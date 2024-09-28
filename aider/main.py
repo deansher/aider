@@ -27,6 +27,16 @@ from aider.versioncheck import check_version, install_from_main_branch, install_
 from .dump import dump  # noqa: F401
 
 
+# It is tricky to decide when to use the name "brade" versus "aider".
+# For now, we use "brade" to refer to the application its executable script.
+# But we retain "aider" in names of configuration files.
+
+
+# It is tricky to decide when to use the name "brade" versus "aider".
+# For now, we use "brade" to refer to the application its executable script.
+# But we retain "aider" in names of configuration files.
+
+
 def check_config_files_for_yes(config_files):
     found = False
     for config_file in config_files:
@@ -91,9 +101,9 @@ def setup_git(git_root, io):
     if git_root:
         repo = git.Repo(git_root)
     elif Path.cwd() == Path.home():
-        io.tool_warning("You should probably run aider in a directory, not your home dir.")
+        io.tool_warning("You should probably run brade in a directory, not your home dir.")
         return
-    elif io.confirm_ask("No git repo found, create one to track aider's changes (recommended)?"):
+    elif io.confirm_ask("No git repo found, create one to track brade's changes (recommended)?"):
         git_root = str(Path.cwd().resolve())
         repo = make_new_repo(git_root, io)
 
@@ -171,8 +181,8 @@ def check_streamlit_install(io):
     return utils.check_pip_install_extra(
         io,
         "streamlit",
-        "You need to install the aider browser feature",
-        ["aider-chat[browser]"],
+        "You need to install the brade browser feature",
+        ["brade-chat[browser]"],
     )
 
 
@@ -359,9 +369,9 @@ def sanity_check_repo(repo, io):
         bad_ver = True
 
     if bad_ver:
-        io.tool_error("Aider only works with git repos with version number 1 or 2.")
+        io.tool_error("Brade only works with git repos with version number 1 or 2.")
         io.tool_output("You may be able to convert your repo: git update-index --index-version=2")
-        io.tool_output("Or run aider --no-git to proceed without using git.")
+        io.tool_output("Or run brade --no-git to proceed without using git.")
         io.tool_output(urls.git_index_version)
         return False
 
@@ -488,6 +498,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             return
         launch_gui(argv)
         return
+
+    io.tool_output("Welcome to Brade.")
 
     if args.verbose:
         for fname in loaded_dotenvs:
@@ -735,7 +747,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         args.pretty = False
         io.tool_output("VSCode terminal detected, pretty output has been disabled.")
 
-    io.tool_output('Use /help <question> for help, run "aider --help" to see cmd line args')
+    io.tool_output('Use /help <question> for help, run "brade --help" to see cmd line args')
 
     if git_root and Path.cwd().resolve() != Path(git_root).resolve():
         io.tool_warning(
@@ -817,8 +829,8 @@ def check_and_load_imports(io, verbose=False):
                 load_slow_imports(swallow=False)
             except Exception as err:
                 io.tool_error(str(err))
-                io.tool_output("Error loading required imports. Did you install aider properly?")
-                io.tool_output("https://aider.chat/docs/install/install.html")
+                io.tool_output("Error loading required imports. Did you install brade properly?")
+                # io.tool_output("https://aider.chat/docs/install/install.html")
                 sys.exit(1)
 
             installs[str(key)] = True
