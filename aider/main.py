@@ -11,6 +11,7 @@ import git
 import importlib_resources
 from dotenv import load_dotenv
 from prompt_toolkit.enums import EditingMode
+from langfuse.decorators import langfuse_context, observe
 
 from aider import __version__, models, urls, utils
 from aider.args import get_parser
@@ -429,6 +430,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Load the .env file specified in the arguments
     loaded_dotenvs = load_dotenv_files(git_root, args.env_file, args.encoding)
+
+    # Configure Langfuse context using the loaded environment variables
+    langfuse_context.configure()
 
     # Parse again to include any arguments that might have been defined in .env
     args = parser.parse_args(argv)
