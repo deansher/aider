@@ -180,7 +180,58 @@ This first version will not yet use a subordinate architect model. Instead, it w
 
 ## (✅) Write an excellent docstring for `send_completion`.
 
-## ( ) Enhance our Langfuse integration to handle streaming.
+## ( ) Add robust error handling for Langfuse integration
+
+This will make our Langfuse integration more resilient and avoid impacting core functionality when Langfuse has issues.
+
+### Implementation Approach
+
+We'll modify `llm.py` to handle Langfuse errors gracefully:
+
+1. Add a LangfuseErrorHandler class to isolate and manage Langfuse-related errors
+2. Modify the Langfuse configuration in `llm.py` to use this error handler:
+```python
+# Configure Langfuse client with error handling
+langfuse_context.configure(
+    error_handler=LangfuseErrorHandler(),
+    disable_on_error=True,  # Disable Langfuse if persistent errors occur
+)
+3. Add clear logging when Langfuse errors occur
+4. Ensure errors don't propagate up to impact core functionality
+
+The error handler will:
+- Log errors appropriately
+- Track error frequency and types
+- Disable Langfuse if persistent errors occur
+- Provide visibility into Langfuse issues without interrupting core functionality
+
+## ( ) Document BradeCoder architecture and design decisions
+
+This documentation will help maintainers understand the system and make future changes safely.
+Add a new section to `plan_brade_coder.md` called "Architecture" that documents:
+
+1. Core Design Decisions:
+   - Why BradeCoder subclasses EditBlockCoder
+   - The rationale for BradePrompts not subclassing CoderPrompts
+   - How the diff format handling was moved and why
+
+2. Key Class Relationships:
+   - The relationship between BradeCoder and BradePrompts
+   - How chat history flows between the classes
+   - The lifecycle of a user interaction
+
+3. Extension Points:
+   - How the architect model will be integrated later
+   - Where new prompt strategies can be added
+   - How to add new editing capabilities
+
+This documentation should reference specific methods and files when describing the architecture, making it easier to understand the codebase structure.
+
+The architectural documentation will help:
+- Onboard new contributors
+- Guide future development
+- Make the codebase more maintainable
+- Preserve design rationale for future reference
 
 ## ( ) In `base_prompts.py`, document the `CoderPrompts` API expected by `Coder` and `EditBlockCoder`.
 
@@ -190,7 +241,7 @@ This first version will not yet use a subordinate architect model. Instead, it w
 
 ## ( ) Introduce "situation analysis" into `BraderCoder`'s prompt generation.
 
-## ( ) **Prepare for Architect Model Integration**
+## ( ) Prepare to integrate an architect model into `BradeCoder`.
 
    - **Design for Extensibility**:
      - Ensure that `BradeCoder`'s structure allows for easy integration of the subordinate architect model in future updates.

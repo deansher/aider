@@ -132,8 +132,9 @@ def find_non_self_methods(path):
         with open(filename, "r") as file:
             try:
                 node = ast.parse(file.read(), filename=filename)
-            except:
-                pass
+            except Exception as e:
+                print(f"Warning: Failed to parse {filename}: {e}")
+                continue
             checker = SelfUsageChecker()
             checker.visit(node)
             for method in checker.non_self_methods:

@@ -10,8 +10,8 @@ from pathlib import Path
 import git
 import importlib_resources
 from dotenv import load_dotenv
+from langfuse.decorators import langfuse_context
 from prompt_toolkit.enums import EditingMode
-from langfuse.decorators import langfuse_context, observe
 
 from aider import __version__, models, urls, utils
 from aider.args import get_parser

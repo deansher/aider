@@ -13,11 +13,12 @@ import sys
 import threading
 import time
 import traceback
-from langfuse.decorators import observe
 from collections import defaultdict
 from datetime import datetime
 from json.decoder import JSONDecodeError
 from pathlib import Path
+
+from langfuse.decorators import observe
 
 from aider import __version__, models, prompts, urls, utils
 from aider.commands import Commands
@@ -1112,8 +1113,9 @@ class Coder:
         code edits, shell commands, or additional prompts.
 
         When the assistant's response includes code edits, this method applies those edits to the
-        appropriate files. It also handles running any suggested shell commands (with user confirmation)
-        and performs actions like auto-committing changes, linting, and testing based on configuration.
+        appropriate files. It also handles running any suggested shell commands (with user
+        confirmation) and performs actions like auto-committing changes, linting, and testing based
+        on configuration.
 
         Args:
             inp (str): The user's input message to process and send to the language model.
@@ -1129,18 +1131,21 @@ class Coder:
             - Performs auto-commits to the repository if configured.
 
         Exceptions:
-            - Handles exceptions like `KeyboardInterrupt`, `ContextWindowExceededError`, and others internally.
+            - Handles exceptions like `KeyboardInterrupt`, `ContextWindowExceededError`,
+              and others internally.
             - Manages retries with exponential backoff for transient errors.
 
         Returns:
             None: When streaming is disabled.
-            Generator[str, None, None]: When streaming is enabled, yields portions of the assistant's response.
+            Generator[str, None, None]: When streaming is enabled, yields portions of the
+            assistant's response.
 
         Notes:
-            - If the response from the assistant is incomplete due to token limits, it manages the situation
-              by updating the conversation context and potentially retrying.
+            - If the response from the assistant is incomplete due to token limits, it manages the
+              situation by updating the conversation context and potentially retrying.
             - Supports reflection by allowing the assistant to prompt for corrections if needed.
-            - Utilizes the `@observe` decorator for Langfuse instrumentation to track method execution.
+            - Utilizes the `@observe` decorator for Langfuse instrumentation to track method
+              execution.
         """
         self.cur_messages += [
             dict(role="user", content=inp),

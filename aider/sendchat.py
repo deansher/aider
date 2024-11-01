@@ -2,10 +2,10 @@ import hashlib
 import json
 
 import backoff
+from langfuse.decorators import observe
 
 from aider.dump import dump  # noqa: F401
 from aider.llm import litellm
-from langfuse.decorators import observe
 
 # from diskcache import Cache
 

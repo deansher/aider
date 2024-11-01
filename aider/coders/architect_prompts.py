@@ -49,7 +49,9 @@ Other messages in the chat may contain outdated versions of the files' contents.
         "Ok, I will use that as the true, current contents of the files."
     )
 
-    files_no_full_files = "<SYSTEM> Your partner has not shared the full contents of any files with you yet."
+    files_no_full_files = (
+        "<SYSTEM> Your partner has not shared the full contents of any files with you yet."
+    )
 
     files_no_full_files_with_repo_map = ""
     files_no_full_files_with_repo_map_reply = ""

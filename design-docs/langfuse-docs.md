@@ -559,7 +559,7 @@ os.environ\["ANTHROPIC\_API\_KEY"\] \= "" import anthropicanthopic\_client \= an
 
 ## **Customize input/output**
 
-By default, input/ouput of a function are captured by `@observe()`.
+By default, input/output of a function are captured by `@observe()`.
 
 You can disable capturing input/output for a specific function:  
 from langfuse.decorators import observe @observe(capture\_input=False, capture\_output=False)def stealth\_fn(input: str):    return input stealth\_fn("Super secret content")  

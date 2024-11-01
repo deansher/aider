@@ -1,9 +1,13 @@
-import sys
 import logging
+import sys
+
 import aider
 from aider.main import main as aider_main
 
 # Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
