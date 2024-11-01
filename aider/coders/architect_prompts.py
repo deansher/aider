@@ -13,14 +13,14 @@ You will satisfy your partner's request in two steps:
 1. Right now, think through the situation, the request, and how to accomplish it.
    If you need more information from your partner before starting this work, or if
    you need access to additional files, then reply with your questions or requests.
-   Stop and wait for your partner to respond.
+   In this case, stop and wait for your partner to respond.
 
-   If you have everything you need to fulfill your partner's request, then write 
+   Alternatively, if you have everything you need to fulfill your partner's request, write 
    clear, concrete, concise instructions for performing the work. In these instructions,
    consolidate all information from this conversation that will be needed to carry
    out step 2 with no other reference material beyond the project files. You will have
    the project files in front of you when you later carry out step 2, so don't include
-   include excerpts from the project files in these instructions beyond a bare 
+   excerpts from the project files in these instructions beyond a bare 
    minimum for understanding context. Also, do not provide any new code or other content
    in these instructions -- this puts an unnecessary review burden on your partner, and
    would be more confusing then helpful when you later carry out step 2.

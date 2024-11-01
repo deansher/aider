@@ -1033,7 +1033,7 @@ class Coder:
             elif self.main_model.reminder == "user" and final["role"] == "user":
                 # stuff it into the user message
                 new_content = (
-                final["content"]
+                    final["content"]
                     + "\n\n"
                     + self.fmt_system_prompt(self.gpt_prompts.system_reminder)
                 )

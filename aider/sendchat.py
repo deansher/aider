@@ -3,6 +3,7 @@ import json
 
 import backoff
 
+from aider.dump import dump  # noqa: F401
 from aider.llm import litellm
 from langfuse.decorators import observe
 
@@ -126,7 +127,7 @@ def _send_completion_to_litellm(
     extra_params=None,
 ):
     """
-    Actually sends the completion request to litellm.completion and handles the response.
+    Sends the completion request to litellm.completion and handles the response.
 
     This function sends a request to the specified language model and returns the response.
     It supports both streaming and non-streaming responses.

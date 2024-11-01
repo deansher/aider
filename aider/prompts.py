@@ -23,15 +23,13 @@ or line breaks.
 """
 
 # COMMANDS
-undo_command_reply = (
-    "<SYSTEM> Your partner did `git reset --hard HEAD~1` to discard the last edits. Please wait for further"
-    " instructions before attempting that change again. Feel free to ask relevant questions about"
-    " why the changes were reverted."
-)
+undo_command_reply = """<SYSTEM> Your partner had us discard the last edits. We did this with `git reset --hard HEAD~1`.
+Please wait for further instructions before attempting that change again. You may choose to ask
+your partner why they discarded the edits.
+"""
 
-added_files = (
-    "<SYSTEM> Your partner added these files to the chat: {fnames}\nLet them know if you need additional files."
-)
+added_files = """<SYSTEM> Your partner added these files to the chat: {fnames}\nTell them if you need additional files.
+"""
 
 
 run_output = """I ran this command:

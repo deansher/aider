@@ -25,6 +25,8 @@ from aider.repo import ANY_GIT_ERROR, GitRepo
 from aider.report import report_uncaught_exceptions
 from aider.versioncheck import check_version, install_from_main_branch, install_upgrade
 
+from .dump import dump  # noqa: F401
+
 # It is tricky to decide when to use the name "brade" versus "aider".
 # For now, we use "brade" to refer to the application its executable script.
 # But we retain "aider" in names of configuration files.

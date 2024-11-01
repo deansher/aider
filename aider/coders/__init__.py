@@ -25,5 +25,4 @@ __all__ = [
     ArchitectCoder,
     EditorEditBlockCoder,
     EditorWholeFileCoder,
-    BradeCoder,
 ]

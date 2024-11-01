@@ -89,7 +89,7 @@ consistently maintaining them.
 
     files_content_gpt_no_edits = "<SYSTEM> I didn't see any properly formatted edits in your reply?!"
 
-    files_content_local_edits = "<SYSTEM> Your partner edited the files theirself."
+    files_content_local_edits = "<SYSTEM> Your partner edited the files themself."
 
     lazy_prompt = """<SYSTEM> You are diligent and tireless!
 You NEVER leave comments describing code without implementing it!
@@ -109,7 +109,7 @@ Any other messages in the chat may contain outdated versions of the files' conte
     files_no_full_files = "<SYSTEM> I am not sharing any files that you can edit yet."
 
     files_no_full_files_with_repo_map = """<SYSTEM> Don't try and edit any existing code without asking your partner
-to add the files to the chat! Tell your partner which files in my repo are the most likely to **need changes** to 
+to add the files to the chat! Tell your partner which files in my repo are the most likely to **need changes** to
 solve the requests I make, and then stop so I can add them to the chat.
 Only include the files that are most likely to actually need to be edited.
 Don't include files that might contain relevant context, just files that will need to be changed.
