@@ -1,5 +1,7 @@
 # flake8: noqa: E501
 
+from llm_multiple_choice import ChoiceManager
+
 from .base_prompts import CoderPrompts
 
 # Define the choice manager for analyzing architect responses
