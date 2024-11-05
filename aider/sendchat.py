@@ -7,26 +7,90 @@ from llm_multiple_choice import DisplayFormat
 
 from aider.llm import litellm
 
+
+def is_anthropic_model(model_name):
+    """
+    Determine if a model is an Anthropic model by checking:
+    - If it contains 'claude' in its name
+
+    Args:
+        model_name (str): The name of the model to check
+
+    Returns:
+        bool: True if the model is an Anthropic model, False otherwise
+    """
+    if not model_name:
+        return False
+
+    model_name = model_name.lower()
+
+    # Check if it's just a claude model
+    if "claude" in model_name:
+        return True
+
+    return False
+
+
 def transform_messages_for_anthropic(messages):
     """
-    Transform message sequences for Anthropic models according to their requirements:
-    - First system message must be at the start
-    - No system messages allowed after user/assistant messages
-    - No multiple consecutive system messages
+    Transform message sequences for Anthropic models according to these rules:
+    - Concatenate all system messages into one opening system message.
+    - Ensure there's a user message after the system message.
+    - Separate consecutive user messages with assistant messages saying "Understood."
+    - Separate consecutive assistant messages with user messages saying "Please continue."
     """
-    # Find first system message if any
+    result = []
+
+    # Combine system messages if present
     system_messages = [msg for msg in messages if msg["role"] == "system"]
     other_messages = [msg for msg in messages if msg["role"] != "system"]
-    
-    if not system_messages:
-        return messages
 
-    # Take first system message, discard others
-    result = [system_messages[0]] + other_messages
+    if system_messages:
+        # Handle the case where content might be a list (for image messages)
+        combined_content = []
+        for msg in system_messages:
+            content = msg["content"]
+            if isinstance(content, list):
+                # For messages containing images, extract text portions
+                text_parts = [
+                    item["text"] for item in content if isinstance(item, dict) and "text" in item
+                ]
+                combined_content.extend(text_parts)
+            else:
+                combined_content.append(content)
+
+        combined_system = {"role": "system", "content": "\n\n".join(combined_content)}
+        result.append(combined_system)
+
+        # If no user message follows system, add "Go ahead."
+        if not other_messages or other_messages[0]["role"] != "user":
+            result.append({"role": "user", "content": "Go ahead."})
+
+    # Process remaining messages
+    last_role = result[-1]["role"] if result else None
+    for msg in other_messages:
+        # If two user messages would be consecutive
+        if msg["role"] == "user" and last_role == "user":
+            result.append({"role": "assistant", "content": "Understood."})
+        # If two assistant messages would be consecutive
+        elif msg["role"] == "assistant" and last_role == "assistant":
+            result.append({"role": "user", "content": "Understood."})
+
+        if isinstance(msg["content"], list):
+            # For messages containing images, extract and join text portions
+            text_parts = [
+                item["text"] for item in msg["content"] if isinstance(item, dict) and "text" in item
+            ]
+            msg = dict(msg)  # Make a copy to avoid modifying the original
+            msg["content"] = " ".join(text_parts) if text_parts else ""
+
+        result.append(msg)
+        last_role = msg["role"]
+
     return result
 
-# from diskcache import Cache
 
+# from diskcache import Cache
 CACHE_PATH = "~/.aider.send.cache.v1"
 CACHE = None
 # CACHE = Cache(CACHE_PATH)
@@ -96,9 +160,9 @@ def send_completion(
 
     """
     # Transform messages for Anthropic models
-    if model_name.startswith(("anthropic.", "claude")):
+    if is_anthropic_model(model_name):
         messages = transform_messages_for_anthropic(messages)
-        
+
     kwargs = dict(
         model=model_name,
         messages=messages,
@@ -249,4 +313,5 @@ def simple_send_with_retries(model_name, messages, extra_params=None):
         _hash, response = send_completion(**kwargs)
         return response.choices[0].message.content
     except (AttributeError, litellm.exceptions.BadRequestError):
+        return
         return
