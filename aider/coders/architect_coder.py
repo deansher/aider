@@ -15,9 +15,17 @@ class ArchitectCoder(AskCoder):
     gpt_prompts = ArchitectPrompts()
 
     def reply_completed(self):
-        content = self.partial_response_content
+        assistant_response = self.partial_response_content
 
-        # Analyze how the architect replied
+        # Create a list of messages that includes both the current conversation turn
+        # and the latest response
+        messages_to_analyze = list(self.cur_messages)  # Copy current messages
+        messages_to_analyze.append({
+            "role": "assistant",
+            "content": assistant_response
+        })
+
+        # Use the complete set of messages in the analysis
         architect_response_codes = analyze_chat_situation(
             possible_architect_responses,
             (
@@ -25,7 +33,7 @@ class ArchitectCoder(AskCoder):
                 " replied above?"
             ),
             self.main_model.name,
-            self.cur_messages,
+            messages_to_analyze,  # Use the complete set of messages
         )
 
         # If architect asked for files, prompt user to add them
@@ -62,7 +70,7 @@ class ArchitectCoder(AskCoder):
                 if self.verbose:
                     editor_coder.show_announcements()
 
-                editor_coder.run(with_message=content, preproc=False)
+                editor_coder.run(with_message=assistant_response, preproc=False)
 
                 self.move_back_cur_messages("I made those changes to the files.")
                 self.total_cost = editor_coder.total_cost

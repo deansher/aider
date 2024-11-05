@@ -62,11 +62,10 @@ def transform_messages_for_anthropic(messages):
         combined_system = {"role": "system", "content": "\n\n".join(combined_content)}
         result.append(combined_system)
 
-        # If no user message follows system, add "Go ahead."
-        if not other_messages or other_messages[0]["role"] != "user":
-            result.append({"role": "user", "content": "Go ahead."})
+    # If no user message follows system, add "Go ahead."
+    if not other_messages or other_messages[0]["role"] != "user":
+        result.append({"role": "user", "content": "Go ahead."})
 
-    # Process remaining messages
     last_role = result[-1]["role"] if result else None
     for msg in other_messages:
         # If two user messages would be consecutive
