@@ -7,7 +7,7 @@ from .base_prompts import CoderPrompts
 # Define the choice manager for analyzing architect responses
 possible_architect_responses = ChoiceManager()
 response_section = possible_architect_responses.add_section(
-    "How did the architect model reply to the user? Choose the single most appropriate option.",
+    "Analyze the response. Choose the single most appropriate option.",
 )
 architect_asked_to_see_files = response_section.add_choice(
     "The architect asked to see additional files."

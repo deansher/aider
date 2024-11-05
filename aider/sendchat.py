@@ -298,6 +298,48 @@ def analyze_chat_situation(
     return choice_manager.validate_choices_response(content)
 
 
+@observe
+def analyze_assistant_response(
+    choice_manager,
+    introduction,
+    model_name,
+    response_text,
+    extra_params=None,
+):
+    """
+    Analyze an assistant's response using a multiple choice questionnaire.
+
+    This function analyzes a single response string using a questionnaire. It's a more
+    focused version of analyze_chat_situation that takes just the response text rather
+    than the full chat context.
+
+    Args:
+        choice_manager (ChoiceManager): The choice manager containing the questionnaire
+        introduction (str): An introduction to the questionnaire explaining the context and goal
+        model_name (str): The name of the language model to use
+        response_text (str): The assistant's response text to analyze
+        extra_params (dict, optional): Additional parameters to pass to the model.
+
+    Returns:
+        ChoiceCodeSet: The validated set of choices made by the model
+
+    Raises:
+        InvalidChoicesResponseError: If the model's response cannot be validated
+    """
+    prompt = choice_manager.prompt_for_choices(DisplayFormat.MARKDOWN, introduction)
+    chat_messages = messages + [{"role": "user", "content": prompt}]
+    _hash, response = send_completion(
+        model_name=model_name,
+        messages=chat_messages,
+        functions=None,
+        stream=False,
+        temperature=0,
+        extra_params=extra_params,
+    )
+    content = response.choices[0].message.content
+    return choice_manager.validate_choices_response(content)
+
+
 @lazy_litellm_retry_decorator
 def simple_send_with_retries(model_name, messages, extra_params=None):
     try:

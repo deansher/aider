@@ -17,23 +17,12 @@ class ArchitectCoder(AskCoder):
     def reply_completed(self):
         assistant_response = self.partial_response_content
 
-        # Create a list of messages that includes both the current conversation turn
-        # and the latest response
-        messages_to_analyze = list(self.cur_messages)  # Copy current messages
-        messages_to_analyze.append({
-            "role": "assistant",
-            "content": assistant_response
-        })
-
-        # Use the complete set of messages in the analysis
-        architect_response_codes = analyze_chat_situation(
+        # Analyze just the assistant's response
+        architect_response_codes = analyze_assistant_response(
             possible_architect_responses,
-            (
-                "<SYSTEM> Which one of the following choices best characterizes how the assistant"
-                " replied above?"
-            ),
+            "<SYSTEM> Which one of the following choices best characterizes this response?",
             self.main_model.name,
-            messages_to_analyze,  # Use the complete set of messages
+            assistant_response,
         )
 
         # If architect asked for files, prompt user to add them
