@@ -73,6 +73,7 @@ class Coder:
     num_reflections = 0
     max_reflections = 3
     edit_format = None
+    produces_code_edits = True  # Most coders produce code edits that must be auto-applied
     yield_stream = False
     temperature = 0
     auto_lint = True
@@ -130,8 +131,17 @@ class Coder:
             # confused the new LLM. It may try and imitate it, disobeying
             # the system prompt.
             done_messages = from_coder.done_messages
-            if edit_format != from_coder.edit_format and done_messages and summarize_from_coder:
+            if (
+                edit_format != from_coder.edit_format
+                and from_coder.produces_code_edits
+                and main_model.produces_code_edits
+                and done_messages
+                and summarize_from_coder
+            ):
                 done_messages = from_coder.summarizer.summarize_all(done_messages)
+                io.tool_output(
+                    "Cleared chat history because we switched between incompatible edit formats."
+                )
 
             # Bring along context from the old Coder
             update = dict(
@@ -521,25 +531,23 @@ class Coder:
 
         return
 
+    def _format_file_content(self, fname, content):
+        """Helper method to consistently format file content with markdown."""
+        relative_fname = self.get_rel_fname(fname)
+        return f"\n## {relative_fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
+
     def get_files_content(self, fnames=None):
         if not fnames:
             fnames = self.abs_fnames
 
         prompt = ""
+        file_count = 0
         for fname, content in self.get_abs_fnames_content():
             if not is_image_file(fname):
-                relative_fname = self.get_rel_fname(fname)
-                prompt += "\n"
-                prompt += relative_fname
-                prompt += f"\n{self.fence[0]}\n"
-
-                prompt += content
-
-                # lines = content.splitlines(keepends=True)
-                # lines = [f"{i+1:03}:{line}" for i, line in enumerate(lines)]
-                # prompt += "".join(lines)
-
-                prompt += f"{self.fence[1]}\n"
+                if file_count == 0:
+                    prompt += "\n# Source Files\n"
+                prompt += self._format_file_content(fname, content)
+                file_count += 1
 
         return prompt
 
@@ -548,12 +556,7 @@ class Coder:
         for fname in self.abs_read_only_fnames:
             content = self.io.read_text(fname)
             if content is not None and not is_image_file(fname):
-                relative_fname = self.get_rel_fname(fname)
-                prompt += "\n"
-                prompt += relative_fname
-                prompt += f"\n{self.fence[0]}\n"
-                prompt += content
-                prompt += f"{self.fence[1]}\n"
+                prompt += self._format_file_content(fname, content)
         return prompt
 
     def get_cur_message_text(self):

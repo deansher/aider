@@ -119,7 +119,7 @@ Now you should have a fully functional development environment for the Brade pro
 Here's an example of following the setup instructions above, for your copy/paste pleasure if your system works the same. Start in the project directory.
 
 ```
-python3 -m venv ../brade_venv \
+python3 -m venv --clear ../brade_venv \
  && source ../brade_venv/bin/activate \
  && pip3 install -e . \
  && pip3 install -r requirements.txt \

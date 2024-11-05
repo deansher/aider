@@ -366,6 +366,12 @@ cog.outl("```")
 ## Enable/disable suggesting shell commands (default: True)
 #AIDER_SUGGEST_SHELL_COMMANDS=true
 
+## To use Langfuse for tracing, set these.
+
+#LANGFUSE_PUBLIC_KEY=
+#LANGFUSE_SECRET_KEY=
+#LANGFUSE_HOST=https://cloud.langfuse.com
+
 #################
 # Voice Settings:
 

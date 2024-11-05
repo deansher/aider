@@ -551,8 +551,9 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         success = install_upgrade(io)
         return 0 if success else 1
 
-    if args.check_update:
-        check_version(io, verbose=args.verbose)
+    # Disable this for now. TODO: change it to a brade upgrade and disable it in dev mode
+    # if args.check_update:
+    #     check_version(io, verbose=args.verbose)
 
     if args.list_models:
         models.print_matching_models(io, args.list_models)
