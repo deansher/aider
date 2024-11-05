@@ -1,4 +1,4 @@
-from ..sendchat import analyze_chat_situation
+from ..sendchat import analyze_chat_situation, analyze_assistant_response
 from .architect_prompts import (
     ArchitectPrompts,
     architect_asked_to_see_files,

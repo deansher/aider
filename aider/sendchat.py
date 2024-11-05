@@ -285,7 +285,10 @@ def analyze_chat_situation(
         InvalidChoicesResponseError: If the model's response cannot be validated
     """
     prompt = choice_manager.prompt_for_choices(DisplayFormat.MARKDOWN, introduction)
-    chat_messages = messages + [{"role": "user", "content": prompt}]
+    chat_messages = [
+        {"role": "assistant", "content": response_text},
+        {"role": "user", "content": prompt}
+    ]
     _hash, response = send_completion(
         model_name=model_name,
         messages=chat_messages,
