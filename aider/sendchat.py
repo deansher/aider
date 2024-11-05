@@ -7,6 +7,24 @@ from llm_multiple_choice import DisplayFormat
 
 from aider.llm import litellm
 
+def transform_messages_for_anthropic(messages):
+    """
+    Transform message sequences for Anthropic models according to their requirements:
+    - First system message must be at the start
+    - No system messages allowed after user/assistant messages
+    - No multiple consecutive system messages
+    """
+    # Find first system message if any
+    system_messages = [msg for msg in messages if msg["role"] == "system"]
+    other_messages = [msg for msg in messages if msg["role"] != "system"]
+    
+    if not system_messages:
+        return messages
+
+    # Take first system message, discard others
+    result = [system_messages[0]] + other_messages
+    return result
+
 # from diskcache import Cache
 
 CACHE_PATH = "~/.aider.send.cache.v1"
@@ -77,6 +95,10 @@ def send_completion(
             - res: The model's response object.
 
     """
+    # Transform messages for Anthropic models
+    if model_name.startswith(("anthropic.", "claude")):
+        messages = transform_messages_for_anthropic(messages)
+        
     kwargs = dict(
         model=model_name,
         messages=messages,
