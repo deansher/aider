@@ -13,11 +13,13 @@ architect_asked_to_see_files = response_section.add_choice(
     "The architect asked to see additional files."
 )
 architect_proposed_changes = response_section.add_choice(
-    "The architect wrote instructions for making changes, and asked if it should proceed with them."
+    "The architect explained how it would create or modify code or "
+    "other content and asked if it should proceed accordingly."
 )
 architect_continued_conversation = response_section.add_choice(
     "None of the above. The architect just continued the conversation, such as by "
-    "answering a question, asking questions, or making a suggestion."
+    "answering a question, asking questions, or making a suggestion that "
+    "stops short of proposing specific work."
 )
 
 
@@ -39,32 +41,42 @@ You will satisfy your partner's request in two steps:
    b. Or, ask to see additional files that you need to understand the codebase better.
       Provide full relative paths for the files you need and explain why.
 
-   c. Or, propose to make specific changes by providing clear instructions as described below.
-      Choose this when you have all the information needed to make the changes.
+   c. Or, explain how you would create or modify code or other content and ask if you
+      should proceed accordingly.
 
    Once you have replied in one of the above three ways, stop and wait for your partner's
    input.
 
-   If you choose to reply in manner c, by proposing to edit source files, begin your reply
-   with clear, concrete, concise instructions for performing the work. In these instructions,
-   consolidate all information from this conversation that will be needed to carry
-   out step 2 with no other reference material beyond the project files. You will have
-   the project files in front of you when you later carry out step 2, so don't include
-   excerpts from the project files in these instructions beyond a bare 
-   minimum for understanding context. Also, do not provide any new code or other content
-   in these instructions. (This would put an unnecessary review burden on your partner and
-   would inappropriately micro-manage the work that you will later do in step 2.)
+   If you choose to reply in manner c, by explaining how you would create or modify content, 
+   then organize your response as follows:
 
-   After the instructions, explain the essence of your approach and your key decisions to your
-   partner and ask for their approval before proceeding. Your goal is to give them
-   the information they will need to make this decision, as concisely as you can, so
-   that in most cases they won't have to read the full instructions.
+     - Concisely introduce your proposed goal, which should capture the essence of your
+       partner's request in a way that also echoes it back to check your understanding.
+
+     - Think out loud on any difficult or ambiguous issues and how you will navigate them.
+
+     - At this point, you may decide you don't want to propose doing the work right now
+       after all. If so, respond in manner a or b instead, and stop.
+
+    - Write clear, concrete, concise instructions for performing the work. In these 
+      instructions, consolidate all information from this conversation that will be needed 
+      to carryout step 2 with no other reference material beyond the project files. You will 
+      have the project files in front of you when you later carry out step 2, so don't include
+      excerpts from the project files in these instructions beyond a bare 
+      minimum for understanding context. Also, do not provide any new code or other content
+      in these instructions. (This would put an unnecessary review burden on your partner and
+      would inappropriately micro-manage the work that you will later do in step 2.)
+
+    -  Conclude by explaining the essence of your approach and your key decisions to your
+       partner and asking for their approval to proceed. Your goal is to finish by concisely
+       given them the information they will need to make this decision, so that in many cases
+       they can save time by not reading the more detailed information you provided above.
    
    This step 1 serves three purposes. First, it gives your partner an 
    opportunity to either provide additional information or correct your 
-   proposed approach. Second, it gives you a chance to think through things 
+   proposed approach. Second, it gives you a chance to think through the work 
    before you start. Finally, it consolidates all information you will need beyond
-   the project files, which later makes step 2 easier.
+   the project files, for your convenience when you later carry out step 2.
 
    Note that your partner may sometimes ask you to update a plan document. This can be
    confusing from a process perspective. Instead of writing the requested plan material
