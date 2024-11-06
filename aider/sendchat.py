@@ -285,10 +285,7 @@ def analyze_chat_situation(
         InvalidChoicesResponseError: If the model's response cannot be validated
     """
     prompt = choice_manager.prompt_for_choices(DisplayFormat.MARKDOWN, introduction)
-    chat_messages = [
-        {"role": "assistant", "content": response_text},
-        {"role": "user", "content": prompt}
-    ]
+    chat_messages = messages + [{"role": "user", "content": prompt}]
     _hash, response = send_completion(
         model_name=model_name,
         messages=chat_messages,
@@ -318,7 +315,10 @@ def analyze_assistant_response(
 
     Args:
         choice_manager (ChoiceManager): The choice manager containing the questionnaire
-        introduction (str): An introduction to the questionnaire explaining the context and goal
+        introduction (str): An introduction to the questionnaire explaining the context and goal.
+            Write this as though for a human who will fill out the questionnaire. Refer to the
+            assistant's response as appearing "below" -- it will automatically be appended
+            at the end of the prompt, in a markdown section titled "Assistant's Response".
         model_name (str): The name of the language model to use
         response_text (str): The assistant's response text to analyze
         extra_params (dict, optional): Additional parameters to pass to the model.
@@ -330,7 +330,8 @@ def analyze_assistant_response(
         InvalidChoicesResponseError: If the model's response cannot be validated
     """
     prompt = choice_manager.prompt_for_choices(DisplayFormat.MARKDOWN, introduction)
-    chat_messages = messages + [{"role": "user", "content": prompt}]
+    prompt += "\n\n# Assistant's Response\n\n" + response_text
+    chat_messages = [{"role": "user", "content": prompt}]
     _hash, response = send_completion(
         model_name=model_name,
         messages=chat_messages,

@@ -1,4 +1,4 @@
-from ..sendchat import analyze_chat_situation, analyze_assistant_response
+from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
     ArchitectPrompts,
     architect_asked_to_see_files,
@@ -20,7 +20,10 @@ class ArchitectCoder(AskCoder):
         # Analyze just the assistant's response
         architect_response_codes = analyze_assistant_response(
             possible_architect_responses,
-            "<SYSTEM> Which one of the following choices best characterizes this response?",
+            (
+                "<SYSTEM> Which one of the following choices best characterizes the assistant"
+                " response shown below?"
+            ),
             self.main_model.name,
             assistant_response,
         )
