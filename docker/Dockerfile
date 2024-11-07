@@ -1,4 +1,4 @@
-FROM python:3.10-slim AS base
+FROM python:3.12-slim AS base
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y build-essential git libportaudio2 pandoc && \
@@ -14,7 +14,7 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/pw-browsers
 ENV PLAYWRIGHT_SKIP_BROWSER_GC=1
 
 # Permission kludges to support `docker run --user xxx`
-RUN chmod a+rwx /venv /venv/bin /venv/include /venv/lib /venv/lib/python3.10/site-packages
+RUN chmod a+rwx /venv /venv/bin /venv/include /venv/lib /venv/lib/python3.12/site-packages
 
 RUN mkdir       /.aider /.cache /pw-browsers
 RUN chmod a+rwx /.aider /.cache /pw-browsers
@@ -34,7 +34,7 @@ RUN /venv/bin/python -m pip install --upgrade --no-cache-dir pip \
     && rm -rf /tmp/brade
 
 RUN /venv/bin/python -m playwright install --with-deps chromium
-RUN find /venv/lib/python3.10/site-packages \( -type d -exec chmod a+rwx {} + \) -o \( -type f -exec chmod a+rw {} + \)
+RUN find /venv/lib/python3.12/site-packages \( -type d -exec chmod a+rwx {} + \) -o \( -type f -exec chmod a+rw {} + \)
 
 ENTRYPOINT ["/venv/bin/brade"]
 
@@ -50,6 +50,6 @@ RUN /venv/bin/python -m pip install --upgrade --no-cache-dir pip \
     && rm -rf /tmp/brade
 
 RUN /venv/bin/python -m playwright install --with-deps chromium
-RUN find /venv/lib/python3.10/site-packages \( -type d -exec chmod a+rwx {} + \) -o \( -type f -exec chmod a+rw {} + \)
+RUN find /venv/lib/python3.12/site-packages \( -type d -exec chmod a+rwx {} + \) -o \( -type f -exec chmod a+rw {} + \)
 
 ENTRYPOINT ["/venv/bin/brade"]
