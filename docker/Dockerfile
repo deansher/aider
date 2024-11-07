@@ -4,6 +4,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y build-essential git libportaudio2 pandoc && \
     rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /app && chmod 777 /app
 WORKDIR /app
 
 RUN python -m venv /venv
