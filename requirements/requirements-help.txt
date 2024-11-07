@@ -6,42 +6,42 @@
 #
 aiohappyeyeballs==2.4.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   aiohttp
 aiohttp==3.10.5
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   huggingface-hub
     #   llama-index-core
 aiosignal==1.3.1
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   aiohttp
 annotated-types==0.7.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   pydantic
 anyio==4.6.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   httpx
 attrs==24.2.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   aiohttp
 certifi==2024.8.30
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   httpcore
     #   httpx
     #   requests
 charset-normalizer==3.3.2
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   requests
 click==8.1.7
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   nltk
 dataclasses-json==0.6.7
     # via llama-index-core
@@ -51,18 +51,18 @@ dirtyjson==1.0.8
     # via llama-index-core
 filelock==3.16.1
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   huggingface-hub
     #   torch
     #   transformers
 frozenlist==1.4.1
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   aiohttp
     #   aiosignal
 fsspec==2024.9.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   huggingface-hub
     #   llama-index-core
     #   torch
@@ -72,33 +72,33 @@ greenlet==3.0.3
     #   sqlalchemy
 h11==0.14.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   httpcore
 httpcore==1.0.5
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   httpx
 httpx==0.27.2
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   llama-index-core
 huggingface-hub[inference]==0.25.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   llama-index-embeddings-huggingface
     #   sentence-transformers
     #   tokenizers
     #   transformers
 idna==3.10
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   anyio
     #   httpx
     #   requests
     #   yarl
 jinja2==3.1.4
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   torch
 joblib==1.4.2
     # via
@@ -112,7 +112,7 @@ llama-index-embeddings-huggingface==0.3.1
     # via -r requirements/requirements-help.in
 markupsafe==2.1.5
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   jinja2
 marshmallow==3.22.0
     # via dataclasses-json
@@ -122,7 +122,7 @@ mpmath==1.3.0
     # via sympy
 multidict==6.1.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   aiohttp
     #   yarl
 mypy-extensions==1.0.0
@@ -131,52 +131,52 @@ nest-asyncio==1.6.0
     # via llama-index-core
 networkx==3.2.1
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   llama-index-core
     #   torch
 nltk==3.9.1
     # via llama-index-core
 numpy==1.26.4
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   llama-index-core
     #   scikit-learn
     #   scipy
     #   transformers
 packaging==24.1
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   huggingface-hub
     #   marshmallow
     #   transformers
 pillow==10.4.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   llama-index-core
     #   sentence-transformers
 pydantic==2.9.2
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   llama-index-core
 pydantic-core==2.23.4
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   pydantic
 pyyaml==6.0.2
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   huggingface-hub
     #   llama-index-core
     #   transformers
 regex==2024.9.11
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   nltk
     #   tiktoken
     #   transformers
 requests==2.32.3
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   huggingface-hub
     #   llama-index-core
     #   tiktoken
@@ -187,14 +187,14 @@ scikit-learn==1.5.2
     # via sentence-transformers
 scipy==1.13.1
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   scikit-learn
     #   sentence-transformers
 sentence-transformers==3.1.1
     # via llama-index-embeddings-huggingface
 sniffio==1.3.1
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   anyio
     #   httpx
 sqlalchemy[asyncio]==2.0.35
@@ -209,17 +209,17 @@ threadpoolctl==3.5.0
     # via scikit-learn
 tiktoken==0.7.0
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   llama-index-core
 tokenizers==0.19.1
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   transformers
 torch==2.2.2
     # via sentence-transformers
 tqdm==4.66.5
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   huggingface-hub
     #   llama-index-core
     #   nltk
@@ -229,7 +229,7 @@ transformers==4.44.2
     # via sentence-transformers
 typing-extensions==4.12.2
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   huggingface-hub
     #   llama-index-core
     #   pydantic
@@ -243,13 +243,14 @@ typing-inspect==0.9.0
     #   llama-index-core
 urllib3==2.2.3
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   requests
 wrapt==1.16.0
     # via
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   deprecated
     #   llama-index-core
 yarl==1.11.1
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   aiohttp

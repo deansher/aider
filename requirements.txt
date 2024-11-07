@@ -104,6 +104,8 @@ langfuse==2.51.2
     # via -r requirements/requirements.in
 litellm==1.47.0
     # via -r requirements/requirements.in
+llm-multiple-choice==0.1.1
+    # via -r requirements/requirements.in
 markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.5

@@ -14,5 +14,5 @@ pyee==12.0.0
     # via playwright
 typing-extensions==4.12.2
     # via
-    #   -c requirements/../requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   pyee
