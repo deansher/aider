@@ -23,33 +23,33 @@ RUN chmod a+rwx /.aider /.cache /pw-browsers
 RUN git config --system --add safe.directory /app
 
 #########################
-FROM base AS aider-full
+FROM base AS brade-full
 
-ENV AIDER_DOCKER_IMAGE=paulgauthier/aider-full
+ENV BRADE_DOCKER_IMAGE=deansher/brade
 
-COPY . /tmp/aider
+COPY . /tmp/brade
 RUN /venv/bin/python -m pip install --upgrade --no-cache-dir pip \
-    && /venv/bin/python -m pip install --no-cache-dir /tmp/aider[help,browser,playwright] \
+    && /venv/bin/python -m pip install --no-cache-dir /tmp/brade[help,browser,playwright] \
        --extra-index-url https://download.pytorch.org/whl/cpu \
-    && rm -rf /tmp/aider
+    && rm -rf /tmp/brade
 
 RUN /venv/bin/python -m playwright install --with-deps chromium
 RUN find /venv/lib/python3.10/site-packages \( -type d -exec chmod a+rwx {} + \) -o \( -type f -exec chmod a+rw {} + \)
 
-ENTRYPOINT ["/venv/bin/aider"]
+ENTRYPOINT ["/venv/bin/brade"]
 
 #########################
-FROM base AS aider
+FROM base AS brade-core
 
-ENV AIDER_DOCKER_IMAGE=paulgauthier/aider
+ENV BRADE_DOCKER_IMAGE=deansher/brade
 
-COPY . /tmp/aider
+COPY . /tmp/brade
 RUN /venv/bin/python -m pip install --upgrade --no-cache-dir pip \
-    && /venv/bin/python -m pip install --no-cache-dir /tmp/aider[playwright] \
+    && /venv/bin/python -m pip install --no-cache-dir /tmp/brade[playwright] \
        --extra-index-url https://download.pytorch.org/whl/cpu \
-    && rm -rf /tmp/aider
+    && rm -rf /tmp/brade
 
 RUN /venv/bin/python -m playwright install --with-deps chromium
 RUN find /venv/lib/python3.10/site-packages \( -type d -exec chmod a+rwx {} + \) -o \( -type f -exec chmod a+rw {} + \)
 
-ENTRYPOINT ["/venv/bin/aider"]
+ENTRYPOINT ["/venv/bin/brade"]
