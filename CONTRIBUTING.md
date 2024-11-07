@@ -130,13 +130,45 @@ python3 -m venv --clear ../brade_venv \
 
 Just run `pytest`.
 
-### Building the Docker Image
+### Building and Testing the Docker Image
 
-The project includes a `Dockerfile` for building a Docker image. You can build the image by running:
+The project includes a `Dockerfile` for building Docker images. There are two build targets:
 
+- `brade-full`: Includes all dependencies including help documentation
+- `brade-core`: Minimal image with core functionality only
+
+To build either target:
+
+```bash
+# Build the full image
+docker build -t brade:full --target brade-full -f docker/Dockerfile .
+
+# Build the core image 
+docker build -t brade:core --target brade-core -f docker/Dockerfile .
 ```
-docker build -t brade -f docker/Dockerfile .
+
+#### Testing the Docker Image
+
+To test the Docker image locally, you'll need to:
+1. Build the image (as shown above)
+2. Run a container with appropriate permissions and volume mounts
+
+Here's the recommended run command:
+
+```bash
+docker run --rm -it \
+  --user $(id -u):$(id -g) \
+  -v "$PWD:/app" \
+  brade:full
 ```
+
+Key options explained:
+- `--user $(id -u):$(id -g)`: Runs container as your user to avoid permission issues
+- `-v "$PWD:/app"`: Mounts current directory into container for accessing local files
+- `--rm`: Automatically removes container when it exits
+- `-it`: Provides interactive terminal for input/output
+
+You can also run the core image by replacing `brade:full` with `brade:core`.
 
 ### Building the Documentation
 
