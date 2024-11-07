@@ -1,5 +1,11 @@
 name: Docker Release
 
+# TODO: Add automated testing of the Docker images after building and before pushing.
+# This could include:
+# - Basic smoke tests to verify the images can run
+# - Verification of included features (full vs core)
+# - Security scanning
+
 on:
   workflow_dispatch:
   push:
