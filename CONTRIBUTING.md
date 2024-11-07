@@ -137,14 +137,16 @@ The project includes a `Dockerfile` for building Docker images. There are two bu
 - `brade-full`: Includes all dependencies including help documentation
 - `brade-core`: Minimal image with core functionality only
 
+Note: Due to Docker security requirements, you should use fully qualified image names that include the registry prefix (`docker.io`) and repository owner (`deansher`). This ensures consistent behavior across different Docker configurations and environments.
+
 To build either target:
 
 ```bash
 # Build the full image
-docker build -t brade:full --target brade-full -f docker/Dockerfile .
+docker build -t docker.io/deansher/brade:full --target brade-full -f docker/Dockerfile .
 
 # Build the core image 
-docker build -t brade:core --target brade-core -f docker/Dockerfile .
+docker build -t docker.io/deansher/brade:core --target brade-core -f docker/Dockerfile .
 ```
 
 #### Testing the Docker Image
@@ -159,7 +161,7 @@ Here's the recommended run command:
 docker run --rm -it \
   --user $(id -u):$(id -g) \
   -v "$PWD:/app" \
-  brade:full
+  docker.io/deansher/brade:full
 ```
 
 Key options explained:
@@ -168,7 +170,7 @@ Key options explained:
 - `--rm`: Automatically removes container when it exits
 - `-it`: Provides interactive terminal for input/output
 
-You can also run the core image by replacing `brade:full` with `brade:core`.
+You can also run the core image by replacing `docker.io/deansher/brade:full` with `docker.io/deansher/brade:core`.
 
 ### Building the Documentation
 
