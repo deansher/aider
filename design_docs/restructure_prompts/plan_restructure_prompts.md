@@ -55,39 +55,78 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 
 ### New User Message Structure
 
-```xml
+#### Semantic Markers Approach
+
+We chose to use semantic XML-like markers rather than strict XML for several key reasons:
+
+1. **Simplicity and Readability**
+   - Markers clearly indicate content boundaries without requiring XML escaping
+   - Natural content remains readable without XML entity encoding
+   - Source code can be included verbatim without modification
+
+2. **Reduced Processing Overhead** 
+   - No need to escape special characters in content
+   - Simpler parsing requirements
+   - Lower risk of encoding/decoding errors
+
+3. **LLM-Friendly Format**
+   - Clear semantic boundaries help the LLM understand content roles
+   - Natural content is easier for the LLM to process
+   - Reduced token usage by avoiding XML escaping
+
+Here's how the semantic markers structure the content:
+
+```
 <latest_context_from_system>
-  [The Brade application puts the most recent authoritative context information here, structured as shown below.]
-  <repository_map>
-    [Repository map]
-  </repository_map>
-  <project_files>
-    <project_file>
-      <path>filename.py</path>
-      <content>
-        [File content]
-      </content>
-    </project_file>
-  </project_files>
-  <platform_info>
-    [System details]
-  </platform_info>
+The Brade application puts the most recent authoritative context information here.
+Content can contain <, >, & and other special characters without escaping.
+
+<repository_map>
+Repository map content appears here, including file paths like:
+src/main.py -> Contains main application logic
+lib/<utils>.py -> Utility functions
+</repository_map>
+
+<project_files>
+Source code appears verbatim:
+
+def hello():
+    print("Hello & welcome!")
+    if x < 3:
+        return True
+</project_files>
+
+<platform_info>
+System details appear here
+</platform_info>
 </latest_context_from_system>
 
 <actions_taken_by_system>
-  [The Brade application explains actions that it took at this point in the chat.]
-  <action_taken>
-    [Description of Brade application action.]
-  </action_taken>
+The Brade application explains actions that it took at this point in the chat.
+
+<action_taken>
+Git commit abc123: Updated hello() function
+</action_taken>
 </actions_taken_by_system>
   
 <instructions_from_system>
-    [instructions]
+Instructions appear here
 </instructions_from_system>
 
 <message_from_user>
-  [User message]
+User message appears here
 </message_from_user>
+```
+
+The markers serve as semantic boundaries while allowing content to appear naturally without escaping. This approach:
+
+- Makes the prompts more maintainable
+- Reduces complexity in the codebase
+- Improves reliability by eliminating XML parsing edge cases
+- Saves tokens by avoiding entity encoding
+- Keeps source code readable and natural
+
+The tradeoff is that we lose strict XML validation, but the benefits of simpler processing and natural content outweigh this limitation for our use case. The LLM is able to understand and respect the semantic boundaries without requiring strict XML compliance.
 
 ## Current State Analysis
 
