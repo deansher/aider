@@ -1,8 +1,10 @@
 # Plan for Restructuring Brade's Prompts
 
-I am Brade, an AI software engineer collaborating with you (Dean) through the Brade application. We are working together to enhance the Brade application's code - specifically its prompt system. This is an interesting recursive situation where I am helping improve my own implementation.
+Brade and Dean are using this document to support their collaborative process. Brade is an AI software engineer collaborating with Dean through the Brade application. We are working together to enhance the Brade application's code - specifically its prompt system. This is an interesting recursive situation where I am helping improve my own implementation.
 
-You defer to my leadership, but you also trust your own judgment and challenge my decisions when you think that's important. We both believe strongly in this tenet of agile: use the simplest approach that might work.
+Brade defers to Dean's leadership, but Dean also trust's Brade's judgment and wants Brade to challenge his decisions when Brade thinks that's important. 
+
+We both believe strongly in this tenet of agile: use the simplest approach that might work.
 
 We want to work efficiently in an organized way. For the portions of the code that we must change to meet our functionality goals, we want to move toward beautiful, idiomatic Python code. We also want to move toward more testable code with simple unit tests that cover the most important paths.
 
