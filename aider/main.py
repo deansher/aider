@@ -182,7 +182,7 @@ def check_streamlit_install(io):
         io,
         "streamlit",
         "You need to install the brade browser feature",
-        ["brade-chat[browser]"],
+        ["brade[browser]"],
     )
 
 
