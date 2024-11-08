@@ -110,8 +110,8 @@ class TestCoder(unittest.TestCase):
         coder = Coder.create(self.GPT35, None, io=InputOutput(), fnames=files)
 
         content = coder.get_files_content().splitlines()
-        self.assertIn("file1.txt", content)
-        self.assertIn("file2.txt", content)
+        self.assertIn("## file1.txt", content)
+        self.assertIn("## file2.txt", content)
 
     def test_check_for_filename_mentions(self):
         with GitTemporaryDirectory():
