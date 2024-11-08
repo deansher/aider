@@ -22,20 +22,17 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python 3.13.0
-WORKDIR /tmp
-RUN wget https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tgz \
-    && tar xzf Python-3.13.0.tgz \
-    && cd Python-3.13.0 \
-    && ./configure --enable-optimizations \
-    && make -j$(nproc) \
-    && make install \
-    && cd .. \
-    && rm -rf Python-3.13.0 Python-3.13.0.tgz
+# Add deadsnakes PPA and install Python 3.13
+RUN apt-get update && apt-get install -y software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y python3.13 python3.13-dev python3.13-venv \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install pip and upgrade it
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.13 \
-    && python3.13 -m pip install --upgrade pip
+    && python3.13 -m pip install --upgrade pip setuptools wheel
 
 # Install AppImage tools
 RUN wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool \
