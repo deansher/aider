@@ -47,5 +47,9 @@ RUN python3.13 -m pip install \
 # Create working directory
 WORKDIR /build
 
+# Copy and set up build script
+COPY scripts/build_appimage.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/build_appimage.sh
+
 # Default command
-CMD ["/bin/bash"]
+CMD ["/usr/local/bin/build_appimage.sh"]
