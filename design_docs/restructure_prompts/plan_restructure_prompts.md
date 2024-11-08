@@ -10,6 +10,18 @@ This document contains three kinds of material:
 - specific plans for meeting those requirements
 - our findings as we analyze our code along the way
 
+For major step of the work, (each top-level bullet of each "### ( ) task" section) we will follow this process:
+
+- Make sure our plan is current.
+- Make sure we have the information we need for our next step.
+  - Writing down any new findings in this document.
+  - Correct anything we previously misunderstood.
+- Make sure existing unit tests pass.
+- Consider whether to add unit tests or do manual testing before making the code changes.
+- Make the code changes.
+- Run the unit tests.
+- Manually validate the change.
+
 We only intend for this plan to cover straightforward next steps to our next demonstrable milestone. We'll extend it as we go.
 
 We write down our findings as we go, to build up context for later tasks. When a task requires analysis, we use the section header as the task and write down our findings as that section's content.
@@ -40,6 +52,42 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 - Improve clarity of prompt contents.
 - Improve the overall flow of prompts and content across the chat message sequence, to make it
   easier for the model to understand what is going on.
+
+### New User Message Structure
+
+```xml
+<latest_context_from_system>
+  [The Brade application puts the most recent authoritative context information here, structured as shown below.]
+  <repository_map>
+    [Repository map]
+  </repository_map>
+  <project_files>
+    <project_file>
+      <path>filename.py</path>
+      <content>
+        [File content]
+      </content>
+    </project_file>
+  </project_files>
+  <platform_info>
+    [System details]
+  </platform_info>
+</latest_context_from_system>
+
+<actions_taken_by_system>
+  [The Brade application explains actions that it took at this point in the chat.]
+  <action_taken>
+    [Description of Brade application action.]
+  </action_taken>
+</actions_taken_by_system>
+  
+<instructions_from_system>
+    [instructions]
+</instructions_from_system>
+
+<message_from_user>
+  [User message]
+</message_from_user>
 
 ## Current State Analysis
 
@@ -127,49 +175,86 @@ Our current approach:
 ## Testing Strategy
 
 ### Unit Tests
-- ( ) Add tests for XML schema validation
-- ( ) Add tests for content placement rules
-- ( ) Add tests for role separation
+- Add tests for XML schema validation
+- Add tests for content placement rules
+- Add tests for role separation
 
 ### Integration Tests
-- ( ) Test basic code editing still works
-- ( ) Test file handling still works
-- ( ) Test git integration still works
-- ( ) Test command processing still works
+- Test basic code editing still works
+- Test file handling still works
+- Test git integration still works
+- Test command processing still works
 
 ### Manual Testing Checklist
-- ( ) Basic code editing with different models
-- ( ) File handling operations (add/remove/modify)
-- ( ) Git operations (commit/status/diff)
-- ( ) Command processing for all command types
-- ( ) Error handling and recovery
-- ( ) Multi-file edits
-- ( ) Long conversations with history
-
-## Validation Steps
-
-After each atomic change:
-1. Run unit tests
-2. Run integration tests
-3. Check Langfuse logs to verify prompt structure
-4. Run manual test checklist
-5. Document any issues found
+- Check Langfuse logs to verify prompt structure
+- Basic code editing with different models
+- File handling operations (add/remove/modify)
+- Git operations (commit/status/diff)
+- Command processing for all command types
+- Error handling and recovery
+- Multi-file edits
+- Long conversations with history
 
 ## Implementation Strategy
 
-### ( ) Phase 1: Preparation
+### ( ) Inventory files that contain prompts.
+
+- ( ) List all files containing prompts
+  - Organize by logical categories
+  - Document file paths and purposes
+- ( ) Make backup copies of all prompt files
+
+
+### ( ) Prepare XML schemas.
 - ( ) Create XML schema for all message types
   - Define standard tags and structure
   - Document best practices and reasoning
   - Create schema validation helpers
   - Add unit tests
-- ( ) Make backup copies of all prompt files
-- ( ) List all files containing prompts
-  - Organize by logical categories
-  - Document file paths and purposes
-- ( ) Decide on repo map formatting changes
 
-### ( ) Phase 2: Move Content (one atomic step per item)
+### ( ) Decide whether to make any repo map formatting changes
+
+### ( ) Implement New Structure
+
+- ( ) Add XML wrapper for repository map
+  ```xml
+  <repository_map>
+    [Repository map content]
+  </repository_map>
+  ```
+
+- ( ) Add XML wrapper for file content
+  ```xml
+  <project_files>
+    <project_file>
+      <path>filename.py</path>
+      <content>[File content]</content>
+    </project_file>
+  </project_files>
+  ```
+
+- ( ) Add XML wrapper for system actions
+  ```xml
+  <actions_taken_by_system>
+    <action_taken>[Description]</action_taken>
+  </actions_taken_by_system>
+  ```
+
+- ( ) Add XML wrapper for user messages
+  ```xml
+  <message_from_user>[User message]</message_from_user>
+  ```
+
+- ( ) Add XML wrapper for system instructions
+  ```xml
+  <instructions_from_system>[Instructions]</instructions_from_system>
+  ```
+
+- ( ) Update tests for each wrapper
+
+- ( ) Verify all functionality works with new structure
+
+### ( ) Move Content (one atomic step per item)
 - ( ) Move platform info from system to user messages
   - Remove from: base_prompts.py system message
   - Add to: final user message XML structure
@@ -186,40 +271,7 @@ After each atomic change:
   - Update tests
   - Verify functionality
 
-### ( ) Phase 3: Implement New Structure
-- ( ) Add XML wrapper for repository map
-  ```xml
-  <repository_map>
-    [Repository map content with consistent structure]
-  </repository_map>
-  ```
-- ( ) Add XML wrapper for file content
-  ```xml
-  <project_files>
-    <project_file>
-      <path>filename.py</path>
-      <content>[File content]</content>
-    </project_file>
-  </project_files>
-  ```
-- ( ) Add XML wrapper for system actions
-  ```xml
-  <actions_taken_by_system>
-    <action_taken>[Description]</action_taken>
-  </actions_taken_by_system>
-  ```
-- ( ) Add XML wrapper for user messages
-  ```xml
-  <message_from_user>[User message]</message_from_user>
-  ```
-- ( ) Add XML wrapper for system instructions
-  ```xml
-  <instructions_from_system>[Instructions]</instructions_from_system>
-  ```
-- ( ) Update tests for each wrapper
-- ( ) Verify all functionality works with new structure
-
-### ( ) Phase 4: Cleanup and Documentation
+### ( ) Cleanup and Documentation
 - ( ) Remove redundant content
 - ( ) Update documentation
 - ( ) Final testing pass
