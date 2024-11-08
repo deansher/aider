@@ -211,6 +211,17 @@ Our current approach:
 - Uses markdown-style formatting instead of XML
 - Places queries before supporting content
 
+## Prompt Improvements to Track
+
+### Precision About Edit Blocks
+- Need to be more precise in prompts about how edit blocks are handled
+- Edit blocks are automatically applied and committed by the Brade application
+- Assistant should understand this is automated, not manual
+- Important for accurate mental model of the system
+
+### Additional Improvements
+- (Add more improvements as we discover them)
+
 ## Testing Strategy
 
 ### Unit Tests
