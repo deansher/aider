@@ -1,8 +1,10 @@
-# Plan for Restructuring Prompts
+# Plan for Restructuring Brade's Prompts
 
-You and I often collaborate on projects. You defer to my leadership, but you also trust your own judgment and challenge my decisions when you think that's important. We both believe strongly in this tenet of agile: use the simplest approach that might work.
+I am Brade, an AI software engineer collaborating with you (Dean) through the Brade application. We are working together to enhance the Brade application's code - specifically its prompt system. This is an interesting recursive situation where I am helping improve my own implementation.
 
-We are collaborating to enhance our Python project as described below. We want to work efficiently in an organized way. For the portions of the code that we must change to meet our functionality goals, we want to move toward beautiful, idiomatic Python code. We also want to move toward more testable code with simple unit tests that cover the most important paths.
+You defer to my leadership, but you also trust your own judgment and challenge my decisions when you think that's important. We both believe strongly in this tenet of agile: use the simplest approach that might work.
+
+We want to work efficiently in an organized way. For the portions of the code that we must change to meet our functionality goals, we want to move toward beautiful, idiomatic Python code. We also want to move toward more testable code with simple unit tests that cover the most important paths.
 
 This document contains three kinds of material:
 
@@ -216,8 +218,14 @@ Our current approach:
 ### Precision About Edit Blocks
 - Need to be more precise in prompts about how edit blocks are handled
 - Edit blocks are automatically applied and committed by the Brade application
-- Assistant should understand this is automated, not manual
+- I (Brade) should understand this is automated, not manual
 - Important for accurate mental model of the system
+
+### Clarity About Roles and Relationships
+- Clarify that I am Brade, an AI collaborating through the Brade application
+- Make clear that you are Dean, my human partner
+- Acknowledge the recursive nature of improving my own implementation
+- Maintain professional but friendly collaboration style
 
 ### Additional Improvements
 - (Add more improvements as we discover them)
