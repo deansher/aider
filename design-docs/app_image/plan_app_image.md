@@ -101,9 +101,9 @@ Key findings:
 Version Constraints by Rationale:
 
 1. Python Version:
-   - We are targeting Python 3.12 only for the AppImage distribution
+   - We are targeting Python 3.13 only for the AppImage distribution
    - This allows us to remove legacy compatibility constraints
-   - Can use latest versions of packages that require Python 3.12
+   - Can use latest versions of packages that require Python 3.13
 
 2. Package Compatibility:
    - numpy<2: Required by sentence-transformers
@@ -145,7 +145,7 @@ Version Constraints by Rationale:
 
 Tasks:
 - (✓) Review current dependency management
-- ( ) Verify all dependencies are compatible with Python 3.12
+- ( ) Verify all dependencies are compatible with Python 3.13
 - ( ) Identify any dependencies with native extensions that need special handling
 - ( ) Document any dependencies that require system libraries
 - ( ) Identify platform-specific packages and their AppImage implications
@@ -172,7 +172,7 @@ Implementation complete in docker/appimage-builder/Dockerfile with:
 - (✓) Create entry point script
 - (✓) Set up environment variables
 
-Implementation complete in build_appimage.sh with:
+Implementation complete in scripts/build_appimage.sh with:
 - Standard AppDir hierarchy
 - Python venv in usr/python
 - Environment setup in AppRun script
