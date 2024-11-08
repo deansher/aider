@@ -272,7 +272,101 @@ Our current approach:
 
 ### ( ) Further Prep for Prompt Restructuring
 - (✓) Create backup copies of all prompt files before making changes
-- ( ) Analyze common patterns and shared content across prompt files
+- (✓) Analyze common patterns and shared content across prompt files
+
+#### Common Patterns Analysis
+
+##### Message Types
+1. System Messages
+   - Role/identity definition (all coders)
+   - Core behavioral traits
+   - Basic context setting
+   
+2. File Content Messages
+   - Source code display
+   - Read-only reference content
+   - Repository mapping
+   - Common format: filename + fence + content
+
+3. Instruction Messages
+   - Task-specific commands
+   - Format requirements
+   - Response guidelines
+   - Platform-specific details
+
+4. Status/Action Messages
+   - Git commit notifications
+   - File additions/changes
+   - Command results
+   - Error reports
+
+##### Shared Content Areas
+1. Core Prompts (base_prompts.py)
+   - System message foundation
+   - File handling templates
+   - Basic instructions
+   - Used by all other prompt files
+
+2. Edit Format Instructions
+   - Search/replace blocks
+   - Whole file updates
+   - Unified diffs
+   - Function calls
+   - Each has similar structure but different syntax
+
+3. Example Messages
+   - Most prompt files include examples
+   - Similar structure but different content
+   - Could be standardized and shared
+
+4. Shell Command Handling
+   - Present in multiple prompt files
+   - Consistent structure
+   - Platform-specific variations
+
+##### Consolidation Opportunities
+1. Merge Common System Content
+   - Combine core role/identity content
+   - Share basic behavioral traits
+   - Standardize context setting
+
+2. Standardize File Handling
+   - Create shared file display format
+   - Unify read-only file handling
+   - Standardize repository mapping
+
+3. Unify Instruction Format
+   - Create consistent XML structure
+   - Share common instructions
+   - Allow coder-specific extensions
+
+4. Centralize Examples
+   - Create shared example library
+   - Allow coder-specific examples
+   - Maintain consistent format
+
+##### XML Schema Implications
+1. Message Type Tags
+   ```xml
+   <system_context>
+   <file_content>
+   <instructions>
+   <status_update>
+   ```
+
+2. Content Organization
+   ```xml
+   <edit_format>
+   <examples>
+   <shell_commands>
+   ```
+
+3. Coder-Specific Extensions
+   ```xml
+   <coder_specific>
+   <custom_instructions>
+   ```
+
 - ( ) Identify opportunities for consolidation and standardization
 - ( ) Plan XML schema to accommodate all prompt types
 
