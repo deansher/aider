@@ -47,7 +47,7 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--model",
         metavar="MODEL",
-        default=None,
+        default="claude-3-5-sonnet-20241022",
         help="Specify the model to use for the main chat",
     )
     opus_model = "claude-3-opus-20240229"
@@ -195,8 +195,8 @@ def get_parser(default_config_files, git_root):
         "--edit-format",
         "--chat-mode",
         metavar="EDIT_FORMAT",
-        default=None,
-        help="Specify what edit format the LLM should use (default depends on model)",
+        default="architect",
+        help="Specify what edit format the LLM should use (default: architect)",
     )
     group.add_argument(
         "--architect",
@@ -217,8 +217,8 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--editor-model",
         metavar="EDITOR_MODEL",
-        default=None,
-        help="Specify the model to use for editor tasks (default depends on --model)",
+        default="claude-3-5-sonnet-20241022",
+        help="Specify the model to use for editor tasks (default: claude-3-5-sonnet-20241022)",
     )
     group.add_argument(
         "--editor-edit-format",
@@ -255,8 +255,8 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--cache-prompts",
         action=argparse.BooleanOptionalAction,
-        default=False,
-        help="Enable caching of prompts (default: False)",
+        default=True,
+        help="Enable caching of prompts (default: True)",
     )
     group.add_argument(
         "--cache-keepalive-pings",
@@ -270,8 +270,8 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--map-tokens",
         type=int,
-        default=None,
-        help="Suggested number of tokens to use for repo map, use 0 to disable (default: 1024)",
+        default=2048,
+        help="Suggested number of tokens to use for repo map, use 0 to disable (default: 2048)",
     )
     group.add_argument(
         "--map-refresh",
