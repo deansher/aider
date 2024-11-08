@@ -75,6 +75,10 @@ Type=Application
 Categories=Development;
 EOF
 
+# Download icon (placeholder - replace with actual icon)
+curl -L https://raw.githubusercontent.com/deansher/brade/main/assets/icon.png -o AppDir/brade.png
+ln -sf brade.png AppDir/.DirIcon
+
 # Generate AppImage
 ARCH=$(uname -m) appimagetool AppDir/
 ```
