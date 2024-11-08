@@ -38,3 +38,119 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
   - The user's message.
 - Drop the `<SYSTEM>` markers we currently use.
 
+## Current Prompt Structure Analysis
+
+### System Messages
+
+Our current system prompts contain:
+- Role definition and persona characteristics
+- Task instructions and requirements
+- Output format specifications
+- Example conversations
+- Platform-specific information
+
+This violates the guide's recommendation that system prompts should focus solely on:
+- Defining Claude's role/expertise
+- Setting fundamental context
+- Establishing basic behavioral parameters
+
+### Document Handling
+
+Currently we:
+- Mix instructions with document content
+- Use inconsistent document organization
+- Place documents after instructions in some cases
+- Use `<SYSTEM>` markers that don't align with XML structure
+
+### Task Structure 
+
+Our current approach:
+- Combines role definition with task instructions in system messages
+- Lacks clear separation between instructions and data
+- Uses markdown-style formatting instead of XML
+- Places queries before supporting content
+
+## Planned Changes
+
+### System Prompt Restructuring
+
+1. Create a minimal system prompt focused on:
+   - Brade's role as an expert software developer
+   - Core behavioral traits (collaborative, thoughtful, professional)
+   - Basic interaction parameters
+
+2. Move to user messages:
+   - Task instructions
+   - Output format requirements
+   - Example conversations
+   - Platform information
+
+### Document Organization
+
+1. Implement consistent XML structure:
+```xml
+<context>
+  <documents>
+    <document>
+      <path>filename.py</path>
+      <content>
+        [Source code]
+      </content>
+    </document>
+  </documents>
+  
+  <instructions>
+    [Task requirements]
+  </instructions>
+  
+  <platform_info>
+    [System details]
+  </platform_info>
+</context>
+```
+
+2. Place documents before instructions in all cases
+
+3. Use clear metadata for each section
+
+### Implementation Tasks
+
+- ( ) Create new minimal system prompt
+  - Focus solely on role and core traits
+  - Remove all task-specific content
+  
+- ( ) Design XML schema for document organization
+  - Define standard tags and structure
+  - Create validation helpers
+  
+- ( ) Implement new user message structure
+  - Move content from system prompt
+  - Organize using XML schema
+  - Place documents first
+  
+- ( ) Update prompt generation code
+  - Modify format_messages() 
+  - Update ChatChunks class
+  - Add XML formatting helpers
+
+- ( ) Add validation and testing
+  - Verify XML structure
+  - Test prompt generation
+  - Validate against guide requirements
+
+### Testing and Validation
+
+We will validate the new structure by:
+1. Verifying XML schema compliance
+2. Testing prompt generation with various inputs
+3. Checking alignment with guide recommendations
+4. Measuring impact on model performance
+
+## Success Criteria
+
+The restructured prompts should:
+- Follow all key recommendations in the prompting guide
+- Maintain or improve model performance
+- Be easy to maintain and extend
+- Support future Claude model updates
+
