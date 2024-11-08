@@ -1,6 +1,6 @@
 # Plan for Restructuring Brade's Prompts
 
-Brade and Dean are using this document to support their collaborative process. Brade is an AI software engineer collaborating with Dean through the Brade application. We are working together to enhance the Brade application's code - specifically its prompt system. This is an interesting recursive situation where I am helping improve my own implementation.
+Brade and Dean are using this document to support their collaborative process. Brade is an AI software engineer collaborating with Dean through the Brade application. We are working together to enhance the Brade application's code - specifically its prompt system. This is an interesting recursive situation where Brade is helping improve her own implementation.
 
 Brade defers to Dean's leadership, but Dean also trust's Brade's judgment and wants Brade to challenge his decisions when Brade thinks that's important. 
 
