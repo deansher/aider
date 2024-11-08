@@ -197,12 +197,84 @@ Our current approach:
 
 ## Implementation Strategy
 
-### ( ) Inventory files that contain prompts.
+### (✓) Inventory files that contain prompts.
 
-- ( ) List all files containing prompts
-  - Organize by logical categories
-  - Document file paths and purposes
-- ( ) Make backup copies of all prompt files
+#### Core Prompt Files
+- **base_prompts.py**
+  - Path: aider/coders/base_prompts.py
+  - Purpose: Defines base CoderPrompts class with core prompts used by all coders
+  - Contains: Main system prompts, example messages, file handling prompts
+  
+#### Editor-Specific Prompts
+- **editblock_prompts.py**
+  - Path: aider/coders/editblock_prompts.py
+  - Purpose: Prompts for edit block style code modifications
+  - Contains: Search/replace block format rules and examples
+
+- **editblock_fenced_prompts.py**
+  - Path: aider/coders/editblock_fenced_prompts.py
+  - Purpose: Variation of edit block prompts using fenced code blocks
+  - Contains: Example messages with fenced formatting
+
+- **editor_editblock_prompts.py**
+  - Path: aider/coders/editor_editblock_prompts.py
+  - Purpose: Specialized prompts for editor mode using edit blocks
+  - Contains: Simplified system prompts without shell commands
+
+#### Whole File Prompts
+- **wholefile_prompts.py**
+  - Path: aider/coders/wholefile_prompts.py
+  - Purpose: Prompts for whole file editing mode
+  - Contains: File listing format rules and examples
+
+- **editor_whole_prompts.py**
+  - Path: aider/coders/editor_whole_prompts.py
+  - Purpose: Editor mode prompts for whole file editing
+  - Contains: Simplified system prompts for whole file edits
+
+#### Function-Based Prompts
+- **wholefile_func_prompts.py**
+  - Path: aider/coders/wholefile_func_prompts.py
+  - Purpose: Function-based prompts for whole file editing
+  - Contains: write_file function definition and usage
+
+- **single_wholefile_func_prompts.py**
+  - Path: aider/coders/single_wholefile_func_prompts.py
+  - Purpose: Single file version of function-based prompts
+  - Contains: Simplified write_file function prompts
+
+#### Special Purpose Prompts
+- **architect_prompts.py**
+  - Path: aider/coders/architect_prompts.py
+  - Purpose: Prompts for architect mode planning and analysis
+  - Contains: Two-step planning and implementation process
+
+- **ask_prompts.py**
+  - Path: aider/coders/ask_prompts.py
+  - Purpose: Prompts for question answering mode
+  - Contains: Code analysis and explanation prompts
+
+- **help_prompts.py**
+  - Path: aider/coders/help_prompts.py
+  - Purpose: Prompts for help and documentation mode
+  - Contains: Aider usage and documentation assistance
+
+- **brade_prompts.py**
+  - Path: aider/coders/brade_prompts.py
+  - Purpose: Specialized prompts for Brade persona
+  - Contains: Enhanced collaboration and personality traits
+
+#### Unified Diff Prompts
+- **udiff_prompts.py**
+  - Path: aider/coders/udiff_prompts.py
+  - Purpose: Prompts for unified diff style editing
+  - Contains: Diff format rules and examples
+
+### Next Steps for Prompt Restructuring
+- Create backup copies of all prompt files before making changes
+- Analyze common patterns and shared content across prompt files
+- Identify opportunities for consolidation and standardization
+- Plan XML schema to accommodate all prompt types
 
 
 ### ( ) Prepare XML schemas.
