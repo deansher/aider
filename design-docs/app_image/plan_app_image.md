@@ -146,7 +146,14 @@ Tasks:
 - ( ) Document build-time dependencies needed for AppImage creation
 - ( ) Analyze compiled extensions that need special handling in AppImage
 
-## ( ) Design Local Build Process
+## ( ) Design Docker-Based Build Process
+
+### (✓) Choose Build Environment Strategy
+Using Docker for AppImage builds because:
+1. Enables development on non-Linux systems (e.g. Mac)
+2. Provides reproducible builds via version controlled Dockerfile
+3. Can be used in GitHub Actions for releases
+4. Ensures consistent build environment
 
 ### ( ) Create Basic AppImage Structure
 - ( ) Define AppDir layout
