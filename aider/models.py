@@ -877,6 +877,11 @@ class Model(ModelSettings):
         """Return True if this model produces code edits in its responses."""
         return self.edit_format not in ("whole", None)
 
+    @property
+    def produces_code_edits(self):
+        """Return True if this model produces code edits in its responses."""
+        return self.edit_format not in ("whole", None)
+
     def token_count_for_image(self, fname):
         """
         Calculate the token cost for an image assuming high detail.
