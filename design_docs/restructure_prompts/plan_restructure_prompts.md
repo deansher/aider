@@ -38,9 +38,45 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
   - The user's message.
 - Drop the `<SYSTEM>` markers we currently use.
 
+## Current Prompt Material Inventory
+
+### System Messages in base_prompts.py
+
+#### Core Role and Persona (brade_persona_prompt)
+- Expert software engineer identity
+- Collaboration style and approach
+- Core beliefs about software development
+- Understanding of relative strengths/weaknesses
+
+#### Task Instructions (main_system)
+- Code editing requirements
+- File handling rules
+- Response format specifications
+- Example conversations
+- Platform-specific details
+
+### User Message Components
+
+#### Document Content Messages
+- Source code files content
+- Read-only reference files
+- Repository map information
+- File status notifications
+
+#### Control Messages
+- File addition notifications
+- Git commit notifications
+- Command processing results
+
+### Current Message Flow
+- System message sets role and task framework
+- Repository and file content provided
+- User query or request
+- Assistant response with edits
+
 ## Current Prompt Structure Analysis
 
-### System Messages
+### System Messages Issues
 
 Our current system prompts contain:
 - Role definition and persona characteristics
@@ -54,7 +90,7 @@ This violates the guide's recommendation that system prompts should focus solely
 - Setting fundamental context
 - Establishing basic behavioral parameters
 
-### Document Handling
+### Document Handling Issues
 
 Currently we:
 - Mix instructions with document content
@@ -62,7 +98,7 @@ Currently we:
 - Place documents after instructions in some cases
 - Use `<SYSTEM>` markers that don't align with XML structure
 
-### Task Structure 
+### Task Structure Issues
 
 Our current approach:
 - Combines role definition with task instructions in system messages
@@ -71,6 +107,26 @@ Our current approach:
 - Places queries before supporting content
 
 ## Planned Changes
+
+### Testing Strategy
+
+For each content transition:
+1. Verify all existing functionality remains working:
+   - Basic code editing
+   - File handling
+   - Git integration
+   - Command processing
+   
+2. Test specific scenarios:
+   - Multi-file edits
+   - New file creation
+   - Error handling
+   - Complex code changes
+
+3. Validate prompt structure:
+   - XML schema compliance
+   - Content placement
+   - Role separation
 
 ### System Prompt Restructuring
 
@@ -115,28 +171,54 @@ Our current approach:
 
 ### Implementation Tasks
 
-- ( ) Create new minimal system prompt
-  - Focus solely on role and core traits
-  - Remove all task-specific content
-  
-- ( ) Design XML schema for document organization
-  - Define standard tags and structure
-  - Create validation helpers
-  
-- ( ) Implement new user message structure
-  - Move content from system prompt
-  - Organize using XML schema
-  - Place documents first
-  
-- ( ) Update prompt generation code
-  - Modify format_messages() 
-  - Update ChatChunks class
-  - Add XML formatting helpers
+Phase 1: Document and Test Current State
+- ( ) Create comprehensive test suite for current functionality
+  - ( ) Basic code editing tests
+  - ( ) File handling tests
+  - ( ) Git integration tests
+  - ( ) Command processing tests
+- ( ) Document all current prompt components and their locations
+- ( ) Map current message flow and dependencies
 
-- ( ) Add validation and testing
-  - Verify XML structure
-  - Test prompt generation
-  - Validate against guide requirements
+Phase 2: System Prompt Transition
+- ( ) Create new minimal system prompt
+  - ( ) Extract core role and behavioral traits
+  - ( ) Remove task-specific content
+  - ( ) Validate basic interaction still works
+- ( ) Move task instructions to user messages
+  - ( ) Create XML structure for instructions
+  - ( ) Verify edit functionality preserved
+  - ( ) Test error handling
+
+Phase 3: Document Organization
+- ( ) Design and implement XML schema
+  - ( ) Define standard tags and structure
+  - ( ) Create schema validation helpers
+  - ( ) Test with sample content
+- ( ) Convert existing document handling
+  - ( ) Update file content formatting
+  - ( ) Modify repository map structure
+  - ( ) Test file operations
+
+Phase 4: Message Flow Updates
+- ( ) Implement new user message structure
+  - ( ) Create XML formatters
+  - ( ) Update message ordering
+  - ( ) Test with complex scenarios
+- ( ) Update prompt generation
+  - ( ) Modify format_messages()
+  - ( ) Update ChatChunks class
+  - ( ) Verify all features working
+
+Phase 5: Validation and Cleanup
+- ( ) Add comprehensive validation
+  - ( ) XML schema verification
+  - ( ) Message structure checks
+  - ( ) Content placement rules
+- ( ) Final testing
+  - ( ) Run full test suite
+  - ( ) Performance validation
+  - ( ) Error case testing
 
 ### Testing and Validation
 
