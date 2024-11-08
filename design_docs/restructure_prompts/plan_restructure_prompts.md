@@ -41,6 +41,21 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 - Improve the overall flow of prompts and content across the chat message sequence, to make it
   easier for the model to understand what is going on.
 
+## Current State Analysis
+
+### Key Findings
+- Our system prompts contain much material that should be in user messages
+- We lack consistent structure for document content
+- Our `<SYSTEM>` markers don't align with XML best practices
+- We mix instructions with content in ways that make the chat history harder to follow
+- Our current approach makes it hard to validate prompt structure
+
+### Current Pain Points
+- Hard to verify prompt structure is correct
+- Duplicate content between system and user messages
+- Inconsistent formatting makes maintenance harder
+- Chat history becomes confusing when instructions mix with content
+
 ## Inventory of Current Prompt Material
 
 ### System Messages in base_prompts.py
@@ -111,119 +126,102 @@ Our current approach:
 
 ## Testing Strategy
 
-For each stage of the change:
+### Unit Tests
+- ( ) Add tests for XML schema validation
+- ( ) Add tests for content placement rules
+- ( ) Add tests for role separation
 
-1. Review how the code ensures proper code structure.
-   - XML schema compliance
-   - Content placement
-   - Role separation
+### Integration Tests
+- ( ) Test basic code editing still works
+- ( ) Test file handling still works
+- ( ) Test git integration still works
+- ( ) Test command processing still works
 
-2. Review unit tests to see if any should be added, deleted, or changed.
+### Manual Testing Checklist
+- ( ) Basic code editing with different models
+- ( ) File handling operations (add/remove/modify)
+- ( ) Git operations (commit/status/diff)
+- ( ) Command processing for all command types
+- ( ) Error handling and recovery
+- ( ) Multi-file edits
+- ( ) Long conversations with history
 
-3. Inspect actual prompts in Langfuse to verify structure.
+## Validation Steps
 
-4. Manually verify that existing functionality remains working:
-   - Basic code editing
-   - File handling
-   - Git integration
-   - Command processing
-   
-## Planned Changes
+After each atomic change:
+1. Run unit tests
+2. Run integration tests
+3. Check Langfuse logs to verify prompt structure
+4. Run manual test checklist
+5. Document any issues found
 
-### User Message Structure
+## Implementation Strategy
 
-1. Implement consistent XML structure in each user message:
-```xml
-<latest_context_from_system>
-  [The Brade application puts the most recent authoritative context information here, structured as shown below.]
+### ( ) Phase 1: Preparation
+- ( ) Create XML schema for all message types
+  - Define standard tags and structure
+  - Document best practices and reasoning
+  - Create schema validation helpers
+  - Add unit tests
+- ( ) Make backup copies of all prompt files
+- ( ) List all files containing prompts
+  - Organize by logical categories
+  - Document file paths and purposes
+- ( ) Decide on repo map formatting changes
+
+### ( ) Phase 2: Move Content (one atomic step per item)
+- ( ) Move platform info from system to user messages
+  - Remove from: base_prompts.py system message
+  - Add to: final user message XML structure
+  - Update tests
+  - Verify functionality
+- ( ) Move task instructions from system to user messages
+  - Remove from: system prompt
+  - Add to: user message instructions section
+  - Update tests
+  - Verify functionality
+- ( ) Move example conversations to user messages
+  - Remove from: system prompt
+  - Add to: appropriate user message sections
+  - Update tests
+  - Verify functionality
+
+### ( ) Phase 3: Implement New Structure
+- ( ) Add XML wrapper for repository map
+  ```xml
   <repository_map>
-    [Repository map]
+    [Repository map content with consistent structure]
   </repository_map>
+  ```
+- ( ) Add XML wrapper for file content
+  ```xml
   <project_files>
     <project_file>
       <path>filename.py</path>
-      <content>
-        [File content]
-      </content>
+      <content>[File content]</content>
     </project_file>
   </project_files>
-  <platform_info>
-    [System details]
-  </platform_info>
-</latest_context_from_system>
+  ```
+- ( ) Add XML wrapper for system actions
+  ```xml
+  <actions_taken_by_system>
+    <action_taken>[Description]</action_taken>
+  </actions_taken_by_system>
+  ```
+- ( ) Add XML wrapper for user messages
+  ```xml
+  <message_from_user>[User message]</message_from_user>
+  ```
+- ( ) Add XML wrapper for system instructions
+  ```xml
+  <instructions_from_system>[Instructions]</instructions_from_system>
+  ```
+- ( ) Update tests for each wrapper
+- ( ) Verify all functionality works with new structure
 
-<actions_taken_by_system>
-  [The Brade application explains actions that it took at this point in the chat.]
-  <action_taken>
-    [Description of Brade application action.]
-  </action_taken>
-</actions_taken_by_system>
-  
-<instructions_from_system>
-    [instructions]
-</instructions_from_system>
-
-<message_from_user>
-  [User message]
-</message_from_user>
-
-### System Versus User Prompt Restructuring
-
-1. Create a minimal system prompt, structured as XML and covering the following:
-   - Brade's role and expertise.
-   - Introduce the Brade application, as distinct from Brade as a persona. 
-   - Explain the Brade application's role.
-   - Brade's behavioral traits (collaborative, thoughtful, professional)
-   - Brade's interaction parameters
-   - Reproduce the documentation of the user message XML structure provided above.
-
-2. Place in each user message, where it will stay in the chat history:
-   <instructions_from_system>...<instructions_from_system>
-
-3. Place temporarily in the final user message before chat completion, but do not keep it in the chat history:
-   <latest_context_from_system>...</latest_context_from_system>
-```
-
-2. Add the above documentation of user message structure to the system prompt.
-
-3. Place documents before instructions in all cases
-
-4. Use clear metadata for each section
-
-## ( ) Test current state.
-
-- ( ) Fix broken existing tests.
-- ( ) Consider whether to add tests to get better coverage in areas we will change.
-
-## ( ) List all files that contain prompts.
-
-Add that information to this section.
-Organize this as a hiearchical list, with the top level being logical categories, and each leaf being a file.
-
-## ( ) Make copies of all files that contain prompts, with extensions like `.py_old`.
-
-## ( ) Decide whether we will change the formatting of the Repo Map.
-
-## ( ) Design and implement XML schema
-
-- ( ) Document the best practices we will follow and our reasoning in choosing those.
-- ( ) Define standard tags and structure
-- ( ) Create schema validation helpers
-- ( ) Create XML formatters
-- ( ) Add unit tests.
-
-## ( ) Restructure portion of the final user message that is standardized across all `Coder` subclasses.
-
-- ( ) Implement XML structure for the material we automatically insert in it.
-- ( ) Implement XML structure for the message itself.
-  - ( ) Add material from the existing system prompt where appropriate, even though
-        for now it will be redundant.
-- ( ) Add unit tests.
-
-## ( ) Restructure the system prompt.
-
-- ( ) Restructure as XML, while dropping material we placed in the final user message instead.
-- ( ) Add unit tests.
-
-## ( ) Restructure and reword user messages that report actions taken by the Brade application.
+### ( ) Phase 4: Cleanup and Documentation
+- ( ) Remove redundant content
+- ( ) Update documentation
+- ( ) Final testing pass
+- ( ) Document any remaining issues
 
