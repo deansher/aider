@@ -7,7 +7,7 @@ mkdir -p AppDir/usr/{bin,lib,python,share}
 # Install Python and dependencies
 python3.13 -m venv AppDir/usr/python
 source AppDir/usr/python/bin/activate
-pip install --no-cache-dir -e .[help,browser]
+pip install --no-cache-dir -e /src[help,browser]
 
 # Copy system libraries
 copy_dependencies() {
