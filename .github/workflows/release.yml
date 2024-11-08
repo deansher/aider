@@ -57,6 +57,8 @@ jobs:
     - name: Build AppImage
       run: |
         mkdir -p build
+        cp build_appimage.sh build/
+        chmod +x build/build_appimage.sh
         docker run --rm \
           -v ${{ github.workspace }}:/src \
           -v ${{ github.workspace }}/build:/build \
