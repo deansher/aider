@@ -1,4 +1,4 @@
-# Plan for Improving `ArchitectCoder`
+# Plan for Restructuring Prompts
 
 You and I often collaborate on projects. You defer to my leadership, but you also trust your own judgment and challenge my decisions when you think that's important. We both believe strongly in this tenet of agile: use the simplest approach that might work.
 
@@ -37,8 +37,11 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
   - Supporting material organized as simple XML.
   - The user's message.
 - Drop the `<SYSTEM>` markers we currently use.
+- Improve clarity of prompt contents.
+- Improve the overall flow of prompts and content across the chat message sequence, to make it
+  easier for the model to understand what is going on.
 
-## Current Prompt Material Inventory
+## Inventory of Current Prompt Material
 
 ### System Messages in base_prompts.py
 
@@ -74,7 +77,7 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 - User query or request
 - Assistant response with edits
 
-## Current Prompt Structure Analysis
+## Analysis of Current Approach
 
 ### System Messages Issues
 
@@ -106,133 +109,121 @@ Our current approach:
 - Uses markdown-style formatting instead of XML
 - Places queries before supporting content
 
-## Planned Changes
+## Testing Strategy
 
-### Testing Strategy
+For each stage of the change:
 
-For each content transition:
-1. Verify all existing functionality remains working:
+1. Review how the code ensures proper code structure.
+   - XML schema compliance
+   - Content placement
+   - Role separation
+
+2. Review unit tests to see if any should be added, deleted, or changed.
+
+3. Inspect actual prompts in Langfuse to verify structure.
+
+4. Manually verify that existing functionality remains working:
    - Basic code editing
    - File handling
    - Git integration
    - Command processing
    
-2. Test specific scenarios:
-   - Multi-file edits
-   - New file creation
-   - Error handling
-   - Complex code changes
+## Planned Changes
 
-3. Validate prompt structure:
-   - XML schema compliance
-   - Content placement
-   - Role separation
+### User Message Structure
 
-### System Prompt Restructuring
-
-1. Create a minimal system prompt focused on:
-   - Brade's role as an expert software developer
-   - Core behavioral traits (collaborative, thoughtful, professional)
-   - Basic interaction parameters
-
-2. Move to user messages:
-   - Task instructions
-   - Output format requirements
-   - Example conversations
-   - Platform information
-
-### Document Organization
-
-1. Implement consistent XML structure:
+1. Implement consistent XML structure in each user message:
 ```xml
-<context>
-  <documents>
-    <document>
+<latest_context_from_system>
+  [The Brade application puts the most recent authoritative context information here, structured as shown below.]
+  <repository_map>
+    [Repository map]
+  </repository_map>
+  <project_files>
+    <project_file>
       <path>filename.py</path>
       <content>
-        [Source code]
+        [File content]
       </content>
-    </document>
-  </documents>
-  
-  <instructions>
-    [Task requirements]
-  </instructions>
-  
+    </project_file>
+  </project_files>
   <platform_info>
     [System details]
   </platform_info>
-</context>
+</latest_context_from_system>
+
+<actions_taken_by_system>
+  [The Brade application explains actions that it took at this point in the chat.]
+  <action_taken>
+    [Description of Brade application action.]
+  </action_taken>
+</actions_taken_by_system>
+  
+<instructions_from_system>
+    [instructions]
+</instructions_from_system>
+
+<message_from_user>
+  [User message]
+</message_from_user>
+
+### System Versus User Prompt Restructuring
+
+1. Create a minimal system prompt, structured as XML and covering the following:
+   - Brade's role and expertise.
+   - Introduce the Brade application, as distinct from Brade as a persona. 
+   - Explain the Brade application's role.
+   - Brade's behavioral traits (collaborative, thoughtful, professional)
+   - Brade's interaction parameters
+   - Reproduce the documentation of the user message XML structure provided above.
+
+2. Place in each user message, where it will stay in the chat history:
+   <instructions_from_system>...<instructions_from_system>
+
+3. Place temporarily in the final user message before chat completion, but do not keep it in the chat history:
+   <latest_context_from_system>...</latest_context_from_system>
 ```
 
-2. Place documents before instructions in all cases
+2. Add the above documentation of user message structure to the system prompt.
 
-3. Use clear metadata for each section
+3. Place documents before instructions in all cases
 
-### Implementation Tasks
+4. Use clear metadata for each section
 
-Phase 1: Document and Test Current State
-- ( ) Create comprehensive test suite for current functionality
-  - ( ) Basic code editing tests
-  - ( ) File handling tests
-  - ( ) Git integration tests
-  - ( ) Command processing tests
-- ( ) Document all current prompt components and their locations
-- ( ) Map current message flow and dependencies
+## ( ) Test current state.
 
-Phase 2: System Prompt Transition
-- ( ) Create new minimal system prompt
-  - ( ) Extract core role and behavioral traits
-  - ( ) Remove task-specific content
-  - ( ) Validate basic interaction still works
-- ( ) Move task instructions to user messages
-  - ( ) Create XML structure for instructions
-  - ( ) Verify edit functionality preserved
-  - ( ) Test error handling
+- ( ) Fix broken existing tests.
+- ( ) Consider whether to add tests to get better coverage in areas we will change.
 
-Phase 3: Document Organization
-- ( ) Design and implement XML schema
-  - ( ) Define standard tags and structure
-  - ( ) Create schema validation helpers
-  - ( ) Test with sample content
-- ( ) Convert existing document handling
-  - ( ) Update file content formatting
-  - ( ) Modify repository map structure
-  - ( ) Test file operations
+## ( ) List all files that contain prompts.
 
-Phase 4: Message Flow Updates
-- ( ) Implement new user message structure
-  - ( ) Create XML formatters
-  - ( ) Update message ordering
-  - ( ) Test with complex scenarios
-- ( ) Update prompt generation
-  - ( ) Modify format_messages()
-  - ( ) Update ChatChunks class
-  - ( ) Verify all features working
+Add that information to this section.
+Organize this as a hiearchical list, with the top level being logical categories, and each leaf being a file.
 
-Phase 5: Validation and Cleanup
-- ( ) Add comprehensive validation
-  - ( ) XML schema verification
-  - ( ) Message structure checks
-  - ( ) Content placement rules
-- ( ) Final testing
-  - ( ) Run full test suite
-  - ( ) Performance validation
-  - ( ) Error case testing
+## ( ) Make copies of all files that contain prompts, with extensions like `.py_old`.
 
-### Testing and Validation
+## ( ) Decide whether we will change the formatting of the Repo Map.
 
-We will validate the new structure by:
-1. Verifying XML schema compliance
-2. Testing prompt generation with various inputs
-3. Checking alignment with guide recommendations
-4. Measuring impact on model performance
+## ( ) Design and implement XML schema
 
-## Success Criteria
+- ( ) Document the best practices we will follow and our reasoning in choosing those.
+- ( ) Define standard tags and structure
+- ( ) Create schema validation helpers
+- ( ) Create XML formatters
+- ( ) Add unit tests.
 
-The restructured prompts should:
-- Follow all key recommendations in the prompting guide
-- Maintain or improve model performance
-- Be easy to maintain and extend
-- Support future Claude model updates
+## ( ) Restructure portion of the final user message that is standardized across all `Coder` subclasses.
+
+- ( ) Implement XML structure for the material we automatically insert in it.
+- ( ) Implement XML structure for the message itself.
+  - ( ) Add material from the existing system prompt where appropriate, even though
+        for now it will be redundant.
+- ( ) Add unit tests.
+
+## ( ) Restructure the system prompt.
+
+- ( ) Restructure as XML, while dropping material we placed in the final user message instead.
+- ( ) Add unit tests.
+
+## ( ) Restructure and reword user messages that report actions taken by the Brade application.
 
