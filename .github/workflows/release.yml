@@ -1,4 +1,4 @@
-name: PyPI Release
+name: Release
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
     #   - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  build_and_publish:
+  build_and_publish_pypi:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -32,3 +32,50 @@ jobs:
       run: |
         python -m build
         twine upload dist/*
+
+  build_and_publish_appimage:
+    needs: build_and_publish_pypi
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86_64]  # Add aarch64 when ready
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build AppImage builder
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/appimage-builder/Dockerfile
+        load: true
+        tags: brade-appimage-builder:latest
+
+    - name: Build AppImage
+      run: |
+        mkdir -p build
+        docker run --rm \
+          -v ${{ github.workspace }}:/src \
+          -v ${{ github.workspace }}/build:/build \
+          brade-appimage-builder:latest \
+          /bin/bash -c "cd /build && python3.13 -m pip install -e /src && ./build_appimage.sh"
+
+    - name: Test AppImage
+      run: |
+        chmod +x build/Brade-${{ matrix.arch }}.AppImage
+        ./build/Brade-${{ matrix.arch }}.AppImage --version
+
+    - name: Upload AppImage
+      uses: actions/upload-artifact@v4
+      with:
+        name: brade-${{ matrix.arch }}-appimage
+        path: build/Brade-${{ matrix.arch }}.AppImage
+
+    - name: Upload to Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/Brade-${{ matrix.arch }}.AppImage
