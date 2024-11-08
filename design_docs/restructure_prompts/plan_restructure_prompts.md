@@ -384,24 +384,24 @@ Our current approach:
    - Allow coder-specific examples
    - Maintain consistent format
 
-##### XML Schema Implications
-1. Message Type Tags
-   ```xml
+##### Semantic Marker Structure
+1. Core Message Markers
+   ```
    <system_context>
    <file_content>
    <instructions>
    <status_update>
    ```
 
-2. Content Organization
-   ```xml
+2. Content Organization Markers
+   ```
    <edit_format>
    <examples>
    <shell_commands>
    ```
 
-3. Coder-Specific Extensions
-   ```xml
+3. Extension Markers
+   ```
    <coder_specific>
    <custom_instructions>
    ```
@@ -409,52 +409,49 @@ Our current approach:
 - ( ) Identify opportunities for consolidation and standardization
 - ( ) Plan XML schema to accommodate all prompt types
 
-### ( ) Prepare XML schemas.
-- ( ) Create XML schema for all message types
-  - Define standard tags and structure
-  - Document best practices and reasoning
-  - Create schema validation helpers
-  - Add unit tests
+### ( ) Document Message Structure Guidelines
+- ( ) Define standard semantic markers and their usage
+- ( ) Document best practices for marker placement and content formatting
+- ( ) Create helper methods for consistent marker handling
+- ( ) Add validation to ensure proper marker structure
+- ( ) Add unit tests for marker validation
 
 ### ( ) Decide whether to make any repo map formatting changes
 
 ### ( ) Implement New Structure
 
-- ( ) Add XML wrapper for repository map
-  ```xml
+- ( ) Add semantic markers for repository map
+  ```
   <repository_map>
-    [Repository map content]
+  [Repository map content]
   </repository_map>
   ```
 
-- ( ) Add XML wrapper for file content
-  ```xml
+- ( ) Add semantic markers for file content
+  ```
   <project_files>
-    <project_file>
-      <path>filename.py</path>
-      <content>[File content]</content>
-    </project_file>
+  [File content]
   </project_files>
   ```
 
-- ( ) Add XML wrapper for system actions
-  ```xml
+- ( ) Add semantic markers for system actions
+  ```
   <actions_taken_by_system>
-    <action_taken>[Description]</action_taken>
+  <action_taken>[Description]</action_taken>
   </actions_taken_by_system>
   ```
 
-- ( ) Add XML wrapper for user messages
-  ```xml
+- ( ) Add semantic markers for user messages
+  ```
   <message_from_user>[User message]</message_from_user>
   ```
 
-- ( ) Add XML wrapper for system instructions
-  ```xml
+- ( ) Add semantic markers for system instructions
+  ```
   <instructions_from_system>[Instructions]</instructions_from_system>
   ```
 
-- ( ) Update tests for each wrapper
+- ( ) Update tests for each marker structure
 
 - ( ) Verify all functionality works with new structure
 
