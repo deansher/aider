@@ -199,6 +199,38 @@ Unless otherwise marked with a comment at the top of the file, source files in t
 
 Aider source files do **not** use type hints.
 
+#### Docstring Type Signatures
+
+While Aider-style files avoid type hints in the code, they should include type information in docstrings using a consistent format:
+
+1. Type signatures appear immediately after the one-line description
+2. Use types from `coders/types.py` for consistency across the codebase
+3. Follow this format for functions and methods:
+   ```python
+   def process_messages(self, messages):
+       """Process chat messages to extract edit blocks.
+       
+       Args:
+         messages: list[ChatMessage] - Messages to analyze
+         
+       Returns:
+         list[EditBlock] - Extracted and validated edit blocks
+       """
+   ```
+
+4. For class attributes, document types in the class docstring:
+   ```python
+   class Editor:
+       """Manages code editing operations.
+       
+       Attributes:
+         history: list[ChatMessage] - Chat message history
+         files: dict[str, str] - Mapping of filenames to content
+       """
+   ```
+
+This approach maintains type information for developers while preserving mechanical merge compatibility with upstream Aider. The consistent use of types from `coders/types.py` ensures we use the same vocabulary across both Aider and Brade style files.
+
 ### Brade Code Style
 
 When a file adopts the Brade coding style, place the following comment at the very top of the file:
