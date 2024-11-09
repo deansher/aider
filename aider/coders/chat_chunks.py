@@ -2,7 +2,7 @@
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -162,7 +162,7 @@ class ChatChunks:
         message, as these form a cacheable unit.
         
         Returns:
-            List of messages that can be cached as a unit
+            list[dict[str, Any]]: Messages that can be cached as a unit
         """
         messages = self.all_messages()
         for i, message in enumerate(reversed(messages)):
