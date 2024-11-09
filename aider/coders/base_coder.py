@@ -68,6 +68,16 @@ class Coder:
     - Coordinates commits, linting, and testing
     - Provides command processing and shell integration
 
+    Message Lifecycle:
+    - cur_messages represent the active exchange that hasn't been processed yet,
+      including the latest user request and any assistant responses
+    - done_messages represent completed conversation history that has been processed and
+      potentially summarized to manage context window size
+    - After code edits are successfully applied, current messages are moved to done
+      messages, marking the completion of that exchange
+    - This separation enables efficient context management by allowing summarization
+      of older conversations while preserving the full context of the active exchange
+
     The class maintains important invariants around file state and git commits:
     - Files must be explicitly added to the chat before editing
     - Auto-commits are made after successful edits
