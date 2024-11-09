@@ -63,7 +63,7 @@ class Coder:
 
     The Coder class orchestrates the entire chat-based code editing workflow:
     - Manages chat history and context
-    - Handles file content and git repository state 
+    - Handles file content and git repository state
     - Processes LLM responses and applies code edits
     - Coordinates commits, linting, and testing
     - Provides command processing and shell integration
@@ -967,7 +967,7 @@ class Coder:
         return prompt
 
     def format_chat_chunks(self):
-        """Organizes all chat context into properly ordered chunks for the LLM.
+        """Organizes chat context for use in prompt generation.
 
         This method structures the full context needed by the LLM, including:
         - System prompts and role definition
@@ -979,7 +979,6 @@ class Coder:
         - Files being edited
         - Final reminders
 
-        The ordering is carefully chosen to provide the right context flow.
         The method also handles:
         - Choosing appropriate code fence markers
         - Managing token limits
@@ -1175,7 +1174,7 @@ class Coder:
     @observe()
     def send_message(self, inp):
         """Core method that processes user input and manages the LLM interaction flow.
-        
+
         This is the central workflow that:
         1. Adds user message to conversation history
         2. Formats all context (files, repo map, history) for the LLM
@@ -1189,7 +1188,7 @@ class Coder:
         - Auto-commits happen after successful edits
         - Dirty files are committed before edits if configured
         - Shell commands require user confirmation
-        
+
         Args:
             inp: The user's message to process
 
