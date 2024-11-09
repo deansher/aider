@@ -1174,6 +1174,12 @@ class Coder:
 
         return chunks
 
+    def format_brade_prompts(self):
+        chunks = self.format_messages()
+        messages = chunks.all_messages()
+        self.warm_cache(chunks)
+        return messages
+
     @observe()
     def send_message(self, inp):
         """Core method that processes user input and manages the LLM interaction flow.
@@ -1209,9 +1215,12 @@ class Coder:
             dict(role="user", content=inp),
         ]
 
-        chunks = self.format_messages()
-        messages = chunks.all_messages()
-        self.warm_cache(chunks)
+        if self.main_model.use_brade_prompts:
+            messages = self.format_brade_prompts()
+        else:
+            chunks = self.format_messages()
+            messages = chunks.all_messages()
+            self.warm_cache(chunks)
 
         if self.verbose:
             utils.show_messages(messages, functions=self.functions)

@@ -405,115 +405,9 @@ Our current approach:
    - Allow coder-specific examples
    - Maintain consistent format
 
-##### Semantic Marker Structure
-1. Core Message Markers
-   ```
-   <system_context>
-   <file_content>
-   <instructions>
-   <status_update>
-   ```
+## Implementation Tasks
 
-2. Content Organization Markers
-   ```
-   <edit_format>
-   <examples>
-   <shell_commands>
-   ```
-
-3. Extension Markers
-   ```
-   <coder_specific>
-   <custom_instructions>
-   ```
-
-- ( ) Identify opportunities for consolidation and standardization
-- ( ) Plan XML schema to accommodate all prompt types
-
-### ( ) Document Message Structure Guidelines
-- ( ) Define standard semantic markers and their usage
-- ( ) Document best practices for marker placement and content formatting
-- ( ) Create helper methods for consistent marker handling
-- ( ) Add validation to ensure proper marker structure
-- ( ) Add unit tests for marker validation
-
-### ( ) Decide whether to make any repo map formatting changes
-
-### ( ) Implement New Structure
-
-- ( ) Add semantic markers for repository map
-  ```
-  <repository_map>
-  [Repository map content]
-  </repository_map>
-  ```
-
-- ( ) Add semantic markers for file content
-  ```
-  <project_files>
-  [File content]
-  </project_files>
-  ```
-
-- ( ) Add semantic markers for system actions
-  ```
-  <actions_taken_by_system>
-  <action_taken>[Description]</action_taken>
-  </actions_taken_by_system>
-  ```
-
-- ( ) Add semantic markers for user messages
-  ```
-  <message_from_user>[User message]</message_from_user>
-  ```
-
-- ( ) Add semantic markers for system instructions
-  ```
-  <instructions_from_system>[Instructions]</instructions_from_system>
-  ```
-
-- ( ) Update tests for each marker structure
-
-- ( ) Verify all functionality works with new structure
-
-### ( ) Move Content (one atomic step per item)
-- ( ) Move platform info from system to user messages
-  - Remove from: base_prompts.py system message
-  - Add to: final user message XML structure
-  - Update tests
-  - Verify functionality
-- ( ) Move task instructions from system to user messages
-  - Remove from: system prompt
-  - Add to: user message instructions section
-  - Update tests
-  - Verify functionality
-- ( ) Move example conversations to user messages
-  - Remove from: system prompt
-  - Add to: appropriate user message sections
-  - Update tests
-  - Verify functionality
-
-### ( ) Cleanup and Documentation
-- ( ) Remove redundant content
-- ( ) Update documentation
-- ( ) Final testing pass
-- ( ) Document any remaining issues
-
-## Documentation Strategy
-
-### (✓) Document Code Style and Merge Strategy
-
-We have two code styles in this project:
-- **Aider Style**: Used in files where we want to maintain mechanical merge compatibility with upstream
-- **Brade Style**: Used in files that have diverged or are unique to Brade, featuring full modern type hints and thorough documentation
-
-Files in Brade style are marked with this header:
-```
-# This file uses the Brade coding style: full modern type hints and strong documentation.
-# Expect to resolve merges manually. See CONTRIBUTING.md.
-```
-
-### ( ) Enhance Documentation of Current State
+### (✓) Enhance Documentation of Current State
 
 - (✓) Revise chat_chunks.py to full Brade style
   - Add complete modern type hints
@@ -521,7 +415,7 @@ Files in Brade style are marked with this header:
   - Document relationships with other components
   - Document invariants and design decisions
 
-- ( ) Document base_coder.py while maintaining Aider style
+- (✓) Document base_coder.py while maintaining Aider style
   - Keep existing code style to support mechanical merges
   - Add high-level docstrings and comments to document:
     - Overall class responsibilities
@@ -532,4 +426,12 @@ Files in Brade style are marked with this header:
   - Preserve existing code structure and style
 
 The key goal is to document our current state while being strategic about which files we move to Brade style versus maintaining merge compatibility with upstream.
+
+## ( ) When Brade prompting is enabled, replace the use of `ChatChunks` with new logic.
+
+### (✔︎) Introduce a flag `Model.use_brade_prompting`.
+
+### (✔︎) Introduce an `if Model.use_brade_prompting` at the right point in `base_coder.py`.
+
+
 
