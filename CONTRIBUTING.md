@@ -2,27 +2,17 @@
 # Contributing to the Project
 
 Please consider submitting your PRs to the [Aider](https://github.com/paul-gauthier/aider)
-project instead of this one, because my goal is to stay as close to that project as possible.
+project instead of this one, because our goal is to stay as close to that project as possible.
 But if you want to propose a change to Brade-specific functionality in a way that still 
-minimizes divergence from the main project, then sure, I'll take a look.
+minimizes divergence from the main project, then sure, we'll take a look.
+
+I'm saying "we" here in case someone joins the "we" one day. It could be you! But meanwhile, I just mean me, Dean.
 
 ## Bug Reports and Feature Requests
 
 Please submit bug reports and feature requests as GitHub issues. This
 helps us to keep track of them and discuss potential solutions or
 enhancements.
-
-## LLM Benchmark Results
-
-Contributions of
-[LLM benchmark results](https://aider.chat/docs/leaderboards/)
-are welcome!
-See the
-[benchmark README](https://github.com/Aider-AI/aider/blob/main/benchmark/README.md)
-for information on running aider's code editing benchmarks.
-Submit results by opening a PR with edits to the
-[benchmark results data files](https://github.com/Aider-AI/aider/blob/main/aider/website/_data/).
-
 
 ## Pull Requests
 
@@ -199,13 +189,27 @@ The built documentation will be available in the `aider/website/_site` directory
 
 Brade supports Python versions 3.10, 3.11, 3.12, and 3.13. When contributing code, ensure compatibility with these supported Python versions.
 
-### Code Style
+### Common Code Style between Aider and Brade
 
-The project follows the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide for Python code, with a maximum line length of 100 characters. Additionally, the project uses [isort](https://pycqa.github.io/isort/) and [Black](https://black.readthedocs.io/en/stable/) for sorting imports and code formatting, respectively. Please install the pre-commit hooks to automatically format your code before committing changes.
+All source files follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide for Python code. Additionally, aider files use [isort](https://pycqa.github.io/isort/) and [Black](https://black.readthedocs.io/en/stable/) for sorting imports and code formatting, respectively. Please install the pre-commit hooks to automatically format your code before committing changes.
 
-### No Type Hints
+### Aider Code Style
 
-The project does not use type hints.
+Unless otherwise marked with a comment at the top of the file, source files in this repo follow Aider coding standards. We keep files in Aider style unless they are unique to Brade, or have diverged so much that mechanical merges are no longer possible anyway.
+
+Aider source files do **not** use type hints.
+
+### Brade Code Style
+
+When a file adopts the Brade coding style, place the following comment at the very top of the file:
+
+```
+# This file uses the Brade coding style.
+# Expect to resolve merges manually.
+# See CONTRIBUTING.md.
+```
+
+Brade source files use full type hints, in the modern style where collection types such as `list` stand for themselves.
 
 ### Testing
 
