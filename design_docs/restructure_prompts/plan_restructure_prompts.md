@@ -499,3 +499,37 @@ Our current approach:
 - ( ) Final testing pass
 - ( ) Document any remaining issues
 
+## Documentation Strategy
+
+### ( ) Document Code Style and Merge Strategy
+
+We have two code styles in this project:
+- **Aider Style**: Used in files where we want to maintain mechanical merge compatibility with upstream
+- **Brade Style**: Used in files that have diverged or are unique to Brade, featuring full modern type hints and thorough documentation
+
+Files in Brade style are marked with this header:
+```
+# This file uses the Brade coding style: full modern type hints and strong documentation.
+# Expect to resolve merges manually. See CONTRIBUTING.md.
+```
+
+### ( ) Enhance Documentation of Current State
+
+- ( ) Revise chat_chunks.py to full Brade style
+  - Add complete modern type hints
+  - Add thorough internal documentation
+  - Document relationships with other components
+  - Document invariants and design decisions
+
+- ( ) Document base_coder.py while maintaining Aider style
+  - Keep existing code style to support mechanical merges
+  - Add high-level docstrings and comments to document:
+    - Overall class responsibilities
+    - Key workflows and data flows
+    - Integration points with other components
+    - Important invariants and assumptions
+  - Focus on larger comments rather than line-level documentation
+  - Preserve existing code structure and style
+
+The key goal is to document our current state while being strategic about which files we move to Brade style versus maintaining merge compatibility with upstream.
+
