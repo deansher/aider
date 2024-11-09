@@ -26,6 +26,16 @@ class ChatChunks:
     7. Current messages - Active conversation
     8. Reminder messages - Additional context/instructions
     
+    Message Lifecycle:
+    - Current messages (cur) represent the active exchange that hasn't been processed yet,
+      including the latest user request and any assistant responses
+    - Done messages represent completed conversation history that has been processed and
+      potentially summarized to manage context window size
+    - After code edits are successfully applied, current messages are moved to done
+      messages, marking the completion of that exchange
+    - This separation enables efficient context management by allowing summarization
+      of older conversations while preserving the full context of the active exchange
+    
     Each field is a list of message dictionaries with 'role' and 'content' keys,
     following the standard LLM chat message format.
     """
