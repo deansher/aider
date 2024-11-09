@@ -208,7 +208,13 @@ When a file adopts the Brade coding style, place the following comment at the ve
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 ```
 
-Brade source files use full type hints, in the modern style where collection types such as `list` stand for themselves.
+Brade source files use full type hints, following these conventions:
+- Use built-in collection types directly (e.g. `list` not `List`)
+- Use union operator syntax (e.g. `str | None` not `Optional[str]`, `str | int` not `Union[str, int]`)
+- Use type hints for all:
+  - Function parameters and return values 
+  - Class attributes
+  - Local variables where helpful for clarity
 
 ### Testing
 
