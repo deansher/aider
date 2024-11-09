@@ -16,8 +16,8 @@ class ChatChunks:
     - It provides a place to organize context needed for generating an LLLM prompt.
       Each chunk of content is represented as a list of messages.
     - It chooses how to order those messages when it returns them from all_messages().
-    - It places cache control directives to its choice of messages when
-      `add_cahe_control` is called.
+    - It places cache control directives on its choice of messages when
+      `add_cache_control()` is called.
 
     The following chunks are managed:
 
