@@ -79,6 +79,10 @@ class ChatChunks:
         chunks. The XML structure helps the LLM understand the different
         components of context.
         
+        Note: For each chunk type, only the content of the last message is used.
+        This is because the last message typically contains the most up-to-date
+        version of that type of content (e.g. latest file contents or instructions).
+        
         Returns:
             A string containing all non-empty message chunks formatted as XML sections
         """
