@@ -2,7 +2,8 @@
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 
 from dataclasses import dataclass, field
-from typing import Any
+
+from .types import ChatMessage, ContentBlock
 
 
 @dataclass
@@ -27,16 +28,16 @@ class ChatChunks:
     Each field is a list of message dictionaries with 'role' and 'content' keys,
     following the standard LLM chat message format.
     """
-    system: list[dict[str, Any]] = field(default_factory=list)
-    examples: list[dict[str, Any]] = field(default_factory=list)
-    done: list[dict[str, Any]] = field(default_factory=list)
-    repo: list[dict[str, Any]] = field(default_factory=list)
-    readonly_files: list[dict[str, Any]] = field(default_factory=list)
-    chat_files: list[dict[str, Any]] = field(default_factory=list)
-    cur: list[dict[str, Any]] = field(default_factory=list)
-    reminder: list[dict[str, Any]] = field(default_factory=list)
+    system: list[ChatMessage] = field(default_factory=list)
+    examples: list[ChatMessage] = field(default_factory=list)
+    done: list[ChatMessage] = field(default_factory=list)
+    repo: list[ChatMessage] = field(default_factory=list)
+    readonly_files: list[ChatMessage] = field(default_factory=list)
+    chat_files: list[ChatMessage] = field(default_factory=list)
+    cur: list[ChatMessage] = field(default_factory=list)
+    reminder: list[ChatMessage] = field(default_factory=list)
 
-    def all_messages(self) -> list[dict[str, Any]]:
+    def all_messages(self) -> list[ChatMessage]:
         """Combines all message chunks in the proper order for LLM context.
         
         Returns:
@@ -131,7 +132,7 @@ class ChatChunks:
 
         self.add_cache_control(self.chat_files)
 
-    def add_cache_control(self, messages: list[dict[str, Any]]) -> None:
+    def add_cache_control(self, messages: list[ChatMessage]) -> None:
         """Adds cache control header to the last message in a message list.
         
         Modifies the last message in the provided list to include cache control
@@ -154,7 +155,7 @@ class ChatChunks:
 
         messages[-1]["content"] = [content]
 
-    def cacheable_messages(self) -> list[dict[str, Any]]:
+    def cacheable_messages(self) -> list[ChatMessage]:
         """Returns the subset of messages that can be cached.
         
         Examines all messages in reverse order to find the last message with

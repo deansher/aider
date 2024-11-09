@@ -242,6 +242,22 @@ def process_messages(self, messages):
     """
 ```
 
+And the same method in a Brade-style file would use explicit type hints:
+```python
+def process_messages(self, messages: list[ChatMessage]) -> list[EditBlock]:
+    """Processes chat messages to extract code edit blocks.
+    
+    The method parses the LLM responses to find code edit blocks and validates
+    them against the EditBlock schema.
+    
+    Args:
+        messages: The chat messages to process
+        
+    Returns:
+        The extracted and validated edit blocks
+    """
+```
+
 This approach allows us to maintain a consistent vocabulary for types across both coding styles while preserving merge compatibility where needed.
 
 ### Testing
