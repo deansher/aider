@@ -216,6 +216,34 @@ Brade source files use full type hints, following these conventions:
   - Class attributes
   - Local variables where helpful for clarity
 
+### Type System
+
+The project uses a shared type vocabulary defined in `coders/types.py`. This supports both code and documentation:
+
+- Files in Brade style:
+  - Import and use types from `coders/types.py` for type hints
+  - Follow modern type hint conventions as described above
+  
+- Files in Aider style:
+  - Do not use type hints to maintain merge compatibility
+  - Use types from `coders/types.py` in docstrings and comments
+  - This provides consistent terminology across the codebase
+
+For example, a method in an Aider-style file might have a docstring like:
+```python
+def process_messages(self, messages):
+    """Processes a list of ChatMessage objects.
+    
+    Args:
+        messages: list[ChatMessage] - Messages to process
+        
+    Returns:
+        list[EditBlock] - Extracted code edit blocks
+    """
+```
+
+This approach allows us to maintain a consistent vocabulary for types across both coding styles while preserving merge compatibility where needed.
+
 ### Testing
 
 The project uses [pytest](https://docs.pytest.org/en/latest/) for running unit tests. The test files are located in the `aider/tests` directory and follow the naming convention `test_*.py`.
