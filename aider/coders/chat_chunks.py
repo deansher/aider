@@ -2,7 +2,6 @@
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 
 from dataclasses import dataclass, field
-from typing import Any
 
 from .types import ChatMessage
 
@@ -52,20 +51,6 @@ class ChatChunks:
             + self.cur
             + self.reminder
         )
-
-    def wrap_xml(self, tag: str, content: Any) -> str:
-        """Wraps content in XML-style tags for structured message formatting.
-
-        Args:
-            tag: The XML tag name to wrap the content in
-            content: The content to wrap (converted to string)
-
-        Returns:
-            The content wrapped in XML tags, or empty string if content is empty
-        """
-        if not content:
-            return ""
-        return f"<{tag}>\n{content}\n</{tag}>"
 
     def add_cache_control_headers(self) -> None:
         """Adds cache control headers to appropriate message chunks.

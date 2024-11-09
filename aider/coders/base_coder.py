@@ -58,6 +58,21 @@ all_fences = [
 ]
 
 
+def wrap_xml(tag: str, content) -> str:
+    """Wraps content in XML-style tags for structured message formatting.
+
+    Args:
+        tag: The XML tag name to wrap the content in
+        content: The content to wrap (converted to string)
+
+    Returns:
+        The content wrapped in XML tags, or empty string if content is empty
+    """
+    if not content:
+        return ""
+    return f"<{tag}>\n{content}\n</{tag}>"
+
+
 class Coder:
     """Core class that manages the interaction between the human user, LLM, and codebase.
 
