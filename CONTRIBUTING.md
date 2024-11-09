@@ -204,9 +204,8 @@ Aider source files do **not** use type hints.
 When a file adopts the Brade coding style, place the following comment at the very top of the file:
 
 ```
-# This file uses the Brade coding style.
-# Expect to resolve merges manually.
-# See CONTRIBUTING.md.
+# This file uses the Brade coding style: full modern type hints and strong documentation.
+# Expect to resolve merges manually. See CONTRIBUTING.md.
 ```
 
 Brade source files use full type hints, in the modern style where collection types such as `list` stand for themselves.
