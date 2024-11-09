@@ -59,6 +59,29 @@ all_fences = [
 
 
 class Coder:
+    """Core class that manages the interaction between the human user, LLM, and codebase.
+
+    The Coder class orchestrates the entire chat-based code editing workflow:
+    - Manages chat history and context
+    - Handles file content and git repository state 
+    - Processes LLM responses and applies code edits
+    - Coordinates commits, linting, and testing
+    - Provides command processing and shell integration
+
+    The class maintains important invariants around file state and git commits:
+    - Files must be explicitly added to the chat before editing
+    - Auto-commits are made after successful edits
+    - Dirty files are committed before edits if configured
+    - Read-only files are never modified
+
+    Key collaborators:
+    - InputOutput: Handles all user interaction
+    - GitRepo: Manages git repository state
+    - RepoMap: Provides repository content summaries
+    - Commands: Processes user commands
+    - ChatSummary: Manages chat history size
+    """
+
     abs_fnames = None
     abs_read_only_fnames = None
     repo = None
@@ -944,6 +967,28 @@ class Coder:
         return prompt
 
     def format_chat_chunks(self):
+        """Organizes all chat context into properly ordered chunks for the LLM.
+
+        This method structures the full context needed by the LLM, including:
+        - System prompts and role definition
+        - Example conversations
+        - Repository content map
+        - Read-only reference files
+        - Chat history
+        - Current conversation
+        - Files being edited
+        - Final reminders
+
+        The ordering is carefully chosen to provide the right context flow.
+        The method also handles:
+        - Choosing appropriate code fence markers
+        - Managing token limits
+        - Adding cache control headers
+        - Formatting messages for the specific LLM
+
+        Returns:
+            ChatChunks: Organized message chunks ready for the LLM
+        """
         self.choose_fence()
         main_sys = self.fmt_system_prompt(self.gpt_prompts.main_system)
 
@@ -1107,48 +1152,34 @@ class Coder:
 
     @observe()
     def send_message(self, inp):
-        """
-        Process a user message, send it to the language model, and handle the response.
+        """Core method that processes user input and manages the LLM interaction flow.
+        
+        This is the central workflow that:
+        1. Adds user message to conversation history
+        2. Formats all context (files, repo map, history) for the LLM
+        3. Sends request and handles streaming response
+        4. Processes code edits and shell commands from response
+        5. Manages git commits, linting, and testing
+        6. Handles errors, retries, and reflection requests
 
-        This method takes the user's input message, incorporates it into the conversation history,
-        formats the messages for the language model, and sends the request. It manages streaming
-        responses, handles retries on errors, and processes the assistant's reply, which may include
-        code edits, shell commands, or additional prompts.
-
-        When the assistant's response includes code edits, this method applies those edits to the
-        appropriate files. It also handles running any suggested shell commands (with user
-        confirmation) and performs actions like auto-committing changes, linting, and testing based
-        on configuration.
-
+        The method maintains several key invariants:
+        - Files must be explicitly added before editing
+        - Auto-commits happen after successful edits
+        - Dirty files are committed before edits if configured
+        - Shell commands require user confirmation
+        
         Args:
-            inp (str): The user's input message to process and send to the language model.
+            inp: The user's message to process
 
         Yields:
-            str: Segments of the assistant's response when streaming is enabled.
+            Response chunks when streaming is enabled
 
-        Side Effects:
-            - Updates `self.cur_messages` and `self.done_messages` with the conversation history.
-            - Modifies files in the repository if code edits are applied.
-            - May execute shell commands suggested by the assistant, after confirming with the user.
-            - Outputs messages and status updates to the user via `self.io`.
-            - Performs auto-commits to the repository if configured.
-
-        Exceptions:
-            - Handles exceptions like `KeyboardInterrupt`, `ContextWindowExceededError`,
-              and others internally.
-            - Manages retries with exponential backoff for transient errors.
-
-        Returns:
-            None: When streaming is disabled.
-            Generator[str, None, None]: When streaming is enabled, yields portions of the
-            assistant's response.
-
-        Notes:
-            - If the response from the assistant is incomplete due to token limits, it manages the
-              situation by updating the conversation context and potentially retrying.
-            - Supports reflection by allowing the assistant to prompt for corrections if needed.
-            - Utilizes the `@observe` decorator for Langfuse instrumentation to track method
-              execution.
+        The method handles many edge cases:
+        - Token limit exhaustion
+        - Malformed edit blocks
+        - Network errors and retries
+        - Keyboard interrupts
+        - Reflection requests
         """
         self.cur_messages += [
             dict(role="user", content=inp),
@@ -1857,6 +1888,24 @@ class Coder:
         return res
 
     def apply_updates(self):
+        """Processes and applies code edits from the LLM response.
+
+        This method handles the core code modification workflow:
+        1. Extracts edit blocks from LLM response
+        2. Validates files can be edited
+        3. Handles new file creation
+        4. Applies the edits
+        5. Reports results to user
+
+        Key invariants maintained:
+        - Only explicitly added files can be edited
+        - New files require user confirmation
+        - Files in .gitignore are skipped
+        - Read-only files are never modified
+
+        Returns:
+            set: The set of files that were successfully edited
+        """
         edited = set()
         try:
             edits = self.get_edits()
@@ -1934,6 +1983,28 @@ class Coder:
         return context
 
     def auto_commit(self, edited, context=None):
+        """Automatically commits edited files to git with generated commit messages.
+
+        This method handles the git workflow after successful edits:
+        1. Skips if repo/auto-commits not configured
+        2. Uses chat context to generate commit message
+        3. Commits the changes
+        4. Updates conversation history
+        5. Reports results to user
+
+        The method maintains important git-related invariants:
+        - Only commits explicitly edited files
+        - Generates meaningful commit messages from context
+        - Tracks aider commits separately
+        - Supports undo functionality
+
+        Args:
+            edited: Set of files to commit
+            context: Optional explicit commit context
+
+        Returns:
+            Optional[str]: Status message about the commit
+        """
         if not self.repo or not self.auto_commits or self.dry_run:
             return
 
