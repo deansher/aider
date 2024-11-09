@@ -73,6 +73,7 @@ class ModelSettings:
     accepts_images: bool = False
     lazy: bool = False
     reminder: str = "user"
+    use_brade_prompting: bool = False
     examples_as_sys_msg: bool = False
     extra_params: Optional[dict] = None
     cache_control: bool = False
@@ -791,10 +792,10 @@ class Model(ModelSettings):
         if "gpt-3.5" in model or "gpt-4" in model:
             self.reminder = "sys"
 
-        if "3.5-sonnet" in model or "3-5-sonnet" in model:
+        if "claude-3.5" in model or "claude-3-5" in model:
             self.edit_format = "diff"
             self.use_repo_map = True
-            self.examples_as_sys_msg = True
+            self.use_brade_prompting = True
             self.reminder = None
             self.accepts_images = True
 
