@@ -18,7 +18,6 @@ from aider.main import check_gitignore, main, setup_git
 from aider.utils import GitTemporaryDirectory, IgnorantTemporaryDirectory, make_repo
 
 
-# TODO: Restore test_main_exit_calls_version_check when version checking is re-enabled
 class TestMain(TestCase):
     def setUp(self):
         self.original_env = os.environ.copy()
@@ -234,6 +233,17 @@ class TestMain(TestCase):
                     MockSend.side_effect = side_effect
 
                     main(["--yes", fname, "--encoding", "iso-8859-15"])
+
+    def test_main_exit_calls_version_check(self):
+        with GitTemporaryDirectory():
+            # TODO: Restore when version checking is re-enabled
+            with (
+                # patch("aider.main.check_version") as mock_check_version,
+                patch("aider.main.InputOutput") as mock_input_output,
+            ):
+                main(["--exit", "--check-update"], input=DummyInput(), output=DummyOutput())
+                # mock_check_version.assert_called_once()
+                mock_input_output.assert_called_once()
 
     @patch("aider.main.InputOutput")
     @patch("aider.coders.base_coder.Coder.run")
