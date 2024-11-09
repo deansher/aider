@@ -73,7 +73,7 @@ class ModelSettings:
     accepts_images: bool = False
     lazy: bool = False
     reminder: str = "user"
-    use_brade_prompting: bool = False
+    use_brade_prompt_structure: bool = False
     examples_as_sys_msg: bool = False
     extra_params: Optional[dict] = None
     cache_control: bool = False
@@ -795,7 +795,7 @@ class Model(ModelSettings):
         if "claude-3.5" in model or "claude-3-5" in model:
             self.edit_format = "diff"
             self.use_repo_map = True
-            self.use_brade_prompting = True
+            self.use_brade_prompt_structure = True
             self.reminder = None
             self.accepts_images = True
 

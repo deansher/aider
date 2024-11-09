@@ -1215,7 +1215,7 @@ class Coder:
             dict(role="user", content=inp),
         ]
 
-        if self.main_model.use_brade_prompts:
+        if self.main_model.use_brade_prompt_structure:
             messages = self.format_brade_prompts()
         else:
             chunks = self.format_messages()

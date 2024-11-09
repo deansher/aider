@@ -429,9 +429,14 @@ The key goal is to document our current state while being strategic about which 
 
 ## ( ) When Brade prompting is enabled, replace the use of `ChatChunks` with new logic.
 
-### (✔︎) Introduce a flag `Model.use_brade_prompting`.
+### (✔︎) Introduce a flag `Model.use_brade_prompt_structure`.
 
-### (✔︎) Introduce an `if Model.use_brade_prompting` at the right point in `base_coder.py`.
+### (✔︎) Introduce an `if Model.use_brade_prompt_structure` at the right point in `base_coder.py`.
+
+### ( ) Implement a function `format_brade_prompt` in a new file `format_brade_prompt.py`.
+
+This will be invoked from `base_coder.py` when `Model.use_brade_prompt_structure` is true, replacing
+the current use of `ChatChunks`.
 
 
 
