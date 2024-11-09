@@ -1,3 +1,6 @@
+# This file uses the Brade coding style: full modern type hints and strong documentation.
+# Expect to resolve merges manually. See CONTRIBUTING.md.
+
 from dataclasses import dataclass, field
 from typing import List
 
@@ -29,36 +32,36 @@ class ChatChunks:
         """Wrap content in XML tags"""
         if not content:
             return ""
-        return f"<{tag}>{content}</{tag}>"
+        return f"<{tag}>\n{content}\n</{tag}>"
 
     def format_xml_messages(self):
         """Format all message chunks as XML"""
         xml = []
-        
+
         # System context
         if self.system:
             xml.append(self.wrap_xml("system_context", self.system[-1]["content"]))
-            
+
         # Repository map
         if self.repo:
             xml.append(self.wrap_xml("repository_map", self.repo[-1]["content"]))
-            
+
         # Project files
         if self.chat_files:
             xml.append(self.wrap_xml("project_files", self.chat_files[-1]["content"]))
-            
-        # Read-only files  
+
+        # Read-only files
         if self.readonly_files:
             xml.append(self.wrap_xml("readonly_files", self.readonly_files[-1]["content"]))
-            
+
         # Instructions
         if self.reminder:
             xml.append(self.wrap_xml("instructions", self.reminder[-1]["content"]))
-            
+
         # Current messages
         if self.cur:
             xml.append(self.wrap_xml("current_messages", self.cur[-1]["content"]))
-            
+
         return "\n".join(xml)
 
     def add_cache_control_headers(self):
