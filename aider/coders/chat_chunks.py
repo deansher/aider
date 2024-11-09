@@ -54,13 +54,7 @@ class ChatChunks:
     reminder: list[ChatMessage] = field(default_factory=list)
 
     def all_messages(self) -> list[ChatMessage]:
-        """Combines all message chunks in the proper order for LLM context.
-
-        Returns:
-            A single list of message dictionaries containing all chunks in the order:
-            system, examples, readonly_files, repo, done, chat_files, cur, and reminder.
-            This ordering ensures proper context flow from general to specific.
-        """
+        """Concatenates all message chunks in a chosen but unspecified order."""
         return (
             self.system
             + self.examples
