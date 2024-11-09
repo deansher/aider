@@ -998,28 +998,6 @@ class Coder:
         Returns:
             ChatChunks: Organized message chunks ready for the LLM
         """
-        """Organizes all chat context into properly ordered chunks for the LLM.
-
-        This method structures the full context needed by the LLM, including:
-        - System prompts and role definition
-        - Example conversations
-        - Repository content map
-        - Read-only reference files
-        - Chat history
-        - Current conversation
-        - Files being edited
-        - Final reminders
-
-        The ordering is carefully chosen to provide the right context flow.
-        The method also handles:
-        - Choosing appropriate code fence markers
-        - Managing token limits
-        - Adding cache control headers
-        - Formatting messages for the specific LLM
-
-        Returns:
-            ChatChunks: Organized message chunks ready for the LLM
-        """
         self.choose_fence()
         main_sys = self.fmt_system_prompt(self.gpt_prompts.main_system)
 
