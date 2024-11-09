@@ -2,6 +2,7 @@
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from .types import ChatMessage, ContentBlock
 
