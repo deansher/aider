@@ -10,25 +10,39 @@ from .base_coder import Coder
 
 
 class ArchitectCoder(AskCoder):
+    """Manages high-level code architecture decisions and coordinates with editor/reviewer coders.
+    
+    This coder acts as an architect that:
+    1. Analyzes requests and proposes changes
+    2. Coordinates with editor coder to implement changes
+    3. Coordinates with reviewer coder to validate changes
+    """
+
     edit_format = "architect"
     produces_code_edits = False  # Architect coder doesn't produce code edits directly
     gpt_prompts = ArchitectPrompts()
 
-    def reply_completed(self):
-        architect_response = self.partial_response_content
-
-        # Analyze just the assistant's response
-        architect_response_codes = analyze_assistant_response(
-            possible_architect_responses,
-            (
-                "Which one of the following choices best characterizes the assistant"
-                " response shown below?"
-            ),
-            self.main_model.name,
-            architect_response,
+    def create_coder(self, coder_class, **kwargs):
+        """Creates a new coder instance with common setup."""
+        base_kwargs = dict(
+            io=self.io,
+            from_coder=self,
+            suggest_shell_commands=False,
+            map_tokens=0,
+            total_cost=self.total_cost,
+            cache_prompts=False,
+            num_cache_warming_pings=0,
+            summarize_from_coder=False,
         )
+        base_kwargs.update(kwargs)
+        
+        coder = coder_class(self.main_model, **base_kwargs)
+        coder.done_messages = list(self.done_messages)
+        coder.cur_messages = list(self.cur_messages)
+        return coder
 
-        # If architect asked for files, prompt user to add them
+    def handle_file_request(self, architect_response_codes):
+        """Handle when architect asks for files."""
         if architect_response_codes.has(architect_asked_to_see_files):
             # Surrounding code will notice the paths and implement that.
             # If the architect responded with some blend of this choice and asking to edit
@@ -36,88 +50,94 @@ class ArchitectCoder(AskCoder):
             # there.
             pass
 
-        # If architect proposed edits, confirm and proceed with editor
-        elif architect_response_codes.has(architect_proposed_changes):
-            if self.io.confirm_ask(
-                'Should I edit files now? (Respond "No" to continue the conversation instead.)'
-            ):
-                kwargs = dict()
-                editor_model = self.main_model.editor_model or self.main_model
-                kwargs["main_model"] = editor_model
-                kwargs["edit_format"] = self.main_model.editor_edit_format
-                kwargs["suggest_shell_commands"] = False
-                kwargs["map_tokens"] = 0
-                kwargs["total_cost"] = self.total_cost
-                kwargs["cache_prompts"] = False
-                kwargs["num_cache_warming_pings"] = 0
-                kwargs["summarize_from_coder"] = False
+    def handle_proposed_changes(self, architect_response):
+        """Handle when architect proposes changes."""
+        if not self.io.confirm_ask(
+            'Should I edit files now? (Respond "No" to continue the conversation instead.)'
+        ):
+            return
 
-                new_kwargs = dict(io=self.io, from_coder=self)
-                new_kwargs.update(kwargs)
+        editor_response = self.execute_changes(architect_response)
+        reviewer_response = self.review_changes(architect_response, editor_response)
+        self.record_conversation(architect_response, editor_response, reviewer_response)
 
-                editor_coder = Coder.create(**new_kwargs)
-                editor_coder.done_messages = list(self.done_messages)
-                editor_coder.cur_messages = list(self.cur_messages)
-                editor_coder.cur_messages.append(
-                    {
-                        "role": "assistant",
-                        "content": architect_response,
-                    }
-                )
+    def execute_changes(self, architect_response):
+        """Run the editor coder to implement changes."""
+        editor_model = self.main_model.editor_model or self.main_model
+        editor_coder = self.create_coder(
+            Coder,
+            main_model=editor_model,
+            edit_format=self.main_model.editor_edit_format,
+        )
+        editor_coder.cur_messages.append(
+            {"role": "assistant", "content": architect_response}
+        )
 
-                if self.verbose:
-                    editor_coder.show_announcements()
+        if self.verbose:
+            editor_coder.show_announcements()
 
-                editor_coder.run(with_message="Yes, please make those changes.", preproc=False)
+        editor_coder.run(with_message="Yes, please make those changes.", preproc=False)
+        self.aider_commit_hashes = editor_coder.aider_commit_hashes
+        return editor_coder.partial_response_content
 
-                # Create an AskCoder instance to review the changes
-                reviewer_coder = AskCoder(
-                    self.main_model,
-                    self.io,
-                    from_coder=self,
-                    suggest_shell_commands=False,
-                    map_tokens=0,
-                    total_cost=editor_coder.total_cost,
-                    cache_prompts=False,
-                    num_cache_warming_pings=0,
-                    summarize_from_coder=False,
-                )
-                reviewer_coder.done_messages = list(self.done_messages)
-                reviewer_coder.cur_messages = list(self.cur_messages)
-                reviewer_coder.cur_messages.extend(
-                    [
-                        {"role": "assistant", "content": architect_response},
-                        {"role": "user", "content": "Yes, please make those changes."},
-                    ]
-                )
+    def review_changes(self, architect_response, editor_response):
+        """Run the reviewer coder to validate changes."""
+        reviewer_coder = self.create_coder(AskCoder)
+        reviewer_coder.cur_messages.extend([
+            {"role": "assistant", "content": architect_response},
+            {"role": "user", "content": "Yes, please make those changes."},
+            {"role": "assistant", "content": editor_response},
+        ])
 
-                # Have AskCoder review the changes
-                reviewer_coder.run(
-                    with_message=(
-                        "Please review the latest versions of the projects files that you just\n"
-                        "changed, focusing on your changes but considering other major issues\n"
-                        "also. If you have any substantial concerns, explain them and ask your\n"
-                        "partner if they'd like you to fix them. If you are satisfied with your\n"
-                        "changes, just briefly tell your partner that you reviewed them and\n"
-                        "believe they are fine."
-                    ),
-                    preproc=False,
-                )
-                reviewer_response = reviewer_coder.partial_response_content
+        reviewer_coder.run(
+            with_message=(
+                "Please review the latest versions of the projects files that you just\n"
+                "changed, focusing on your changes but considering other major issues\n"
+                "also. If you have any substantial concerns, explain them and ask your\n"
+                "partner if they'd like you to fix them. If you are satisfied with your\n"
+                "changes, just briefly tell your partner that you reviewed them and\n"
+                "believe they are fine."
+            ),
+            preproc=False,
+        )
+        self.total_cost = reviewer_coder.total_cost
+        return reviewer_coder.partial_response_content
 
-                # Record the entire conversation including all responses
-                self.cur_messages.extend(
-                    [
-                        {"role": "assistant", "content": architect_response},
-                        {"role": "user", "content": "Yes, please make those changes."},
-                        {"role": "assistant", "content": editor_response},
-                        {"role": "user", "content": "Please review the changes that were just made. If you have any concerns, explain them."},
-                        {"role": "assistant", "content": reviewer_response},
-                    ]
-                )
-                self.move_back_cur_messages(self.gpt_prompts.editor_response_placeholder)
-                self.partial_response_content = ""  # Clear to prevent redundant message
-                self.total_cost += editor_coder.total_cost + reviewer_coder.total_cost
-                self.aider_commit_hashes = editor_coder.aider_commit_hashes
+    def record_conversation(self, architect_response, editor_response, reviewer_response):
+        """Record the complete conversation history."""
+        self.cur_messages.extend([
+            {"role": "assistant", "content": architect_response},
+            {"role": "user", "content": "Yes, please make those changes."},
+            {"role": "assistant", "content": editor_response},
+            {"role": "user", "content": "Please review the changes that were just made. If you have any concerns, explain them."},
+            {"role": "assistant", "content": reviewer_response},
+        ])
+
+        self.move_back_cur_messages(
+            "The Brade application made those changes in the project files and committed"
+            " them."
+        )
+        self.partial_response_content = ""  # Clear to prevent redundant message
+
+    def reply_completed(self):
+        """Process the architect's response and coordinate with editor/reviewer as needed."""
+        architect_response = self.partial_response_content
+
+        # Analyze just the assistant's response
+        architect_response_codes = analyze_assistant_response(
+            possible_architect_responses,
+            (
+                "<SYSTEM> Which one of the following choices best characterizes the assistant"
+                " response shown below?"
+            ),
+            self.main_model.name,
+            architect_response,
+        )
+
+        # Handle different response types
+        self.handle_file_request(architect_response_codes)
+        
+        if architect_response_codes.has(architect_proposed_changes):
+            self.handle_proposed_changes(architect_response)
 
         # Otherwise just let the conversation continue
