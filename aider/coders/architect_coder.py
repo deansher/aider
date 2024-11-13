@@ -141,9 +141,9 @@ class ArchitectCoder(AskCoder):
 
         Returns:
             A configured coder instance ready for use.
-            The coder's done_messages and cur_messages are initialized as copies of
-            the architect's message state.
+            The coder's done_messages and cur_messages are initialized as empty.
         """
+        # Base configuration for all coders
         base_kwargs = dict(
             io=self.io,
             suggest_shell_commands=False,
@@ -152,24 +152,12 @@ class ArchitectCoder(AskCoder):
             cache_prompts=False,
             num_cache_warming_pings=0,
         )
-
-        # Add AskCoder specific parameters only if the target is AskCoder or derived from it
-        if issubclass(coder_class, AskCoder):
-            base_kwargs.update(
-                from_coder=self,
-                summarize_from_coder=False,
-            )
-
+        
+        # Update with any passed kwargs
         base_kwargs.update(kwargs)
-
-        # Create the coder instance
-        coder = coder_class(self.main_model, **base_kwargs)
-
-        # Initialize message state from architect
-        coder.done_messages = list(self.done_messages)
-        coder.cur_messages = list(self.cur_messages)
-
-        return coder
+        
+        # Create and return the coder
+        return coder_class.create(**base_kwargs)
 
     def handle_proposed_changes(self, exchange: ArchitectExchange) -> None:
         """Handle when architect proposes changes.
