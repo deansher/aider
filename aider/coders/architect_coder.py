@@ -5,10 +5,10 @@ from typing import Any, Optional
 
 from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
-    ArchitectPrompts,
     APPROVED_CHANGES_PROMPT,
     CHANGES_COMMITTED_MESSAGE,
     REVIEW_CHANGES_PROMPT,
+    ArchitectPrompts,
     architect_proposed_changes,
     possible_architect_responses,
 )
@@ -32,7 +32,6 @@ class ArchitectExchange:
         editor_response: The editor's response after implementing changes
         reviewer_response: The reviewer's response after validating changes
     """
-
 
     def __init__(self, architect_response: str):
         """Initialize a new exchange.
@@ -123,31 +122,36 @@ class ArchitectCoder(AskCoder):
     gpt_prompts = ArchitectPrompts()
 
     def create_coder(self, coder_class: type[Coder], **kwargs: Any) -> Coder:
-        """Creates a new coder instance with common setup.
+        """Creates a new coder instance from this architect coder.
 
         Args:
             coder_class: The coder class to instantiate
-            **kwargs: Additional keyword arguments to pass to the coder constructor
+            **kwargs: Additional keyword arguments to override settings from this coder
 
         Returns:
-            A configured coder instance ready for use.
-            The coder's done_messages and cur_messages are initialized as empty.
+            A configured coder instance inheriting base configuration (possibly modified
+            by kwargs), message history, repo and file state, and possibly other state
+            from this architect coder.
         """
-        # Base configuration for all coders
+        # Start with base config that overrides key settings
         base_kwargs = dict(
-            io=self.io,
             suggest_shell_commands=False,
             map_tokens=0,
-            total_cost=self.total_cost,
             cache_prompts=False,
             num_cache_warming_pings=0,
         )
-        
+
         # Update with any passed kwargs
         base_kwargs.update(kwargs)
-        
-        # Create and return the coder
-        return coder_class.create(**base_kwargs)
+
+        # Create new coder inheriting from this one
+        coder = coder_class.create(
+            from_coder=self,
+            summarize_from_coder=False,  # Preserve message history exactly
+            **base_kwargs,
+        )
+
+        return coder
 
     def handle_proposed_changes(self, exchange: ArchitectExchange) -> None:
         """Handle when architect proposes changes.
@@ -179,12 +183,13 @@ class ArchitectCoder(AskCoder):
             main_model=editor_model,
             edit_format=self.main_model.editor_edit_format,
         )
-        editor_coder.cur_messages.extend(exchange.get_editor_messages())
+        # Instead of mutating cur_messages, create new extended copy
+        editor_coder.cur_messages = editor_coder.cur_messages + exchange.get_editor_messages()
 
         if self.verbose:
             editor_coder.show_announcements()
 
-        editor_coder.run(with_message=exchange.APPROVED_CHANGES_PROMPT, preproc=False)
+        editor_coder.run(with_message=APPROVED_CHANGES_PROMPT, preproc=False)
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
         exchange.editor_response = editor_coder.partial_response_content
 
@@ -198,7 +203,8 @@ class ArchitectCoder(AskCoder):
             The reviewer's response after validating changes
         """
         reviewer_coder = self.create_coder(AskCoder)
-        reviewer_coder.cur_messages.extend(exchange.get_reviewer_messages())
+        # Instead of mutating cur_messages, create new extended copy
+        reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_reviewer_messages()
         reviewer_coder.run(with_message=REVIEW_CHANGES_PROMPT, preproc=False)
         self.total_cost = reviewer_coder.total_cost
         exchange.reviewer_response = reviewer_coder.partial_response_content
@@ -209,7 +215,7 @@ class ArchitectCoder(AskCoder):
         Args:
             exchange: The completed exchange containing all responses
         """
-        self.cur_messages.extend(exchange.get_conversation_messages())
+        self.cur_messages = self.cur_messages + exchange.get_conversation_messages()
         self.move_back_cur_messages(CHANGES_COMMITTED_MESSAGE)
         self.partial_response_content = ""  # Clear to prevent redundant message
 
