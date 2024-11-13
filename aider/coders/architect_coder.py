@@ -98,7 +98,7 @@ class ArchitectExchange:
             raise ValueError("Exchange not complete")
 
         return self._editor_exchange() + [
-            {"role": "user", "content": self.REVIEW_CHANGES_PROMPT},
+            {"role": "user", "content": REVIEW_CHANGES_PROMPT},
             {"role": "assistant", "content": self.reviewer_response},
         ]
 
