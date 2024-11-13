@@ -110,10 +110,11 @@ Here's an example of following the setup instructions above, for your copy/paste
 
 ```
 python3 -m venv --clear ../brade_venv \
- && source ../brade_venv/bin/activate \
- && pip3 install -e . \
- && pip3 install -r requirements.txt \
- && pip3 install -r requirements/requirements-dev.txt
+&& source ../brade_venv/bin/activate \
+&& python -m pip install --upgrade pip \
+&& pip install -e . \
+&& pip install -r requirements.txt \
+&& pip install -r requirements/requirements-dev.txt
 ```
 
 ### Running Tests
