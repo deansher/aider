@@ -21,6 +21,7 @@ from pathlib import Path
 from langfuse.decorators import observe
 
 from aider import __version__, models, prompts, urls, utils
+from aider.coders.format_brade_messages import format_brade_messages
 from aider.commands import Commands
 from aider.history import ChatSummary
 from aider.io import ConfirmGroup, InputOutput
@@ -84,14 +85,17 @@ class Coder:
     - Provides command processing and shell integration
 
     Message Lifecycle:
-    - cur_messages represent the active exchange that hasn't been processed yet,
-      including the latest user request and any assistant responses
-    - done_messages represent completed conversation history that has been processed and
-      potentially summarized to manage context window size
-    - After code edits are successfully applied, current messages are moved to done
-      messages, marking the completion of that exchange
-    - This separation enables efficient context management by allowing summarization
-      of older conversations while preserving the full context of the active exchange
+        cur_messages holds the messages in the current exchange, which starts with
+        a user message and includes any assistant responses up until either:
+
+        1. Message processing fails (malformed edits, context overflow, etc.)
+        2. Message processing succeeds and generates file edits
+        3. Message processing succeeds without file edits
+
+        In cases 2-3, cur_messages are moved to done_messages and processing of that
+        exchange is complete. In case 1, cur_messages remains in place so the exchange
+        can be retried or reflected upon. The separation between cur_messages and
+        done_messages is crucial for proper handling of edits, commits, and error recovery.
 
     The class maintains important invariants around file state and git commits:
     - Files must be explicitly added to the chat before editing
@@ -234,6 +238,10 @@ class Coder:
             prefix = "Model"
 
         output = f"{prefix}: {main_model.name} with {self.edit_format} edit format"
+        if main_model.use_brade_prompt_structure:
+            output += ", Brade prompts"
+        else:
+            output += ", Aider prompts"
         if self.add_cache_headers or main_model.caches_by_default:
             output += ", prompt cache"
         if main_model.info.get("supports_assistant_prefill"):
@@ -245,6 +253,10 @@ class Coder:
                 f"Editor model: {main_model.editor_model.name} with"
                 f" {main_model.editor_edit_format} edit format"
             )
+            if main_model.editor_model.use_brade_prompt_structure:
+                output += ", Brade prompts"
+            else:
+                output += ", Aider prompts"
             lines.append(output)
 
         if weak_model is not main_model:
@@ -694,7 +706,8 @@ class Coder:
         if read_only_content:
             readonly_messages += [
                 dict(
-                    role="user", content=self.gpt_prompts.read_only_files_prefix + read_only_content
+                    role="user",
+                    content=self.gpt_prompts.read_only_files_prefix + read_only_content,
                 ),
                 dict(
                     role="assistant",
@@ -746,7 +759,10 @@ class Coder:
                     rel_fname = self.get_rel_fname(fname)
                     image_messages += [
                         {"type": "text", "text": f"Image file: {rel_fname}"},
-                        {"type": "image_url", "image_url": {"url": image_url, "detail": "high"}},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": image_url, "detail": "high"},
+                        },
                     ]
 
         if not image_messages:
@@ -799,6 +815,7 @@ class Coder:
             self.commands,
             self.abs_read_only_fnames,
             edit_format=edit_format,
+            use_brade_prompt=self.main_model.use_brade_prompt_structure,
         )
 
     def preproc_user_input(self, inp):
@@ -896,15 +913,38 @@ class Coder:
         self.done_messages = self.summarized_done_messages
         self.summarized_done_messages = []
 
-    def move_back_cur_messages(self, message):
+    def move_back_cur_messages(self, new_user_content):
+        """Moves current messages to history and optionally adds a new exchange.
+
+        This method manages the transition of messages from active conversation (cur_messages)
+        to history (done_messages). It:
+        1. Appends all current messages to the history
+        2. Triggers history summarization if needed
+        3. Optionally adds a new user message and "Understood" assistant response to done_messages.
+        4. Clears cur_messages.
+
+        This is commonly used after successful code edits to:
+        - Preserve the edit conversation in history
+        - Record that changes were applied
+        - Start fresh for the next exchange
+
+        Args:
+            new_user_content: Optional message to add as a user message, paired with
+                an "Understood" assistant response. Often used to record system
+                actions like "Changes were committed".
+
+        Note:
+            The history (done_messages) may be summarized before the new messages are added,
+            if it has grown too large, but the newly added messages will be preserved verbatim.
+        """
         self.done_messages += self.cur_messages
         self.summarize_start()
 
         # TODO check for impact on image messages
-        if message:
+        if new_user_content:
             self.done_messages += [
-                dict(role="user", content=message),
-                dict(role="assistant", content="Ok."),
+                dict(role="user", content=new_user_content),
+                dict(role="assistant", content="Understood."),
             ]
         self.cur_messages = []
 
@@ -983,6 +1023,7 @@ class Coder:
             )
 
         prompt = prompt.format(
+            name="Brade",  # Add name parameter for prompt templates
             fence=self.fence,
             lazy_prompt=lazy_prompt,
             platform=platform_text,
@@ -1072,7 +1113,8 @@ class Coder:
         if self.gpt_prompts.system_reminder:
             reminder_message = [
                 dict(
-                    role="system", content=self.fmt_system_prompt(self.gpt_prompts.system_reminder)
+                    role="system",
+                    content=self.fmt_system_prompt(self.gpt_prompts.system_reminder),
                 ),
             ]
         else:
@@ -1174,11 +1216,67 @@ class Coder:
 
         return chunks
 
-    def format_brade_prompts(self):
-        chunks = self.format_messages()
-        messages = chunks.all_messages()
-        self.warm_cache(chunks)
-        return messages
+    def _format_brade_messages(self):
+        """Formats messages using Brade's XML-based structure.
+
+        This method transforms the chat context into Brade's format while maintaining
+        existing caching behavior. It:
+        1. Gets all content via existing ChatChunks mechanism
+        2. Transforms file content into FileContent tuples
+        3. Organizes everything into the new XML structure
+        4. Preserves caching behavior by using warm_cache()
+
+        Returns:
+            list[ChatMessage]: The formatted sequence of messages
+        """
+        # Transform file content into FileContent tuples
+        readonly_files = []
+        for fname in self.abs_read_only_fnames:
+            content = self.io.read_text(fname)
+            if content is not None and not is_image_file(fname):
+                readonly_files.append((self.get_rel_fname(fname), content))
+
+        editable_files = []
+        for fname, content in self.get_abs_fnames_content():
+            if not is_image_file(fname):
+                editable_files.append((self.get_rel_fname(fname), content))
+
+        # Get repository map if available
+        repo_map = self.get_repo_map()
+
+        # Get platform info
+        platform_info = self.get_platform_info()
+
+        # Get task instructions from prompts
+        task_instructions = ""
+        _prompts = getattr(self, "gpt_prompts", None)
+        if _prompts and _prompts.task_instructions:
+            task_instructions = _prompts.task_instructions
+        if _prompts and _prompts.system_reminder:
+            task_instructions += "\n\n" + self.fmt_system_prompt(_prompts.system_reminder)
+
+        # Get task examples from prompts
+        task_examples = None
+        if _prompts and _prompts.example_messages:
+            task_examples = [
+                dict(
+                    role=msg["role"],
+                    content=self.fmt_system_prompt(msg["content"]),
+                )
+                for msg in self.gpt_prompts.example_messages
+            ]
+
+        return format_brade_messages(
+            system_prompt=self.fmt_system_prompt(_prompts.main_system_core if _prompts else ""),
+            done_messages=self.done_messages,
+            cur_messages=self.cur_messages,
+            repo_map=repo_map,
+            readonly_files=readonly_files,
+            editable_files=editable_files,
+            platform_info=platform_info,
+            task_instructions=task_instructions,
+            task_examples=task_examples,
+        )
 
     @observe()
     def send_message(self, inp):
@@ -1216,7 +1314,7 @@ class Coder:
         ]
 
         if self.main_model.use_brade_prompt_structure:
-            messages = self.format_brade_prompts()
+            messages = self._format_brade_messages()
         else:
             chunks = self.format_messages()
             messages = chunks.all_messages()
@@ -1271,7 +1369,11 @@ class Coder:
                         messages[-1]["content"] = self.multi_response_content
                     else:
                         messages.append(
-                            dict(role="assistant", content=self.multi_response_content, prefix=True)
+                            dict(
+                                role="assistant",
+                                content=self.multi_response_content,
+                                prefix=True,
+                            )
                         )
                 except Exception as err:
                     self.io.tool_error(f"Unexpected error: {err}")
@@ -1889,8 +1991,6 @@ class Coder:
         if tokens < warn_number_of_tokens:
             return
 
-        self.io.tool_warning("Warning: it's best to only add files that need changes to the chat.")
-        self.io.tool_warning(urls.edit_errors)
         self.warning_given = True
 
     def prepare_to_edit(self, edits):

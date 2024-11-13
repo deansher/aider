@@ -4,14 +4,13 @@ from .base_prompts import CoderPrompts
 
 
 class AskPrompts(CoderPrompts):
-    main_system = f"""
-{CoderPrompts.brade_persona_prompt}
-
-# Your Current Task
-
+    @property
+    def task_instructions(self) -> str:
+        """Task-specific instructions for the code analysis workflow."""
+        return """
 Act as an expert code analyst.
 Answer questions about the supplied code.
-Always reply to the user in the same language they are using.
+Always reply to your partner in the same language they are speaking.
 """
 
     example_messages = []

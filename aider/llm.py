@@ -7,14 +7,17 @@ from langfuse.decorators import langfuse_context
 
 warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
 
-AIDER_SITE_URL = "https://aider.chat"
-AIDER_APP_NAME = "Aider"
+BRADE_SITE_URL = "https://github.com/deansher/brade"
+BRADE_APP_NAME = "Brade"
 
-os.environ["OR_SITE_URL"] = AIDER_SITE_URL
-os.environ["OR_APP_NAME"] = AIDER_APP_NAME
+os.environ["OR_SITE_URL"] = BRADE_SITE_URL
+os.environ["OR_APP_NAME"] = BRADE_APP_NAME
 os.environ["LITELLM_MODE"] = "PRODUCTION"
 
 logger = logging.getLogger(__name__)
+
+# Flag to track Langfuse status
+langfuse_enabled = True
 
 
 # `import litellm` takes 1.5 seconds, defer it!
@@ -38,11 +41,20 @@ class LazyLiteLLM:
         self._lazy_module.drop_params = True
         self._lazy_module._logging._disable_debugging()
 
+        # Check if we're running in a test environment
+        global langfuse_enabled
+        if "PYTEST_CURRENT_TEST" in os.environ:
+            langfuse_enabled = False
+            logger.debug("Langfuse disabled in test environment")
+            return
+
         # Configure Langfuse after environment variables are loaded
         try:
-            langfuse_context.configure()
+            if langfuse_enabled:
+                langfuse_context.configure()
         except Exception as e:
-            logger.warning("Failed to configure Langfuse: %s", str(e))
+            langfuse_enabled = False
+            logger.info("Langfuse disabled: %s", str(e))
 
 
 litellm = LazyLiteLLM()

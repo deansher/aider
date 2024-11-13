@@ -276,6 +276,7 @@ MODEL_SETTINGS = [
         },
         cache_control=True,
         reminder="user",
+        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "anthropic/claude-3-5-sonnet-20240620",
@@ -294,6 +295,7 @@ MODEL_SETTINGS = [
         },
         cache_control=True,
         reminder="user",
+        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "anthropic/claude-3-5-sonnet-20241022",
@@ -312,6 +314,7 @@ MODEL_SETTINGS = [
         },
         cache_control=True,
         reminder="user",
+        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "claude-3-5-sonnet-20241022",
@@ -330,6 +333,7 @@ MODEL_SETTINGS = [
         },
         cache_control=True,
         reminder="user",
+        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "anthropic/claude-3-haiku-20240307",
@@ -369,6 +373,7 @@ MODEL_SETTINGS = [
         },
         reminder="user",
         cache_control=True,
+        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "openrouter/anthropic/claude-3.5-sonnet:beta",
@@ -384,6 +389,7 @@ MODEL_SETTINGS = [
         },
         reminder="user",
         cache_control=True,
+        use_brade_prompt_structure=True,
     ),
     # Vertex AI Claude models
     # Does not yet support 8k token
@@ -400,6 +406,7 @@ MODEL_SETTINGS = [
             "max_tokens": 8192,
         },
         reminder="user",
+        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "vertex_ai/claude-3-5-sonnet-v2@20241022",
@@ -414,6 +421,7 @@ MODEL_SETTINGS = [
             "max_tokens": 8192,
         },
         reminder="user",
+        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "vertex_ai/claude-3-opus@20240229",

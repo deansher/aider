@@ -4,7 +4,10 @@ from .wholefile_prompts import WholeFilePrompts
 
 
 class EditorWholeFilePrompts(WholeFilePrompts):
-    main_system = """Act as an expert software developer and make changes to source code.
+    @property
+    def task_instructions(self) -> str:
+        """Task-specific instructions for editor mode."""
+        return """
 {lazy_prompt}
 Output a copy of each file that needs changes.
 """

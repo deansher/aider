@@ -1,7 +1,8 @@
+from aider.coders.editblock_coder import EditBlockCoder
+
 from .architect_coder import ArchitectCoder
 from .ask_coder import AskCoder
 from .base_coder import Coder
-from .brade_coder import BradeCoder
 from .editblock_fenced_coder import EditBlockFencedCoder
 from .editor_editblock_coder import EditorEditBlockCoder
 from .editor_whole_coder import EditorWholeFileCoder
@@ -15,8 +16,7 @@ __all__ = [
     HelpCoder,
     AskCoder,
     Coder,
-    # EditBlockCoder,
-    BradeCoder,
+    EditBlockCoder,
     EditBlockFencedCoder,
     WholeFileCoder,
     UnifiedDiffCoder,

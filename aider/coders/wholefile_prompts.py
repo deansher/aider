@@ -4,11 +4,11 @@ from .base_prompts import CoderPrompts
 
 
 class WholeFilePrompts(CoderPrompts):
-    main_system = """Act as an expert software developer.
-Take requests for changes to the supplied code.
-If the request is ambiguous, ask questions.
-
-Always reply to the user in the same language they are using.
+    @property
+    def task_instructions(self) -> str:
+        """Task-specific instructions for the whole file editing workflow."""
+        return """
+Always reply to your partner in the same language they are using.
 
 {lazy_prompt}
 Once you understand the request you MUST:

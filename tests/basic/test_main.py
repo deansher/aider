@@ -150,7 +150,7 @@ class TestMain(TestCase):
             assert kwargs["auto_commits"] is False
 
         with patch("aider.coders.Coder.create") as MockCoder:
-            main(["--auto-commits"], input=DummyInput())
+            main(["--auto-commits", "--no-show-model-warnings"], input=DummyInput())
             _, kwargs = MockCoder.call_args
             assert kwargs["auto_commits"] is True
 

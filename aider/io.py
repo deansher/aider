@@ -352,6 +352,7 @@ class InputOutput:
         commands,
         abs_read_only_fnames=None,
         edit_format=None,
+        use_brade_prompt=None,
     ):
         self.rule()
 
@@ -362,7 +363,9 @@ class InputOutput:
                 os.path.relpath(fname, root) for fname in (abs_read_only_fnames or [])
             ]
             show = self.format_files_for_input(rel_fnames, rel_read_only_fnames)
-        if edit_format:
+        if use_brade_prompt:
+            show += "brade"
+        elif edit_format:
             show += edit_format
         show += "> "
 

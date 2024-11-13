@@ -15,7 +15,7 @@ class ArchitectCoder(AskCoder):
     gpt_prompts = ArchitectPrompts()
 
     def reply_completed(self):
-        assistant_response = self.partial_response_content
+        architect_response = self.partial_response_content
 
         # Analyze just the assistant's response
         architect_response_codes = analyze_assistant_response(
@@ -25,7 +25,7 @@ class ArchitectCoder(AskCoder):
                 " response shown below?"
             ),
             self.main_model.name,
-            assistant_response,
+            architect_response,
         )
 
         # If architect asked for files, prompt user to add them
@@ -56,15 +56,35 @@ class ArchitectCoder(AskCoder):
                 new_kwargs.update(kwargs)
 
                 editor_coder = Coder.create(**new_kwargs)
-                editor_coder.cur_messages = []
-                editor_coder.done_messages = []
+                editor_coder.done_messages = list(self.done_messages)
+                editor_coder.cur_messages = list(self.cur_messages)
+                editor_coder.cur_messages.append(
+                    {
+                        "role": "assistant",
+                        "content": architect_response,
+                    }
+                )
 
                 if self.verbose:
                     editor_coder.show_announcements()
 
-                editor_coder.run(with_message=assistant_response, preproc=False)
+                editor_coder.run(with_message="Yes, please make those changes.", preproc=False)
+                editor_response = editor_coder.partial_response_content
 
-                self.move_back_cur_messages("I made those changes to the files.")
+                # Record the editor's entire conversation including its response
+                self.cur_messages.extend(
+                    [
+                        {"role": "assistant", "content": architect_response},
+                        {"role": "user", "content": "Yes, please make those changes."},
+                        {"role": "assistant", "content": editor_response},
+                    ]
+                )
+
+                self.move_back_cur_messages(
+                    "The Brade application made those changes in the project files and committed"
+                    " them."
+                )
+                self.partial_response_content = ""  # Clear to prevent redundant message
                 self.total_cost = editor_coder.total_cost
                 self.aider_commit_hashes = editor_coder.aider_commit_hashes
 

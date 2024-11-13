@@ -171,11 +171,10 @@ Examples of when to suggest shell commands:
 - Etc.
 """
 
-    main_system = f"""{CoderPrompts.brade_persona_prompt}
-
-# Your Current Task
-
-{CoderPrompts.lazy_prompt}
+    @property
+    def task_instructions(self) -> str:
+        """Task-specific instructions for the edit block workflow."""
+        return """
 Take requests for changes to the supplied code.
 If the request is ambiguous, ask questions.
 
@@ -195,5 +194,4 @@ You can keep asking if you then decide you need to edit more files.
 
 All changes to files must use this *SEARCH/REPLACE block* format.
 ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
-{shell_cmd_prompt}
 """

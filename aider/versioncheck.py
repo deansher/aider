@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 from pathlib import Path
 
@@ -31,34 +30,40 @@ def install_upgrade(io, latest_version=None):
     Install the latest version of aider from PyPI.
     """
 
-    if latest_version:
-        new_ver_text = f"Newer aider version v{latest_version} is available."
-    else:
-        new_ver_text = "Install latest version of aider?"
-
-    docker_image = os.environ.get("AIDER_DOCKER_IMAGE")
-    if docker_image:
-        text = f"""
-{new_ver_text} To upgrade, run:
-
-    docker pull {docker_image}
-"""
-        io.tool_warning(text)
-        return True
-
-    success = utils.check_pip_install_extra(
-        io,
-        None,
-        new_ver_text,
-        ["aider-chat"],
-        self_update=True,
-    )
-
-    if success:
-        io.tool_output("Re-run aider to use new version.")
-        sys.exit()
-
+    io.tool_output("Brade does not yet support automatic version upgrades.")
     return
+
+    # TODO: Support auotmatic version upgrades.
+
+
+#     if latest_version:
+#         new_ver_text = f"Newer aider version v{latest_version} is available."
+#     else:
+#         new_ver_text = "Install latest version of aider?"
+
+#     docker_image = os.environ.get("AIDER_DOCKER_IMAGE")
+#     if docker_image:
+#         text = f"""
+# {new_ver_text} To upgrade, run:
+
+#     docker pull {docker_image}
+# """
+#         io.tool_warning(text)
+#         return True
+
+#     success = utils.check_pip_install_extra(
+#         io,
+#         None,
+#         new_ver_text,
+#         ["aider-chat"],
+#         self_update=True,
+#     )
+
+#     if success:
+#         io.tool_output("Re-run aider to use new version.")
+#         sys.exit()
+
+#     return
 
 
 def check_version(io, just_check=False, verbose=False):

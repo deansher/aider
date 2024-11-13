@@ -21,11 +21,16 @@ class ChatMessage(TypedDict):
         role: The role of the message sender (system, user, assistant)
         content: The message content, either as a string or structured content
         function_call: Optional function call data
+        prefix: Optional flag indicating this message should be prefixed to next completion
     """
 
     role: str  # "system", "user", "assistant"
     content: str | list["ContentBlock"]
     function_call: dict[str, str] | None
+    # When True, indicates this message contains a truncated response that should be
+    # prefixed to the next completion. This enables handling responses that exceed the
+    # model's maximum output tokens by allowing the model to continue from where it left off.
+    prefix: bool | None
 
 
 class ImageUrl(TypedDict):

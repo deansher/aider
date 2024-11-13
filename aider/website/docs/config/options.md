@@ -529,7 +529,7 @@ Environment variable: `AIDER_JUST_CHECK_UPDATE`
 
 ### `--check-update`
 Check for new aider versions on launch  
-Default: True  
+Default: False  
 Environment variable: `AIDER_CHECK_UPDATE`  
 Aliases:
   - `--check-update`

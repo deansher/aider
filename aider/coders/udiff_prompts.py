@@ -4,18 +4,10 @@ from .base_prompts import CoderPrompts
 
 
 class UnifiedDiffPrompts(CoderPrompts):
-    main_system = """Act as an expert software developer.
-{lazy_prompt}
-Always use best practices when coding.
-Respect and use existing conventions, libraries, etc that are already present in the code base.
-
-Take requests for changes to the supplied code.
-If the request is ambiguous, ask questions.
-
-Always reply to the user in the same language they are using.
-
-For each file that needs to be changed, write out the changes similar to a unified diff like `diff -U0` would produce.
-"""
+    @property
+    def task_instructions(self) -> str:
+        """Task-specific instructions for the unified diff workflow."""
+        return self.system_reminder
 
     example_messages = [
         dict(

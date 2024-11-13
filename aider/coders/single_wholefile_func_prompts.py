@@ -4,9 +4,11 @@ from .base_prompts import CoderPrompts
 
 
 class SingleWholeFileFunctionPrompts(CoderPrompts):
-    main_system = """Act as an expert software developer.
-Take requests for changes to the supplied code.
-If the request is ambiguous, ask questions.
+    @property
+    def task_instructions(self) -> str:
+        """Task-specific instructions for single-file editing workflow."""
+        return """
+Reply to your partner in the same language they are using.
 
 Once you understand the request you MUST use the `write_file` function to update the file to make the changes.
 """

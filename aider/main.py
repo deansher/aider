@@ -1,9 +1,11 @@
 import configparser
 import json
+import logging
 import os
 import re
 import sys
 import threading
+import time
 import traceback
 from pathlib import Path
 
@@ -551,9 +553,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         success = install_upgrade(io)
         return 0 if success else 1
 
-    # Disable this for now. TODO: change it to a brade upgrade and disable it in dev mode
-    # if args.check_update:
-    #     check_version(io, verbose=args.verbose)
+    if args.check_update:
+        check_version(io, verbose=args.verbose)
 
     if args.list_models:
         models.print_matching_models(io, args.list_models)
@@ -802,9 +803,11 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
 
 def check_and_load_imports(io, verbose=False):
+    logger = logging.getLogger(__name__)
     installs_file = Path.home() / ".aider" / "installs.json"
     key = (__version__, sys.executable)
 
+    logger.debug("Starting check_and_load_imports")
     if verbose:
         io.tool_output(
             f"Checking imports for version {__version__} and executable {sys.executable}"
@@ -815,14 +818,17 @@ def check_and_load_imports(io, verbose=False):
         if installs_file.exists():
             with open(installs_file, "r") as f:
                 installs = json.load(f)
+            logger.debug("Loaded existing installs file")
             if verbose:
                 io.tool_output("Installs file exists and loaded")
         else:
             installs = {}
+            logger.debug("Creating new installs dictionary")
             if verbose:
                 io.tool_output("Installs file does not exist, creating new dictionary")
 
         if str(key) not in installs:
+            logger.debug("First run for this version, loading imports synchronously")
             if verbose:
                 io.tool_output(
                     "First run for this version and executable, loading imports synchronously"
@@ -839,15 +845,19 @@ def check_and_load_imports(io, verbose=False):
             installs_file.parent.mkdir(parents=True, exist_ok=True)
             with open(installs_file, "w") as f:
                 json.dump(installs, f, indent=4)
+            logger.debug("Updated installs file after synchronous import")
             if verbose:
                 io.tool_output("Imports loaded and installs file updated")
         else:
+            logger.debug("Starting background import thread")
             if verbose:
                 io.tool_output("Not first run, loading imports in background thread")
-            thread = threading.Thread(target=load_slow_imports)
+            thread = threading.Thread(target=load_slow_imports, name="SlowImports")
             thread.daemon = True
             thread.start()
+            logger.debug("Background import thread started")
     except Exception as e:
+        logger.error(f"Error in checking imports: {e}", exc_info=True)
         io.tool_warning(f"Error in checking imports: {e}")
         if verbose:
             io.tool_output(f"Full exception details: {traceback.format_exc()}")
@@ -859,16 +869,34 @@ def load_slow_imports(swallow=True):
     # This func is called either synchronously or in a thread
     # depending on whether it's been run before for this version and executable.
 
+    logger = logging.getLogger(__name__)
+    logger.debug("Starting load_slow_imports")
+    start_time = time.time()
+
     try:
+        logger.debug("Importing httpx")
         import httpx  # noqa: F401
+
+        logger.debug("Importing litellm")
         import litellm  # noqa: F401
+
+        logger.debug("Importing networkx")
         import networkx  # noqa: F401
+
+        logger.debug("Importing numpy")
         import numpy  # noqa: F401
+
+        elapsed = time.time() - start_time
+        logger.debug(f"Completed load_slow_imports in {elapsed:.2f} seconds")
     except Exception as e:
+        logger.error("Error in load_slow_imports", exc_info=True)
         if not swallow:
             raise e
 
 
 if __name__ == "__main__":
+    logger = logging.getLogger(__name__)
+    logger.debug("Starting main process")
     status = main()
+    logger.debug("Main process completed, preparing to exit")
     sys.exit(status)
