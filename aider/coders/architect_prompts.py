@@ -6,6 +6,20 @@ from aider.coders.format_brade_messages import THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
+# Message constants used in architect exchanges
+APPROVED_CHANGES_PROMPT = "Yes, please make those changes."
+REVIEW_CHANGES_PROMPT = (
+    "Please review the latest versions of the projects files that you just\n"
+    "changed, focusing on your changes but considering other major issues\n"
+    "also. If you have any substantial concerns, explain them and ask your\n"
+    "partner if they'd like you to fix them. If you are satisfied with your\n"
+    "changes, just briefly tell your partner that you reviewed them and\n"
+    "believe they are fine."
+)
+CHANGES_COMMITTED_MESSAGE = (
+    "The Brade application made those changes in the project files and committed them."
+)
+
 # Define the choice manager for analyzing architect responses
 possible_architect_responses = ChoiceManager()
 response_section = possible_architect_responses.add_section(

@@ -6,6 +6,9 @@ from typing import Any, Optional
 from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
     ArchitectPrompts,
+    APPROVED_CHANGES_PROMPT,
+    CHANGES_COMMITTED_MESSAGE,
+    REVIEW_CHANGES_PROMPT,
     architect_proposed_changes,
     possible_architect_responses,
 )
@@ -30,19 +33,6 @@ class ArchitectExchange:
         reviewer_response: The reviewer's response after validating changes
     """
 
-    # Standard user prompts used in the exchange
-    APPROVED_CHANGES_PROMPT = "Yes, please make those changes."
-    REVIEW_CHANGES_PROMPT = (
-        "Please review the latest versions of the projects files that you just\n"
-        "changed, focusing on your changes but considering other major issues\n"
-        "also. If you have any substantial concerns, explain them and ask your\n"
-        "partner if they'd like you to fix them. If you are satisfied with your\n"
-        "changes, just briefly tell your partner that you reviewed them and\n"
-        "believe they are fine."
-    )
-    CHANGES_COMMITTED_MESSAGE = (
-        "The Brade application made those changes in the project files and committed them."
-    )
 
     def __init__(self, architect_response: str):
         """Initialize a new exchange.
@@ -76,7 +66,7 @@ class ArchitectExchange:
 
         return [
             self._architect_message(),
-            {"role": "user", "content": self.APPROVED_CHANGES_PROMPT},
+            {"role": "user", "content": APPROVED_CHANGES_PROMPT},
             {"role": "assistant", "content": self.editor_response},
         ]
 
@@ -209,7 +199,7 @@ class ArchitectCoder(AskCoder):
         """
         reviewer_coder = self.create_coder(AskCoder)
         reviewer_coder.cur_messages.extend(exchange.get_reviewer_messages())
-        reviewer_coder.run(with_message=exchange.REVIEW_CHANGES_PROMPT, preproc=False)
+        reviewer_coder.run(with_message=REVIEW_CHANGES_PROMPT, preproc=False)
         self.total_cost = reviewer_coder.total_cost
         exchange.reviewer_response = reviewer_coder.partial_response_content
 
@@ -220,7 +210,7 @@ class ArchitectCoder(AskCoder):
             exchange: The completed exchange containing all responses
         """
         self.cur_messages.extend(exchange.get_conversation_messages())
-        self.move_back_cur_messages(exchange.CHANGES_COMMITTED_MESSAGE)
+        self.move_back_cur_messages(CHANGES_COMMITTED_MESSAGE)
         self.partial_response_content = ""  # Clear to prevent redundant message
 
     def reply_completed(self) -> None:
