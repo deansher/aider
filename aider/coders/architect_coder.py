@@ -70,15 +70,47 @@ class ArchitectCoder(AskCoder):
 
                 editor_coder.run(with_message="Yes, please make those changes.", preproc=False)
 
-                self.cur_messages.extend(
+                # Create an AskCoder instance to review the changes
+                reviewer_coder = AskCoder(
+                    self.main_model,
+                    self.io,
+                    from_coder=self,
+                    suggest_shell_commands=False,
+                    map_tokens=0,
+                    total_cost=editor_coder.total_cost,
+                    cache_prompts=False,
+                    num_cache_warming_pings=0,
+                    summarize_from_coder=False,
+                )
+                reviewer_coder.done_messages = list(self.done_messages)
+                reviewer_coder.cur_messages = list(self.cur_messages)
+                reviewer_coder.cur_messages.extend(
                     [
                         {"role": "assistant", "content": architect_response},
                         {"role": "user", "content": "Yes, please make those changes."},
                     ]
                 )
+
+                # Have AskCoder review the changes
+                reviewer_coder.run(
+                    with_message="Please review the changes that were just made. If you have any concerns, explain them.",
+                    preproc=False,
+                )
+                reviewer_response = reviewer_coder.partial_response_content
+
+                # Record the entire conversation including all responses
+                self.cur_messages.extend(
+                    [
+                        {"role": "assistant", "content": architect_response},
+                        {"role": "user", "content": "Yes, please make those changes."},
+                        {"role": "assistant", "content": editor_response},
+                        {"role": "user", "content": "Please review the changes that were just made. If you have any concerns, explain them."},
+                        {"role": "assistant", "content": reviewer_response},
+                    ]
+                )
                 self.move_back_cur_messages(self.gpt_prompts.editor_response_placeholder)
                 self.partial_response_content = ""  # Clear to prevent redundant message
-                self.total_cost += editor_coder.total_cost
+                self.total_cost += editor_coder.total_cost + reviewer_coder.total_cost
                 self.aider_commit_hashes = editor_coder.aider_commit_hashes
 
         # Otherwise just let the conversation continue
