@@ -788,6 +788,12 @@ class Coder:
                 for msg in self.cur_messages:
                     if not msg.get('processed', False):
                         msg['processed'] = True
+                        if msg['role'] == 'assistant':
+                            self.partial_response_content = msg['content']
+                            edited = self.apply_updates()
+                            if edited:
+                                self.aider_edited_files.update(edited)
+                                self.auto_commit(edited)
 
             if not self.reflected_message:
                 break
