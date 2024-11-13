@@ -383,8 +383,6 @@ def sanity_check_repo(repo, io):
 
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
-    report_uncaught_exceptions()
-
     if argv is None:
         argv = sys.argv[1:]
 
