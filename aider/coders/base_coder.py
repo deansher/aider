@@ -713,18 +713,25 @@ class Coder:
         if self.repo:
             self.commit_before_message.append(self.repo.get_head_commit_sha())
 
-    def run(self, with_message=None, preproc=True):
+    def run(self, with_message=None, preproc=True, immediate_process=False):
+        """Run the coder with optional message and processing flags.
+        
+        Args:
+            with_message: Optional message to process
+            preproc: Whether to preprocess the message
+            immediate_process: Whether to process messages immediately (for subordinate coders)
+        """
         self.choose_fence()
         try:
             if with_message:
                 self.io.user_input(with_message)
-                self.run_one(with_message, preproc)
+                self.run_one(with_message, preproc, immediate_process)
                 return self.partial_response_content
 
             while True:
                 try:
                     user_message = self.get_input()
-                    self.run_one(user_message, preproc)
+                    self.run_one(user_message, preproc, immediate_process)
                     self.show_undo_hint()
                 except KeyboardInterrupt:
                     self.keyboard_interrupt()
@@ -757,7 +764,14 @@ class Coder:
 
         return inp
 
-    def run_one(self, user_message, preproc):
+    def run_one(self, user_message, preproc, immediate_process=False):
+        """Run one message exchange with preprocessing and optional immediate processing.
+        
+        Args:
+            user_message: The message to process
+            preproc: Whether to preprocess the message
+            immediate_process: Whether to process messages immediately (for subordinate coders)
+        """
         self.init_before_message()
 
         if preproc:
@@ -768,6 +782,12 @@ class Coder:
         while message:
             self.reflected_message = None
             list(self.send_message(message))
+
+            # Process messages immediately for subordinate coders
+            if immediate_process:
+                for msg in self.cur_messages:
+                    if not msg.get('processed', False):
+                        msg['processed'] = True
 
             if not self.reflected_message:
                 break
