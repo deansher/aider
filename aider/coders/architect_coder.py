@@ -93,7 +93,14 @@ class ArchitectCoder(AskCoder):
 
                 # Have AskCoder review the changes
                 reviewer_coder.run(
-                    with_message="Please review the changes that were just made. If you have any concerns, explain them.",
+                    with_message=(
+                        "Please review the latest versions of the projects files that you just\n"
+                        "changed, focusing on your changes but considering other major issues\n"
+                        "also. If you have any substantial concerns, explain them and ask your\n"
+                        "partner if they'd like you to fix them. If you are satisfied with your\n"
+                        "changes, just briefly tell your partner that you reviewed them and\n"
+                        "believe they are fine."
+                    ),
                     preproc=False,
                 )
                 reviewer_response = reviewer_coder.partial_response_content
