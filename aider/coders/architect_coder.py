@@ -55,44 +55,61 @@ class ArchitectExchange:
         self.editor_response: Optional[str] = None
         self.reviewer_response: Optional[str] = None
 
-    def get_editor_messages(self) -> list[dict[str, str]]:
-        """Get messages needed by editor to implement changes.
+    def _architect_message(self) -> dict[str, str]:
+        """Get the architect's proposal message.
         
         Returns:
-            List of messages for the editor's context
+            The architect's message proposing changes
         """
-        return [
-            {"role": "assistant", "content": self.architect_response}
-        ]
+        return {"role": "assistant", "content": self.architect_response}
 
-    def get_reviewer_messages(self) -> list[dict[str, str]]:
-        """Get messages needed by reviewer to validate changes.
+    def _editor_exchange(self) -> list[dict[str, str]]:
+        """Get the architect-editor exchange messages.
         
         Returns:
-            List of messages for the reviewer's context
+            List of messages for the architect-editor exchange
+            
+        Raises:
+            ValueError: If editor response is not yet set
         """
         if not self.editor_response:
             raise ValueError("Editor response not yet set")
             
         return [
-            {"role": "assistant", "content": self.architect_response},
+            self._architect_message(),
             {"role": "user", "content": self.APPROVE_CHANGES_PROMPT},
             {"role": "assistant", "content": self.editor_response},
         ]
+
+    def get_editor_messages(self) -> list[dict[str, str]]:
+        """Get messages needed by editor to implement changes.
+
+        Returns:
+            List of messages for the editor's context
+        """
+        return [self._architect_message()]
+
+    def get_reviewer_messages(self) -> list[dict[str, str]]:
+        """Get messages needed by reviewer to validate changes.
+
+        Returns:
+            List of messages for the reviewer's context
+        """
+        return self._editor_exchange()
 
     def get_conversation_messages(self) -> list[dict[str, str]]:
         """Get the complete conversation record.
         
         Returns:
             List of all messages in the exchange
+            
+        Raises:
+            ValueError: If exchange is not complete
         """
         if not self.editor_response or not self.reviewer_response:
             raise ValueError("Exchange not complete")
             
-        return [
-            {"role": "assistant", "content": self.architect_response},
-            {"role": "user", "content": self.APPROVE_CHANGES_PROMPT},
-            {"role": "assistant", "content": self.editor_response},
+        return self._editor_exchange() + [
             {"role": "user", "content": "Please review the changes that were just made. If you have any concerns, explain them."},
             {"role": "assistant", "content": self.reviewer_response},
         ]
