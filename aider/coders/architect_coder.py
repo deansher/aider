@@ -6,7 +6,6 @@ from typing import Any, Optional
 from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
     ArchitectPrompts,
-    architect_asked_to_see_files,
     architect_proposed_changes,
     possible_architect_responses,
 )
@@ -16,15 +15,15 @@ from .base_coder import Coder
 
 class ArchitectExchange:
     """Encapsulates a complete architect-editor-reviewer exchange.
-    
+
     This class manages the messages and responses for a complete exchange between:
     - The architect proposing changes
-    - The editor implementing changes 
+    - The editor implementing changes
     - The reviewer validating changes
-    
+
     It provides methods to generate the appropriate message sequences needed by each
     participant and to record the final conversation.
-    
+
     Attributes:
         architect_response: The architect's response proposing changes
         editor_response: The editor's response after implementing changes
@@ -32,7 +31,7 @@ class ArchitectExchange:
     """
 
     # Standard user prompts used in the exchange
-    APPROVE_CHANGES_PROMPT = "Yes, please make those changes."
+    APPROVED_CHANGES_PROMPT = "Yes, please make those changes."
     REVIEW_CHANGES_PROMPT = (
         "Please review the latest versions of the projects files that you just\n"
         "changed, focusing on your changes but considering other major issues\n"
@@ -47,7 +46,7 @@ class ArchitectExchange:
 
     def __init__(self, architect_response: str):
         """Initialize a new exchange.
-        
+
         Args:
             architect_response: The architect's response proposing changes
         """
@@ -57,7 +56,7 @@ class ArchitectExchange:
 
     def _architect_message(self) -> dict[str, str]:
         """Get the architect's proposal message.
-        
+
         Returns:
             The architect's message proposing changes
         """
@@ -65,19 +64,19 @@ class ArchitectExchange:
 
     def _editor_exchange(self) -> list[dict[str, str]]:
         """Get the architect-editor exchange messages.
-        
+
         Returns:
             List of messages for the architect-editor exchange
-            
+
         Raises:
             ValueError: If editor response is not yet set
         """
         if not self.editor_response:
             raise ValueError("Editor response not yet set")
-            
+
         return [
             self._architect_message(),
-            {"role": "user", "content": self.APPROVE_CHANGES_PROMPT},
+            {"role": "user", "content": self.APPROVED_CHANGES_PROMPT},
             {"role": "assistant", "content": self.editor_response},
         ]
 
@@ -99,30 +98,30 @@ class ArchitectExchange:
 
     def get_conversation_messages(self) -> list[dict[str, str]]:
         """Get the complete conversation record.
-        
+
         Returns:
             List of all messages in the exchange
-            
+
         Raises:
             ValueError: If exchange is not complete
         """
         if not self.editor_response or not self.reviewer_response:
             raise ValueError("Exchange not complete")
-            
+
         return self._editor_exchange() + [
-            {"role": "user", "content": "Please review the changes that were just made. If you have any concerns, explain them."},
+            {"role": "user", "content": self.REVIEW_CHANGES_PROMPT},
             {"role": "assistant", "content": self.reviewer_response},
         ]
 
 
 class ArchitectCoder(AskCoder):
     """Manages high-level code architecture decisions and coordinates with editor/reviewer coders.
-    
+
     This coder acts as an architect that:
     1. Analyzes requests and proposes changes
     2. Coordinates with editor coder to implement changes
     3. Coordinates with reviewer coder to validate changes
-    
+
     Attributes:
         edit_format: The edit format identifier for this coder type
         produces_code_edits: Whether this coder directly produces code edits
@@ -135,13 +134,15 @@ class ArchitectCoder(AskCoder):
 
     def create_coder(self, coder_class: type[Coder], **kwargs: Any) -> Coder:
         """Creates a new coder instance with common setup.
-        
+
         Args:
             coder_class: The coder class to instantiate
             **kwargs: Additional keyword arguments to pass to the coder constructor
-            
+
         Returns:
-            A configured coder instance ready for use
+            A configured coder instance ready for use.
+            The coder's done_messages and cur_messages are initialized as copies of
+            the architect's message state.
         """
         base_kwargs = dict(
             io=self.io,
@@ -154,28 +155,15 @@ class ArchitectCoder(AskCoder):
             summarize_from_coder=False,
         )
         base_kwargs.update(kwargs)
-        
+
         coder = coder_class(self.main_model, **base_kwargs)
         coder.done_messages = list(self.done_messages)
         coder.cur_messages = list(self.cur_messages)
         return coder
 
-    def handle_file_request(self, architect_response_codes: Any) -> None:
-        """Handle when architect asks for files.
-        
-        Args:
-            architect_response_codes: The analyzed response codes from the architect
-        """
-        if architect_response_codes.has(architect_asked_to_see_files):
-            # Surrounding code will notice the paths and implement that.
-            # If the architect responded with some blend of this choice and asking to edit
-            # files, give it the additional files first and let it decide where to go from
-            # there.
-            pass
-
     def handle_proposed_changes(self, exchange: ArchitectExchange) -> None:
         """Handle when architect proposes changes.
-        
+
         Args:
             exchange: The exchange containing the architect's proposed changes
         """
@@ -190,10 +178,10 @@ class ArchitectCoder(AskCoder):
 
     def execute_changes(self, exchange: ArchitectExchange) -> None:
         """Run the editor coder to implement changes.
-        
+
         Args:
             exchange: The exchange containing the architect's proposed changes
-            
+
         Returns:
             The editor's response after implementing changes
         """
@@ -208,16 +196,16 @@ class ArchitectCoder(AskCoder):
         if self.verbose:
             editor_coder.show_announcements()
 
-        editor_coder.run(with_message=exchange.APPROVE_CHANGES_PROMPT, preproc=False)
+        editor_coder.run(with_message=exchange.APPROVED_CHANGES_PROMPT, preproc=False)
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
         exchange.editor_response = editor_coder.partial_response_content
 
     def review_changes(self, exchange: ArchitectExchange) -> None:
         """Run the reviewer coder to validate changes.
-        
+
         Args:
             exchange: The exchange containing the architect and editor responses
-            
+
         Returns:
             The reviewer's response after validating changes
         """
@@ -229,7 +217,7 @@ class ArchitectCoder(AskCoder):
 
     def record_conversation(self, exchange: ArchitectExchange) -> None:
         """Record the complete conversation history.
-        
+
         Args:
             exchange: The completed exchange containing all responses
         """
@@ -245,16 +233,13 @@ class ArchitectCoder(AskCoder):
         architect_response_codes = analyze_assistant_response(
             possible_architect_responses,
             (
-                "<SYSTEM> Which one of the following choices best characterizes the assistant"
+                "Which one of the following choices best characterizes the assistant"
                 " response shown below?"
             ),
             self.main_model.name,
             architect_response,
         )
 
-        # Handle different response types
-        self.handle_file_request(architect_response_codes)
-        
         if architect_response_codes.has(architect_proposed_changes):
             exchange = ArchitectExchange(architect_response)
             self.handle_proposed_changes(exchange)
