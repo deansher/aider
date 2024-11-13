@@ -146,19 +146,29 @@ class ArchitectCoder(AskCoder):
         """
         base_kwargs = dict(
             io=self.io,
-            from_coder=self,
             suggest_shell_commands=False,
             map_tokens=0,
             total_cost=self.total_cost,
             cache_prompts=False,
             num_cache_warming_pings=0,
-            summarize_from_coder=False,
         )
+
+        # Add AskCoder specific parameters only if the target is AskCoder or derived from it
+        if issubclass(coder_class, AskCoder):
+            base_kwargs.update(
+                from_coder=self,
+                summarize_from_coder=False,
+            )
+
         base_kwargs.update(kwargs)
 
+        # Create the coder instance
         coder = coder_class(self.main_model, **base_kwargs)
+
+        # Initialize message state from architect
         coder.done_messages = list(self.done_messages)
         coder.cur_messages = list(self.cur_messages)
+
         return coder
 
     def handle_proposed_changes(self, exchange: ArchitectExchange) -> None:
