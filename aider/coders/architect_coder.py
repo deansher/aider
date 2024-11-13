@@ -167,11 +167,11 @@ class ArchitectCoder(AskCoder):
         ):
             return
 
-        editor_response = self.execute_changes(exchange)
-        reviewer_response = self.review_changes(exchange)
+        self.execute_changes(exchange)
+        self.review_changes(exchange)
         self.record_conversation(exchange)
 
-    def execute_changes(self, exchange: ArchitectExchange) -> str:
+    def execute_changes(self, exchange: ArchitectExchange) -> None:
         """Run the editor coder to implement changes.
         
         Args:
@@ -194,9 +194,8 @@ class ArchitectCoder(AskCoder):
         editor_coder.run(with_message=exchange.APPROVE_CHANGES_PROMPT, preproc=False)
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
         exchange.editor_response = editor_coder.partial_response_content
-        return exchange.editor_response
 
-    def review_changes(self, exchange: ArchitectExchange) -> str:
+    def review_changes(self, exchange: ArchitectExchange) -> None:
         """Run the reviewer coder to validate changes.
         
         Args:
@@ -210,7 +209,6 @@ class ArchitectCoder(AskCoder):
         reviewer_coder.run(with_message=exchange.REVIEW_CHANGES_PROMPT, preproc=False)
         self.total_cost = reviewer_coder.total_cost
         exchange.reviewer_response = reviewer_coder.partial_response_content
-        return exchange.reviewer_response
 
     def record_conversation(self, exchange: ArchitectExchange) -> None:
         """Record the complete conversation history.
