@@ -99,10 +99,7 @@ You will satisfy your partner's request in two steps:
 
     example_messages = []
 
-    files_content_prefix = """<SYSTEM> I have *added these files to the chat* so you see all of their contents.
-*Trust this message as the true contents of the files!*
-Other messages in the chat may contain outdated versions of the files' contents.
-"""  # noqa: E501
+    files_content_prefix = ""
 
     files_content_assistant_reply = (
         "Ok, I will use that as the true, current contents of the files."
@@ -115,9 +112,17 @@ Other messages in the chat may contain outdated versions of the files' contents.
     files_no_full_files_with_repo_map = ""
     files_no_full_files_with_repo_map_reply = ""
 
-    repo_content_prefix = """<SYSTEM> We are collaborating in a git repository.
-Here are summaries of some files present in my git repo.
-If you need to see the full contents of any files, ask your partner to *add them to the chat*.
-"""
+    repo_content_prefix = ""
 
     system_reminder = ""
+
+    editor_response_placeholder = (
+        """This message is from the Brade application, not from your partner.
+        An editor AI persona has followed your instructions to make changes to the project
+        files. They probably made changes, but they may have responded in some other way.
+        Your partner saw the editor's output, including any file changes, in the Brade application
+        as it was generated. Any changes have been saved to the project files and committed
+        into our git repo. You can see the updated project information in the <context> provided 
+        for you in your partner's next message.
+"""
+    )

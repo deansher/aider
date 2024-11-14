@@ -69,23 +69,16 @@ class ArchitectCoder(AskCoder):
                     editor_coder.show_announcements()
 
                 editor_coder.run(with_message="Yes, please make those changes.", preproc=False)
-                editor_response = editor_coder.partial_response_content
 
-                # Record the editor's entire conversation including its response
                 self.cur_messages.extend(
                     [
                         {"role": "assistant", "content": architect_response},
                         {"role": "user", "content": "Yes, please make those changes."},
-                        {"role": "assistant", "content": editor_response},
                     ]
                 )
-
-                self.move_back_cur_messages(
-                    "The Brade application made those changes in the project files and committed"
-                    " them."
-                )
+                self.move_back_cur_messages(self.gpt_prompts.editor_response_placeholder)
                 self.partial_response_content = ""  # Clear to prevent redundant message
-                self.total_cost = editor_coder.total_cost
+                self.total_cost += editor_coder.total_cost
                 self.aider_commit_hashes = editor_coder.aider_commit_hashes
 
         # Otherwise just let the conversation continue
