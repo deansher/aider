@@ -761,13 +761,13 @@ class Coder:
         self.init_before_message()
 
         if preproc:
-            message = self.preproc_user_input(user_message)
+            prompt_message = self.preproc_user_input(user_message)
         else:
-            message = user_message
+            prompt_message = user_message
 
-        while message:
+        while prompt_message:
             self.reflected_message = None
-            list(self.send_message(message))
+            list(self.send_message(prompt_message))
 
             if not self.reflected_message:
                 break
@@ -777,7 +777,7 @@ class Coder:
                 return
 
             self.num_reflections += 1
-            message = self.reflected_message
+            prompt_message = self.reflected_message
 
     def check_for_urls(self, inp):
         url_pattern = re.compile(r"(https?://[^\s/$.?#].[^\s]*[^\s,.])")
@@ -1093,13 +1093,13 @@ class Coder:
         )
 
     @observe()
-    def send_message(self, inp):
+    def send_message(self, new_user_message):
         """Core method that processes user input and manages the LLM interaction flow.
 
         This is the central workflow that:
-        1. Adds user message to conversation history
-        2. Formats all context (files, repo map, history) for the LLM
-        3. Sends request and handles streaming response
+        1. Adds user message to self.cur_messages
+        2. Creates prompt_messages, a chat history for the LLM that captures all state
+        3. Sends completion request and handles streaming response
         4. Processes code edits and shell commands from response
         5. Manages git commits, linting, and testing
         6. Handles errors, retries, and reflection requests
@@ -1111,7 +1111,7 @@ class Coder:
         - Shell commands require user confirmation
 
         Args:
-            inp: The user's message to process
+            new_user_message: The user's message to process
 
         Yields:
             Response chunks when streaming is enabled
@@ -1124,13 +1124,13 @@ class Coder:
         - Reflection requests
         """
         self.cur_messages += [
-            dict(role="user", content=inp),
+            dict(role="user", content=new_user_message),
         ]
 
         messages = self._format_brade_messages()
 
         if self.verbose:
-            utils.show_messages(messages, functions=self.functions)
+            utils.show_messages(prompt_messages, functions=self.functions)
 
         self.multi_response_content = ""
         if self.show_pretty() and self.stream:
@@ -1146,7 +1146,7 @@ class Coder:
         try:
             while True:
                 try:
-                    yield from self.send(messages, functions=self.functions)
+                    yield from self.send(prompt_messages, functions=self.functions)
                     break
                 except retry_exceptions() as err:
                     self.io.tool_warning(str(err))
@@ -1174,10 +1174,10 @@ class Coder:
 
                     self.multi_response_content = self.get_multi_response_content()
 
-                    if messages[-1]["role"] == "assistant":
-                        messages[-1]["content"] = self.multi_response_content
+                    if prompt_messages[-1]["role"] == "assistant":
+                        prompt_messages[-1]["content"] = self.multi_response_content
                     else:
-                        messages.append(
+                        prompt_messages.append(
                             dict(
                                 role="assistant",
                                 content=self.multi_response_content,
@@ -1830,24 +1830,6 @@ class Coder:
         return res
 
     def apply_updates(self):
-        """Processes and applies code edits from the LLM response.
-
-        This method handles the core code modification workflow:
-        1. Extracts edit blocks from LLM response
-        2. Validates files can be edited
-        3. Handles new file creation
-        4. Applies the edits
-        5. Reports results to user
-
-        Key invariants maintained:
-        - Only explicitly added files can be edited
-        - New files require user confirmation
-        - Files in .gitignore are skipped
-        - Read-only files are never modified
-
-        Returns:
-            set: The set of files that were successfully edited
-        """
         """Processes and applies code edits from the LLM response.
 
         This method handles the core code modification workflow:
