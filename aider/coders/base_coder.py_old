@@ -4,8 +4,8 @@ import base64
 import hashlib
 import json
 import locale
-import logging
 import math
+import mimetypes
 import os
 import platform
 import re
@@ -31,11 +31,10 @@ from aider.repo import ANY_GIT_ERROR, GitRepo
 from aider.repomap import RepoMap
 from aider.run_cmd import run_cmd
 from aider.sendchat import RETRY_TIMEOUT, retry_exceptions, send_completion
-from aider.utils import format_content, format_tokens, is_image_file
+from aider.utils import format_content, format_messages, format_tokens, is_image_file
 
 from ..dump import dump  # noqa: F401
-
-logger = logging.getLogger(__name__)
+from .chat_chunks import ChatChunks
 
 
 class MissingAPIKeyError(ValueError):
@@ -60,6 +59,21 @@ all_fences = [
 ]
 
 
+def wrap_xml(tag: str, content) -> str:
+    """Wraps content in XML-style tags for structured message formatting.
+
+    Args:
+        tag: The XML tag name to wrap the content in
+        content: The content to wrap (converted to string)
+
+    Returns:
+        The content wrapped in XML tags, or empty string if content is empty
+    """
+    if not content:
+        return ""
+    return f"<{tag}>\n{content}\n</{tag}>"
+
+
 class Coder:
     """Core class that manages the interaction between the human user, LLM, and codebase.
 
@@ -74,7 +88,7 @@ class Coder:
         cur_messages holds the messages in the current exchange, which starts with
         a user message and includes any assistant responses up until either:
 
-        1. Message processing fails
+        1. Message processing fails (malformed edits, context overflow, etc.)
         2. Message processing succeeds and generates file edits
         3. Message processing succeeds without file edits
 
@@ -111,8 +125,7 @@ class Coder:
     num_reflections = 0
     max_reflections = 3
     edit_format = None
-    # Most coders produce code edits that must be auto-applied
-    produces_code_edits = True
+    produces_code_edits = True  # Most coders produce code edits that must be auto-applied
     yield_stream = False
     temperature = 0
     auto_lint = True
@@ -167,27 +180,26 @@ class Coder:
 
             # If the edit format changes, we can't leave old ASSISTANT
             # messages in the chat history. The old edit format will
-            # confuse the new LLM. It will likely imitate it, disobeying
+            # confused the new LLM. It may try and imitate it, disobeying
             # the system prompt.
-            use_done_messages = from_coder.done_messages
+            done_messages = from_coder.done_messages
             if (
                 edit_format != from_coder.edit_format
                 and from_coder.produces_code_edits
                 and main_model.produces_code_edits
-                and use_done_messages
+                and done_messages
                 and summarize_from_coder
             ):
-                use_done_messages = from_coder.summarizer.summarize_all(use_done_messages)
+                done_messages = from_coder.summarizer.summarize_all(done_messages)
                 io.tool_output(
-                    "Summarized old chat messages because we switched between incompatible edit"
-                    " formats."
+                    "Cleared chat history because we switched between incompatible edit formats."
                 )
 
             # Bring along context from the old Coder
             update = dict(
                 fnames=list(from_coder.abs_fnames),
-                read_only_fnames=list(from_coder.abs_read_only_fnames),
-                done_messages=use_done_messages,
+                read_only_fnames=list(from_coder.abs_read_only_fnames),  # Copy read-only files
+                done_messages=done_messages,
                 cur_messages=from_coder.cur_messages,
                 aider_commit_hashes=from_coder.aider_commit_hashes,
                 commands=from_coder.commands.clone(),
@@ -226,6 +238,10 @@ class Coder:
             prefix = "Model"
 
         output = f"{prefix}: {main_model.name} with {self.edit_format} edit format"
+        if main_model.use_brade_prompt_structure:
+            output += ", Brade prompts"
+        else:
+            output += ", Aider prompts"
         if self.add_cache_headers or main_model.caches_by_default:
             output += ", prompt cache"
         if main_model.info.get("supports_assistant_prefill"):
@@ -237,6 +253,10 @@ class Coder:
                 f"Editor model: {main_model.editor_model.name} with"
                 f" {main_model.editor_edit_format} edit format"
             )
+            if main_model.editor_model.use_brade_prompt_structure:
+                output += ", Brade prompts"
+            else:
+                output += ", Aider prompts"
             lines.append(output)
 
         if weak_model is not main_model:
@@ -407,7 +427,7 @@ class Coder:
                 if utils.touch_file(fname):
                     self.io.tool_output(f"Creating empty file {fname}")
                 else:
-                    self.io.tool_warning(f"Cannot create {fname}, skipping.")
+                    self.io.tool_warning(f"Can not create {fname}, skipping.")
                     continue
 
             if not fname.is_file():
@@ -439,7 +459,9 @@ class Coder:
 
         max_inp_tokens = self.main_model.info.get("max_input_tokens") or 0
 
-        if use_repo_map and self.repo:
+        has_map_prompt = hasattr(self, "gpt_prompts") and self.gpt_prompts.repo_content_prefix
+
+        if use_repo_map and self.repo and has_map_prompt:
             self.repo_map = RepoMap(
                 map_tokens,
                 self.root,
@@ -508,18 +530,6 @@ class Coder:
             return True
 
     def abs_root_path(self, path):
-        """Converts a path relative to the project root into an absolute filesystem path.
-
-        This method ensures all path operations are anchored to the project's root directory
-        rather than the current working directory. It maintains a cache of computed paths
-        for performance.
-
-        Args:
-            path (str|Path): A path relative to the project root directory
-
-        Returns:
-            str: An absolute filesystem path anchored to the project root
-        """
         key = path
         if key in self.abs_root_path_cache:
             return self.abs_root_path_cache[key]
@@ -543,17 +553,6 @@ class Coder:
         return True
 
     def get_abs_fnames_content(self):
-        """Yields tuples of absolute filenames and their content for files in the chat.
-
-        This method iterates through files that have been added to the chat session
-        and retrieves their content. It handles error cases by:
-        - Removing files that can't be read from the chat
-        - Warning the user about dropped files
-
-        Returns:
-            Generator: Yields tuples of (absolute_filename: str, content: str)
-                      for files that were successfully read.
-        """
         for fname in list(self.abs_fnames):
             content = self.io.read_text(fname)
 
@@ -591,6 +590,26 @@ class Coder:
             )
 
         return
+
+    def _format_file_content(self, fname, content):
+        """Helper method to consistently format file content with markdown."""
+        relative_fname = self.get_rel_fname(fname)
+        return f"\n## {relative_fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
+
+    def get_files_content(self, fnames=None):
+        if not fnames:
+            fnames = self.abs_fnames
+
+        prompt = ""
+        file_count = 0
+        for fname, content in self.get_abs_fnames_content():
+            if not is_image_file(fname):
+                if file_count == 0:
+                    prompt += "\n# Source Files\n"
+                prompt += self._format_file_content(fname, content)
+                file_count += 1
+
+        return prompt
 
     def get_read_only_files_content(self):
         prompt = ""
@@ -697,6 +716,60 @@ class Coder:
             ]
         return readonly_messages
 
+    def get_chat_files_messages(self):
+        chat_files_messages = []
+        if self.abs_fnames:
+            files_content = self.gpt_prompts.files_content_prefix
+            files_content += self.get_files_content()
+            files_reply = self.gpt_prompts.files_content_assistant_reply
+        elif self.get_repo_map() and self.gpt_prompts.files_no_full_files_with_repo_map:
+            files_content = self.gpt_prompts.files_no_full_files_with_repo_map
+            files_reply = self.gpt_prompts.files_no_full_files_with_repo_map_reply
+        else:
+            files_content = self.gpt_prompts.files_no_full_files
+            files_reply = "Ok."
+
+        if files_content:
+            chat_files_messages += [
+                dict(role="user", content=files_content),
+                dict(role="assistant", content=files_reply),
+            ]
+
+        images_message = self.get_images_message()
+        if images_message is not None:
+            chat_files_messages += [
+                images_message,
+                dict(role="assistant", content="Ok."),
+            ]
+
+        return chat_files_messages
+
+    def get_images_message(self):
+        if not self.main_model.accepts_images:
+            return None
+
+        image_messages = []
+        for fname, content in self.get_abs_fnames_content():
+            if is_image_file(fname):
+                with open(fname, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+                mime_type, _ = mimetypes.guess_type(fname)
+                if mime_type and mime_type.startswith("image/"):
+                    image_url = f"data:{mime_type};base64,{encoded_string}"
+                    rel_fname = self.get_rel_fname(fname)
+                    image_messages += [
+                        {"type": "text", "text": f"Image file: {rel_fname}"},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": image_url, "detail": "high"},
+                        },
+                    ]
+
+        if not image_messages:
+            return None
+
+        return {"role": "user", "content": image_messages}
+
     def run_stream(self, user_message):
         self.io.user_input(user_message)
         self.init_before_message()
@@ -714,7 +787,6 @@ class Coder:
             self.commit_before_message.append(self.repo.get_head_commit_sha())
 
     def run(self, with_message=None, preproc=True):
-        self.choose_fence()
         try:
             if with_message:
                 self.io.user_input(with_message)
@@ -743,6 +815,7 @@ class Coder:
             self.commands,
             self.abs_read_only_fnames,
             edit_format=edit_format,
+            use_brade_prompt=self.main_model.use_brade_prompt_structure,
         )
 
     def preproc_user_input(self, inp):
@@ -959,6 +1032,137 @@ class Coder:
         )
         return prompt
 
+    def format_chat_chunks(self):
+        """Organizes chat context for use in prompt generation.
+
+        This method structures the full context needed by the LLM, including:
+        - System prompts and role definition
+        - Example conversations
+        - Repository content map
+        - Read-only reference files
+        - Chat history
+        - Current conversation
+        - Files being edited
+        - Final reminders
+
+        The method also handles:
+        - Choosing appropriate code fence markers
+        - Managing token limits
+        - Adding cache control headers
+        - Formatting messages for the specific LLM
+
+        Returns:
+            ChatChunks: Organized message chunks ready for the LLM
+        """
+        self.choose_fence()
+        main_sys = self.fmt_system_prompt(self.gpt_prompts.main_system)
+
+        example_messages = []
+        if self.main_model.examples_as_sys_msg:
+            if self.gpt_prompts.example_messages:
+                main_sys += "\n# Example conversations:\n\n"
+            for msg in self.gpt_prompts.example_messages:
+                role = msg["role"]
+                content = self.fmt_system_prompt(msg["content"])
+                main_sys += f"## {role.upper()}: {content}\n\n"
+            main_sys = main_sys.strip()
+        else:
+            for msg in self.gpt_prompts.example_messages:
+                example_messages.append(
+                    dict(
+                        role=msg["role"],
+                        content=self.fmt_system_prompt(msg["content"]),
+                    )
+                )
+            if self.gpt_prompts.example_messages:
+                example_messages += [
+                    dict(
+                        role="user",
+                        content=(
+                            "I switched to a new code base. Please don't consider the above files"
+                            " or try to edit them any longer."
+                        ),
+                    ),
+                    dict(role="assistant", content="Ok."),
+                ]
+
+        if self.gpt_prompts.system_reminder:
+            main_sys += "\n" + self.fmt_system_prompt(self.gpt_prompts.system_reminder)
+
+        chunks = ChatChunks()
+
+        if self.main_model.use_system_prompt:
+            chunks.system = [
+                dict(role="system", content=main_sys),
+            ]
+        else:
+            chunks.system = [
+                dict(role="user", content=main_sys),
+                dict(role="assistant", content="Ok."),
+            ]
+
+        chunks.examples = example_messages
+
+        self.summarize_end()
+        chunks.done = self.done_messages
+
+        chunks.repo = self.get_repo_messages()
+        chunks.readonly_files = self.get_readonly_files_messages()
+        chunks.chat_files = self.get_chat_files_messages()
+
+        if self.gpt_prompts.system_reminder:
+            reminder_message = [
+                dict(
+                    role="system",
+                    content=self.fmt_system_prompt(self.gpt_prompts.system_reminder),
+                ),
+            ]
+        else:
+            reminder_message = []
+
+        chunks.cur = list(self.cur_messages)
+        chunks.reminder = []
+
+        # TODO review impact of token count on image messages
+        messages_tokens = self.main_model.token_count(chunks.all_messages())
+        reminder_tokens = self.main_model.token_count(reminder_message)
+        cur_tokens = self.main_model.token_count(chunks.cur)
+
+        if None not in (messages_tokens, reminder_tokens, cur_tokens):
+            total_tokens = messages_tokens + reminder_tokens + cur_tokens
+        else:
+            # add the reminder anyway
+            total_tokens = 0
+
+        final = chunks.cur[-1]
+
+        max_input_tokens = self.main_model.info.get("max_input_tokens") or 0
+        # Add the reminder prompt if we still have room to include it.
+        if (
+            max_input_tokens is None
+            or total_tokens < max_input_tokens
+            and self.gpt_prompts.system_reminder
+        ):
+            if self.main_model.reminder == "sys":
+                chunks.reminder = reminder_message
+            elif self.main_model.reminder == "user" and final["role"] == "user":
+                # stuff it into the user message
+                new_content = (
+                    final["content"]
+                    + "\n\n"
+                    + self.fmt_system_prompt(self.gpt_prompts.system_reminder)
+                )
+                chunks.cur[-1] = dict(role=final["role"], content=new_content)
+
+        return chunks
+
+    def format_messages(self):
+        chunks = self.format_chat_chunks()
+        if self.add_cache_headers:
+            chunks.add_cache_control_headers()
+
+        return chunks
+
     def warm_cache(self, chunks):
         if not self.add_cache_headers:
             return
@@ -1012,21 +1216,6 @@ class Coder:
 
         return chunks
 
-    def process_image(self, image_path):
-        """Converts an image file to base64 encoding with proper MIME type for chat inclusion"""
-        with open(image_path, "rb") as image_file:
-            return base64.b64encode(image_file.read()).decode("utf-8")
-
-    def get_image_files_content(self):
-        """Returns list of (filename, base64content) tuples for image files in chat"""
-        image_files = []
-        for fname in list(self.abs_fnames):
-            if is_image_file(fname):
-                rel_fname = self.get_rel_fname(fname)
-                base64content = self.process_image(fname)
-                image_files.append((rel_fname, base64content))
-        return image_files
-
     def _format_brade_messages(self):
         """Formats messages using Brade's XML-based structure.
 
@@ -1041,18 +1230,16 @@ class Coder:
             list[ChatMessage]: The formatted sequence of messages
         """
         # Transform file content into FileContent tuples
-        readonly_text_files = []
+        readonly_files = []
         for fname in self.abs_read_only_fnames:
             content = self.io.read_text(fname)
             if content is not None and not is_image_file(fname):
-                readonly_text_files.append((self.get_rel_fname(fname), content))
+                readonly_files.append((self.get_rel_fname(fname), content))
 
-        editable_text_files = []
+        editable_files = []
         for fname, content in self.get_abs_fnames_content():
             if not is_image_file(fname):
-                editable_text_files.append((self.get_rel_fname(fname), content))
-
-        image_files = self.get_image_files_content() if self.main_model.accepts_images else None
+                editable_files.append((self.get_rel_fname(fname), content))
 
         # Get repository map if available
         repo_map = self.get_repo_map()
@@ -1084,9 +1271,8 @@ class Coder:
             done_messages=self.done_messages,
             cur_messages=self.cur_messages,
             repo_map=repo_map,
-            readonly_text_files=readonly_text_files,
-            editable_text_files=editable_text_files,
-            image_files=image_files,
+            readonly_files=readonly_files,
+            editable_files=editable_files,
             platform_info=platform_info,
             task_instructions=task_instructions,
             task_examples=task_examples,
@@ -1127,7 +1313,12 @@ class Coder:
             dict(role="user", content=inp),
         ]
 
-        messages = self._format_brade_messages()
+        if self.main_model.use_brade_prompt_structure:
+            messages = self._format_brade_messages()
+        else:
+            chunks = self.format_messages()
+            messages = chunks.all_messages()
+            self.warm_cache(chunks)
 
         if self.verbose:
             utils.show_messages(messages, functions=self.functions)
@@ -1287,7 +1478,7 @@ class Coder:
             output_tokens = self.main_model.token_count(self.partial_response_content)
         max_output_tokens = self.main_model.info.get("max_output_tokens") or 0
 
-        input_tokens = self.main_model.token_count(self._format_brade_messages())
+        input_tokens = self.main_model.token_count(self.format_messages().all_messages())
         max_input_tokens = self.main_model.info.get("max_input_tokens") or 0
 
         total_tokens = input_tokens + output_tokens
@@ -1426,7 +1617,7 @@ class Coder:
         self.partial_response_content = ""
         self.partial_response_function_call = dict()
 
-        self.io.log_llm_history("TO LLM", self._format_brade_messages())
+        self.io.log_llm_history("TO LLM", format_messages(messages))
 
         if self.main_model.use_temperature:
             temp = self.temperature

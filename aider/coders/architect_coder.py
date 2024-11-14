@@ -189,8 +189,7 @@ class ArchitectCoder(AskCoder):
         if self.verbose:
             editor_coder.show_announcements()
 
-        # Run editor with immediate processing to apply changes right away
-        editor_coder.run(with_message=APPROVED_CHANGES_PROMPT, preproc=False, immediate_process=True)
+        editor_coder.run(with_message=APPROVED_CHANGES_PROMPT, preproc=False)
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
         exchange.editor_response = editor_coder.partial_response_content
 
