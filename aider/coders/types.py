@@ -60,18 +60,14 @@ class ContentBlock(TypedDict):
     cache_control: CacheControl | None
 
 
-class Edit(TypedDict):
-    """A tuple representing a code edit extracted from an LLM response.
-    
-    The tuple is (path, original, updated) where:
-    - path: The file path to edit, or None for shell commands
-    - original: The original content to match and replace
-    - updated: The new content to replace with
-    """
+Edit = tuple[str | None, str, str]
+"""A tuple representing a code edit extracted from an LLM response.
 
-    path: str | None  # File path or None for shell commands
-    original: str  # Original content to match
-    updated: str  # New content to replace with
+The tuple is (path, original, updated) where:
+- path: The file path to edit, or None for shell commands
+- original: The original content to match and replace
+- updated: The new content to replace with
+"""
 
 
 class RepoFile(TypedDict):
