@@ -19,6 +19,16 @@ class EditBlockCoder(Coder):
     gpt_prompts = EditBlockPrompts()
 
     def get_edits(self):
+        """Extract edit blocks from the LLM response.
+
+        This method extracts edit blocks from the LLM's response content in
+        self.partial_response_content. The format of the edit blocks depends on
+        the specific coder implementation (e.g. EditBlockCoder uses search/replace blocks).
+
+        Returns:
+            list[Edit]: List of (path, original, updated) tuples representing the edits.
+                       For shell commands, path will be None.
+        """
         content = self.partial_response_content
 
         # might raise ValueError for malformed ORIG/UPD blocks
