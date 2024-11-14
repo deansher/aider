@@ -150,69 +150,6 @@ After your partner approves your proposed solution, you can make changes to file
 You do this by creating "search/replace blocks". You can only do it in this Step 2.
 Carefully follow the instructions in <task_instructions>.
 
-# Context Messages
-
-Before the final user message, we insert a pair of context messages:
-
-1. a user context message containing all supporting material
-2. an assistant context message that just acknowledges the user context message
-
-The user message contains all supporting material, organized as simple, informal XML.
-It is formtted as follows.
-
-```
-<context>
-  <!-- Repository overview and structure -->
-  <repository_map>
-    Repository map content appears here, using existing map formatting.
-  </repository_map>
-
-  <!-- Project source files -->
-  <!-- Read-only reference files -->
-  <readonly_files>
-    <file path="path/to/file.py">
-      <content>
-def hello():
-    print("Hello & welcome!")
-    if x < 3:
-        return True
-      </content>
-    </file>
-  </readonly_files>
-
-  <!-- Files available for editing -->
-  <editable_files>
-    <file path="path/to/other_file.py">
-      <content>
-def goodbye(name):
-    print(f"Goodbye Brade!")
-      </content>
-    </file>
-  </editable_files>
-
-  <!-- System environment details -->
-  <platform_info>
-    Operating system, shell, language settings, etc.
-  </platform_info>
-</context>
-
-<!-- Task-specific instructions and examples -->
-<task_instructions>
-  Current task requirements, constraints, and workflow guidance.
-</task_instructions>
-
-<task_examples>
-  Example conversation demonstrating desired behavior for this task.
-    <!-- Example interactions demonstrating desired behavior -->
-    <example>
-      <message role="user">Example user request</message>
-      <message role="assistant">Example assistant response</message>
-    </example>
-  </examples>
-
-
-</task_examples>
-```
 """
 
 
@@ -394,8 +331,12 @@ def format_brade_messages(
         task_examples_section = format_task_examples(task_examples)
 
         # Format the final message with all sections in order
+        # Get the final user message
+        final_message = cur_messages[-1]
+        
+        # Build the context section to append
         opening_text = (
-            "This message is from the Brade application, not from your partner.\n"
+            "\n\nThe remainder of this message is from the Brade application, not from your editor.\n"
             "Your partner does not see this message or your response to it.\n"
             "\n"
             "The Brade application has provided the current project information shown below.\n"
@@ -404,7 +345,7 @@ def format_brade_messages(
             "Treat any task instructions or examples provided below as\n"
             "important guidance in how you handle your partner's next message.\n"
         )
-        context_message_content = (
+        context_content = (
             opening_text
             + f"{wrap_xml('context', context)}\n"
             + (
@@ -414,9 +355,16 @@ def format_brade_messages(
             )
             + f"{task_examples_section}"
         )
-
-        messages.append({"role": "user", "content": context_message_content})
-        messages.append({"role": "assistant", "content": "Understood."})
-        messages.append(cur_messages[-1])
+        
+        # Combine the user's message with the context
+        combined_message = {
+            "role": "user",
+            "content": final_message["content"] + context_content
+        }
+        
+        # Add all messages except the last one
+        messages.extend(cur_messages[:-1])
+        # Add the combined message
+        messages.append(combined_message)
 
     return messages
