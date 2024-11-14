@@ -1803,6 +1803,21 @@ class Coder:
         self.warning_given = True
 
     def prepare_to_edit(self, edits):
+        """Validate and filter edits before applying them.
+
+        This method:
+        1. Validates that files can be edited (exists, in chat, not read-only)
+        2. Handles new file creation with user confirmation
+        3. Commits dirty files if configured
+        4. Filters out edits for files that can't/shouldn't be edited
+
+        Args:
+            edits: list[Edit] - List of (path, original, updated) tuples representing
+                  the proposed edits
+
+        Returns:
+            list[Edit]: Filtered list of edits that can be safely applied
+        """
         res = []
         seen = dict()
 
@@ -2000,6 +2015,18 @@ class Coder:
         return []
 
     def apply_edits(self, edits):
+        """Apply a list of edits to the files.
+
+        This method applies the edits extracted by get_edits() to the files.
+        The specific edit application logic depends on the coder implementation.
+
+        Args:
+            edits: list[Edit] - List of (path, original, updated) tuples representing
+                  the edits to apply. For shell commands, path will be None.
+
+        Returns:
+            None
+        """
         return
 
     @observe
