@@ -18,7 +18,7 @@ from datetime import datetime
 from json.decoder import JSONDecodeError
 from pathlib import Path
 
-from langfuse.decorators import observe
+from langfuse.decorators import observe, langfuse_context
 
 from aider import __version__, models, prompts, urls, utils
 from aider.coders.format_brade_messages import format_brade_messages
