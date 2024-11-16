@@ -9,7 +9,8 @@ from .base_prompts import CoderPrompts
 # Message constants used in architect exchanges
 APPROVED_CHANGES_PROMPT = "Yes, please make those changes."
 REVIEW_CHANGES_PROMPT = (
-    "Please review the latest versions of the projects files that you just\n"
+    THIS_MESSAGE_IS_FROM_APP
+    + "Please review the latest versions of the projects files that you just\n"
     "changed, focusing on your changes but considering other major issues\n"
     "also. If you have any substantial concerns, explain them and ask your\n"
     "partner if they'd like you to fix them. If you are satisfied with your\n"
@@ -17,7 +18,8 @@ REVIEW_CHANGES_PROMPT = (
     "believe they are fine."
 )
 CHANGES_COMMITTED_MESSAGE = (
-    "The Brade application made those changes in the project files and committed them."
+    THIS_MESSAGE_IS_FROM_APP
+    + "The Brade application made those changes in the project files and committed them."
 )
 
 # Define the choice manager for analyzing architect responses
@@ -134,8 +136,8 @@ You will satisfy your partner's request in two steps:
     system_reminder = ""
 
     editor_response_placeholder = (
-        """This message is from the Brade application, not from your partner.
-        An editor AI persona has followed your instructions to make changes to the project
+        THIS_MESSAGE_IS_FROM_APP
+        + """An editor AI persona has followed your instructions to make changes to the project
         files. They probably made changes, but they may have responded in some other way.
         Your partner saw the editor's output, including any file changes, in the Brade application
         as it was generated. Any changes have been saved to the project files and committed

@@ -186,17 +186,19 @@ Your partner does not see this message.
 """
 )
 
+REST_OF_MESSAGE_IS_FROM_APP = (
+    """The rest of this message is from the Brade application, rather than from your partner.
+Your partner does not see this portion of the message.
+
+"""
+)
+
 
 def format_task_examples(task_examples: list[ChatMessage] | None) -> str:
     """Formats task example messages into XML structure.
 
     This function validates and transforms example conversations into XML format,
     showing paired user/assistant interactions that demonstrate desired behavior.
-
-    The function maintains these invariants:
-    - Messages must be in user/assistant pairs
-    - User messages must precede assistant messages
-    - All messages must have string content (not structured content)
 
     Args:
         task_examples: List of ChatMessages containing example conversations.
@@ -208,10 +210,8 @@ def format_task_examples(task_examples: list[ChatMessage] | None) -> str:
         Returns empty string if no examples provided.
 
     Raises:
-        ValueError: If messages aren't in proper user/assistant pairs,
-            if roles don't alternate correctly, or if message content
-            is not a string.
-        TypeError: If task_examples is not None and not a list.
+        ValueError: If messages aren't in proper user/assistant pairs
+            or if roles don't alternate correctly.
     """
     if not task_examples:
         return ""
@@ -238,14 +238,8 @@ def format_task_examples(task_examples: list[ChatMessage] | None) -> str:
     return wrap_xml("task_examples", examples_xml)
 
 
-# Type definitions
+# Type alias for file content tuples (filename, content)
 FileContent = Tuple[str, str]
-"""A tuple containing a file's path and content.
-
-The tuple is (path, content) where:
-- path: The file path relative to repo root
-- content: The file's content as a string
-"""
 
 
 def wrap_xml(tag: str, content: str | None) -> str:
@@ -266,43 +260,35 @@ def wrap_xml(tag: str, content: str | None) -> str:
 def format_file_section(files: list[FileContent] | None) -> str:
     """Formats a list of files and their contents into an XML section.
 
-    This function maintains these invariants:
-    - Each file path must be a non-empty string
-    - Each file's content must be a string (can be empty)
-    - File paths must be valid for the target platform
-    - XML special characters in paths and content are not escaped
-
     Args:
         files: List of FileContent tuples, each containing:
-            - file_path (str): The path/name of the file
+            - filename (str): The path/name of the file
             - content (str): The file's content
 
     Returns:
-        XML formatted string containing the files and their contents.
-        Returns empty string if files is None or empty.
+        XML formatted string containing the files and their contents
 
     Raises:
         TypeError: If files is not None and not a list of FileContent tuples
-        ValueError: If any tuple in files doesn't have exactly 2 string elements,
-            or if either element is not a string
+        ValueError: If any tuple in files doesn't have exactly 2 string elements
     """
     if not files:
         return ""
 
     if not isinstance(files, list):
-        raise TypeError("files must be None or a list of (file_path, content) tuples")
+        raise TypeError("files must be None or a list of (filename, content) tuples")
 
-    xml_content: str = ""
+    result = ""
     for item in files:
         if not isinstance(item, tuple) or len(item) != 2:
-            raise ValueError("Each item in files must be a (file_path, content) tuple")
+            raise ValueError("Each item in files must be a (filename, content) tuple")
 
-        file_path, content = item
-        if not isinstance(file_path, str) or not isinstance(content, str):
-            raise ValueError("File path and content must both be strings")
+        fname, content = item
+        if not isinstance(fname, str) or not isinstance(content, str):
+            raise ValueError("Filename and content must both be strings")
 
-        xml_content += f"<file path='{file_path}'>\n{content}\n</file>\n"
-    return xml_content
+        result += f"<file path='{fname}'>\n{content}\n</file>\n"
+    return result
 
 
 def format_brade_messages(
@@ -326,21 +312,14 @@ def format_brade_messages(
     - Clear separation of context and user message
     - Consistent document organization
 
-    The function maintains these invariants:
-    - All messages have string content (not structured content)
-    - The system prompt is always the first message
-    - Context is only added to the final user message
-    - XML sections maintain a consistent order
-    - File content is not escaped or modified
-
     Args:
         system_prompt: Core system message defining role and context
         done_messages: Previous conversation history
-        cur_messages: Current conversation messages to process
+        cur_messages: Current conversation messages
         repo_map: Optional repository map showing structure and content
-        readonly_text_files: Optional list of (file_path, content) tuples for reference files
-        editable_text_files: Optional list of (file_path, content) tuples for editable files
-        image_files: Optional list of (file_path, content) tuples for image files
+        readonly_text_files: Optional list of (filename, content) tuples for reference text files
+        editable_text_files: Optional list of (filename, content) tuples for text files being edited
+        image_files: Optional list of (filename, content) tuples for image files
         platform_info: Optional system environment details
         task_instructions: Optional task-specific requirements and workflow guidance
         task_examples: Optional list of ChatMessages containing example conversations.
@@ -348,13 +327,11 @@ def format_brade_messages(
             Messages should be in pairs (user, assistant) demonstrating desired behavior.
 
     Returns:
-        The formatted sequence of messages ready for the LLM, with context
-        added to the final user message.
+        The formatted sequence of messages ready for the LLM
 
     Raises:
-        ValueError: If system_prompt is None, empty, or if task_examples are malformed
-        TypeError: If file content tuples are not properly formatted or if message
-            content is not a string
+        ValueError: If system_prompt is None or if task_examples are malformed
+        TypeError: If file content tuples are not properly formatted
     """
     if system_prompt is None:
         raise ValueError("system_prompt cannot be None")
@@ -370,27 +347,27 @@ def format_brade_messages(
         messages.extend(cur_messages[:-1])
 
         # Build the context section
-        context_sections: list[str] = []
+        context_parts = []
 
         # Add repository map if provided and contains non-whitespace content
         if repo_map and repo_map.strip():
-            context_sections.append(wrap_xml("repository_map", repo_map))
+            context_parts.append(wrap_xml("repository_map", repo_map))
 
         # Add file sections if provided
         if readonly_text_files:
-            files_xml: str = format_file_section(readonly_text_files)
-            context_sections.append(wrap_xml("readonly_files", files_xml))
+            files_xml = format_file_section(readonly_text_files)
+            context_parts.append(wrap_xml("readonly_files", files_xml))
 
         if editable_text_files:
-            files_xml: str = format_file_section(editable_text_files)
-            context_sections.append(wrap_xml("editable_files", files_xml))
+            files_xml = format_file_section(editable_text_files)
+            context_parts.append(wrap_xml("editable_files", files_xml))
 
         # Add platform info if provided
         if platform_info:
-            context_sections.append(wrap_xml("platform_info", platform_info))
+            context_parts.append(wrap_xml("platform_info", platform_info))
 
-        # Combine all context sections in order
-        context: str = "".join(context_sections)
+        # Combine all context
+        context = "".join(context_parts)
 
         # Format task examples if provided
         task_examples_section = format_task_examples(task_examples)
@@ -401,7 +378,7 @@ def format_brade_messages(
 
         # Build the context section to append
         context_preface = (
-            THIS_MESSAGE_IS_FROM_APP
+            REST_OF_MESSAGE_IS_FROM_APP
             + "The Brade application has provided the current project information shown below.\n"
             "This information is more recent and reliable than anything in earlier chat messages.\n"
             "\n"
