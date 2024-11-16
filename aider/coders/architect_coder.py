@@ -153,76 +153,12 @@ class ArchitectCoder(AskCoder):
 
         return coder
 
-    def handle_proposed_changes(self, exchange: ArchitectExchange) -> None:
-        """Handle when architect proposes changes.
+    def handle_architect_response(self, architect_coder: "ArchitectCoder") -> None:
+        """Handle the architect's response.
 
         Args:
-            exchange: The exchange containing the architect's proposed changes
+            architect_coder: The architect coder instance
         """
-        if not self.io.confirm_ask(
-            'Should I edit files now? (Respond "No" to continue the conversation instead.)'
-        ):
-            return
-
-        self.execute_changes(exchange)
-        self.review_changes(exchange)
-        self.record_conversation(exchange)
-
-    def execute_changes(self, exchange: ArchitectExchange) -> None:
-        """Run the editor coder to implement changes.
-
-        Args:
-            exchange: The exchange containing the architect's proposed changes
-
-        Returns:
-            The editor's response after implementing changes
-        """
-        editor_model = self.main_model.editor_model or self.main_model
-        editor_coder = self.create_coder(
-            Coder,
-            main_model=editor_model,
-            edit_format=self.main_model.editor_edit_format,
-        )
-        # Instead of mutating cur_messages, create new extended copy
-        editor_coder.cur_messages = editor_coder.cur_messages + exchange.get_editor_messages()
-
-        if self.verbose:
-            editor_coder.show_announcements()
-
-        editor_coder.run(with_message=APPROVED_CHANGES_PROMPT, preproc=False)
-        self.aider_commit_hashes = editor_coder.aider_commit_hashes
-        exchange.editor_response = editor_coder.partial_response_content
-
-    def review_changes(self, exchange: ArchitectExchange) -> None:
-        """Run the reviewer coder to validate changes.
-
-        Args:
-            exchange: The exchange containing the architect and editor responses
-
-        Returns:
-            The reviewer's response after validating changes
-        """
-        reviewer_coder = self.create_coder(AskCoder)
-        # Instead of mutating cur_messages, create new extended copy
-        reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_reviewer_messages()
-        reviewer_coder.run(with_message=REVIEW_CHANGES_PROMPT, preproc=False)
-        self.total_cost = reviewer_coder.total_cost
-        exchange.reviewer_response = reviewer_coder.partial_response_content
-
-    def record_conversation(self, exchange: ArchitectExchange) -> None:
-        """Record the complete conversation history.
-
-        Args:
-            exchange: The completed exchange containing all responses
-        """
-        self.cur_messages = self.cur_messages + exchange.get_conversation_messages()
-        self.move_back_cur_messages(CHANGES_COMMITTED_MESSAGE)
-        self.partial_response_content = ""  # Clear to prevent redundant message
-
-    def reply_completed(self) -> None:
-        """Process the architect's response and coordinate with editor/reviewer as needed."""
-        architect_response = self.partial_response_content
-
         # Analyze just the assistant's response
         architect_response_codes = analyze_assistant_response(
             possible_architect_responses,
@@ -230,12 +166,50 @@ class ArchitectCoder(AskCoder):
                 "Which one of the following choices best characterizes the assistant"
                 " response shown below?"
             ),
-            self.main_model.name,
-            architect_response,
+            architect_coder.main_model.name,
+            self.architect_response,
         )
 
         if architect_response_codes.has(architect_proposed_changes):
-            exchange = ArchitectExchange(architect_response)
-            self.handle_proposed_changes(exchange)
+            if not architect_coder.io.confirm_ask(
+                'Should I edit files now? (Respond "No" to continue the conversation instead.)'
+            ):
+                return
+
+            # Run editor coder to implement changes
+            editor_model = architect_coder.main_model.editor_model or architect_coder.main_model
+            editor_coder = architect_coder.create_coder(
+                Coder,
+                main_model=editor_model,
+                edit_format=architect_coder.main_model.editor_edit_format,
+            )
+            # Instead of mutating cur_messages, create new extended copy
+            editor_coder.cur_messages = editor_coder.cur_messages + self.get_editor_messages()
+
+            if architect_coder.verbose:
+                editor_coder.show_announcements()
+
+            editor_coder.run(with_message=APPROVED_CHANGES_PROMPT, preproc=False)
+            architect_coder.aider_commit_hashes = editor_coder.aider_commit_hashes
+            self.editor_response = editor_coder.partial_response_content
+
+            # Run reviewer coder to validate changes
+            reviewer_coder = architect_coder.create_coder(AskCoder)
+            # Instead of mutating cur_messages, create new extended copy
+            reviewer_coder.cur_messages = reviewer_coder.cur_messages + self.get_reviewer_messages()
+            reviewer_coder.run(with_message=REVIEW_CHANGES_PROMPT, preproc=False)
+            architect_coder.total_cost = reviewer_coder.total_cost
+            self.reviewer_response = reviewer_coder.partial_response_content
+
+            # Record the complete conversation history
+            architect_coder.cur_messages = architect_coder.cur_messages + self.get_conversation_messages()
+            architect_coder.move_back_cur_messages(CHANGES_COMMITTED_MESSAGE)
+            architect_coder.partial_response_content = ""  # Clear to prevent redundant message
 
         # Otherwise just let the conversation continue
+
+    def reply_completed(self) -> None:
+        """Process the architect's response and coordinate with editor/reviewer as needed."""
+        architect_response = self.partial_response_content
+        exchange = ArchitectExchange(architect_response)
+        exchange.handle_architect_response(self)
