@@ -112,7 +112,7 @@ class Coder:
     max_reflections = 3
     edit_format = None
     # Most coders produce code edits that must be auto-applied
-    # produces_code_edits = True
+    produces_code_edits = True
     yield_stream = False
     temperature = 0
     auto_lint = True
@@ -439,9 +439,7 @@ class Coder:
 
         max_inp_tokens = self.main_model.info.get("max_input_tokens") or 0
 
-        has_map_prompt = hasattr(self, "gpt_prompts") and self.gpt_prompts.repo_content_prefix
-
-        if use_repo_map and self.repo and has_map_prompt:
+        if use_repo_map and self.repo:
             self.repo_map = RepoMap(
                 map_tokens,
                 self.root,
