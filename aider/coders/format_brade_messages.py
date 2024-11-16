@@ -289,8 +289,9 @@ def format_brade_messages(
     done_messages: list[ChatMessage],
     cur_messages: list[ChatMessage],
     repo_map: str | None = None,
-    readonly_files: list[FileContent] | None = None,
-    editable_files: list[FileContent] | None = None,
+    readonly_text_files: list[FileContent] | None = None,
+    editable_text_files: list[FileContent] | None = None,
+    image_files: list[FileContent] | None = None,
     platform_info: str | None = None,
     task_instructions: str | None = None,
     task_examples: list[ChatMessage] | None = None,
@@ -306,12 +307,12 @@ def format_brade_messages(
 
     Args:
         system_prompt: Core system message defining role and context
-        example_messages: Example conversations demonstrating desired behavior
         done_messages: Previous conversation history
         cur_messages: Current conversation messages
         repo_map: Optional repository map showing structure and content
-        readonly_files: Optional list of (filename, content) tuples for reference files
-        editable_files: Optional list of (filename, content) tuples for files being edited
+        readonly_text_files: Optional list of (filename, content) tuples for reference text files
+        editable_text_files: Optional list of (filename, content) tuples for text files being edited
+        image_files: Optional list of (filename, content) tuples for image files
         platform_info: Optional system environment details
         task_instructions: Optional task-specific requirements and workflow guidance
         task_examples: Optional list of ChatMessages containing example conversations.
@@ -346,12 +347,12 @@ def format_brade_messages(
             context_parts.append(wrap_xml("repository_map", repo_map))
 
         # Add file sections if provided
-        if readonly_files:
-            files_xml = format_file_section(readonly_files)
+        if readonly_text_files:
+            files_xml = format_file_section(readonly_text_files)
             context_parts.append(wrap_xml("readonly_files", files_xml))
 
-        if editable_files:
-            files_xml = format_file_section(editable_files)
+        if editable_text_files:
+            files_xml = format_file_section(editable_text_files)
             context_parts.append(wrap_xml("editable_files", files_xml))
 
         # Add platform info if provided
@@ -383,6 +384,8 @@ def format_brade_messages(
             )
             + f"{task_examples_section}"
         )
+
+        # TODO: Add image files to the context message content
 
         messages.append({"role": "user", "content": context_message_content})
         messages.append({"role": "assistant", "content": "Understood."})

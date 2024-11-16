@@ -77,8 +77,8 @@ def test_basic_message_structure(
         done_messages=sample_done_messages,
         cur_messages=sample_cur_messages,
         repo_map=test_repo_map,
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
         platform_info=test_platform,
     )
 
@@ -216,8 +216,8 @@ def test_task_examples_integration() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         task_examples=examples,
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
         platform_info="Test platform info",
     )
 
@@ -254,8 +254,8 @@ def test_system_message_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         task_instructions=test_instructions,
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
     )
 
     # Verify system message position and uniqueness
@@ -275,8 +275,8 @@ def test_system_message_handling() -> None:
         system_prompt="",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
     )
     assert messages[0]["role"] == "system"
     assert messages[0]["content"] == ""
@@ -287,8 +287,8 @@ def test_system_message_handling() -> None:
             system_prompt=None,  # type: ignore
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            readonly_files=[],
-            editable_files=[],
+            readonly_text_files=[],
+            editable_text_files=[],
         )
 
 
@@ -309,8 +309,8 @@ def test_task_instructions_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         task_instructions=task_instructions,
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
         platform_info="Test platform info",
     )
 
@@ -331,8 +331,8 @@ def test_task_instructions_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         task_instructions="",
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
         platform_info="Test platform info",
     )
     context_msg = messages[-3]["content"]
@@ -345,8 +345,8 @@ def test_task_instructions_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         task_instructions=None,
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
         platform_info="Test platform info",
     )
     context_msg = messages[-3]["content"]
@@ -381,8 +381,8 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="",
-        readonly_files=[test_files[0]],  # test.py as readonly
-        editable_files=[test_files[1]],  # data.txt as editable
+        readonly_text_files=[test_files[0]],  # test.py as readonly
+        editable_text_files=[test_files[1]],  # data.txt as editable
         platform_info="Test platform info",
     )
 
@@ -408,8 +408,8 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="",
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
         platform_info="Test platform info",
     )
     final_msg = messages[-1]["content"]
@@ -422,8 +422,8 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="",
-        readonly_files=None,
-        editable_files=None,
+        readonly_text_files=None,
+        editable_text_files=None,
         platform_info="Test platform info",
     )
     final_msg = messages[-1]["content"]
@@ -447,8 +447,8 @@ def test_platform_info_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         platform_info=test_platform,
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
     )
 
     context_msg = messages[-3]["content"]
@@ -463,8 +463,8 @@ def test_platform_info_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         platform_info=None,
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
     )
     assert "<platform_info>" not in messages[-1]["content"]
 
@@ -489,8 +489,8 @@ def test_repo_map_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         repo_map=test_map,
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
     )
 
     context_msg = messages[-3]["content"]
@@ -512,8 +512,8 @@ def test_repo_map_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         repo_map="",
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
     )
     assert "<repository_map>" not in messages[-1]["content"]
 
@@ -523,8 +523,8 @@ def test_repo_map_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         repo_map=None,
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
     )
     assert "<repository_map>" not in messages[-1]["content"]
 
@@ -534,7 +534,7 @@ def test_repo_map_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         repo_map="   \n  \t  ",
-        readonly_files=[],
-        editable_files=[],
+        readonly_text_files=[],
+        editable_text_files=[],
     )
     assert "<repository_map>" not in messages[-1]["content"]

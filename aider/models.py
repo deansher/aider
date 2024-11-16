@@ -73,7 +73,6 @@ class ModelSettings:
     accepts_images: bool = False
     lazy: bool = False
     reminder: str = "user"
-    use_brade_prompt_structure: bool = False
     examples_as_sys_msg: bool = False
     extra_params: Optional[dict] = None
     cache_control: bool = False
@@ -276,7 +275,6 @@ MODEL_SETTINGS = [
         },
         cache_control=True,
         reminder="user",
-        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "anthropic/claude-3-5-sonnet-20240620",
@@ -295,7 +293,6 @@ MODEL_SETTINGS = [
         },
         cache_control=True,
         reminder="user",
-        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "anthropic/claude-3-5-sonnet-20241022",
@@ -314,7 +311,6 @@ MODEL_SETTINGS = [
         },
         cache_control=True,
         reminder="user",
-        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "claude-3-5-sonnet-20241022",
@@ -333,7 +329,6 @@ MODEL_SETTINGS = [
         },
         cache_control=True,
         reminder="user",
-        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "anthropic/claude-3-haiku-20240307",
@@ -373,7 +368,6 @@ MODEL_SETTINGS = [
         },
         reminder="user",
         cache_control=True,
-        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "openrouter/anthropic/claude-3.5-sonnet:beta",
@@ -389,7 +383,6 @@ MODEL_SETTINGS = [
         },
         reminder="user",
         cache_control=True,
-        use_brade_prompt_structure=True,
     ),
     # Vertex AI Claude models
     # Does not yet support 8k token
@@ -406,7 +399,6 @@ MODEL_SETTINGS = [
             "max_tokens": 8192,
         },
         reminder="user",
-        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "vertex_ai/claude-3-5-sonnet-v2@20241022",
@@ -421,7 +413,6 @@ MODEL_SETTINGS = [
             "max_tokens": 8192,
         },
         reminder="user",
-        use_brade_prompt_structure=True,
     ),
     ModelSettings(
         "vertex_ai/claude-3-opus@20240229",
@@ -803,7 +794,6 @@ class Model(ModelSettings):
         if "claude-3.5" in model or "claude-3-5" in model:
             self.edit_format = "diff"
             self.use_repo_map = True
-            self.use_brade_prompt_structure = True
             self.reminder = None
             self.accepts_images = True
 
