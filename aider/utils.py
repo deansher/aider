@@ -334,34 +334,39 @@ def check_pip_install_extra(io, module, prompt, pip_install_cmd, self_update=Fal
 
     cmd = get_pip_install(pip_install_cmd)
 
-    if prompt:
-        io.tool_warning(prompt)
-
-    if self_update and platform.system() == "Windows":
-        io.tool_output("Run this command to update:")
-        print()
-        print(printable_shell_command(cmd))  # plain print so it doesn't line-wrap
-        return
-
-    if not io.confirm_ask("Run pip install?", default="y", subject=printable_shell_command(cmd)):
-        return
-
-    success, output = run_install(cmd)
-    if success:
-        if not module:
-            return True
-        try:
-            __import__(module)
-            return True
-        except (ImportError, ModuleNotFoundError, RuntimeError) as err:
-            io.tool_error(str(err))
-            pass
-
-    io.tool_error(output)
-
+    io.tool_output("Run this command to update:")
     print()
-    print("Install failed, try running this command manually:")
-    print(printable_shell_command(cmd))
+    print(printable_shell_command(cmd))  # plain print so it doesn't line-wrap
+    return
+
+    # if prompt:
+    #     io.tool_warning(prompt)
+
+    # if self_update and platform.system() == "Windows":
+    #     io.tool_output("Run this command to update:")
+    #     print()
+    #     print(printable_shell_command(cmd))  # plain print so it doesn't line-wrap
+    #     return
+
+    # if not io.confirm_ask("Run pip install?", default="y", subject=printable_shell_command(cmd)):
+    #     return
+
+    # success, output = run_install(cmd)
+    # if success:
+    #     if not module:
+    #         return True
+    #     try:
+    #         __import__(module)
+    #         return True
+    #     except (ImportError, ModuleNotFoundError, RuntimeError) as err:
+    #         io.tool_error(str(err))
+    #         pass
+
+    # io.tool_error(output)
+
+    # print()
+    # print("Install failed, try running this command manually:")
+    # print(printable_shell_command(cmd))
 
 
 def printable_shell_command(cmd_list):
