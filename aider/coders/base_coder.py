@@ -1428,7 +1428,7 @@ class Coder:
 
         # Update the current observation with a more specific name based on the coder class
         langfuse_context.update_current_observation(
-            name=f"{self.__class__.__name__}-process-user-message"
+            name=f"{self.__class__.__name__}-{purpose}"
         )
 
         self.io.log_llm_history("TO LLM", self._format_brade_messages())
