@@ -140,7 +140,7 @@ def send_completion(
     stream,
     temperature=0,
     extra_params=None,
-    purpose="llm-completion",
+    purpose="send-completion",
 ):
     """
     Send a completion request to the language model and handle the response.
