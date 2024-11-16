@@ -216,7 +216,7 @@ def _send_completion_to_litellm(
     stream,
     temperature=0,
     extra_params=None,
-    purpose="send-completion",
+    purpose="(unlabeled)",
 ):
     """
     Sends the completion request to litellm.completion and handles the response.
