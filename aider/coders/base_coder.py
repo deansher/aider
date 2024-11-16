@@ -1127,7 +1127,7 @@ class Coder:
             dict(role="user", content=new_user_message),
         ]
 
-        messages = self._format_brade_messages()
+        prompt_messages = self._format_brade_messages()
 
         if self.verbose:
             utils.show_messages(prompt_messages, functions=self.functions)
