@@ -347,11 +347,13 @@ pip install pip-tools
 ./scripts/pip-compile.sh
 ```
 
-You can also pass one argument to `pip-compile.sh`, which will flow through to `pip-compile`. For example:
+If you want to upgrade all dependencies, use the `--upgrade` flag:
 
 ```
 ./scripts/pip-compile.sh --upgrade
 ```
+
+Given pip's limitations, it is wise to create a fresh venv after upgrading dependencies. (And you may want to consider doing so after adding a dependency.)
 
 ### Pre-commit Hooks
 
