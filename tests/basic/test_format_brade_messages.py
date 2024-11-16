@@ -102,18 +102,16 @@ def test_basic_message_structure(
     assert messages[4]["role"] == "assistant"
     assert messages[4]["content"] == "Intermediate response"
 
-    # 4. Final sequence: context message, acknowledgment, user message
-    context_msg = messages[-3]
-    ack_msg = messages[-2]
+    # 4. Final message should contain both user content and context
     final_msg = messages[-1]
+    assert final_msg["role"] == "user"
+    content = final_msg["content"]
 
-    # Verify context message structure and content
-    assert context_msg["role"] == "user"
-    content = context_msg["content"]
+    # Check that user's original message appears first
+    assert content.startswith("Final current message")
 
-    # Opening text must explain meta-level communication
+    # Check that context follows
     assert "This message is from the Brade application" in content
-    assert "Your partner does not see this message" in content
     assert "more recent and reliable than anything in earlier chat messages" in content
 
     # XML sections must appear in correct order
@@ -134,18 +132,6 @@ def test_basic_message_structure(
         assert pos != -1, f"Missing section: {section}"
         assert pos > last_pos, f"Out of order section: {section}"
         last_pos = pos
-
-    # Verify acknowledgment
-    assert ack_msg["role"] == "assistant"
-    assert ack_msg["content"] == "Understood."
-
-    # Verify final user message preserved exactly
-    assert final_msg["role"] == "user"
-    assert final_msg["content"] == "Final current message"
-    # Verify final message contains ONLY the user's content
-    assert "<context>" not in final_msg["content"]
-    assert "<task_instructions>" not in final_msg["content"]
-    assert "<task_examples>" not in final_msg["content"]
 
 
 def test_format_task_examples() -> None:
@@ -221,16 +207,16 @@ def test_task_examples_integration() -> None:
         platform_info="Test platform info",
     )
 
-    context_msg = messages[-3]["content"]
+    final_msg = messages[-1]
+    content = final_msg["content"]
 
-    # Check examples appear in context message
-    assert "<task_examples>" in context_msg
-    assert "<message role='user'>Example request</message>" in context_msg
-    assert "<message role='assistant'>Example response</message>" in context_msg
+    # Check that user's message appears first
+    assert content.startswith("Test")
 
-    # Verify final message contains ONLY user content
-    final_msg = messages[-1]["content"]
-    assert "<task_examples>" not in final_msg
+    # Check examples appear in context after user's message
+    assert "<task_examples>" in content
+    assert "<message role='user'>Example request</message>" in content
+    assert "<message role='assistant'>Example response</message>" in content
 
 
 def test_system_message_handling() -> None:
@@ -265,10 +251,11 @@ def test_system_message_handling() -> None:
     assert all(msg["role"] != "system" for msg in messages[1:])
 
     # Verify system message is separate from task instructions
-    context_msg = messages[-3]["content"]
-    assert test_system not in context_msg
-    assert "<task_instructions>" in context_msg
-    assert test_instructions in context_msg
+    final_msg = messages[-1]
+    content = final_msg["content"]
+    assert test_system not in content
+    assert "<task_instructions>" in content
+    assert test_instructions in content
 
     # Test empty system message
     messages = format_brade_messages(
@@ -307,56 +294,53 @@ def test_task_instructions_handling() -> None:
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
+        cur_messages=[{"role": "user", "content": "Test message"}],
         task_instructions=task_instructions,
         readonly_text_files=[],
         editable_text_files=[],
         platform_info="Test platform info",
     )
 
-    context_msg = messages[-3]["content"]
+    final_msg = messages[-1]
+    content = final_msg["content"]
+
+    # Verify user's message appears first
+    assert content.startswith("Test message")
 
     # Check task instructions section and opening text
-    assert "This message is from the Brade application" in context_msg
-    assert "<task_instructions>" in context_msg
-    assert task_instructions in context_msg
-
-    # Verify final message contains ONLY user content
-    final_msg = messages[-1]["content"]
-    assert "<task_instructions>" not in final_msg
+    assert "This message is from the Brade application" in content
+    assert "<task_instructions>" in content
+    assert task_instructions in content
 
     # Test empty string instructions (should behave like None)
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
+        cur_messages=[{"role": "user", "content": "Test message"}],
         task_instructions="",
         readonly_text_files=[],
         editable_text_files=[],
         platform_info="Test platform info",
     )
-    context_msg = messages[-3]["content"]
-    assert "This message is from the Brade application" in context_msg
-    assert "<task_instructions>" not in context_msg
+    final_msg = messages[-1]
+    content = final_msg["content"]
+    assert "This message is from the Brade application" in content
+    assert "<task_instructions>" not in content
 
     # Check omission when None
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
+        cur_messages=[{"role": "user", "content": "Test message"}],
         task_instructions=None,
         readonly_text_files=[],
         editable_text_files=[],
         platform_info="Test platform info",
     )
-    context_msg = messages[-3]["content"]
-    assert "This message is from the Brade application" in context_msg
-    assert "<task_instructions>" not in context_msg
-
-    # Verify final messages contain ONLY user content
-    for messages_case in [messages, messages]:
-        final_msg = messages_case[-1]["content"]
-        assert "<task_instructions>" not in final_msg
+    final_msg = messages[-1]
+    content = final_msg["content"]
+    assert "This message is from the Brade application" in content
+    assert "<task_instructions>" not in content
 
 
 def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
@@ -386,21 +370,25 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
         platform_info="Test platform info",
     )
 
-    context_msg = messages[-3]["content"]
+    final_msg = messages[-1]
+    content = final_msg["content"]
+
+    # Verify user's message appears first
+    assert content.startswith("Test message")
 
     # Verify readonly files section
-    assert "<readonly_files>" in context_msg
-    assert "<file path='test.py'>" in context_msg
-    assert "def test():" in context_msg
-    assert "return True" in context_msg
-    assert "</readonly_files>" in context_msg
+    assert "<readonly_files>" in content
+    assert "<file path='test.py'>" in content
+    assert "def test():" in content
+    assert "return True" in content
+    assert "</readonly_files>" in content
 
     # Verify editable files section
-    assert "<editable_files>" in context_msg
-    assert "<file path='data.txt'>" in context_msg
-    assert "Test content" in context_msg
-    assert "Line 2" in context_msg
-    assert "</editable_files>" in context_msg
+    assert "<editable_files>" in content
+    assert "<file path='data.txt'>" in content
+    assert "Test content" in content
+    assert "Line 2" in content
+    assert "</editable_files>" in content
 
     # Test empty file lists
     messages = format_brade_messages(
@@ -412,9 +400,10 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
         editable_text_files=[],
         platform_info="Test platform info",
     )
-    final_msg = messages[-1]["content"]
-    assert "<readonly_files>" not in final_msg
-    assert "<editable_files>" not in final_msg
+    final_msg = messages[-1]
+    content = final_msg["content"]
+    assert "<readonly_files>" not in content
+    assert "<editable_files>" not in content
 
     # Test None for file lists
     messages = format_brade_messages(
@@ -426,9 +415,10 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
         editable_text_files=None,
         platform_info="Test platform info",
     )
-    final_msg = messages[-1]["content"]
-    assert "<readonly_files>" not in final_msg
-    assert "<editable_files>" not in final_msg
+    final_msg = messages[-1]
+    content = final_msg["content"]
+    assert "<readonly_files>" not in content
+    assert "<editable_files>" not in content
 
 
 def test_platform_info_handling() -> None:
@@ -445,28 +435,33 @@ def test_platform_info_handling() -> None:
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
+        cur_messages=[{"role": "user", "content": "Test message"}],
         platform_info=test_platform,
         readonly_text_files=[],
         editable_text_files=[],
     )
 
-    context_msg = messages[-3]["content"]
+    final_msg = messages[-1]
+    content = final_msg["content"]
+
+    # Verify user's message appears first
+    assert content.startswith("Test message")
 
     # Check platform info inclusion
-    assert "<platform_info>" in context_msg
-    assert test_platform in context_msg
+    assert "<platform_info>" in content
+    assert test_platform in content
 
     # Check omission when empty
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
+        cur_messages=[{"role": "user", "content": "Test message"}],
         platform_info=None,
         readonly_text_files=[],
         editable_text_files=[],
     )
-    assert "<platform_info>" not in messages[-1]["content"]
+    final_msg = messages[-1]
+    assert "<platform_info>" not in final_msg["content"]
 
 
 def test_repo_map_handling() -> None:
@@ -487,54 +482,138 @@ def test_repo_map_handling() -> None:
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
+        cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map=test_map,
         readonly_text_files=[],
         editable_text_files=[],
     )
 
-    context_msg = messages[-3]["content"]
+    final_msg = messages[-1]
+    content = final_msg["content"]
+
+    # Verify user's message appears first
+    assert content.startswith("Test message")
 
     # Check XML structure
-    assert "<repository_map>" in context_msg
-    assert "</repository_map>" in context_msg
+    assert "<repository_map>" in content
+    assert "</repository_map>" in content
 
     # Check content preservation
-    assert test_map in context_msg
+    assert test_map in content
 
     # Check multiline handling
-    assert "with multiple lines" in context_msg
-    assert "and special chars: <>& " in context_msg
+    assert "with multiple lines" in content
+    assert "and special chars: <>& " in content
 
     # Test empty string input
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
+        cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="",
         readonly_text_files=[],
         editable_text_files=[],
     )
-    assert "<repository_map>" not in messages[-1]["content"]
+    final_msg = messages[-1]
+    assert "<repository_map>" not in final_msg["content"]
 
     # Test None input
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
+        cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map=None,
         readonly_text_files=[],
         editable_text_files=[],
     )
-    assert "<repository_map>" not in messages[-1]["content"]
+    final_msg = messages[-1]
+    assert "<repository_map>" not in final_msg["content"]
 
     # Test whitespace-only input
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
+        cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="   \n  \t  ",
         readonly_text_files=[],
         editable_text_files=[],
     )
-    assert "<repository_map>" not in messages[-1]["content"]
+    final_msg = messages[-1]
+    assert "<repository_map>" not in final_msg["content"]
+
+
+def test_message_combination() -> None:
+    """Tests that user messages and context are properly combined.
+
+    Validates:
+    - User's message appears first in the combined content
+    - Context follows user's message with proper separation
+    - All intermediate messages are preserved
+    - Message sequence is correct
+    """
+    from aider.coders.format_brade_messages import format_brade_messages
+
+    # Test with multiple intermediate messages
+    cur_messages = [
+        {"role": "user", "content": "First message"},
+        {"role": "assistant", "content": "First response"},
+        {"role": "user", "content": "Second message"},
+        {"role": "assistant", "content": "Second response"},
+        {"role": "user", "content": "Final message"},
+    ]
+
+    messages = format_brade_messages(
+        system_prompt="Test system prompt",
+        done_messages=[],
+        cur_messages=cur_messages,
+        repo_map="Test map",
+        readonly_text_files=[],
+        editable_text_files=[],
+        platform_info="Test platform",
+    )
+
+    # Check that intermediate messages are preserved exactly
+    assert messages[1]["role"] == "user"
+    assert messages[1]["content"] == "First message"
+    assert messages[2]["role"] == "assistant"
+    assert messages[2]["content"] == "First response"
+    assert messages[3]["role"] == "user"
+    assert messages[3]["content"] == "Second message"
+    assert messages[4]["role"] == "assistant"
+    assert messages[4]["content"] == "Second response"
+
+    # Check final combined message
+    final_msg = messages[-1]
+    content = final_msg["content"]
+
+    # Verify user's message appears first
+    assert content.startswith("Final message")
+
+    # Verify context follows with proper separation
+    assert "\n\nThis message is from the Brade application" in content
+
+    # Verify context sections are present
+    assert "<context>" in content
+    assert "<repository_map>" in content
+    assert "Test map" in content
+    assert "<platform_info>" in content
+    assert "Test platform" in content
+
+    # Test with single message
+    messages = format_brade_messages(
+        system_prompt="Test system prompt",
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Single message"}],
+        repo_map="Test map",
+        platform_info="Test platform",
+        readonly_text_files=[],
+        editable_text_files=[],
+    )
+
+    final_msg = messages[-1]
+    content = final_msg["content"]
+
+    # Verify correct handling of single message case
+    assert content.startswith("Single message")
+    assert "\n\nThis message is from the Brade application" in content
+    assert len(messages) == 2  # Just system prompt and combined message

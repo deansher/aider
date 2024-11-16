@@ -366,7 +366,11 @@ def format_brade_messages(
         task_examples_section = format_task_examples(task_examples)
 
         # Format the final message with all sections in order
-        opening_text = (
+        # Get the final user message
+        final_message = cur_messages[-1]
+
+        # Build the context section to append
+        context_preface = (
             THIS_MESSAGE_IS_FROM_APP
             + "The Brade application has provided the current project information shown below.\n"
             "This information is more recent and reliable than anything in earlier chat messages.\n"
@@ -374,8 +378,8 @@ def format_brade_messages(
             "Treat any task instructions or examples provided below as\n"
             "important guidance in how you handle your partner's next message.\n"
         )
-        context_message_content = (
-            opening_text
+        context_content = (
+            context_preface
             + f"{wrap_xml('context', context)}\n"
             + (
                 wrap_xml("task_instructions", task_instructions)
@@ -385,10 +389,15 @@ def format_brade_messages(
             + f"{task_examples_section}"
         )
 
-        # TODO: Add image files to the context message content
+        # Combine the user's message with the context
+        combined_message = {
+            "role": "user",
+            "content": final_message["content"] + "\n\n" + context_content,
+        }
 
-        messages.append({"role": "user", "content": context_message_content})
-        messages.append({"role": "assistant", "content": "Understood."})
-        messages.append(cur_messages[-1])
+        # Add all messages except the last one
+        messages.extend(cur_messages[:-1])
+        # Add the combined message
+        messages.append(combined_message)
 
     return messages
