@@ -179,6 +179,13 @@ def goodbye(name):
 ```
 """
 
+THIS_MESSAGE_IS_FROM_APP = (
+    """This message is from the Brade application, rather than from your partner.
+Your partner does not see this message.
+
+"""
+)
+
 
 def format_task_examples(task_examples: list[ChatMessage] | None) -> str:
     """Formats task example messages into XML structure.
@@ -359,10 +366,8 @@ def format_brade_messages(
 
         # Format the final message with all sections in order
         opening_text = (
-            "This message is from the Brade application, not from your partner.\n"
-            "Your partner does not see this message or your response to it.\n"
-            "\n"
-            "The Brade application has provided the current project information shown below.\n"
+            THIS_MESSAGE_IS_FROM_APP
+            + "The Brade application has provided the current project information shown below.\n"
             "This information is more recent and reliable than anything in earlier chat messages.\n"
             "\n"
             "Treat any task instructions or examples provided below as\n"

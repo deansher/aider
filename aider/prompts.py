@@ -5,6 +5,8 @@
 
 # Conventional Commits text adapted from:
 # https://www.conventionalcommits.org/en/v1.0.0/#summary
+from aider.coders.format_brade_messages import THIS_MESSAGE_IS_FROM_APP
+
 commit_system = """You are an expert software engineer that generates concise, \
 one-line Git commit messages based on the provided diffs.
 Review the provided context and diffs which are about to be committed to a git repo.
@@ -23,14 +25,17 @@ or line breaks.
 """
 
 # COMMANDS
-undo_command_reply = """<SYSTEM> Your partner had us discard the last edits. We did this with `git reset --hard HEAD~1`.
+undo_command_reply = (
+    THIS_MESSAGE_IS_FROM_APP
+    + """Your partner had us discard the last edits. We did this with `git reset --hard HEAD~1`.
 Please wait for further instructions before attempting that change again. You may choose to ask
 your partner why they discarded the edits.
 """
+)
 
-added_files = """<SYSTEM> Your partner added these files to the chat: {fnames}\nTell them if you need additional files.
+added_files = THIS_MESSAGE_IS_FROM_APP + """Your partner added these files to the chat: {fnames}
+Tell them if you need additional files.
 """
-
 
 run_output = """I ran this command:
 

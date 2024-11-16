@@ -2,6 +2,8 @@
 
 from llm_multiple_choice import ChoiceManager
 
+from aider.coders.format_brade_messages import THIS_MESSAGE_IS_FROM_APP
+
 from .base_prompts import CoderPrompts
 
 # Define the choice manager for analyzing architect responses
@@ -106,7 +108,8 @@ You will satisfy your partner's request in two steps:
     )
 
     files_no_full_files = (
-        "<SYSTEM> Your partner has not shared the full contents of any files with you yet."
+        THIS_MESSAGE_IS_FROM_APP
+        + "Your partner has not shared the full contents of any files with you yet."
     )
 
     files_no_full_files_with_repo_map = ""

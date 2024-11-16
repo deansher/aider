@@ -21,7 +21,7 @@ class ArchitectCoder(AskCoder):
         architect_response_codes = analyze_assistant_response(
             possible_architect_responses,
             (
-                "<SYSTEM> Which one of the following choices best characterizes the assistant"
+                "Which one of the following choices best characterizes the assistant"
                 " response shown below?"
             ),
             self.main_model.name,
