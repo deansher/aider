@@ -95,24 +95,6 @@ class TestCoder(unittest.TestCase):
             self.assertTrue(coder.allowed_to_edit("added.txt"))
             self.assertTrue(coder.need_commit_before_edits)
 
-    def test_get_files_content(self):
-        tempdir = Path(tempfile.mkdtemp())
-
-        file1 = tempdir / "file1.txt"
-        file2 = tempdir / "file2.txt"
-
-        file1.touch()
-        file2.touch()
-
-        files = [file1, file2]
-
-        # Initialize the Coder object with the mocked IO and mocked repo
-        coder = Coder.create(self.GPT35, None, io=InputOutput(), fnames=files)
-
-        content = coder.get_files_content().splitlines()
-        self.assertIn("## file1.txt", content)
-        self.assertIn("## file2.txt", content)
-
     def test_check_for_filename_mentions(self):
         with GitTemporaryDirectory():
             repo = git.Repo()

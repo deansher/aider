@@ -592,26 +592,6 @@ class Coder:
 
         return
 
-    def _format_file_content(self, fname, content):
-        """Helper method to consistently format file content with markdown."""
-        relative_fname = self.get_rel_fname(fname)
-        return f"\n## {relative_fname}\n{self.fence[0]}\n{content}{self.fence[1]}\n"
-
-    def get_files_content(self, fnames=None):
-        if not fnames:
-            fnames = self.abs_fnames
-
-        prompt = ""
-        file_count = 0
-        for fname, content in self.get_abs_fnames_content():
-            if not is_image_file(fname):
-                if file_count == 0:
-                    prompt += "\n# Source Files\n"
-                prompt += self._format_file_content(fname, content)
-                file_count += 1
-
-        return prompt
-
     def get_read_only_files_content(self):
         prompt = ""
         for fname in self.abs_read_only_fnames:
