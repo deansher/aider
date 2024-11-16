@@ -1092,7 +1092,7 @@ class Coder:
             task_examples=task_examples,
         )
 
-    @observe()
+    @observe
     def send_message(self, new_user_message):
         """Core method that processes user input and manages the LLM interaction flow.
 
@@ -1123,6 +1123,10 @@ class Coder:
         - Keyboard interrupts
         - Reflection requests
         """
+        user_message_prefix = new_user_message[:10] + " ..."
+        langfuse_context.update_current_observation(
+            name=f"{self.__class__.__name__} user message: {user_message_prefix}"
+        )
         self.cur_messages += [
             dict(role="user", content=new_user_message),
         ]
@@ -1426,11 +1430,6 @@ class Coder:
         self.partial_response_content = ""
         self.partial_response_function_call = dict()
 
-        # Update the current observation with a more specific name based on the coder class
-        langfuse_context.update_current_observation(
-            name=f"{self.__class__.__name__}-{purpose}"
-        )
-
         self.io.log_llm_history("TO LLM", self._format_brade_messages())
 
         if self.main_model.use_temperature:
@@ -1447,7 +1446,7 @@ class Coder:
                 self.stream,
                 temp,
                 extra_params=model.extra_params,
-                purpose="process-user-message",
+                purpose="user message",
             )
             self.chat_completion_call_hashes.append(hash_object.hexdigest())
 

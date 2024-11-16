@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 
 import backoff
 from langfuse.decorators import observe, langfuse_context
@@ -7,6 +8,9 @@ from langfuse.decorators import observe, langfuse_context
 from llm_multiple_choice import DisplayFormat
 
 from aider.llm import litellm
+
+
+logger = logging.getLogger(__name__)
 
 
 def is_anthropic_model(model_name):
@@ -303,7 +307,7 @@ def analyze_chat_situation(
         stream=False,
         temperature=0,
         extra_params=extra_params,
-        purpose="analyze-chat-situation",
+        purpose="analyze chat",
     )
     content = response.choices[0].message.content
     return choice_manager.validate_choices_response(content)
@@ -350,14 +354,14 @@ def analyze_assistant_response(
         stream=False,
         temperature=0,
         extra_params=extra_params,
-        purpose="analyze-assistant-response",
+        purpose="analyze assistant response",
     )
     content = response.choices[0].message.content
     return choice_manager.validate_choices_response(content)
 
 
 @lazy_litellm_retry_decorator
-def simple_send_with_retries(model_name, messages, extra_params=None):
+def simple_send_with_retries(model_name, messages, extra_params=None, purpose="send with retries"):
     try:
         kwargs = {
             "model_name": model_name,
@@ -371,5 +375,5 @@ def simple_send_with_retries(model_name, messages, extra_params=None):
         _hash, response = send_completion(**kwargs)
         return response.choices[0].message.content
     except (AttributeError, litellm.exceptions.BadRequestError):
-        return
-        return
+        logger.exception(f"Error sending completion to {model_name}", exc_info=True)
+        raise
