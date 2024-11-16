@@ -238,8 +238,10 @@ def _send_completion_to_litellm(
         - It adapts its behavior based on whether streaming is enabled or not.
         - The `@observe` decorator captures input and output for Langfuse.
     """
+    # Use the provided purpose as the name, or fall back to a default
     langfuse_context.update_current_observation(
-        name=str(purpose or "llm-chat-completion"))
+        name=str(purpose or "llm-chat-completion")
+    )
 
     kwargs = dict(
         model=model_name,

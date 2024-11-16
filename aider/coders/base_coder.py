@@ -1092,7 +1092,7 @@ class Coder:
             task_examples=task_examples,
         )
 
-    @observe(name="process-user-message")
+    @observe()
     def send_message(self, new_user_message):
         """Core method that processes user input and manages the LLM interaction flow.
 
@@ -1425,6 +1425,11 @@ class Coder:
 
         self.partial_response_content = ""
         self.partial_response_function_call = dict()
+
+        # Update the current observation with a more specific name based on the coder class
+        langfuse_context.update_current_observation(
+            name=f"{self.__class__.__name__}-process-user-message"
+        )
 
         self.io.log_llm_history("TO LLM", self._format_brade_messages())
 
