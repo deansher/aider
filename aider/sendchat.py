@@ -135,7 +135,7 @@ def send_completion(
     stream,
     temperature=0,
     extra_params=None,
-    purpose=None,
+    purpose="llm-completion",
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -295,6 +295,7 @@ def analyze_chat_situation(
         stream=False,
         temperature=0,
         extra_params=extra_params,
+        purpose="analyze-chat-situation",
     )
     content = response.choices[0].message.content
     return choice_manager.validate_choices_response(content)
@@ -341,6 +342,7 @@ def analyze_assistant_response(
         stream=False,
         temperature=0,
         extra_params=extra_params,
+        purpose="analyze-assistant-response",
     )
     content = response.choices[0].message.content
     return choice_manager.validate_choices_response(content)
@@ -355,6 +357,7 @@ def simple_send_with_retries(model_name, messages, extra_params=None):
             "functions": None,
             "stream": False,
             "extra_params": extra_params,
+            "purpose": "simple-send-with-retries",
         }
 
         _hash, response = send_completion(**kwargs)

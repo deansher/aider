@@ -1442,6 +1442,7 @@ class Coder:
                 self.stream,
                 temp,
                 extra_params=model.extra_params,
+                purpose="process-user-message",
             )
             self.chat_completion_call_hashes.append(hash_object.hexdigest())
 
