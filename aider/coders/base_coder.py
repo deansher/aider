@@ -2029,7 +2029,7 @@ class Coder:
         """
         return
 
-    @observe
+    @observe(name="execute-shell-commands")
     def run_shell_commands(self):
         if not self.suggest_shell_commands:
             return ""
