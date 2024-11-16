@@ -1092,7 +1092,7 @@ class Coder:
             task_examples=task_examples,
         )
 
-    @observe()
+    @observe(name="process-user-message")
     def send_message(self, new_user_message):
         """Core method that processes user input and manages the LLM interaction flow.
 
