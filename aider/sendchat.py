@@ -135,6 +135,7 @@ def send_completion(
     stream,
     temperature=0,
     extra_params=None,
+    purpose=None,
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -193,6 +194,7 @@ def send_completion(
         stream=stream,
         temperature=temperature,
         extra_params=extra_params,
+        purpose=purpose,
     )
 
     if not stream and CACHE is not None:
@@ -201,7 +203,7 @@ def send_completion(
     return hash_object, res
 
 
-@observe(name="llm-completion", as_type="generation")
+@observe(name=lambda kwargs: kwargs.get("purpose") or "llm-completion", as_type="generation")
 def _send_completion_to_litellm(
     model_name,
     messages,
@@ -209,6 +211,7 @@ def _send_completion_to_litellm(
     stream,
     temperature=0,
     extra_params=None,
+    purpose=None,
 ):
     """
     Sends the completion request to litellm.completion and handles the response.
