@@ -2,7 +2,8 @@ import hashlib
 import json
 
 import backoff
-from langfuse.decorators import observe
+from langfuse.decorators import observe, langfuse_context
+
 from llm_multiple_choice import DisplayFormat
 
 from aider.llm import litellm
@@ -203,7 +204,7 @@ def send_completion(
     return hash_object, res
 
 
-@observe(name=lambda kwargs: kwargs.get("purpose") or "llm-completion", as_type="generation")
+@observe(as_type="generation")
 def _send_completion_to_litellm(
     model_name,
     messages,
@@ -211,7 +212,7 @@ def _send_completion_to_litellm(
     stream,
     temperature=0,
     extra_params=None,
-    purpose=None,
+    purpose="llm-completion",
 ):
     """
     Sends the completion request to litellm.completion and handles the response.
@@ -226,6 +227,8 @@ def _send_completion_to_litellm(
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Defaults to 0.
         extra_params (dict, optional): Additional parameters to pass to the model. Defaults to None.
+        purpose (str, optional): The purpose of this completion, used as the name in Langfuse.
+                               Defaults to "llm-completion".
 
     Returns:
         res: The model's response object.
@@ -235,6 +238,11 @@ def _send_completion_to_litellm(
         - It adapts its behavior based on whether streaming is enabled or not.
         - The `@observe` decorator captures input and output for Langfuse.
     """
+    # Set the name for the current observation
+    langfuse_context.update_current_observation(
+        name=str(purpose or "llm-completion")
+    )
+
     kwargs = dict(
         model=model_name,
         messages=messages,
