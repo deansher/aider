@@ -284,6 +284,23 @@ def _send_completion_to_litellm(
 
         langfuse_context.update_current_observation(usage=usage)
 
+    # Extract usage information from the completion response
+    if hasattr(res, "usage"):
+        usage = {
+            "input": res.usage.prompt_tokens,
+            "output": res.usage.completion_tokens,
+            "unit": "TOKENS"
+        }
+        
+        # Add cost information if available
+        if hasattr(res.usage, "total_cost"):
+            usage["total_cost"] = res.usage.total_cost
+        elif hasattr(res.usage, "completion_cost") and hasattr(res.usage, "prompt_cost"):
+            usage["input_cost"] = res.usage.prompt_cost
+            usage["output_cost"] = res.usage.completion_cost
+
+        langfuse_context.update_current_observation(usage=usage)
+
     return res
 
 
