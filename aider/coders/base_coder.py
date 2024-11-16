@@ -18,7 +18,7 @@ from datetime import datetime
 from json.decoder import JSONDecodeError
 from pathlib import Path
 
-from langfuse.decorators import observe, langfuse_context
+from langfuse.decorators import langfuse_context, observe
 
 from aider import __version__, models, prompts, urls, utils
 from aider.coders.format_brade_messages import format_brade_messages
@@ -1092,7 +1092,6 @@ class Coder:
             task_examples=task_examples,
         )
 
-    @observe(name="execute-shell-commands")
     def send_message(self, new_user_message):
         """Core method that processes user input and manages the LLM interaction flow.
 
