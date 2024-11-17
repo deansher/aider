@@ -8,7 +8,7 @@ class EditorEditBlockPrompts(EditBlockPrompts):
     def task_instructions(self) -> str:
         """Task-specific instructions for the edit block workflow."""
         return """
-Make file changes to implement the step that you and your partner have agreeed you will take.
+Make file changes to implement the step that you and your partner have agreed you will take.
 Make each change by producing a *SEARCH/REPLACE block* as instructed below. 
 You must use precisely this format. Study the <task_examples>...</task_examples>
 to ensure that you understand it.
