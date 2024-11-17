@@ -389,6 +389,7 @@ of the project. This information is more recent and reliable than anything in ea
         )
         context_content = (
             context_preface
+            + "\n"
             + f"{wrap_xml('context', context)}\n"
             + (
                 wrap_xml("task_instructions", task_instructions)
