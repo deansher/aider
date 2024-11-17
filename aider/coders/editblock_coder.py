@@ -147,7 +147,25 @@ def perfect_replace(whole_lines, part_lines, replace_lines):
 
 
 def replace_most_similar_chunk(whole, part, replace):
-    """Best efforts to find the `part` lines in `whole` and replace them with `replace`"""
+    """Best efforts to find the `part` lines in `whole` and replace them with `replace`.
+    
+    The code is more flexible than what we tell the model about matching:
+    
+    1. Perfect match - tries for exact character-by-character match first
+    
+    2. Whitespace flexibility:
+    - Handles mismatched leading whitespace
+    - Can match content with different indentation levels
+    
+    3. Elided content with "...":
+    - Supports matching across elided sections marked with ...
+    - The ... must match exactly between search and replace sections
+    - The non-elided chunks must match exactly
+    
+    4. Empty search sections:
+    - Allowed for new files
+    - Results in appending content to existing files
+    """
 
     whole, whole_lines = prep(whole)
     part, part_lines = prep(part)
@@ -395,6 +413,20 @@ missing_filename_err = (
 
 
 def strip_filename(filename, fence):
+    """Clean up a filename from various allowed formats.
+    
+    The code is flexible about filename formatting:
+    - Can have trailing colons (stripped)
+    - Can have leading # (stripped) 
+    - Can have surrounding backticks (stripped)
+    - Can have surrounding asterisks (stripped)
+    - Can be preceded by multiple fences
+    - Can be the basename of a valid file path
+    - Can be a fuzzy match to a valid file path
+    
+    Returns:
+        The cleaned filename or None if invalid
+    """
     filename = filename.strip()
 
     if filename == "...":
@@ -417,6 +449,36 @@ def strip_filename(filename, fence):
 
 
 def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None):
+    """Parse search/replace blocks from the content.
+
+    The actual requirements for search/replace blocks are more flexible than what we tell the model:
+
+    File Path Requirements:
+    - Must be alone on a line before the opening fence
+    - Can be stripped of trailing colons, leading #, and surrounding backticks/asterisks
+    - For new files, an empty SEARCH section is allowed
+    - The path can be relative to project root
+    - The path must be valid (either match an existing file or be a new file path)
+
+    Block Structure Requirements:
+    - Opening fence (e.g. ```python) - language specifier is optional
+    - "<<<<<<< SEARCH" line (5+ < characters)
+    - Search content (can be empty for new files)
+    - "=======" line (5+ = characters)
+    - Replace content
+    - ">>>>>>> REPLACE" line (5+ > characters)
+    - Closing fence (```)
+
+    Search Content Requirements:
+    - For existing files, must match exactly (including whitespace)
+    - Exception: The code has special handling for leading whitespace mismatches
+    - Exception: Can handle "..." lines that match between search and replace sections
+
+    Multiple Blocks:
+    - Multiple blocks for the same file are allowed
+    - Each block is processed independently
+    - Only the first match in a file is replaced
+    """
     lines = content.splitlines(keepends=True)
     i = 0
     current_filename = None
