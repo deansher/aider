@@ -242,12 +242,20 @@ def _send_completion_to_litellm(
                                Defaults to "llm-completion".
 
     Returns:
-        res: The model's response object.
+        res: The model's response object. When stream=True, returns a streaming response object
+             that can be iterated over to get chunks of the response as they become available.
+             When stream=False, returns a complete response object with the full response.
 
     Notes:
         - This function uses Langfuse for tracing and monitoring.
-        - It adapts its behavior based on whether streaming is enabled or not.
+        - When streaming is enabled (stream=True):
+          * Returns a streaming response object that yields chunks of the response
+          * Each chunk contains a delta with the next piece of content
+          * The caller must iterate over the response to get the complete content
+        - When streaming is disabled (stream=False):
+          * Returns a complete response object with the full content
         - The `@observe` decorator captures input and output for Langfuse.
+        - Usage information is captured in Langfuse for both streaming and non-streaming responses.
     """
     # Use the provided purpose as the name in Langfuse trace
     langfuse_context.update_current_observation(
