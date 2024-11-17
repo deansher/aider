@@ -384,6 +384,78 @@ Use trace or observation objects to create child generations:
 
 See documentation of spans above on how to use the langfuse client and ids if you cannot use the Langfuse objects to trace your application. This also fully applies to events.
 
+### **Model Usage & Cost**
+
+Across Langfuse, usage and cost are tracked for LLM generations:
+
+* Usage: token/character counts  
+* Cost: USD cost of the generation
+
+Both usage and cost can be either
+
+* [ingested](https://langfuse.com/docs/model-usage-and-cost#ingest) via API, SDKs or integrations  
+* or [inferred](https://langfuse.com/docs/model-usage-and-cost#infer) based on the `model` parameter of the generation. Langfuse comes with a list of predefined popular models and their tokenizers including OpenAI, Anthropic, and Google models. You can also add your own [custom model definitions](https://langfuse.com/docs/model-usage-and-cost#custom-model-definitions) or request official support for new models via [GitHub](https://langfuse.com/issue). Inferred cost are calculated at the time of ingestion.
+
+Ingested usage and cost are prioritized over inferred usage and cost:  
+`Yes`  
+`No`  
+`Yes`  
+`No`  
+`use usage`  
+`Ingested Observation`  
+`Usage (tokens or other unit)`  
+`Cost (in USD)`  
+`Includes usage?`  
+`Use tokenizer`  
+`Includes cost?`  
+`Use model price/unit`
+
+Via the [Daily Metrics API](https://langfuse.com/docs/analytics/daily-metrics-api), you can retrieve aggregated daily usage and cost metrics from Langfuse for downstream use in analytics, billing, and rate-limiting. The API allows you to filter by application type, user, or tags.
+
+#### **Ingest usage and/or cost**
+
+If available in the LLM response, ingesting usage and/or cost is the most accurate and robust way to track usage in Langfuse.
+
+Many of the Langfuse integrations automatically capture usage and cost data from the LLM response. If this does not work as expected, please create an [issue](https://langfuse.com/issue) on GitHub.  
+Python (Decorator)Python (low-level SDK)JS  
+@observe(as\_type="generation")def anthropic\_completion(\*\*kwargs):  \# optional, extract some fields from kwargs  kwargs\_clone \= kwargs.copy()  input \= kwargs\_clone.pop('messages', None)  model \= kwargs\_clone.pop('model', None)  langfuse\_context.update\_current\_observation(      input=input,      model=model,      metadata=kwargs\_clone  )  response \= anthopic\_client.messages.create(\*\*kwargs)  langfuse\_context.update\_current\_observation(      usage={          "input": response.usage.input\_tokens,          "output": response.usage.output\_tokens,          \# "total": int,  \# if not set, it is derived from input \+ output          "unit": "TOKENS", \# any of: "TOKENS", "CHARACTERS", "MILLISECONDS", "SECONDS", "IMAGES"          \# Optionally, also ingest usd cost. Alternatively, you can infer it via a model definition in Langfuse.          \# Here we assume the input and output cost are 1 USD each.          "input\_cost": 1,          "output\_cost": 1,          \# "total\_cost": float, \# if not set, it is derived from input\_cost \+ output\_cost      }  )  \# return result  return response.content\[0\].text @observe()def main():  return anthropic\_completion(      model="claude-3-opus-20240229",      max\_tokens=1024,      messages=\[          {"role": "user", "content": "Hello, Claude"}      \]  ) main()
+
+You can also update the usage and cost via `generation.update()` and `generation.end()`.
+
+##### **Compatibility with OpenAI**
+
+For increased compatibility with OpenAI, you can also use the following attributes to ingest usage:  
+PythonJS  
+generation \= langfuse.generation(  \# ...  usage={    \# usage    "prompt\_tokens": int,    "completion\_tokens": int,    "total\_tokens": int,  \# optional, it is derived from prompt \+ completion  },  \# ...)
+
+You can also ingest OpenAI-style usage via `generation.update()` and `generation.end()`.
+
+#### **Infer usage and/or cost**
+
+If either usage or cost are not ingested, Langfuse will attempt to infer the missing values based on the `model` parameter of the generation at the time of ingestion. This is especially useful for some model providers or self-hosted models which do not include usage or cost in the response.
+
+Langfuse comes with a list of predefined popular models and their tokenizers including OpenAI, Anthropic, Google. Check out the [full list](https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/models) (you need to sign-in).
+
+You can also add your own custom model definitions (see [below](https://langfuse.com/docs/model-usage-and-cost#custom-model-definitions)) or request official support for new models via [GitHub](https://langfuse.com/issue).
+
+##### **Usage**
+
+If a tokenizer is specified for the model, Langfuse automatically calculates token amounts for ingested generations.
+
+The following tokenizers are currently supported:
+
+| Model | Tokenizer | Used package | Comment |
+| ----- | ----- | ----- | ----- |
+| `gpt-4o` | `o200k_base` | [`tiktoken`](https://www.npmjs.com/package/tiktoken) |  |
+| `gpt*` | `cl100k_base` | [`tiktoken`](https://www.npmjs.com/package/tiktoken) |  |
+| `claude*` | `claude` | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) | According to Anthropic, their tokenizer is not accurate for Claude 3 models. If possible, send us the tokens from their API response. |
+
+##### **Cost**
+
+Model definitions include prices per unit (input, output, total).
+
+Langfuse automatically calculates cost for ingested generations at the time of ingestion if (1) usage is ingested or inferred, (2) and a matching model definition includes prices.  
+
 ## **Scores**
 
 [Scores](https://langfuse.com/docs/scores/overview) are used to evaluate single executions/traces. They can be created via Annotation in the Langfuse UI or via the SDKs.

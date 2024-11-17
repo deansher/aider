@@ -121,7 +121,7 @@ class ArchitectCoder(AskCoder):
     produces_code_edits = False  # Architect coder doesn't produce code edits directly
     gpt_prompts = ArchitectPrompts()
 
-    def create_coder(self, coder_class: type[Coder], **kwargs: Any) -> Coder:
+    def create_coder(self, edit_format: str, **kwargs: Any) -> Coder:
         """Creates a new coder instance from this architect coder.
 
         Args:
@@ -134,21 +134,22 @@ class ArchitectCoder(AskCoder):
             from this architect coder.
         """
         # Start with base config that overrides key settings
-        base_kwargs = dict(
+        use_kwargs = dict(
             suggest_shell_commands=False,
             map_tokens=0,
             cache_prompts=False,
             num_cache_warming_pings=0,
+            edit_format=edit_format,
         )
 
         # Update with any passed kwargs
-        base_kwargs.update(kwargs)
+        use_kwargs.update(kwargs)
 
-        # Create new coder inheriting from this one
-        coder = coder_class.create(
+        # Create new coder that inherits parameters and state from this one
+        coder = Coder.create(
             from_coder=self,
             summarize_from_coder=False,  # Preserve message history exactly
-            **base_kwargs,
+            **use_kwargs,
         )
 
         return coder
@@ -198,9 +199,8 @@ class ArchitectCoder(AskCoder):
         """
         editor_model = self.main_model.editor_model or self.main_model
         editor_coder = self.create_coder(
-            Coder,
-            main_model=editor_model,
             edit_format=self.main_model.editor_edit_format,
+            main_model=editor_model,
         )
         # Instead of mutating cur_messages, create new extended copy
         editor_coder.cur_messages = editor_coder.cur_messages + exchange.get_editor_messages()
@@ -222,7 +222,7 @@ class ArchitectCoder(AskCoder):
         Returns:
             The reviewer's response after validating changes
         """
-        reviewer_coder = self.create_coder(AskCoder)
+        reviewer_coder = self.create_coder("ask")
         # Instead of mutating cur_messages, create new extended copy
         reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_reviewer_messages()
         reviewer_coder.run(with_message=REVIEW_CHANGES_PROMPT, preproc=False)

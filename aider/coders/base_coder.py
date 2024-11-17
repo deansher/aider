@@ -1092,6 +1092,7 @@ class Coder:
             task_examples=task_examples,
         )
 
+    @observe
     def send_message(self, new_user_message):
         """Core method that processes user input and manages the LLM interaction flow.
 
@@ -1124,7 +1125,7 @@ class Coder:
         """
         user_message_prefix = new_user_message[:10] + " ..."
         langfuse_context.update_current_observation(
-            name=f"{self.__class__.__name__} user message: {user_message_prefix}"
+            name=f"{self.__class__.__name__}: {user_message_prefix}"
         )
         self.cur_messages += [
             dict(role="user", content=new_user_message),
@@ -1422,7 +1423,7 @@ class Coder:
         if added_fnames:
             return prompts.added_files.format(fnames=", ".join(added_fnames))
 
-    def send(self, messages, model=None, functions=None):
+    def send(self, messages, model=None, functions=None, purpose="send"):
         if not model:
             model = self.main_model
 
@@ -1445,7 +1446,7 @@ class Coder:
                 self.stream,
                 temp,
                 extra_params=model.extra_params,
-                purpose="user message",
+                purpose=purpose,
             )
             self.chat_completion_call_hashes.append(hash_object.hexdigest())
 
@@ -2033,7 +2034,6 @@ class Coder:
         """
         return
 
-    @observe(name="execute-shell-commands")
     def run_shell_commands(self):
         if not self.suggest_shell_commands:
             return ""
