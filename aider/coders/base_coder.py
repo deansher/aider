@@ -1062,15 +1062,15 @@ class Coder:
 
         # Get task instructions from prompts
         task_instructions = ""
-        _prompts = getattr(self, "gpt_prompts", None)
-        if _prompts and _prompts.task_instructions:
-            task_instructions = _prompts.task_instructions
-        if _prompts and _prompts.system_reminder:
-            task_instructions += "\n\n" + self.fmt_system_prompt(_prompts.system_reminder)
+        prompts = getattr(self, "gpt_prompts", None)
+        if prompts and prompts.task_instructions:
+            task_instructions = prompts.task_instructions
+        if prompts and prompts.system_reminder:
+            task_instructions += "\n\n" + self.fmt_system_prompt(prompts.system_reminder)
 
         # Get task examples from prompts
         task_examples = None
-        if _prompts and _prompts.example_messages:
+        if prompts and prompts.example_messages:
             task_examples = [
                 dict(
                     role=msg["role"],
@@ -1080,7 +1080,7 @@ class Coder:
             ]
 
         return format_brade_messages(
-            system_prompt=self.fmt_system_prompt(_prompts.main_system_core if _prompts else ""),
+            system_prompt=self.fmt_system_prompt(prompts.main_system_core if prompts else ""),
             done_messages=self.done_messages,
             cur_messages=self.cur_messages,
             repo_map=repo_map,

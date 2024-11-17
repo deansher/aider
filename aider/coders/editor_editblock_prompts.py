@@ -8,9 +8,10 @@ class EditorEditBlockPrompts(EditBlockPrompts):
     def task_instructions(self) -> str:
         """Task-specific instructions for the edit block workflow."""
         return """
-Describe each change with a *SEARCH/REPLACE block* per the examples below.
-All changes to files must use this *SEARCH/REPLACE block* format.
-ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
+Make file changes to implement the step that you and your partner have agreeed you will take.
+Make each change by producing a *SEARCH/REPLACE block* as instructed below. 
+You must use precisely this format. Study the <task_examples>...</task_examples>
+to ensure that you understand it.
 """
 
     shell_cmd_prompt = ""
