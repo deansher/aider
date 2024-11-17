@@ -22,22 +22,36 @@ CHANGES_COMMITTED_MESSAGE = (
     + "The Brade application made those changes in the project files and committed them."
 )
 
+ARCHITECT_RESPONSE_CHOICES = """
+You have three ways to respond:
+
+1. Propose specific changes to make. Start with "Here is how I would" and briefly state 
+   your goal. Then think through any tricky issues. Write clear, focused instructions for 
+   the changes - concrete enough to act on, but brief enough to easily review. Don't include 
+   actual content yet. Finally, summarize the key points so your partner can quickly decide 
+   whether to proceed.
+
+2. Ask to see more files that you need, with their full paths and why you need them.
+
+3. Continue the conversation by answering questions, asking questions, or making suggestions 
+   that need more discussion before proposing specific changes.
+"""
+
 # Define the choice manager for analyzing architect responses
 possible_architect_responses = ChoiceManager()
 response_section = possible_architect_responses.add_section(
-    "Analyze the assistant's response. Choose the single most appropriate option.",
-)
-architect_asked_to_see_files = response_section.add_choice(
-    "The architect asked to see additional files."
+    "We gave the assistant the following choices of how to respond:\n\n"
+    f"{ARCHITECT_RESPONSE_CHOICES}\n\n"
+    "Which one of these three choices did the assistant take?"
 )
 architect_proposed_changes = response_section.add_choice(
-    "The architect explained how it would create or modify code or "
-    "other content and asked if it should proceed accordingly."
+    "Choice 1: The architect proposed specific changes to make."
+)
+architect_asked_to_see_files = response_section.add_choice(
+    "Choice 2: The architect asked to see more files."
 )
 architect_continued_conversation = response_section.add_choice(
-    "None of the above. The architect just continued the conversation, such as by "
-    "answering a question, asking questions, or making a suggestion that "
-    "stops short of proposing specific work."
+    "Choice 3: The architect continued the conversation."
 )
 
 
@@ -45,22 +59,20 @@ class ArchitectPrompts(CoderPrompts):
     @property
     def task_instructions(self) -> str:
         """Task-specific instructions for the architect workflow."""
-        return """
-Your goal is to help your partner make steady progress through a series of small, focused steps. Start by proposing a concrete next step that moves the project forward.
+        return f"""
+Your goal is to help your partner make steady progress through a series of small, focused steps. 
+Start by proposing a concrete next step that moves the project forward.
 
-If your partner's request is specific, follow it precisely. If it's more open-ended, look for the simplest change that would make things better. Lead your response by proposing this concrete step so your partner can quickly evaluate if it's what they want.
+If your partner's request is specific, follow it precisely. If it's more open-ended, look for the
+simplest change that would make the project better. Lead your response by proposing this concrete 
+step so your partner can quickly evaluate if it's what they want.
 
-You have three ways to respond:
-
-1. Propose specific changes to make. Start with "Here is how I would" and briefly state your goal. Then think through any tricky issues. Write clear, focused instructions for the changes - concrete enough to act on, but brief enough to easily review. Don't include actual content yet. Finally, summarize the key points so your partner can quickly decide whether to proceed.
-
-2. Ask to see more files that you need, with their full paths and why you need them.
-
-3. Continue the conversation by answering questions, asking questions, or making suggestions that need more discussion before proposing specific changes.
+{ARCHITECT_RESPONSE_CHOICES}
 
 For any response type, stop after making your proposal and wait for your partner's input.
 
-Special note for plan documents: If asked to update a plan, don't write the plan content yet. Instead, briefly confirm what updates are needed and ask to proceed.
+Special note for plan documents: If asked to update a plan, don't write the plan content yet. 
+Instead, briefly confirm what updates are needed and ask to proceed.
 
 After your partner responds, you'll take the appropriate next action.
 """
