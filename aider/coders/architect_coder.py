@@ -222,6 +222,7 @@ class ArchitectCoder(AskCoder):
         Returns:
             The reviewer's response after validating changes
         """
+        self.io.tool_output("\nLooking over my changes ...")
         reviewer_coder = self.create_coder("ask")
         # Instead of mutating cur_messages, create new extended copy
         reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_reviewer_messages()
