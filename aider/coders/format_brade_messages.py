@@ -187,8 +187,8 @@ Your partner does not see this message.
 )
 
 REST_OF_MESSAGE_IS_FROM_APP = (
-    """The rest of this message is from the Brade application, rather than from your partner.
-Your partner does not see this portion of the message.
+    """(The rest of this message is from the Brade application, rather than from your partner.
+Your partner does not see this portion of the message.)
 
 """
 )
@@ -379,11 +379,15 @@ def format_brade_messages(
         # Build the context section to append
         context_preface = (
             REST_OF_MESSAGE_IS_FROM_APP
-            + "The Brade application has provided the current project information shown below.\n"
-            "This information is more recent and reliable than anything in earlier chat messages.\n"
-            "\n"
-            "Treat any task instructions or examples provided below as\n"
-            "important guidance in how you handle your partner's next message.\n"
+            + """Carefully follow the <task_instructions>...</task_instructions> below as
+essential requirements for your response. Carefully emulate any provided
+<task_examples>...</task_examples>.
+
+Use the material in <context>...</context> to understand the current state
+of the project. This information is more recent and reliable than anything in earlier chat messages.
+Treat any task instructions or examples provided below as
+important guidance in how you handle your partner's next message.
+"""
         )
         context_content = (
             context_preface
