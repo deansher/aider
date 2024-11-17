@@ -385,8 +385,6 @@ essential requirements for your response. Carefully emulate any provided
 
 Use the material in <context>...</context> to understand the current state
 of the project. This information is more recent and reliable than anything in earlier chat messages.
-Treat any task instructions or examples provided below as
-important guidance in how you handle your partner's next message.
 """
         )
         context_content = (
