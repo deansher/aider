@@ -284,6 +284,24 @@ def _send_completion_to_litellm(
 
         langfuse_context.update_current_observation(usage=usage)
 
+    # Extract output content from the completion response
+    if hasattr(res, "choices") and len(res.choices) > 0:
+        choice = res.choices[0]
+        output = None
+        
+        # Handle function calls
+        if hasattr(choice, "tool_calls") and choice.tool_calls:
+            tool_call = choice.tool_calls[0]
+            if hasattr(tool_call, "function"):
+                output = tool_call.function
+        
+        # Handle regular content
+        if hasattr(choice, "message") and hasattr(choice.message, "content"):
+            output = choice.message.content
+            
+        if output:
+            langfuse_context.update_current_observation(output=output)
+
     return res
 
 
