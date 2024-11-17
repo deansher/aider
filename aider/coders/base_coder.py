@@ -1150,7 +1150,9 @@ class Coder:
         try:
             while True:
                 try:
-                    yield from self.send(prompt_messages, functions=self.functions)
+                    yield from self.send(
+                        prompt_messages, functions=self.functions, purpose="new user message"
+                    )
                     break
                 except retry_exceptions() as err:
                     self.io.tool_warning(str(err))
@@ -1199,6 +1201,7 @@ class Coder:
                 self.mdstream = None
 
             self.partial_response_content = self.get_multi_response_content(True)
+            langfuse_context.update_current_observation(output=self.partial_response_content)
             self.multi_response_content = ""
 
         self.io.tool_output()
@@ -2035,6 +2038,34 @@ class Coder:
         return
 
     def run_shell_commands(self):
+        """Execute shell commands that were detected in the LLM response.
+
+        Shell command handling works as follows:
+
+        1. Command Detection:
+           - During LLM response processing in find_original_update_blocks(), any code blocks
+             with shell-related fences (```bash, ```sh, etc.) are captured as shell commands
+             - These are stored in self.shell_commands list
+             - Shell blocks are identified by fence markers like ```bash, ```sh, etc.
+             - Only blocks NOT followed by a SEARCH/REPLACE block are treated as commands
+
+        2. Configuration:
+           - The suggest_shell_commands flag controls whether commands are offered for execution
+           - When False, commands are still collected but not offered to run
+           - This is controlled via constructor parameter and CLI flag
+
+        3. Command Execution Flow:
+           - After processing edits, run_shell_commands() is called
+           - It iterates through the collected commands in self.shell_commands
+           - For each command, it calls handle_shell_commands()
+           - Commands are only executed if the user explicitly confirms
+           - Output is captured and displayed to the user
+           - Any errors are reported back to the LLM for handling
+
+        This design separates command detection from execution decisions, allowing
+        flexible control over when and whether to run shell commands while still
+        capturing them for analysis.
+        """
         if not self.suggest_shell_commands:
             return ""
 

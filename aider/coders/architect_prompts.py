@@ -25,33 +25,44 @@ CHANGES_COMMITTED_MESSAGE = (
 ARCHITECT_RESPONSE_CHOICES = """
 You have three ways to respond:
 
-1. Propose specific changes to make. Start with "Here is how I would" and briefly state 
-   your goal. Then think through any tricky issues. Write clear, focused instructions for 
-   the changes - concrete enough to act on, but brief enough to easily review. Don't include 
-   actual content yet. Finally, summarize the key points so your partner can quickly decide 
-   whether to proceed.
+A. Propose specific changes to make. Open by clearly stating that you are proposing changes.
+   Then think through any tricky issues. Write clear, focused instructions for the changes -
+   concrete enough to act on, but brief enough to easily review. Don't include actual content
+   yet. Close by asking whether you should make the changes you proposed.
 
-2. Ask to see more files that you need, with their full paths and why you need them.
+B. Ask to see more files that you need, with their full paths and why you need them.
 
-3. Continue the conversation by answering questions, asking questions, or making suggestions 
+C. Continue the conversation by answering questions, asking questions, or making suggestions
    that need more discussion before proposing specific changes.
 """
 
 # Define the choice manager for analyzing architect responses
 possible_architect_responses = ChoiceManager()
+
 response_section = possible_architect_responses.add_section(
-    "We gave the assistant the following choices of how to respond:\n\n"
-    f"{ARCHITECT_RESPONSE_CHOICES}\n\n"
-    "Which one of these three choices did the assistant take?"
+    f"""We gave the assistant the following choices of how to respond:
+{ARCHITECT_RESPONSE_CHOICES}
+Choose the single option that best matches how the assistant responded.
+
+What's tricky is deciding whether the assistant intended to propose actionable 
+changes or was just suggesting a direction. The only difference it makes in 
+practice whether you choose A or C is that, if you choose A, the user will be
+asked a (Y)es or (N)o question of whether to proceed with the  proposed work. 
+It is jarring for the user to get this question when the assistant 
+was just continuing the conversation. But it is far worse for the user not to 
+get this question when wish they could tell the assistant to go ahead with its 
+proposed changes. Choose the option that you think will give the user the best 
+experience.
+"""
 )
 architect_proposed_changes = response_section.add_choice(
-    "Choice 1: The architect proposed specific changes to make."
+    "A. The assistant proposed project changes it could make."
 )
 architect_asked_to_see_files = response_section.add_choice(
-    "Choice 2: The architect asked to see more files."
+    "B. The assistant asked to see more files."
 )
 architect_continued_conversation = response_section.add_choice(
-    "Choice 3: The architect continued the conversation."
+    "C. The assistant continued the conversation."
 )
 
 

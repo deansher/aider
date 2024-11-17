@@ -722,5 +722,136 @@ from langfuse.decorators import langfuse\_context assert langfuse\_context.auth\
 
 ## **Learn more**
 
+# Streaming
+
 See Docs and [SDK reference](https://python.reference.langfuse.com/langfuse/decorators) for more details. Questions? Add them on [GitHub Discussions](https://github.com/orgs/langfuse/discussions/categories/support).
 
+## Streaming Response Handling in Langfuse
+
+Here's a comprehensive guide for handling streaming responses with Langfuse decorators.
+
+## Basic Streaming Implementation
+
+For streaming responses, you need to properly update the observation context as chunks arrive:
+
+```python
+from langfuse.decorators import observe, langfuse_context
+
+@observe(as_type="generation")
+async def stream_completion(**kwargs):
+    model_parameters = {k: v for k, v in kwargs.items() if v is not None}
+    final_response = ""
+    
+    # Initialize the observation
+    langfuse_context.update_current_observation(
+        model="your-model-name",
+        model_parameters=model_parameters
+    )
+    
+    async for chunk in client.stream(**kwargs):
+        content = chunk.choices[0].delta.content
+        if content:
+            final_response += content
+            yield content
+            
+    # Update final observation with complete response
+    langfuse_context.update_current_observation(
+        output=final_response
+    )
+```
+
+## OpenAI Streaming
+
+When using OpenAI's streaming API, special handling is needed for usage statistics:
+
+```python
+from langfuse.openai import openai
+
+@observe(as_type="generation")
+def stream_openai_completion():
+    stream = openai.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Hello"}],
+        stream=True,
+        stream_options={"include_usage": True}
+    )
+    
+    result = ""
+    for chunk in stream:
+        # OpenAI returns usage in final empty chunk
+        if chunk.choices:
+            content = chunk.choices[0].delta.content or ""
+            result += content
+            yield content[1][3]
+```
+
+## Mistral AI Streaming
+
+For Mistral AI's streaming implementation:
+
+```python
+@observe(as_type="generation")
+def stream_mistral_completion(**kwargs):
+    kwargs_clone = kwargs.copy()
+    model = kwargs_clone.pop('model', None)
+    
+    langfuse_context.update_current_observation(
+        model=model,
+        metadata=kwargs_clone
+    )
+    
+    final_response = ""
+    for chunk in mistral_client.chat.stream(**kwargs):
+        content = chunk.data.choices.delta.content
+        final_response += content
+        yield content
+        
+        if chunk.data.choices.finish_reason == "stop":
+            langfuse_context.update_current_observation(
+                usage={
+                    "input": chunk.data.usage.prompt_tokens,
+                    "output": chunk.data.usage.completion_tokens
+                },
+                output=final_response
+            )[2]
+```
+
+## Best Practices
+
+**Token Usage Tracking**
+- Always update the observation with token usage information when available
+- For OpenAI, check for the final chunk with empty choices to capture usage stats[3]
+- For other providers, update usage statistics when the stream completes
+
+**Error Handling**
+- Wrap streaming operations in try/except blocks
+- Update the observation with error information if the stream fails
+- Ensure proper cleanup of resources even if streaming is interrupted
+
+**Context Management**
+- Initialize the observation before starting the stream
+- Update the observation context incrementally as chunks arrive
+- Provide a final update with complete response when streaming ends
+
+**Integration with LangChain**
+For LangChain streaming:
+
+```python
+@observe()
+def langchain_streaming():
+    langfuse_handler = langfuse_context.get_current_langchain_handler()
+    for chunk in chain.stream(
+        {"input": "query"}, 
+        config={"callbacks": [langfuse_handler]}
+    ):
+        yield chunk[1]
+```
+
+Remember to flush the Langfuse client after streaming completes to ensure all data is sent to the server[4].
+
+Citations:
+[1] https://langfuse.com/docs/integrations/langchain/example-python
+[2] https://langfuse.com/docs/integrations/mistral-sdk
+[3] https://langfuse.com/docs/integrations/openai/python/get-started
+[4] https://langfuse.com/docs/integrations/openai/python/examples
+[5] https://langfuse.com/docs/sdk/python/decorators

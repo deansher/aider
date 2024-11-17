@@ -3,12 +3,10 @@ import json
 import logging
 
 import backoff
-from langfuse.decorators import observe, langfuse_context
-
+from langfuse.decorators import langfuse_context, observe
 from llm_multiple_choice import DisplayFormat
 
 from aider.llm import litellm
-
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +56,7 @@ def transform_messages_for_anthropic(messages):
             if isinstance(content, list):
                 # For messages containing images, extract text portions
                 text_parts = [
-                    item["text"]
-                    for item in content
-                    if isinstance(item, dict) and "text" in item
+                    item["text"] for item in content if isinstance(item, dict) and "text" in item
                 ]
                 combined_content.extend(text_parts)
             else:
@@ -85,9 +81,7 @@ def transform_messages_for_anthropic(messages):
         if isinstance(msg["content"], list):
             # For messages containing images, extract and join text portions
             text_parts = [
-                item["text"]
-                for item in msg["content"]
-                if isinstance(item, dict) and "text" in item
+                item["text"] for item in msg["content"] if isinstance(item, dict) and "text" in item
             ]
             msg = dict(msg)  # Make a copy to avoid modifying the original
             msg["content"] = " ".join(text_parts) if text_parts else ""
@@ -258,9 +252,7 @@ def _send_completion_to_litellm(
         - Usage information is captured in Langfuse for both streaming and non-streaming responses.
     """
     # Use the provided purpose as the name in Langfuse trace
-    langfuse_context.update_current_observation(
-        name=purpose, model=model_name, input=messages
-    )
+    langfuse_context.update_current_observation(name=purpose, model=model_name, input=messages)
 
     kwargs = dict(
         model=model_name,
@@ -283,7 +275,7 @@ def _send_completion_to_litellm(
 
     res = litellm.completion(**kwargs)
 
-    # Extract usage information from the completion response
+    usage = None
     if hasattr(res, "usage"):
         usage = {
             "input": res.usage.prompt_tokens,
@@ -294,31 +286,34 @@ def _send_completion_to_litellm(
         # Add cost information if available
         if hasattr(res.usage, "total_cost"):
             usage["total_cost"] = res.usage.total_cost
-        elif hasattr(res.usage, "completion_cost") and hasattr(
-            res.usage, "prompt_cost"
-        ):
+        elif hasattr(res.usage, "completion_cost") and hasattr(res.usage, "prompt_cost"):
             usage["input_cost"] = res.usage.prompt_cost
             usage["output_cost"] = res.usage.completion_cost
 
-        langfuse_context.update_current_observation(usage=usage)
-
-    # Extract output content from the completion response
-    if hasattr(res, "choices") and len(res.choices) > 0:
-        choice = res.choices[0]
+    if stream:
+        langfuse_context.update_current_observation(usage=usage, name=purpose)
+    else:
         output = None
+        if hasattr(res, "choices") and len(res.choices) > 0:
+            choice = res.choices[0]
 
-        # Handle function calls
-        if hasattr(choice, "tool_calls") and choice.tool_calls:
-            tool_call = choice.tool_calls[0]
-            if hasattr(tool_call, "function"):
-                output = tool_call.function
+            # Handle function calls
+            if hasattr(choice, "tool_calls") and choice.tool_calls:
+                tool_call = choice.tool_calls[0]
+                if hasattr(tool_call, "function"):
+                    output = tool_call.function
 
-        # Handle regular content
-        if hasattr(choice, "message") and hasattr(choice.message, "content"):
-            output = choice.message.content
+            # Handle regular content
+            if hasattr(choice, "message") and hasattr(choice.message, "content"):
+                output = choice.message.content
 
-        if output:
-            langfuse_context.update_current_observation(output=output)
+        langfuse_context.update_current_observation(
+            name=purpose,
+            input=str(messages),  # Convert messages to string for logging
+            output=output if output else None,
+            model=model_name,
+            usage=usage if usage else None,
+        )
 
     return res
 
@@ -416,9 +411,7 @@ def analyze_assistant_response(
 
 
 @lazy_litellm_retry_decorator
-def simple_send_with_retries(
-    model_name, messages, extra_params=None, purpose="send with retries"
-):
+def simple_send_with_retries(model_name, messages, extra_params=None, purpose="send with retries"):
     try:
         kwargs = {
             "model_name": model_name,
@@ -426,7 +419,7 @@ def simple_send_with_retries(
             "functions": None,
             "stream": False,
             "extra_params": extra_params,
-            "purpose": "simple-send-with-retries",
+            "purpose": purpose,
         }
 
         _hash, response = send_completion(**kwargs)

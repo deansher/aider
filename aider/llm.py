@@ -3,6 +3,7 @@ import logging
 import os
 import warnings
 
+from langfuse import Langfuse
 from langfuse.decorators import langfuse_context
 
 warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 # Flag to track Langfuse status
 langfuse_enabled = True
+langfuse_instance = None
 
 
 # `import litellm` takes 1.5 seconds, defer it!
@@ -52,6 +54,8 @@ class LazyLiteLLM:
         try:
             if langfuse_enabled:
                 langfuse_context.configure()
+                global langfuse_instance
+                langfuse_instance = Langfuse()
         except Exception as e:
             langfuse_enabled = False
             logger.info("Langfuse disabled: %s", str(e))
