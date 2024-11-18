@@ -4,7 +4,7 @@ import logging
 
 import backoff
 from langfuse.decorators import langfuse_context, observe
-from llm_multiple_choice import DisplayFormat
+from llm_multiple_choice import DisplayFormat, InvalidChoicesResponseError
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
@@ -460,17 +460,19 @@ def analyze_assistant_response(
         ChoiceCodeSet: The validated set of choices made by the model
 
     Raises:
-        InvalidChoicesResponseError: If the model's response cannot be validated
+        InvalidChoicesResponseError: If the model's response cannot be validated even after retries
     """
     max_retries = 3
-    last_error = None
+    previous_response = None
+    previous_error = None
     
     for attempt in range(max_retries):
         prompt = choice_manager.prompt_for_choices(DisplayFormat.MARKDOWN, introduction)
         if attempt > 0:
             # Include previous error in retry attempts
             prompt += "\n\n# Previous Error\n\n"
-            prompt += f"Your last response was invalid:\n{last_error}\n\nPlease try again."
+            prompt += f"You previously responded with this: {previous_response}\n\n"
+            prompt += f"That response gave the following error:\n{previous_error}\n\nPlease try again."
         prompt += "\n\n# Assistant's Response\n\n" + response_text
         
         chat_messages = [{"role": "user", "content": prompt}]
@@ -488,10 +490,11 @@ def analyze_assistant_response(
         try:
             return choice_manager.validate_choices_response(content)
         except InvalidChoicesResponseError as e:
-            last_error = str(e)
+            previous_response = content
+            previous_error = str(e)
             if attempt == max_retries - 1:  # Last attempt
                 raise  # Re-raise the last error if all retries failed
-            logger.warning(f"Invalid choices response (attempt {attempt + 1}): {last_error}")
+            logger.warning(f"Invalid choices response (attempt {attempt + 1}): {previous_error}")
 
 
 @lazy_litellm_retry_decorator
