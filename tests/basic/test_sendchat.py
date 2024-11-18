@@ -123,7 +123,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Set up the mock to return invalid response then succeed
         mock_completion.side_effect = [
-            litellm.exceptions.InvalidResponseError("Invalid response"),
+            InvalidResponseError("Invalid response"),
             success_response,
         ]
 
@@ -143,7 +143,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Set up the mock to return None then succeed
         mock_completion.side_effect = [
-            litellm.exceptions.InvalidResponseError("None response"),
+            InvalidResponseError("None response"),
             success_response,
         ]
 
