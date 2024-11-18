@@ -266,10 +266,18 @@ def wrap_xml(tag: str, content: str | None) -> str:
         return f"<{tag}>\n</{tag}>\n"
     
     # For non-empty content:
-    # 1. Preserve leading whitespace
-    # 2. Remove trailing whitespace
-    # 3. Add exactly one trailing newline
-    content = content.rstrip() + "\n"
+    # 1. Remove any leading/trailing whitespace
+    # 2. Preserve indentation of individual lines
+    lines = content.splitlines()
+    cleaned_lines = []
+    for line in lines:
+        if line.strip():  # Keep indentation for non-empty lines
+            cleaned_lines.append(line.rstrip())
+        else:  # Empty lines get no whitespace
+            cleaned_lines.append("")
+    
+    # Join lines and add exactly one trailing newline
+    content = "\n".join(cleaned_lines) + "\n"
     
     return f"<{tag}>\n{content}</{tag}>\n"
 
