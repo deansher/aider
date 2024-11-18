@@ -398,11 +398,7 @@ of the project. This information is more recent and reliable than anything in ea
             context_preface
             + "\n"
             + f"{wrap_xml('context', context)}\n"
-            + (
-                wrap_xml("task_instructions", task_instructions)
-                if task_instructions and task_instructions.strip()
-                else ""
-            )
+            + wrap_xml("task_instructions", task_instructions)
             + f"{task_examples_section}"
         )
 
