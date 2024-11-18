@@ -462,20 +462,36 @@ def analyze_assistant_response(
     Raises:
         InvalidChoicesResponseError: If the model's response cannot be validated
     """
-    prompt = choice_manager.prompt_for_choices(DisplayFormat.MARKDOWN, introduction)
-    prompt += "\n\n# Assistant's Response\n\n" + response_text
-    chat_messages = [{"role": "user", "content": prompt}]
-    _hash, response = send_completion(
-        model_name=model_name,
-        messages=chat_messages,
-        functions=None,
-        stream=False,
-        temperature=0,
-        extra_params=extra_params,
-        purpose="analyze assistant response",
-    )
-    content = response.choices[0].message.content
-    return choice_manager.validate_choices_response(content)
+    max_retries = 3
+    last_error = None
+    
+    for attempt in range(max_retries):
+        prompt = choice_manager.prompt_for_choices(DisplayFormat.MARKDOWN, introduction)
+        if attempt > 0:
+            # Include previous error in retry attempts
+            prompt += "\n\n# Previous Error\n\n"
+            prompt += f"Your last response was invalid:\n{last_error}\n\nPlease try again."
+        prompt += "\n\n# Assistant's Response\n\n" + response_text
+        
+        chat_messages = [{"role": "user", "content": prompt}]
+        _hash, response = send_completion(
+            model_name=model_name,
+            messages=chat_messages,
+            functions=None,
+            stream=False,
+            temperature=0,
+            extra_params=extra_params,
+            purpose=f"analyze assistant response (attempt {attempt + 1})",
+        )
+        content = response.choices[0].message.content
+        
+        try:
+            return choice_manager.validate_choices_response(content)
+        except InvalidChoicesResponseError as e:
+            last_error = str(e)
+            if attempt == max_retries - 1:  # Last attempt
+                raise  # Re-raise the last error if all retries failed
+            logger.warning(f"Invalid choices response (attempt {attempt + 1}): {last_error}")
 
 
 @lazy_litellm_retry_decorator
