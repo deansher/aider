@@ -331,7 +331,7 @@ def test_task_instructions_handling() -> None:
     assert REST_OF_MESSAGE_IS_FROM_APP in content
     assert "<task_instructions>" in content
     assert "</task_instructions>" in content
-    assert "<task_instructions>\n\n</task_instructions>" in content
+    assert "<task_instructions>\n</task_instructions>" in content
 
     # Test None instructions (should be included with empty content)
     messages = format_brade_messages(
@@ -348,7 +348,7 @@ def test_task_instructions_handling() -> None:
     assert REST_OF_MESSAGE_IS_FROM_APP in content
     assert "<task_instructions>" in content
     assert "</task_instructions>" in content
-    assert "<task_instructions>\n\n</task_instructions>" in content
+    assert "<task_instructions>\n</task_instructions>" in content
 
 
 def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
