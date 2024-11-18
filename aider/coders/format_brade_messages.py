@@ -263,7 +263,7 @@ def wrap_xml(tag: str, content: str | None) -> str:
     
     # Handle whitespace-only content
     if not content.strip():
-        return f"<{tag}>\n</tag>\n"
+        return f"<{tag}>\n</{tag}>\n"
     
     # For non-empty content:
     # 1. Preserve leading whitespace
