@@ -286,14 +286,14 @@ def _send_completion_to_litellm(
         raise SendCompletionError(error_message, status_code=res.status_code)
 
     if not hasattr(res, "choices"):
+        if hasattr(res, "text") and res.text:
+            logger.info(f"Received response with no choices but non-empty text from {model_name}: {res.text}")
+            return res.text
         error_message = f"Response from {model_name} has no choices attribute"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
 
     if not res.choices:
-        if hasattr(res, "text") and res.text:
-            logger.info(f"Received response with no choices but non-empty text from {model_name}: {res.text}")
-            return res
         error_message = f"Received empty choices list from {model_name}"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
