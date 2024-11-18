@@ -6,6 +6,7 @@ import backoff
 from langfuse.decorators import langfuse_context, observe
 from llm_multiple_choice import DisplayFormat
 
+from aider.exceptions import SendCompletionError
 from aider.llm import litellm
 
 logger = logging.getLogger(__name__)
