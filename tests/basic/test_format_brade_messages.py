@@ -288,9 +288,9 @@ def test_task_instructions_handling() -> None:
 
     Validates:
     - Task instructions appear in <task_instructions> section when provided
-    - Section is omitted when no instructions provided
-    - Empty string instructions are handled like None
-    - Opening text only mentions task_instructions when they are present
+    - Empty string instructions result in empty task_instructions section
+    - None instructions result in empty task_instructions section
+    - Opening text always mentions task_instructions
     """
     from aider.coders.format_brade_messages import format_brade_messages
 
@@ -316,7 +316,7 @@ def test_task_instructions_handling() -> None:
     assert "<task_instructions>" in content
     assert task_instructions in content
 
-    # Test empty string instructions (should behave like None)
+    # Test empty string instructions (should be included with empty content)
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
@@ -329,9 +329,11 @@ def test_task_instructions_handling() -> None:
     final_msg = messages[-1]
     content = final_msg["content"]
     assert REST_OF_MESSAGE_IS_FROM_APP in content
-    assert "<task_instructions>" not in content
+    assert "<task_instructions>" in content
+    assert "</task_instructions>" in content
+    assert "<task_instructions>\n\n</task_instructions>" in content
 
-    # Check omission when None
+    # Test None instructions (should be included with empty content)
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         done_messages=[],
@@ -344,7 +346,9 @@ def test_task_instructions_handling() -> None:
     final_msg = messages[-1]
     content = final_msg["content"]
     assert REST_OF_MESSAGE_IS_FROM_APP in content
-    assert "<task_instructions>" not in content
+    assert "<task_instructions>" in content
+    assert "</task_instructions>" in content
+    assert "<task_instructions>\n\n</task_instructions>" in content
 
 
 def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
