@@ -445,15 +445,26 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
     }
 
     _hash, response = send_completion(**kwargs)
-    if response.status_code != 200:
+
+    # Handle non-200 status codes
+    if hasattr(response, 'status_code') and response.status_code != 200:
         error_message = f"Error sending completion to {model_name}: {response.status_code} - {response.text}"
         raise SendCompletionError(error_message, status_code=response.status_code)
-    elif not response.choices and response.text:
-        logger.info(f"Received response with no choices but non-empty text from {model_name}: {response.text}")
-        return response.text
-    elif response.choices:
-        return response.choices[0].message.content
-    else:
-        error_message = f"Invalid response from {model_name}"
+
+    # Handle case where response has text but no choices
+    if not hasattr(response, 'choices'):
+        if hasattr(response, 'text') and response.text:
+            logger.info(f"Received response with no choices but non-empty text from {model_name}: {response.text}")
+            return response.text
+        error_message = f"Response from {model_name} has no choices attribute"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
+
+    # Handle empty choices list
+    if not response.choices:
+        error_message = f"Received empty choices list from {model_name}"
+        logger.error(error_message)
+        raise InvalidResponseError(error_message)
+
+    # Return content from first choice
+    return response.choices[0].message.content
