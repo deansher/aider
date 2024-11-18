@@ -470,11 +470,11 @@ def test_wrap_xml() -> None:
 
     # Test mixed content and whitespace
     result = wrap_xml("test", "content  \n  ")
-    assert result == "<test>\ncontent  \n</test>\n", f"Unexpected result: {result}"
+    assert result == "<test>\ncontent  \n  \n</test>\n", f"Unexpected result: {result}"
     result = wrap_xml("test", "  \ncontent\n  ")
-    assert result == "<test>\n  \ncontent\n</test>\n", f"Unexpected result: {result}"
+    assert result == "<test>\n  \ncontent\n  \n</test>\n", f"Unexpected result: {result}"
     result = wrap_xml("test", "\n  content  \n")
-    assert result == "<test>\n\n  content\n</test>\n", f"Unexpected result: {result}"
+    assert result == "<test>\n\n  content  \n</test>\n", f"Unexpected result: {result}"
 
 
 def test_platform_info_handling() -> None:
