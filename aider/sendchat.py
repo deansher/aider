@@ -435,25 +435,25 @@ def analyze_assistant_response(
 
 @lazy_litellm_retry_decorator
 def simple_send_with_retries(model_name, messages, extra_params=None, purpose="send with retries"):
-    try:
-        kwargs = {
-            "model_name": model_name,
-            "messages": messages,
-            "functions": None,
-            "stream": False,
-            "extra_params": extra_params,
-            "purpose": purpose,
-        }
+    kwargs = {
+        "model_name": model_name,
+        "messages": messages,
+        "functions": None,
+        "stream": False,
+        "extra_params": extra_params,
+        "purpose": purpose,
+    }
 
-        _hash, response = send_completion(**kwargs)
-        if response.status_code != 200:
-            error_message = f"Error sending completion to {model_name}: {response.status_code} - {response.text}"
-            raise SendCompletionError(error_message, status_code=response.status_code)
-        elif not response.choices and response.text:
-            logger.info(f"Received response with no choices but non-empty text from {model_name}: {response.text}")
-            return response.text
-        elif response.choices:
-            return response.choices[0].message.content
-    except (AttributeError, litellm.exceptions.BadRequestError):
-        logger.exception(f"Error sending completion to {model_name}", exc_info=True)
-        raise
+    _hash, response = send_completion(**kwargs)
+    if response.status_code != 200:
+        error_message = f"Error sending completion to {model_name}: {response.status_code} - {response.text}"
+        raise SendCompletionError(error_message, status_code=response.status_code)
+    elif not response.choices and response.text:
+        logger.info(f"Received response with no choices but non-empty text from {model_name}: {response.text}")
+        return response.text
+    elif response.choices:
+        return response.choices[0].message.content
+    else:
+        error_message = f"Invalid response from {model_name}"
+        logger.error(error_message)
+        raise InvalidResponseError(error_message)

@@ -121,7 +121,10 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         invalid_response.status_code = 200
 
         # Set up the mock to return invalid response then succeed
-        mock_completion.side_effect = [invalid_response, success_response]
+        mock_completion.side_effect = [
+            litellm.exceptions.InvalidResponseError("Invalid response"),
+            success_response,
+        ]
 
         # Call the simple_send_with_retries method
         result = simple_send_with_retries("model", ["message"])
@@ -138,7 +141,10 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         success_response.status_code = 200
 
         # Set up the mock to return None then succeed
-        mock_completion.side_effect = [None, success_response]
+        mock_completion.side_effect = [
+            litellm.exceptions.InvalidResponseError("None response"),
+            success_response,
+        ]
 
         # Call the simple_send_with_retries method
         result = simple_send_with_retries("model", ["message"])
