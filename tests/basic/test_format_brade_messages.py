@@ -109,17 +109,23 @@ def test_basic_message_structure(
     content = final_msg["content"]
 
     # Check that user's original message appears first
-    assert content.startswith("Final current message"), f"Content should start with user message but got:\n{content}"
+    assert content.startswith(
+        "Final current message"
+    ), f"Content should start with user message but got:\n{content}"
 
     # Check that context follows
     assert REST_OF_MESSAGE_IS_FROM_APP in content, f"Expected app message marker in:\n{content}"
-    assert "more recent and reliable than anything in earlier chat messages" in content, f"Expected context message in:\n{content}"
+    assert (
+        "more recent and reliable than anything in earlier chat messages" in content
+    ), f"Expected context message in:\n{content}"
 
-    # XML sections must appear in correct order after the last <context> tag
-    last_context_pos = content.rindex("<context>")
-    
+    # XML sections must appear in correct order. Start at the last <context> tag
+    # to allow a mention of <context> in preface material.
+
+    last_pos = content.rindex("<context>")
+    assert last_pos >= 0
+
     sections = [
-        "<context>",
         "<repository_map>",
         test_repo_map,
         "</repository_map>",
@@ -129,11 +135,12 @@ def test_basic_message_structure(
         "</context>",
     ]
 
-    last_pos = last_context_pos
     for section in sections:
-        pos = content.find(section, last_context_pos)
+        pos = content.find(section, last_pos)
         assert pos != -1, f"Missing section {section!r} after last <context> in:\n{content}"
-        assert pos > last_pos, f"Section {section!r} out of order after last <context> in:\n{content}"
+        assert (
+            pos > last_pos
+        ), f"Section {section!r} out of order after last <context> in:\n{content}"
         last_pos = pos
 
 
@@ -171,8 +178,12 @@ def test_format_task_examples() -> None:
     assert "</example>" in result, f"Expected closing example tag in:\n{result}"
 
     # Check message transformation
-    assert "<message role='user'>Example request</message>" in result, f"Expected user message in:\n{result}"
-    assert "<message role='assistant'>Example response</message>" in result, f"Expected assistant message in:\n{result}"
+    assert (
+        "<message role='user'>Example request</message>" in result
+    ), f"Expected user message in:\n{result}"
+    assert (
+        "<message role='assistant'>Example response</message>" in result
+    ), f"Expected assistant message in:\n{result}"
 
     # Test invalid message pairs
     with pytest.raises(ValueError, match="must alternate between user and assistant"):
@@ -333,7 +344,9 @@ def test_task_instructions_handling() -> None:
     assert REST_OF_MESSAGE_IS_FROM_APP in content
     assert "<task_instructions>" in content
     assert "</task_instructions>" in content
-    assert "<task_instructions>\n</task_instructions>" in content, f"Expected empty task instructions format in:\n{content}"
+    assert (
+        "<task_instructions>\n</task_instructions>" in content
+    ), f"Expected empty task instructions format in:\n{content}"
 
     # Test None instructions (should be included with empty content)
     messages = format_brade_messages(
@@ -385,7 +398,9 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
     content = final_msg["content"]
 
     # Verify user's message appears first
-    assert content.startswith("Test message"), f"Content should start with user message but got:\n{content}"
+    assert content.startswith(
+        "Test message"
+    ), f"Content should start with user message but got:\n{content}"
 
     # Verify readonly files section
     assert "<readonly_files>" in content, f"Expected readonly_files tag in:\n{content}"
@@ -502,7 +517,9 @@ def test_platform_info_handling() -> None:
     content = final_msg["content"]
 
     # Verify user's message appears first
-    assert content.startswith("Test message"), f"Content should start with user message but got:\n{content}"
+    assert content.startswith(
+        "Test message"
+    ), f"Content should start with user message but got:\n{content}"
 
     # Check platform info inclusion
     assert "<platform_info>" in content, f"Expected platform_info tag in:\n{content}"
@@ -551,7 +568,9 @@ def test_repo_map_handling() -> None:
     content = final_msg["content"]
 
     # Verify user's message appears first
-    assert content.startswith("Test message"), f"Content should start with user message but got:\n{content}"
+    assert content.startswith(
+        "Test message"
+    ), f"Content should start with user message but got:\n{content}"
 
     # Check XML structure
     assert "<repository_map>" in content, f"Expected repository_map tag in:\n{content}"
@@ -650,7 +669,9 @@ def test_message_combination() -> None:
     content = final_msg["content"]
 
     # Verify user's message appears first
-    assert content.startswith("Final message"), f"Content should start with user message but got:\n{content}"
+    assert content.startswith(
+        "Final message"
+    ), f"Content should start with user message but got:\n{content}"
 
     # Verify context follows with proper separation
     assert REST_OF_MESSAGE_IS_FROM_APP in content, f"Expected app message marker in:\n{content}"

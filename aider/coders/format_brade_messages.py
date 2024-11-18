@@ -247,8 +247,9 @@ def wrap_xml(tag: str, content: str | None) -> str:
 
     The function ensures consistent newline handling:
     - A newline after the opening tag
-    - For non-empty content: content with exactly one trailing newline
-    - For empty/whitespace content: no trailing newline
+    - For non-empty content: exactly one newline at the end of the content
+    - For empty/whitespace content: no additinal newline, so the opening and closing tags
+      are on adjacent lines
     - A newline after the closing tag
 
     Args:
@@ -260,26 +261,12 @@ def wrap_xml(tag: str, content: str | None) -> str:
     """
     if not content:
         content = ""
-    
+
     # Handle whitespace-only content
     if not content.strip():
         return f"<{tag}>\n</{tag}>\n"
-    
-    # For non-empty content:
-    # 1. Remove any leading/trailing whitespace
-    # 2. Preserve indentation of individual lines
-    lines = content.splitlines()
-    cleaned_lines = []
-    for line in lines:
-        if line.strip():  # Keep indentation for non-empty lines
-            cleaned_lines.append(line.rstrip())
-        else:  # Empty lines get no whitespace
-            cleaned_lines.append("")
-    
-    # Join lines and add exactly one trailing newline
-    content = "\n".join(cleaned_lines) + "\n"
-    
-    return f"<{tag}>\n{content}</{tag}>\n"
+
+    return f"<{tag}>\n{content.rstrip('\n')}\n</{tag}>\n"
 
 
 def format_file_section(files: list[FileContent] | None) -> str:
