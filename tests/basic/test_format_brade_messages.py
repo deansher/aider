@@ -5,7 +5,7 @@
 
 import pytest
 
-from aider.coders.format_brade_messages import FileContent
+from aider.coders.format_brade_messages import REST_OF_MESSAGE_IS_FROM_APP, FileContent
 from aider.coders.types import ChatMessage
 
 
@@ -111,7 +111,7 @@ def test_basic_message_structure(
     assert content.startswith("Final current message")
 
     # Check that context follows
-    assert "This message is from the Brade application" in content
+    assert REST_OF_MESSAGE_IS_FROM_APP in content
     assert "more recent and reliable than anything in earlier chat messages" in content
 
     # XML sections must appear in correct order
@@ -308,7 +308,7 @@ def test_task_instructions_handling() -> None:
     assert content.startswith("Test message")
 
     # Check task instructions section and opening text
-    assert "This message is from the Brade application" in content
+    assert REST_OF_MESSAGE_IS_FROM_APP in content
     assert "<task_instructions>" in content
     assert task_instructions in content
 
@@ -324,7 +324,7 @@ def test_task_instructions_handling() -> None:
     )
     final_msg = messages[-1]
     content = final_msg["content"]
-    assert "This message is from the Brade application" in content
+    assert REST_OF_MESSAGE_IS_FROM_APP in content
     assert "<task_instructions>" not in content
 
     # Check omission when None
@@ -339,7 +339,7 @@ def test_task_instructions_handling() -> None:
     )
     final_msg = messages[-1]
     content = final_msg["content"]
-    assert "This message is from the Brade application" in content
+    assert REST_OF_MESSAGE_IS_FROM_APP in content
     assert "<task_instructions>" not in content
 
 
@@ -590,7 +590,7 @@ def test_message_combination() -> None:
     assert content.startswith("Final message")
 
     # Verify context follows with proper separation
-    assert "\n\nThis message is from the Brade application" in content
+    assert REST_OF_MESSAGE_IS_FROM_APP in content
 
     # Verify context sections are present
     assert "<context>" in content
@@ -615,5 +615,5 @@ def test_message_combination() -> None:
 
     # Verify correct handling of single message case
     assert content.startswith("Single message")
-    assert "\n\nThis message is from the Brade application" in content
+    assert REST_OF_MESSAGE_IS_FROM_APP in content
     assert len(messages) == 2  # Just system prompt and combined message

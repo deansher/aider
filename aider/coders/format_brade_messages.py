@@ -321,7 +321,7 @@ def format_brade_messages(
         editable_text_files: Optional list of (filename, content) tuples for text files being edited
         image_files: Optional list of (filename, content) tuples for image files
         platform_info: Optional system environment details
-        task_instructions: Optional task-specific requirements and workflow guidance
+        task_instructions: task-specific requirements and workflow guidance
         task_examples: Optional list of ChatMessages containing example conversations.
             These messages will be transformed into XML format showing example interactions.
             Messages should be in pairs (user, assistant) demonstrating desired behavior.
