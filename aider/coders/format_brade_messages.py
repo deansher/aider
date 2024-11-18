@@ -245,8 +245,10 @@ FileContent = Tuple[str, str]
 def wrap_xml(tag: str, content: str | None) -> str:
     """Wraps content in XML tags, always including tags even for empty content.
 
-    The function ensures the content ends with a newline by adding one if not already present.
-    This helps maintain consistent formatting in the XML output.
+    The function ensures consistent newline handling:
+    - A newline after the opening tag
+    - Content with exactly one trailing newline
+    - A newline before the closing tag
 
     Args:
         tag: The XML tag name to use
@@ -257,9 +259,9 @@ def wrap_xml(tag: str, content: str | None) -> str:
     """
     if not content:
         content = ""
-    # Add newline after content only if it doesn't already end with one
-    content_with_newline = content if content.rstrip().endswith('\n') else content + '\n'
-    return f"<{tag}>\n{content_with_newline}</{tag}>\n"
+    # Ensure content has exactly one trailing newline
+    content = content.rstrip('\n') + '\n'
+    return f"<{tag}>\n{content}</{tag}>\n"
 
 
 def format_file_section(files: list[FileContent] | None) -> str:
@@ -371,8 +373,8 @@ def format_brade_messages(
         if platform_info:
             context_parts.append(wrap_xml("platform_info", platform_info))
 
-        # Combine all context
-        context = "".join(context_parts)
+        # Combine all context with proper nesting
+        context = "".join(context_parts) if context_parts else "\n"
 
         # Format task examples if provided
         task_examples_section = format_task_examples(task_examples)
