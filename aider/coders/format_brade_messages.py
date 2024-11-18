@@ -254,7 +254,9 @@ def wrap_xml(tag: str, content: str | None) -> str:
     """
     if not content:
         content = ""
-    return f"<{tag}>\n{content}\n</{tag}>\n"
+    # Add newline after content only if it doesn't already end with one
+    content_with_newline = content if content.rstrip().endswith('\n') else content + '\n'
+    return f"<{tag}>\n{content_with_newline}</{tag}>\n"
 
 
 def format_file_section(files: list[FileContent] | None) -> str:
