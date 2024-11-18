@@ -260,11 +260,17 @@ def wrap_xml(tag: str, content: str | None) -> str:
     """
     if not content:
         content = ""
-    # Only add trailing newline if content has non-whitespace characters
-    if content.strip():
-        content = content.rstrip() + "\n"
-    else:
-        content = content.rstrip()
+    
+    # Handle whitespace-only content
+    if not content.strip():
+        return f"<{tag}>\n</tag>\n"
+    
+    # For non-empty content:
+    # 1. Preserve leading whitespace
+    # 2. Remove trailing whitespace
+    # 3. Add exactly one trailing newline
+    content = content.rstrip() + "\n"
+    
     return f"<{tag}>\n{content}</{tag}>\n"
 
 
