@@ -285,6 +285,12 @@ def _send_completion_to_litellm(
         error_message = f"Error sending completion to {model_name}: {res.status_code} - {res.text}"
         raise SendCompletionError(error_message, status_code=res.status_code)
 
+    # Check for non-200 status code first
+    if hasattr(res, "status_code") and res.status_code != 200:
+        error_message = f"Error sending completion to {model_name}: {res.status_code} - {res.text}"
+        raise SendCompletionError(error_message, status_code=res.status_code)
+
+    # Handle case where response has text but no choices
     if not hasattr(res, "choices"):
         if hasattr(res, "text") and res.text:
             logger.info(f"Received response with no choices but non-empty text from {model_name}: {res.text}")
@@ -293,6 +299,7 @@ def _send_completion_to_litellm(
         logger.error(error_message)
         raise InvalidResponseError(error_message)
 
+    # Handle empty choices list
     if not res.choices:
         error_message = f"Received empty choices list from {model_name}"
         logger.error(error_message)
@@ -435,6 +442,25 @@ def analyze_assistant_response(
 
 @lazy_litellm_retry_decorator
 def simple_send_with_retries(model_name, messages, extra_params=None, purpose="send with retries"):
+    """
+    Send a completion request with retries on various error conditions.
+
+    This function wraps send_completion with retry logic for handling various error types.
+    It will retry on connection errors, rate limit errors, and invalid responses.
+
+    Args:
+        model_name (str): The name of the language model to use
+        messages (list): A list of message dictionaries to send to the model
+        extra_params (dict, optional): Additional parameters to pass to the model
+        purpose (str, optional): The purpose label for this completion request
+
+    Returns:
+        str: The content of the model's response
+
+    Raises:
+        SendCompletionError: If the request fails with a non-200 status code
+        InvalidResponseError: If the response is missing required fields or empty
+    """
     kwargs = {
         "model_name": model_name,
         "messages": messages,
@@ -445,11 +471,6 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
     }
 
     _hash, response = send_completion(**kwargs)
-
-    # Handle non-200 status codes
-    if hasattr(response, 'status_code') and response.status_code != 200:
-        error_message = f"Error sending completion to {model_name}: {response.status_code} - {response.text}"
-        raise SendCompletionError(error_message, status_code=response.status_code)
 
     # Handle case where response has text but no choices
     if not hasattr(response, 'choices'):
