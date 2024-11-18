@@ -248,7 +248,7 @@ def wrap_xml(tag: str, content: str | None) -> str:
     The function ensures consistent newline handling:
     - A newline after the opening tag
     - Content with exactly one trailing newline
-    - A newline before the closing tag
+    - A newline after the closing tag
 
     Args:
         tag: The XML tag name to use
@@ -260,7 +260,7 @@ def wrap_xml(tag: str, content: str | None) -> str:
     if not content:
         content = ""
     # Ensure content has exactly one trailing newline
-    content = content.rstrip('\n') + '\n'
+    content = content.rstrip() + "\n"
     return f"<{tag}>\n{content}</{tag}>\n"
 
 
