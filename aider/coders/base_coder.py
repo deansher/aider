@@ -1081,6 +1081,7 @@ class Coder:
 
         return format_brade_messages(
             system_prompt=self.fmt_system_prompt(prompts.main_system_core if prompts else ""),
+            task_instructions=task_instructions,
             done_messages=self.done_messages,
             cur_messages=self.cur_messages,
             repo_map=repo_map,
@@ -1088,7 +1089,6 @@ class Coder:
             editable_text_files=editable_text_files,
             image_files=image_files,
             platform_info=platform_info,
-            task_instructions=task_instructions,
             task_examples=task_examples,
         )
 
