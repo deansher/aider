@@ -293,6 +293,7 @@ def format_file_section(files: list[FileContent] | None) -> str:
 
 def format_brade_messages(
     system_prompt: str,
+    task_instructions: str,
     done_messages: list[ChatMessage],
     cur_messages: list[ChatMessage],
     repo_map: str | None = None,
@@ -300,7 +301,6 @@ def format_brade_messages(
     editable_text_files: list[FileContent] | None = None,
     image_files: list[FileContent] | None = None,
     platform_info: str | None = None,
-    task_instructions: str | None = None,
     task_examples: list[ChatMessage] | None = None,
 ) -> list[ChatMessage]:
     """Formats chat messages according to Brade's prompt structure.

@@ -74,6 +74,7 @@ def test_basic_message_structure(
 
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=sample_done_messages,
         cur_messages=sample_cur_messages,
         repo_map=test_repo_map,
@@ -199,6 +200,7 @@ def test_task_examples_integration() -> None:
 
     messages = format_brade_messages(
         system_prompt="Test prompt",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         task_examples=examples,
@@ -260,6 +262,7 @@ def test_system_message_handling() -> None:
     # Test empty system message
     messages = format_brade_messages(
         system_prompt="",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         readonly_text_files=[],
@@ -272,6 +275,7 @@ def test_system_message_handling() -> None:
     with pytest.raises(ValueError, match="system_prompt cannot be None"):
         format_brade_messages(
             system_prompt=None,  # type: ignore
+            task_instructions="Test task instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
             readonly_text_files=[],
@@ -362,6 +366,7 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
 
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="",
@@ -393,6 +398,7 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
     # Test empty file lists
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="",
@@ -408,6 +414,7 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
     # Test None for file lists
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="",
@@ -434,6 +441,7 @@ def test_platform_info_handling() -> None:
 
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         platform_info=test_platform,
@@ -454,6 +462,7 @@ def test_platform_info_handling() -> None:
     # Check omission when empty
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         platform_info=None,
@@ -481,6 +490,7 @@ def test_repo_map_handling() -> None:
 
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map=test_map,
@@ -508,6 +518,7 @@ def test_repo_map_handling() -> None:
     # Test empty string input
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="",
@@ -520,6 +531,7 @@ def test_repo_map_handling() -> None:
     # Test None input
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map=None,
@@ -532,6 +544,7 @@ def test_repo_map_handling() -> None:
     # Test whitespace-only input
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map="   \n  \t  ",
@@ -564,6 +577,7 @@ def test_message_combination() -> None:
 
     messages = format_brade_messages(
         system_prompt="Test system prompt",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=cur_messages,
         repo_map="Test map",
@@ -602,6 +616,7 @@ def test_message_combination() -> None:
     # Test with single message
     messages = format_brade_messages(
         system_prompt="Test system prompt",
+        task_instructions="Test task instructions",
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Single message"}],
         repo_map="Test map",
