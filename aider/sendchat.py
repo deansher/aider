@@ -331,18 +331,6 @@ def _send_completion_to_litellm(
         error_message = f"Error sending completion to {model_name}: {res.status_code} - {res.text}"
         raise SendCompletionError(error_message, status_code=res.status_code)
 
-    # Handle case where response has text but no choices
-    if not hasattr(res, "choices"):
-        error_message = f"Response from {model_name} has no choices attribute"
-        logger.error(error_message)
-        raise InvalidResponseError(error_message)
-
-    # Handle empty choices list
-    if not res.choices:
-        error_message = f"Received empty choices list from {model_name}"
-        logger.error(error_message)
-        raise InvalidResponseError(error_message)
-
     usage = None
     if hasattr(res, "usage"):
         usage = {
@@ -361,19 +349,30 @@ def _send_completion_to_litellm(
     if stream:
         langfuse_context.update_current_observation(usage=usage, name=purpose)
     else:
+        # Handle case where response has text but no choices
+        if not hasattr(res, "choices"):
+            error_message = f"Response from {model_name} has no choices attribute"
+            logger.error(error_message + "\nResponse: " + str(res))
+            raise InvalidResponseError(error_message)
+
+        # Handle empty choices list
+        if len(res.choices) == 0:
+            error_message = f"Received empty choices list from {model_name}"
+            logger.error(error_message + "\nResponse: " + str(res))
+            raise InvalidResponseError(error_message)
+
         output = None
-        if hasattr(res, "choices") and len(res.choices) > 0:
-            choice = res.choices[0]
+        choice = res.choices[0]
 
-            # Handle function calls
-            if hasattr(choice, "tool_calls") and choice.tool_calls:
-                tool_call = choice.tool_calls[0]
-                if hasattr(tool_call, "function"):
-                    output = tool_call.function
+        # Handle function calls
+        if hasattr(choice, "tool_calls") and choice.tool_calls:
+            tool_call = choice.tool_calls[0]
+            if hasattr(tool_call, "function"):
+                output = tool_call.function
 
-            # Handle regular content
-            if hasattr(choice, "message") and hasattr(choice.message, "content"):
-                output = choice.message.content
+        # Handle regular content
+        if hasattr(choice, "message") and hasattr(choice.message, "content"):
+            output = choice.message.content
 
         langfuse_context.update_current_observation(
             name=purpose,
@@ -465,16 +464,19 @@ def analyze_assistant_response(
     max_retries = 3
     previous_response = None
     previous_error = None
-    
+
     for attempt in range(max_retries):
         prompt = choice_manager.prompt_for_choices(DisplayFormat.MARKDOWN, introduction)
         if attempt > 0:
             # Include previous error in retry attempts
             prompt += "\n\n# Previous Error\n\n"
             prompt += f"You previously responded with this: {previous_response}\n\n"
-            prompt += f"That response gave the following error:\n{previous_error}\n\nPlease try again."
+            prompt += (
+                f"That response gave the following error:\n{previous_error}\n\nPlease try again."
+            )
+
         prompt += "\n\n# Assistant's Response\n\n" + response_text
-        
+
         chat_messages = [{"role": "user", "content": prompt}]
         _hash, response = send_completion(
             model_name=model_name,
@@ -486,7 +488,7 @@ def analyze_assistant_response(
             purpose=f"analyze assistant response (attempt {attempt + 1})",
         )
         content = response.choices[0].message.content
-        
+
         try:
             return choice_manager.validate_choices_response(content)
         except InvalidChoicesResponseError as e:
@@ -536,6 +538,3 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
         error_message = f"Invalid response from {model_name}: missing choices"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
-
-    # Return content from first choice
-    return response.choices[0].message.content
