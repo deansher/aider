@@ -275,15 +275,17 @@ def _send_completion_to_litellm(
     if extra_params is not None:
         kwargs.update(extra_params)
 
-    res = litellm.completion(**kwargs)
+    try:
+        res = litellm.completion(**kwargs)
+    except (litellm.exceptions.RateLimitError, litellm.exceptions.APIError) as e:
+        # Re-raise these exceptions to be handled by the retry decorator
+        raise
+
+    # Handle None response
     if res is None:
         error_message = f"Received None response from {model_name}"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
-
-    if hasattr(res, "status_code") and res.status_code != 200:
-        error_message = f"Error sending completion to {model_name}: {res.status_code} - {res.text}"
-        raise SendCompletionError(error_message, status_code=res.status_code)
 
     # Check for non-200 status code first
     if hasattr(res, "status_code") and res.status_code != 200:
@@ -292,9 +294,6 @@ def _send_completion_to_litellm(
 
     # Handle case where response has text but no choices
     if not hasattr(res, "choices"):
-        if hasattr(res, "text") and res.text:
-            logger.info(f"Received response with no choices but non-empty text from {model_name}: {res.text}")
-            return res.text
         error_message = f"Response from {model_name} has no choices attribute"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
@@ -472,18 +471,11 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
 
     _hash, response = send_completion(**kwargs)
 
-    # Handle case where response has text but no choices
-    if not hasattr(response, 'choices'):
-        if hasattr(response, 'text') and response.text:
-            logger.info(f"Received response with no choices but non-empty text from {model_name}: {response.text}")
-            return response.text
-        error_message = f"Response from {model_name} has no choices attribute"
-        logger.error(error_message)
-        raise InvalidResponseError(error_message)
-
-    # Handle empty choices list
-    if not response.choices:
-        error_message = f"Received empty choices list from {model_name}"
+    # Extract content from response
+    if hasattr(response, 'choices') and response.choices:
+        return response.choices[0].message.content
+    else:
+        error_message = f"Invalid response from {model_name}: missing choices"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
 
