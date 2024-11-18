@@ -423,6 +423,12 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
         }
 
         _hash, response = send_completion(**kwargs)
+        if response is None:
+            logger.error(f"Received None response from {model_name}")
+            return None
+        elif not response.choices:
+            logger.error(f"Received empty choices list from {model_name}")
+            return None
         return response.choices[0].message.content
     except (AttributeError, litellm.exceptions.BadRequestError):
         logger.exception(f"Error sending completion to {model_name}", exc_info=True)
