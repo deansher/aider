@@ -172,7 +172,7 @@ def goodbye(name):
       <message role="user">Example user request</message>
       <message role="assistant">Example assistant response</message>
     </example>
-  </examples>
+</task_examples>
 
 
 </task_examples>
