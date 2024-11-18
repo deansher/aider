@@ -432,6 +432,47 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
     assert "<editable_files>" not in content
 
 
+def test_wrap_xml() -> None:
+    """Tests that wrap_xml correctly handles empty, whitespace, and non-empty content.
+
+    Validates:
+    - Empty string content results in no trailing newline
+    - None content results in no trailing newline
+    - Whitespace-only content results in no trailing newline
+    - Non-empty content gets exactly one trailing newline
+    - Opening/closing tags and their newlines are consistent
+    """
+    from aider.coders.format_brade_messages import wrap_xml
+
+    # Test empty string
+    result = wrap_xml("test", "")
+    assert result == "<test>\n</test>\n"
+
+    # Test None
+    result = wrap_xml("test", None)
+    assert result == "<test>\n</test>\n"
+
+    # Test whitespace-only strings
+    result = wrap_xml("test", "   ")
+    assert result == "<test>\n</test>\n"
+    result = wrap_xml("test", "\n")
+    assert result == "<test>\n</test>\n"
+    result = wrap_xml("test", "\t  \n  ")
+    assert result == "<test>\n</test>\n"
+
+    # Test non-empty content
+    result = wrap_xml("test", "content")
+    assert result == "<test>\ncontent\n</test>\n"
+    result = wrap_xml("test", "line1\nline2")
+    assert result == "<test>\nline1\nline2\n</test>\n"
+
+    # Test mixed content and whitespace
+    result = wrap_xml("test", "content  \n  ")
+    assert result == "<test>\ncontent\n</test>\n"
+    result = wrap_xml("test", "\n  content  \n")
+    assert result == "<test>\n  content\n</test>\n"
+
+
 def test_platform_info_handling() -> None:
     """Tests that platform info is properly included in the final user message.
 
