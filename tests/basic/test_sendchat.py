@@ -19,7 +19,12 @@ class TestSendChat(unittest.TestCase):
         mock = MagicMock()
         mock.status_code = 500
 
-        # Set up the mock to raise
+        # Create a successful mock response for the second attempt
+        success_response = MagicMock()
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success response"
+
+        # Set up the mock to raise then succeed
         mock_completion.side_effect = [
             litellm.exceptions.RateLimitError(
                 "rate limit exceeded",
@@ -27,11 +32,12 @@ class TestSendChat(unittest.TestCase):
                 llm_provider="llm_provider",
                 model="model",
             ),
-            None,
+            success_response,
         ]
 
         # Call the simple_send_with_retries method
-        simple_send_with_retries("model", ["message"])
+        result = simple_send_with_retries("model", ["message"])
+        self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
 
@@ -84,12 +90,18 @@ class TestAnalyzeChatSituation(unittest.TestCase):
     @patch("litellm.completion")
     @patch("builtins.print")
     def test_simple_send_with_retries_connection_error(self, mock_print, mock_completion):
-        # Set up the mock to raise
+        # Create a successful mock response for the second attempt
+        success_response = MagicMock()
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success response"
+
+        # Set up the mock to raise then succeed
         mock_completion.side_effect = [
             httpx.ConnectError("Connection error"),
-            None,
+            success_response,
         ]
 
         # Call the simple_send_with_retries method
-        simple_send_with_retries("model", ["message"])
+        result = simple_send_with_retries("model", ["message"])
+        self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
