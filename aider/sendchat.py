@@ -6,7 +6,7 @@ import backoff
 from langfuse.decorators import langfuse_context, observe
 from llm_multiple_choice import DisplayFormat
 
-from aider.exceptions import SendCompletionError, InvalidResponseError
+from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
 
 logger = logging.getLogger(__name__)
@@ -451,7 +451,7 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
         model_name (str): The name of the language model to use
         messages (list): A list of message dictionaries to send to the model
         extra_params (dict, optional): Additional parameters to pass to the model
-        purpose (str, optional): The purpose label for this completion request
+        purpose (str, optional): The purpose label for this completion request for Langfuse tracing
 
     Returns:
         str: The content of the model's response
@@ -472,7 +472,7 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
     _hash, response = send_completion(**kwargs)
 
     # Extract content from response
-    if hasattr(response, 'choices') and response.choices:
+    if hasattr(response, "choices") and response.choices:
         return response.choices[0].message.content
     else:
         error_message = f"Invalid response from {model_name}: missing choices"
