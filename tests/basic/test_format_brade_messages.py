@@ -115,7 +115,9 @@ def test_basic_message_structure(
     assert REST_OF_MESSAGE_IS_FROM_APP in content, f"Expected app message marker in:\n{content}"
     assert "more recent and reliable than anything in earlier chat messages" in content, f"Expected context message in:\n{content}"
 
-    # XML sections must appear in correct order
+    # XML sections must appear in correct order after the last <context> tag
+    last_context_pos = content.rindex("<context>")
+    
     sections = [
         "<context>",
         "<repository_map>",
@@ -127,11 +129,11 @@ def test_basic_message_structure(
         "</context>",
     ]
 
-    last_pos = -1
+    last_pos = last_context_pos
     for section in sections:
-        pos = content.find(section)
-        assert pos != -1, f"Missing section {section!r} in:\n{content}"
-        assert pos > last_pos, f"Section {section!r} out of order in:\n{content}"
+        pos = content.find(section, last_context_pos)
+        assert pos != -1, f"Missing section {section!r} after last <context> in:\n{content}"
+        assert pos > last_pos, f"Section {section!r} out of order after last <context> in:\n{content}"
         last_pos = pos
 
 
