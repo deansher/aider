@@ -86,6 +86,34 @@ class TestAnalyzeChatSituation(unittest.TestCase):
                 self.messages,
             )
 
+    @patch("aider.sendchat.send_completion")
+    def test_analyze_assistant_response_retry_success(self, mock_send):
+        # Mock responses: first invalid, then valid
+        invalid_response = MagicMock()
+        invalid_response.choices = [MagicMock()]
+        invalid_response.choices[0].message.content = "invalid"
+
+        valid_response = MagicMock()
+        valid_response.choices = [MagicMock()]
+        valid_response.choices[0].message.content = "1"
+
+        mock_send.side_effect = [(None, invalid_response), (None, valid_response)]
+
+        # Call should succeed after retry
+        result = analyze_assistant_response(
+            self.choice_manager,
+            self.introduction,
+            self.model_name,
+            "test response",
+        )
+        
+        # Verify the result contains the expected choice
+        self.assertTrue(result.has(self.choice1))
+        self.assertFalse(result.has(self.choice2))
+        
+        # Verify send_completion was called twice
+        self.assertEqual(mock_send.call_count, 2)
+
     @patch("litellm.completion")
     @patch("builtins.print")
     def test_simple_send_with_retries_connection_error(self, mock_print, mock_completion):
