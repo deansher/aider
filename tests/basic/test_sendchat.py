@@ -105,3 +105,23 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         result = simple_send_with_retries("model", ["message"])
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
+
+    @patch("litellm.completion")
+    @patch("builtins.print")
+    def test_simple_send_with_retries_invalid_response(self, mock_print, mock_completion):
+        # Create a successful mock response for the second attempt
+        success_response = MagicMock()
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success response"
+
+        # Create an invalid response for the first attempt
+        invalid_response = MagicMock()
+        invalid_response.choices = []
+
+        # Set up the mock to return invalid response then succeed
+        mock_completion.side_effect = [invalid_response, success_response]
+
+        # Call the simple_send_with_retries method
+        result = simple_send_with_retries("model", ["message"])
+        self.assertEqual(result, "Success response")
+        mock_print.assert_called_once()
