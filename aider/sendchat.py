@@ -278,6 +278,8 @@ def _send_completion_to_litellm(
     try:
         res = litellm.completion(**kwargs)
     except (litellm.exceptions.RateLimitError, litellm.exceptions.APIError) as e:
+        # Log the error before re-raising for retry
+        logger.warning(f"LiteLLM error ({type(e).__name__}): {str(e)}")
         # Re-raise these exceptions to be handled by the retry decorator
         raise
 
