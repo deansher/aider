@@ -238,18 +238,33 @@ def _send_completion_to_litellm(
                                Defaults to "llm-completion".
 
     Returns:
-        res: The model's response object. When stream=True, returns a streaming response object
-             that can be iterated over to get chunks of the response as they become available.
-             When stream=False, returns a complete response object with the full response.
+        res: The model's response object. The structure depends on stream mode:
+            When stream=False:
+                - choices[0].message.content: The complete response text
+                - choices[0].tool_calls[0].function: Function call details if tools were used
+                - usage.prompt_tokens: Number of input tokens
+                - usage.completion_tokens: Number of output tokens
+                - usage.total_cost: Total cost in USD if available
+                - usage.prompt_cost: Input cost in USD if available
+                - usage.completion_cost: Output cost in USD if available
+            When stream=True:
+                Returns an iterator yielding chunks, where each chunk has:
+                - choices[0].delta.content: The next piece of response text
+                - choices[0].delta.tool_calls[0].function: Partial function call details
+                - usage: Only available in final chunk if stream_options.include_usage=True
+
+    Raises:
+        SendCompletionError: If the API returns a non-200 status code
+        InvalidResponseError: If the response is missing required fields or empty
+        litellm.exceptions.RateLimitError: If rate limit is exceeded
+        litellm.exceptions.APIError: For various API-level errors
+        litellm.exceptions.Timeout: If the request times out
+        litellm.exceptions.APIConnectionError: For network connectivity issues
+        litellm.exceptions.ServiceUnavailableError: If the service is unavailable
+        litellm.exceptions.InternalServerError: For server-side errors
 
     Notes:
         - This function uses Langfuse for tracing and monitoring.
-        - When streaming is enabled (stream=True):
-          * Returns a streaming response object that yields chunks of the response
-          * Each chunk contains a delta with the next piece of content
-          * The caller must iterate over the response to get the complete content
-        - When streaming is disabled (stream=False):
-          * Returns a complete response object with the full content
         - The `@observe` decorator captures input and output for Langfuse.
         - Usage information is captured in Langfuse for both streaming and non-streaming responses.
     """
