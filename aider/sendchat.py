@@ -439,17 +439,20 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
 
         _hash, response = send_completion(**kwargs)
         if response is None:
-            logger.error(f"Received None response from {model_name}")
-            return None
+            error_message = f"Received None response from {model_name}"
+            logger.error(error_message)
+            raise SendCompletionError(error_message)
         elif response.status_code is None:
-            logger.error(f"Received response with None status_code from {model_name}")
-            return None
+            error_message = f"Received response with None status_code from {model_name}"
+            logger.error(error_message)
+            raise SendCompletionError(error_message)
         elif not response.choices and response.text:
             logger.info(f"Received response with no choices but non-empty text from {model_name}: {response.text}")
             return response.text
         elif not response.choices:
-            logger.error(f"Received empty choices list from {model_name}")
-            return None
+            error_message = f"Received empty choices list from {model_name}"
+            logger.error(error_message)
+            raise SendCompletionError(error_message)
         elif response.status_code != 200:
             error_message = f"Error sending completion to {model_name}: {response.status_code} - {response.text}"
             raise SendCompletionError(error_message, status_code=response.status_code)
