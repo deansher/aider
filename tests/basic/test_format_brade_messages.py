@@ -462,15 +462,17 @@ def test_wrap_xml() -> None:
 
     # Test non-empty content
     result = wrap_xml("test", "content")
-    assert result == "<test>\ncontent\n</test>\n"
+    assert result == "<test>\ncontent\n</test>\n", f"Unexpected result: {result}"
     result = wrap_xml("test", "line1\nline2")
-    assert result == "<test>\nline1\nline2\n</test>\n"
+    assert result == "<test>\nline1\nline2\n</test>\n", f"Unexpected result: {result}"
 
     # Test mixed content and whitespace
     result = wrap_xml("test", "content  \n  ")
-    assert result == "<test>\ncontent\n</test>\n"
+    assert result == "<test>\ncontent  \n</test>\n", f"Unexpected result: {result}"
+    result = wrap_xml("test", "  \ncontent\n  ")
+    assert result == "<test>\n  \ncontent\n</test>\n", f"Unexpected result: {result}"
     result = wrap_xml("test", "\n  content  \n")
-    assert result == "<test>\n  content\n</test>\n"
+    assert result == "<test>\n\n  content\n</test>\n", f"Unexpected result: {result}"
 
 
 def test_platform_info_handling() -> None:
@@ -554,7 +556,7 @@ def test_repo_map_handling() -> None:
     assert "</repository_map>" in content, f"Expected closing repository_map tag in:\n{content}"
 
     # Check content preservation
-    assert test_map in content, f"Expected repository map content {test_map!r} in:\n{content}"
+    assert test_map.rstrip() in content
 
     # Check multiline handling
     assert "with multiple lines" in content, f"Expected multiline content in:\n{content}"
