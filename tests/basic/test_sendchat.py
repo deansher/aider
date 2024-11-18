@@ -4,9 +4,14 @@ from unittest.mock import MagicMock, patch
 import httpx
 from llm_multiple_choice import ChoiceManager, InvalidChoicesResponseError
 
+from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
-from aider.sendchat import analyze_chat_situation, simple_send_with_retries, send_completion
-from aider.exceptions import SendCompletionError, InvalidResponseError
+from aider.sendchat import (
+    analyze_assistant_response,
+    analyze_chat_situation,
+    send_completion,
+    simple_send_with_retries,
+)
 
 
 class PrintCalled(Exception):
@@ -106,19 +111,19 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             self.model_name,
             "test response",
         )
-        
+
         # Verify the result contains the expected choice
         self.assertTrue(result.has(self.choice1))
         self.assertFalse(result.has(self.choice2))
-        
+
         # Verify send_completion was called twice
         self.assertEqual(mock_send.call_count, 2)
 
         # Verify that the second call included the error information
         second_call_args = mock_send.call_args_list[1][1]
-        messages = second_call_args['messages']
-        self.assertIn("Previous Error", messages[0]['content'])
-        self.assertIn("invalid", messages[0]['content'])
+        messages = second_call_args["messages"]
+        self.assertIn("Previous Error", messages[0]["content"])
+        self.assertIn("invalid", messages[0]["content"])
 
     @patch("litellm.completion")
     @patch("builtins.print")
@@ -199,7 +204,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Call send_completion and verify it raises SendCompletionError
         with self.assertRaises(SendCompletionError) as context:
             send_completion("model", ["message"], None, False)
-        
+
         self.assertEqual(context.exception.status_code, 400)
         self.assertIn("Bad Request", str(context.exception))
 
@@ -218,7 +223,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Call send_completion and verify it raises InvalidResponseError
         with self.assertRaises(InvalidResponseError) as context:
             send_completion("model", ["message"], None, False)
-        
+
         self.assertIn("has no choices attribute", str(context.exception))
 
     @patch("litellm.completion")
@@ -236,5 +241,5 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Call send_completion and verify it raises InvalidResponseError
         with self.assertRaises(InvalidResponseError) as context:
             send_completion("model", ["message"], None, False)
-        
+
         self.assertIn("empty choices list", str(context.exception))
