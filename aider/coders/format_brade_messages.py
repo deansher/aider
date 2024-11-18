@@ -245,6 +245,9 @@ FileContent = Tuple[str, str]
 def wrap_xml(tag: str, content: str | None) -> str:
     """Wraps content in XML tags, always including tags even for empty content.
 
+    The function ensures the content ends with a newline by adding one if not already present.
+    This helps maintain consistent formatting in the XML output.
+
     Args:
         tag: The XML tag name to use
         content: The content to wrap, can be None/empty
