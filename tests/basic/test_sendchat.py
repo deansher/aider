@@ -5,7 +5,8 @@ import httpx
 from llm_multiple_choice import ChoiceManager, InvalidChoicesResponseError
 
 from aider.llm import litellm
-from aider.sendchat import analyze_chat_situation, simple_send_with_retries
+from aider.sendchat import analyze_chat_situation, simple_send_with_retries, send_completion
+from aider.exceptions import SendCompletionError, InvalidResponseError
 
 
 class PrintCalled(Exception):
