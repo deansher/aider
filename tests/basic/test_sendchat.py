@@ -150,3 +150,57 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         result = simple_send_with_retries("model", ["message"])
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
+
+    @patch("litellm.completion")
+    @patch("builtins.print")
+    def test_send_completion_non_200_status(self, mock_print, mock_completion):
+        # Create a response with non-200 status code
+        error_response = MagicMock()
+        error_response.status_code = 400
+        error_response.text = "Bad Request"
+
+        # Set up the mock to return error response
+        mock_completion.return_value = error_response
+
+        # Call send_completion and verify it raises SendCompletionError
+        with self.assertRaises(SendCompletionError) as context:
+            send_completion("model", ["message"], None, False)
+        
+        self.assertEqual(context.exception.status_code, 400)
+        self.assertIn("Bad Request", str(context.exception))
+
+    @patch("litellm.completion")
+    @patch("builtins.print")
+    def test_send_completion_missing_choices(self, mock_print, mock_completion):
+        # Create a response missing choices attribute
+        invalid_response = MagicMock()
+        invalid_response.status_code = 200
+        # Remove choices attribute
+        del invalid_response.choices
+
+        # Set up the mock to return invalid response
+        mock_completion.return_value = invalid_response
+
+        # Call send_completion and verify it raises InvalidResponseError
+        with self.assertRaises(InvalidResponseError) as context:
+            send_completion("model", ["message"], None, False)
+        
+        self.assertIn("has no choices attribute", str(context.exception))
+
+    @patch("litellm.completion")
+    @patch("builtins.print")
+    def test_send_completion_empty_choices(self, mock_print, mock_completion):
+        # Create a response with empty choices list
+        invalid_response = MagicMock()
+        invalid_response.status_code = 200
+        invalid_response.choices = []
+        invalid_response.text = ""
+
+        # Set up the mock to return invalid response
+        mock_completion.return_value = invalid_response
+
+        # Call send_completion and verify it raises InvalidResponseError
+        with self.assertRaises(InvalidResponseError) as context:
+            send_completion("model", ["message"], None, False)
+        
+        self.assertIn("empty choices list", str(context.exception))
