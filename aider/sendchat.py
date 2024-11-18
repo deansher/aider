@@ -274,6 +274,20 @@ def _send_completion_to_litellm(
         kwargs.update(extra_params)
 
     res = litellm.completion(**kwargs)
+    if res is None:
+        logger.error(f"Received None response from {model_name}")
+        return None
+
+    if not hasattr(res, "choices") or not res.choices:
+        if hasattr(res, "text") and res.text:
+            logger.info(f"Received response with no choices but non-empty text from {model_name}: {res.text}")
+            return res
+        logger.error(f"Received empty choices list from {model_name}")
+        return None
+
+    if hasattr(res, "status_code") and res.status_code != 200:
+        error_message = f"Error sending completion to {model_name}: {res.status_code} - {res.text}"
+        raise SendCompletionError(error_message, status_code=res.status_code)
 
     usage = None
     if hasattr(res, "usage"):
