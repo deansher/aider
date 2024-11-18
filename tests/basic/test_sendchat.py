@@ -114,6 +114,12 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Verify send_completion was called twice
         self.assertEqual(mock_send.call_count, 2)
 
+        # Verify that the second call included the error information
+        second_call_args = mock_send.call_args_list[1][1]
+        messages = second_call_args['messages']
+        self.assertIn("Previous Error", messages[0]['content'])
+        self.assertIn("invalid", messages[0]['content'])
+
     @patch("litellm.completion")
     @patch("builtins.print")
     def test_simple_send_with_retries_connection_error(self, mock_print, mock_completion):
