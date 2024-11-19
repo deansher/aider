@@ -3,24 +3,16 @@
 
 # COMMIT
 
-# Conventional Commits text adapted from:
-# https://www.conventionalcommits.org/en/v1.0.0/#summary
 from aider.coders.format_brade_messages import THIS_MESSAGE_IS_FROM_APP
 
-commit_system = """You are an expert software engineer that generates concise, \
-one-line Git commit messages based on the provided diffs.
-Review the provided context and diffs which are about to be committed to a git repo.
-Review the diffs carefully.
-Generate a one-line commit message for those changes.
-The commit message should be structured as follows: <type>: <description>
-Use these for <type>: fix, feat, build, chore, ci, docs, style, refactor, perf, test
+commit_system = """You are an expert software engineer. Write a concise,
+one-line git commit message for the diffs shown in this user message.
 
 Ensure the commit message:
-- Starts with the appropriate prefix.
 - Is in the imperative mood (e.g., \"Add feature\" not \"Added feature\" or \"Adding feature\").
 - Does not exceed 72 characters.
 
-Reply only with the one-line commit message, without any additional text, explanations, \
+Reply only with the one-line commit message, without any additional text, explanations,
 or line breaks.
 """
 
