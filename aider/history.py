@@ -2,7 +2,7 @@
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 
 import argparse
-from typing import Any, Optional, Sequence
+from typing import Optional
 
 from aider import models, prompts
 from aider.dump import dump  # noqa: F401
@@ -18,7 +18,7 @@ class ChatSummary:
     
     Attributes:
         models: List of Model instances to use for summarization, tried in order
-        max_tokens: Maximum number of tokens allowed in summarized history
+        max_tokens: Maximum number of tokens allowed in resuling history
         token_count: Function from first model used to count tokens in messages
     """
     
