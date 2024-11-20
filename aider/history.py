@@ -74,25 +74,16 @@ class ChatSummary:
         return sized
 
     def summarize(
-        self, messages: list[ChatMessage], depth: int = 0
+        self, messages: list[ChatMessage], recursion_depth: int = 0
     ) -> list[ChatMessage]:
-        """Recursively summarize messages to fit within token limit.
-        
-        Uses a divide-and-conquer approach for large message histories:
-        1. If messages fit within limit and depth=0, return unchanged
-        2. If messages are small or depth>3, summarize all messages
-        3. Otherwise:
-           - Split messages roughly in half
-           - Ensure split point is after an assistant message
-           - Keep recent messages that fit within model's context window
-           - Recursively summarize older messages if needed
+        """Summarize messages as necessary to fit within token limit.
         
         Args:
             messages: List of chat messages to summarize
             depth: Current recursion depth, used to limit recursion
             
         Returns:
-            List of summarized messages that fit within token limit
+            List of messages that fit within self.max_tokens
             
         Raises:
             ValueError: If no models are available for summarization
@@ -102,11 +93,11 @@ class ChatSummary:
 
         sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
-        if total <= self.max_tokens and depth == 0:
+        if total <= self.max_tokens and recursion_depth == 0:
             return messages
 
         min_split = 4
-        if len(messages) <= min_split or depth > 3:
+        if len(messages) <= min_split or recursion_depth > 3:
             return self.summarize_all(messages)
 
         tail_tokens = 0
@@ -159,7 +150,7 @@ class ChatSummary:
         if summary_tokens + tail_tokens < self.max_tokens:
             return result
 
-        return self.summarize(result, depth + 1)
+        return self.summarize(result, recursion_depth + 1)
 
     def summarize_all(self, messages: list[ChatMessage]) -> list[ChatMessage]:
         """Summarize all messages into a single summary message.
