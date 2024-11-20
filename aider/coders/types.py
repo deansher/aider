@@ -11,7 +11,17 @@ This provides a consistent vocabulary for types across both coding styles while
 preserving merge compatibility where needed.
 """
 
-from typing import TypedDict
+from typing import Callable, TypedDict
+
+
+TokenCountFunc = Callable[[str | ChatMessage | list[ChatMessage]], int]
+"""Function that counts tokens in text or chat messages.
+
+Used by models to count tokens in various types of content:
+- Plain text strings
+- Individual chat messages
+- Lists of chat messages
+"""
 
 
 class ChatMessage(TypedDict):

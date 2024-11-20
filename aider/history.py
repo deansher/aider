@@ -43,7 +43,7 @@ class ChatSummary:
             raise ValueError("At least one model must be provided")
         self.models = models if isinstance(models, list) else [models]
         self.max_tokens = max_tokens
-        self.token_count = self.models[0].token_count
+        self.token_count: TokenCountFunc = self.models[0].token_count
 
     def too_big(self, messages: list[ChatMessage]) -> bool:
         """Check if messages exceed the token limit.
