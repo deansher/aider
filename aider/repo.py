@@ -173,17 +173,14 @@ class GitRepo:
             return self.repo.git_dir
 
     def get_commit_message(self, diffs, context):
-        diffs = "# Diffs:\n" + diffs
-
-        content = ""
-        if context:
-            content += context + "\n"
-        content += diffs
-
-        system_content = self.commit_prompt or prompts.commit_system
+        prompt = self.commit_prompt or prompts.commit_message_prompt
         messages = [
-            dict(role="system", content=system_content),
-            dict(role="user", content=content),
+            dict(
+                role="user",
+                content=(
+                    prompt + "\n\n" + "<diffs>\n" + (context + "\n" or "") + diffs + "</diffs>\n"
+                ),
+            )
         ]
 
         commit_message = None

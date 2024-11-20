@@ -5,15 +5,14 @@
 
 from aider.coders.format_brade_messages import THIS_MESSAGE_IS_FROM_APP
 
-commit_system = """You are an expert software engineer. Write a concise,
-one-line git commit message for the diffs shown in this user message.
+commit_message_prompt = """You are an expert software engineer. Write a concise,
+one-line git commit message for the file changes shown below in <diffs>...</diffs>. 
+Respond with nothing but the one-line commit message, without any additional text, 
+explanations, or line breaks.
 
 Ensure the commit message:
 - Is in the imperative mood (e.g., \"Add feature\" not \"Added feature\" or \"Adding feature\").
 - Does not exceed 72 characters.
-
-Reply only with the one-line commit message, without any additional text, explanations,
-or line breaks.
 """
 
 # COMMANDS
