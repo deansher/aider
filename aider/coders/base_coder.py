@@ -757,7 +757,12 @@ class Coder:
 
         return inp
 
+    @observe
     def run_one(self, user_message, preproc):
+        langfuse_context.update_current_observation(
+            name=self.__class__.__name__,
+            input=user_message,
+        )
         self.init_before_message()
 
         if preproc:
@@ -778,6 +783,7 @@ class Coder:
 
             self.num_reflections += 1
             prompt_message = self.reflected_message
+        langfuse_context.update_current_observation(output=self.partial_response_content)
 
     def check_for_urls(self, inp):
         url_pattern = re.compile(r"(https?://[^\s/$.?#].[^\s]*[^\s,.])")
@@ -1123,10 +1129,8 @@ class Coder:
         - Keyboard interrupts
         - Reflection requests
         """
-        user_message_prefix = new_user_message[:10] + " ..."
-        langfuse_context.update_current_observation(
-            name=f"{self.__class__.__name__}: {user_message_prefix}"
-        )
+        user_message_prefix = new_user_message[:15] + " ..."
+        langfuse_context.update_current_observation(name=f"{user_message_prefix}")
         self.cur_messages += [
             dict(role="user", content=new_user_message),
         ]
@@ -1201,7 +1205,9 @@ class Coder:
                 self.mdstream = None
 
             self.partial_response_content = self.get_multi_response_content(True)
-            langfuse_context.update_current_observation(output=self.partial_response_content)
+            # TODO: Is this what causes the following warning?
+            #    WARNING - Item exceeds size limit (size: 1374855), dropping ...
+            # langfuse_context.update_current_observation(output=self.partial_response_content)
             self.multi_response_content = ""
 
         self.io.tool_output()
