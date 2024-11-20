@@ -12,30 +12,28 @@ from aider.sendchat import simple_send_with_retries
 
 class ChatSummary:
     """Manages summarization of chat history to keep it within token limits.
-    
+
     This class handles the recursive summarization of chat history when it grows too large.
     It uses a divide-and-conquer approach for large histories and preserves more recent
     messages when possible.
-    
+
     Attributes:
         models: List of Model instances to use for summarization, tried in order
         max_tokens: Maximum number of tokens allowed in resuling history
         token_count: Function from first model used to count tokens in messages
     """
-    
+
     def __init__(
-        self,
-        models: Optional[models.Model | list[models.Model]] = None,
-        max_tokens: int = 1024
+        self, models: Optional[models.Model | list[models.Model]] = None, max_tokens: int = 1024
     ) -> None:
         """Initialize a ChatSummary instance.
-        
+
         Args:
             models: One or more Model instances to use for summarization.
                    Models are tried in order if earlier ones fail.
             max_tokens: Maximum number of tokens allowed in summarized history.
                        Default is 1024.
-                
+
         Raises:
             ValueError: If no models are provided.
         """
@@ -47,10 +45,10 @@ class ChatSummary:
 
     def too_big(self, messages: list[ChatMessage]) -> bool:
         """Check if messages exceed the token limit.
-        
+
         Args:
             messages: List of chat messages to check.
-            
+
         Returns:
             True if total tokens exceeds max_tokens, False otherwise.
         """
@@ -60,10 +58,10 @@ class ChatSummary:
 
     def tokenize(self, messages: list[ChatMessage]) -> list[tuple[int, ChatMessage]]:
         """Count tokens in each message.
-        
+
         Args:
             messages: List of chat messages to tokenize.
-            
+
         Returns:
             List of (token_count, message) tuples.
         """
@@ -73,11 +71,9 @@ class ChatSummary:
             sized.append((tokens, msg))
         return sized
 
-    def summarize(
-        self, messages: list[ChatMessage], recursion_depth: int = 0
-    ) -> list[ChatMessage]:
+    def summarize(self, messages: list[ChatMessage], recursion_depth: int = 0) -> list[ChatMessage]:
         """Summarize messages as necessary to fit within token limit.
-        
+
         This method uses a divide-and-conquer approach to summarize chat history:
         1. If messages fit in token limit, return them unchanged
         2. If messages are too small to split, summarize everything
@@ -86,14 +82,14 @@ class ChatSummary:
            - Summarize older messages while preserving newer ones
            - Combine and check if result fits in token limit
            - If still too large, recurse on combined result
-        
+
         Args:
             messages: List of chat messages to summarize
             recursion_depth: Current recursion depth, used to limit recursion
-            
+
         Returns:
             List of messages that fit within self.max_tokens
-            
+
         Raises:
             ValueError: If no models are available for summarization
         """
@@ -131,19 +127,19 @@ class ChatSummary:
         if split_index <= min_split:
             return self.summarize_all(messages)
 
-        # Split messages and prepare head section for processing
+        # Split messages into a head and tail. Then select messages from head
+        # to keep and summarize.
         head = messages[:split_index]
         tail = messages[split_index:]
 
         sized = sized[:split_index]
-        head.reverse()
+        head.reverse()  # temporarily for convenience
         sized.reverse()
         keep = []
-        total = 0
+        total = 512  # Reserve space for summarization system prompt
 
         # Calculate how many older messages we can keep
         model_max_input_tokens = self.models[0].info.get("max_input_tokens") or 4096
-        model_max_input_tokens -= 512  # Reserve space for system prompts
 
         for i in range(split_index):
             total += sized[i][0]
@@ -151,9 +147,9 @@ class ChatSummary:
                 break
             keep.append(head[i])
 
-        keep.reverse()
+        keep.reverse()  # restore forward order
 
-        # Process head and combine with tail
+        # Summarize head and combine with tail
         summary = self.summarize_all(keep)
         tail_tokens = sum(tokens for tokens, msg in sized[split_index:])
         summary_tokens = self.token_count(summary)
@@ -168,16 +164,16 @@ class ChatSummary:
 
     def summarize_all(self, messages: list[ChatMessage]) -> list[ChatMessage]:
         """Summarize all messages into a single summary message.
-        
+
         Formats messages into a markdown-like format and sends to LLM for summarization.
         Tries each model in sequence until one succeeds.
-        
+
         Args:
             messages: List of chat messages to summarize
-            
+
         Returns:
             List containing a single summary message
-            
+
         Raises:
             ValueError: If summarization fails for all available models
         """
@@ -215,7 +211,7 @@ class ChatSummary:
 
 def main() -> None:
     """Command-line interface for chat history summarization.
-    
+
     Parses a markdown file containing chat history and summarizes it using
     the ChatSummary class with default models.
     """
