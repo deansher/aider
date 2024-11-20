@@ -5,6 +5,7 @@ import argparse
 from typing import Optional
 
 from aider import models, prompts
+from aider.coders.types import ChatMessage
 from aider.dump import dump  # noqa: F401
 from aider.sendchat import simple_send_with_retries
 
@@ -44,7 +45,7 @@ class ChatSummary:
         self.max_tokens = max_tokens
         self.token_count = self.models[0].token_count
 
-    def too_big(self, messages: list[dict[str, str]]) -> bool:
+    def too_big(self, messages: list[ChatMessage]) -> bool:
         """Check if messages exceed the token limit.
         
         Args:
@@ -57,7 +58,7 @@ class ChatSummary:
         total = sum(tokens for tokens, _msg in sized)
         return total > self.max_tokens
 
-    def tokenize(self, messages: list[dict[str, str]]) -> list[tuple[int, dict[str, str]]]:
+    def tokenize(self, messages: list[ChatMessage]) -> list[tuple[int, ChatMessage]]:
         """Count tokens in each message.
         
         Args:
@@ -73,8 +74,8 @@ class ChatSummary:
         return sized
 
     def summarize(
-        self, messages: list[dict[str, str]], depth: int = 0
-    ) -> list[dict[str, str]]:
+        self, messages: list[ChatMessage], depth: int = 0
+    ) -> list[ChatMessage]:
         """Recursively summarize messages to fit within token limit.
         
         Uses a divide-and-conquer approach for large message histories:
@@ -160,7 +161,7 @@ class ChatSummary:
 
         return self.summarize(result, depth + 1)
 
-    def summarize_all(self, messages: list[dict[str, str]]) -> list[dict[str, str]]:
+    def summarize_all(self, messages: list[ChatMessage]) -> list[ChatMessage]:
         """Summarize all messages into a single summary message.
         
         Formats messages into a markdown-like format and sends to LLM for summarization.
