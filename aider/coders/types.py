@@ -14,16 +14,6 @@ preserving merge compatibility where needed.
 from typing import Callable, TypedDict
 
 
-TokenCountFunc = Callable[[str | ChatMessage | list[ChatMessage]], int]
-"""Function that counts tokens in text or chat messages.
-
-Used by models to count tokens in various types of content:
-- Plain text strings
-- Individual chat messages
-- Lists of chat messages
-"""
-
-
 class ChatMessage(TypedDict):
     """A message in a chat conversation with an LLM.
 
@@ -68,6 +58,16 @@ class ContentBlock(TypedDict):
     text: str | None  # Present for text blocks
     image_url: ImageUrl | None  # Present for image blocks
     cache_control: CacheControl | None
+
+
+TokenCountFunc = Callable[[str | ChatMessage | list[ChatMessage]], int]
+"""Function that counts tokens in text or chat messages.
+
+Used by models to count tokens in various types of content:
+- Plain text strings
+- Individual chat messages
+- Lists of chat messages
+"""
 
 
 Edit = tuple[str | None, str, str]
