@@ -273,7 +273,9 @@ def _send_completion_to_litellm(
                 Returns an iterator yielding chunks, where each chunk has:
                 - choices[0].delta.content: The next piece of response text
                 - choices[0].delta.tool_calls[0].function: Partial function call details
-                - usage: Only available in final chunk if stream_options.include_usage=True
+                - usage: Not available
+                  (We could change our implementation to add this
+                  by setting stream_options.include_usage=True)
 
     Raises:
         SendCompletionError: If the API returns a non-200 status code
