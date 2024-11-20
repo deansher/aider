@@ -5,7 +5,7 @@ import argparse
 from typing import Optional
 
 from aider import models, prompts
-from aider.coders.types import ChatMessage
+from aider.coders.types import ChatMessage, TokenCountFunc
 from aider.dump import dump  # noqa: F401
 from aider.sendchat import simple_send_with_retries
 
