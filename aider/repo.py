@@ -178,7 +178,12 @@ class GitRepo:
             dict(
                 role="user",
                 content=(
-                    prompt + "\n\n" + "<diffs>\n" + (context + "\n" or "") + diffs + "</diffs>\n"
+                    prompt
+                    + "\n\n"
+                    + "<diffs>\n"
+                    + (context + "\n" if context else "")
+                    + diffs
+                    + "</diffs>\n"
                 ),
             )
         ]
