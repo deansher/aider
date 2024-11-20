@@ -78,9 +78,18 @@ class ChatSummary:
     ) -> list[ChatMessage]:
         """Summarize messages as necessary to fit within token limit.
         
+        This method uses a divide-and-conquer approach to summarize chat history:
+        1. If messages fit in token limit, return them unchanged
+        2. If messages are too small to split, summarize everything
+        3. Otherwise split messages and recursively process each part:
+           - Find split point that preserves recent messages
+           - Summarize older messages while preserving newer ones
+           - Combine and check if result fits in token limit
+           - If still too large, recurse on combined result
+        
         Args:
             messages: List of chat messages to summarize
-            depth: Current recursion depth, used to limit recursion
+            recursion_depth: Current recursion depth, used to limit recursion
             
         Returns:
             List of messages that fit within self.max_tokens
@@ -88,6 +97,7 @@ class ChatSummary:
         Raises:
             ValueError: If no models are available for summarization
         """
+        # Validate models and check if summarization is needed
         if not self.models:
             raise ValueError("No models available for summarization")
 
@@ -96,15 +106,16 @@ class ChatSummary:
         if total <= self.max_tokens and recursion_depth == 0:
             return messages
 
+        # Handle base cases: too small to split or max recursion reached
         min_split = 4
         if len(messages) <= min_split or recursion_depth > 3:
             return self.summarize_all(messages)
 
+        # Find initial split point targeting half of max tokens for tail
         tail_tokens = 0
         split_index = len(messages)
         half_max_tokens = self.max_tokens // 2
 
-        # Iterate over the messages in reverse order
         for i in range(len(sized) - 1, -1, -1):
             tokens, _msg = sized[i]
             if tail_tokens + tokens < half_max_tokens:
@@ -113,13 +124,14 @@ class ChatSummary:
             else:
                 break
 
-        # Ensure the head ends with an assistant message
+        # Adjust split point to ensure clean conversation breaks
         while messages[split_index - 1]["role"] != "assistant" and split_index > 1:
             split_index -= 1
 
         if split_index <= min_split:
             return self.summarize_all(messages)
 
+        # Split messages and prepare head section for processing
         head = messages[:split_index]
         tail = messages[split_index:]
 
@@ -129,9 +141,9 @@ class ChatSummary:
         keep = []
         total = 0
 
-        # These sometimes come set with value = None
+        # Calculate how many older messages we can keep
         model_max_input_tokens = self.models[0].info.get("max_input_tokens") or 4096
-        model_max_input_tokens -= 512
+        model_max_input_tokens -= 512  # Reserve space for system prompts
 
         for i in range(split_index):
             total += sized[i][0]
@@ -141,15 +153,17 @@ class ChatSummary:
 
         keep.reverse()
 
+        # Process head and combine with tail
         summary = self.summarize_all(keep)
-
         tail_tokens = sum(tokens for tokens, msg in sized[split_index:])
         summary_tokens = self.token_count(summary)
 
+        # Check if combined result fits in token limit
         result = summary + tail
         if summary_tokens + tail_tokens < self.max_tokens:
             return result
 
+        # If still too large, recurse on combined result
         return self.summarize(result, recursion_depth + 1)
 
     def summarize_all(self, messages: list[ChatMessage]) -> list[ChatMessage]:
