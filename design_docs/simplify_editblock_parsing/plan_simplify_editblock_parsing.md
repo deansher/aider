@@ -67,7 +67,39 @@ The current EditBlockCoder uses complex heuristics to parse search/replace block
 
 ## Tasks
 
-### ( ) Document how this works today.
+### (✓) Document how this works today.
+
+The edit block functionality is implemented in `editblock_coder.py` and tested in `test_editblock.py`. Each edit block has a file path followed by a body.
+
+#### File Path Requirements
+
+- Must be alone on a line before the opening fence
+- Can be stripped of trailing colons, leading #, and surrounding backticks/asterisks
+- For new files, an empty SEARCH section is allowed
+- The path can be relative to project root
+- The path must be valid (either match an existing file or be a new file path)
+
+#### Body Requirements
+
+- Opening fence (e.g. ```python) - language specifier is optional
+- "<<<<<<< SEARCH" line (5+ < characters)
+- Search content (can be empty for new files)
+- "=======" line (5+ = characters)
+- Replace content
+- ">>>>>>> REPLACE" line (5+ > characters)
+- Closing fence (```)
+
+##### Search Content Requirements
+
+- For existing files, must match exactly (including whitespace)
+- Exception: The code has special handling for leading whitespace mismatches
+- Exception: Can handle "..." lines that match between search and replace sections
+
+#### Multiple Blocks:
+
+- Multiple blocks for the same file are allowed
+- Each block is processed independently
+- Only the first match in a file is replaced
 
 ### ( ) Specify portion of the target code we will change and others we will leave untouched.
 
