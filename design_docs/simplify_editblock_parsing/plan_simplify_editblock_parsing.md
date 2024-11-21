@@ -130,6 +130,24 @@ The edit block functionality is implemented in `editblock_coder.py` and tested i
    - Add more test cases for error conditions
    - Add tests for the shell command handling
 
-### ( ) Document how we will simplify the `find_original_update_blocks` function
+### ( ) Simplify the `find_original_update_blocks` function
 
-We want to do this as one or more complete refactoring steps. By "complete", we mean that both target code and test code will have been changed, unit tests will pass, and Brade will be usable again. We want to take the smallest refactoring steps we can.
+#### ( ) Extract helper functions for cleaner code organization
+- ( ) Extract `process_shell_block` helper to handle shell code blocks
+- ( ) Extract `process_edit_block` helper to handle SEARCH/REPLACE blocks
+- ( ) Extract `validate_edit_block` helper to check block structure
+
+#### ( ) Improve error handling and messages
+- ( ) Add clear error messages for each validation step
+- ( ) Use custom exceptions for different error types
+- ( ) Add context to error messages (line numbers, relevant content)
+
+#### ( ) Simplify the main loop logic
+- ( ) Reduce nesting depth in main loop
+- ( ) Use early returns to handle special cases
+- ( ) Clarify the block parsing state machine
+
+#### ( ) Improve documentation
+- ( ) Add clear docstrings explaining block format requirements
+- ( ) Document error conditions and handling
+- ( ) Add examples in docstrings showing valid formats
