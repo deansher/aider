@@ -101,16 +101,35 @@ The edit block functionality is implemented in `editblock_coder.py` and tested i
 - Each block is processed independently
 - Only the first match in a file is replaced
 
-### ( ) List simplifications that we want to apply as individual refactorings
+### (✓) List simplifications that we want to apply as individual refactorings.
 
-### ( ) Specify portion of the target code we will change and others we will leave untouched.
+1. Simplify the `find_original_update_blocks` function:
+   - Split into smaller functions for better readability and testability
+   - Extract shell command handling into a separate function
+   - Extract filename handling into a separate function
+   - Improve error handling to be more consistent
 
-### ( ) Specify the internal APIs that we will leave untouched.
+2. Improve the `find_filename` function:
+   - Simplify the logic for finding filenames
+   - Make the function more focused by removing some of the flexible filename matching
+   - Add better documentation of what filename formats are actually supported
 
-### ( ) Specify the internal APIs that we will refactor.
+3. Improve the `replace_most_similar_chunk` function:
+   - Remove the fuzzy matching code that is currently disabled
+   - Simplify the function to focus on exact matches and whitespace handling
+   - Move the "..." handling to a separate function
 
-### ( ) Outline the changes we will need to make to tests.
+4. Improve the `do_replace` function:
+   - Simplify the logic for handling new files
+   - Make the error handling more consistent
+   - Add better documentation of the function's behavior
 
-### ( ) List small refactoring steps we will undertake.
+5. Improve test organization:
+   - Group tests by functionality
+   - Add more focused unit tests for the smaller functions
+   - Add more test cases for error conditions
+   - Add tests for the shell command handling
 
-Each refactoring step must be testable, both through unit tests and by manually testing the Brade application.
+### ( ) Document how we will simplify the `find_original_update_blocks` function
+
+We want to do this as one or more complete refactoring steps. By "complete", we mean that both target code and test code will have been changed, unit tests will pass, and Brade will be usable again. We want to take the smallest refactoring steps we can.
