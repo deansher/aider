@@ -101,6 +101,8 @@ The edit block functionality is implemented in `editblock_coder.py` and tested i
 - Each block is processed independently
 - Only the first match in a file is replaced
 
+### ( ) List simplifications that we want to apply as individual refactorings
+
 ### ( ) Specify portion of the target code we will change and others we will leave untouched.
 
 ### ( ) Specify the internal APIs that we will leave untouched.
