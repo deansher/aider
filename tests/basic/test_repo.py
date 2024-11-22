@@ -168,7 +168,11 @@ class TestRepo(unittest.TestCase):
         self.assertEqual(result, "Custom commit message")
         mock_send.assert_called_once()
         args, _ = mock_send.call_args
-        self.assertEqual(args[1][0]["content"], custom_prompt)
+        # Verify that the custom prompt appears at the start of the message content
+        self.assertTrue(args[1][0]["content"].startswith(custom_prompt))
+        # Verify that the diffs and context are included
+        self.assertIn("dummy context", args[1][0]["content"])
+        self.assertIn("dummy diff", args[1][0]["content"])
 
     @patch("aider.repo.GitRepo.get_commit_message")
     def test_commit_with_custom_committer_name(self, mock_send):
