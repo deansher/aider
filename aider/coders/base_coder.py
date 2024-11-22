@@ -21,7 +21,7 @@ from pathlib import Path
 from langfuse.decorators import langfuse_context, observe
 
 from aider import __version__, models, prompts, urls, utils
-from aider.coders.format_brade_messages import format_brade_messages
+from aider.brade_prompts import format_brade_messages
 from aider.commands import Commands
 from aider.history import ChatSummary
 from aider.io import ConfirmGroup, InputOutput

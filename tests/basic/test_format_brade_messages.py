@@ -5,7 +5,7 @@
 
 import pytest
 
-from aider.coders.format_brade_messages import REST_OF_MESSAGE_IS_FROM_APP, FileContent
+from aider.brade_prompts import REST_OF_MESSAGE_IS_FROM_APP, FileContent
 from aider.coders.types import ChatMessage
 
 
@@ -67,7 +67,7 @@ def test_basic_message_structure(
     - Message content is preserved appropriately
     - Context message contains all required sections
     """
-    from aider.coders.format_brade_messages import format_brade_messages
+    from aider.brade_prompts import format_brade_messages
 
     test_platform = "Test platform info"
     test_repo_map = "Sample repo structure"
@@ -153,7 +153,7 @@ def test_format_task_examples() -> None:
     - Messages are properly paired and transformed
     - Invalid message pairs are rejected
     """
-    from aider.coders.format_brade_messages import format_task_examples
+    from aider.brade_prompts import format_task_examples
 
     # Test None input
     assert format_task_examples(None) == ""
@@ -204,7 +204,7 @@ def test_task_examples_integration() -> None:
 
     Validates that task examples are properly included in the final formatted message.
     """
-    from aider.coders.format_brade_messages import format_brade_messages
+    from aider.brade_prompts import format_brade_messages
 
     examples = [
         {"role": "user", "content": "Example request"},
@@ -244,7 +244,7 @@ def test_system_message_handling() -> None:
     - Empty/None system message is handled appropriately
     - System message appears only once
     """
-    from aider.coders.format_brade_messages import format_brade_messages
+    from aider.brade_prompts import format_brade_messages
 
     test_system = "Test system prompt"
     test_instructions = "Test task instructions"
@@ -305,7 +305,7 @@ def test_task_instructions_handling() -> None:
     - None instructions result in empty task_instructions section
     - Opening text always mentions task_instructions
     """
-    from aider.coders.format_brade_messages import format_brade_messages
+    from aider.brade_prompts import format_brade_messages
 
     task_instructions = "Test task instructions"
     messages = format_brade_messages(
@@ -375,7 +375,7 @@ def test_file_content_handling(sample_files: list[tuple[str, str]]) -> None:
     - Simple file content preservation
     - Empty/None file list handling
     """
-    from aider.coders.format_brade_messages import format_brade_messages
+    from aider.brade_prompts import format_brade_messages
 
     # Test basic file content structure with minimal files
     test_files = [
@@ -459,7 +459,7 @@ def test_wrap_xml() -> None:
     - Non-empty content gets exactly one trailing newline
     - Opening/closing tags and their newlines are consistent
     """
-    from aider.coders.format_brade_messages import wrap_xml
+    from aider.brade_prompts import wrap_xml
 
     # Test empty string
     result = wrap_xml("test", "")
@@ -499,7 +499,7 @@ def test_platform_info_handling() -> None:
     - Platform info appears in <platform_info> section when provided
     - Section is omitted when no platform info is provided
     """
-    from aider.coders.format_brade_messages import format_brade_messages
+    from aider.brade_prompts import format_brade_messages
 
     test_platform = "Test platform info"
 
@@ -549,7 +549,7 @@ def test_repo_map_handling() -> None:
     - Content is preserved exactly
     - Empty/None inputs are handled correctly
     """
-    from aider.coders.format_brade_messages import format_brade_messages
+    from aider.brade_prompts import format_brade_messages
 
     # Test basic repo map inclusion
     test_map = "Sample repo map content\nwith multiple lines\nand special chars: <>& "
@@ -632,7 +632,7 @@ def test_message_combination() -> None:
     - All intermediate messages are preserved
     - Message sequence is correct
     """
-    from aider.coders.format_brade_messages import format_brade_messages
+    from aider.brade_prompts import format_brade_messages
 
     # Test with multiple intermediate messages
     cur_messages = [

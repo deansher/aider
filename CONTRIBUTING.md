@@ -369,3 +369,63 @@ pre-commit will then run automatically on each `git commit` command. You can use
 ```
 pre-commit run --all-files
 ```
+
+## Code Architecture
+
+The project's code is organized into several conceptual layers, from lowest to highest:
+
+### Low-Level Support Layer
+Files in `aider/` root that provide basic functionality:
+- `utils.py` - Basic utilities and helpers
+- `io.py` - Basic I/O operations
+- `dump.py` - Debugging utilities
+- `exceptions.py` - Error definitions
+- `llm.py` - LLM API communication
+- `models.py` - LLM model definitions
+- `prompts.py` - Prompts and related constants
+- `brade_prompts.py` - Prompts and related constants introduced by Brade
+
+These modules should:
+- Have minimal dependencies on other project code
+- Be usable independently
+- Not import from higher layers
+
+### Mid-Level Services Layer  
+Files in `aider/` root that coordinate between layers:
+- `sendchat.py` - LLM API communication
+- `repomap.py` - Repository content mapping
+- `linter.py` - Code linting services
+- `repo.py` - Git repository operations 
+
+These modules:
+- May import from the support layer
+- Should not import from high-level layers
+- Provide services used by high-level layers
+
+### High-Level Application Layer
+Files in `aider/` root and `aider/coders/` that implement core application logic:
+- `aider/coders/` - Core editing and chat functionality
+- `main.py` - Application entry point and CLI
+- `commands.py` - User command processing
+
+These modules:
+- May import from lower layers
+- Implement the main application workflows
+- Handle user interaction
+
+### Key Architectural Principles
+
+1. **Dependency Direction**: Modules should only import from the same or lower layers
+2. **Layer Isolation**: Lower layers should not know about higher layers
+3. **Interface Stability**: Lower layers should provide stable interfaces
+4. **Minimal Dependencies**: Each module should have minimal dependencies
+
+### Special Considerations for Brade
+
+Since Brade is a fork of Aider:
+- We maintain these layering principles in new code.
+- We add proper layering when we must modify code anyway.
+- We minimize architectural changes that would make merges harder.
+- We document violations we discover but don't believe we should fix.
+
+This helps us improve the architecture incrementally while staying close to upstream Aider.

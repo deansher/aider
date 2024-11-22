@@ -2,7 +2,7 @@
 
 from llm_multiple_choice import ChoiceManager
 
-from aider.coders.format_brade_messages import THIS_MESSAGE_IS_FROM_APP
+from aider.brade_prompts import THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 

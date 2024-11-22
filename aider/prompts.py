@@ -3,7 +3,7 @@
 
 # COMMIT
 
-from aider.coders.format_brade_messages import THIS_MESSAGE_IS_FROM_APP
+from aider.brade_prompts import THIS_MESSAGE_IS_FROM_APP
 
 commit_message_prompt = """You are an expert software engineer. Write a concise,
 one-line git commit message for the file changes shown below in <diffs>...</diffs>. 

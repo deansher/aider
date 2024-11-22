@@ -1,9 +1,6 @@
 from abc import ABC, abstractproperty
 
-from aider.coders.format_brade_messages import (
-    BRADE_PERSONA_PROMPT,
-    THIS_MESSAGE_IS_FROM_APP,
-)
+from aider.brade_prompts import BRADE_PERSONA_PROMPT, THIS_MESSAGE_IS_FROM_APP
 
 
 class CoderPrompts(ABC):
