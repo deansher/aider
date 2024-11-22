@@ -6,7 +6,7 @@
 import pytest
 
 from aider.brade_prompts import REST_OF_MESSAGE_IS_FROM_APP, FileContent
-from aider.coders.types import ChatMessage
+from aider.types import ChatMessage
 
 
 @pytest.fixture

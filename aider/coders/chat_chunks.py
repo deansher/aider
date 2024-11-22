@@ -3,7 +3,7 @@
 
 from dataclasses import dataclass, field
 
-from .types import ChatMessage
+from ..types import ChatMessage
 
 
 @dataclass

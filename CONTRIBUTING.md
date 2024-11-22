@@ -376,6 +376,7 @@ The project's code is organized into several conceptual layers, from lowest to h
 
 ### Low-Level Support Layer
 Files in `aider/` root that provide basic functionality:
+- `types.py` - Type definitions widely used across the app
 - `utils.py` - Basic utilities and helpers
 - `io.py` - Basic I/O operations
 - `dump.py` - Debugging utilities

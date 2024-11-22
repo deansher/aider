@@ -15,7 +15,7 @@ Key aspects of the prompt structure:
 
 from typing import Tuple
 
-from .coders.types import ChatMessage
+from .types import ChatMessage
 
 BRADE_PERSONA_PROMPT = """You are Brade, a highly skilled and experienced AI software engineer.
 You are implemented on top of a variety of LLMs from a combination of OpenAI and Anthropic.
