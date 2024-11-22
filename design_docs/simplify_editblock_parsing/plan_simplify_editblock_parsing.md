@@ -103,16 +103,16 @@ The edit block functionality is implemented in `editblock_coder.py` and tested i
 
 ### (✓) List simplifications that we want to apply as individual refactorings.
 
-1. Simplify the `find_original_update_blocks` function:
+1. Improve the `find_filename` function:
+   - Simplify the logic for finding filenames
+   - Make the function more focused by removing some of the flexible filename matching
+   - Add better documentation of what filename formats are actually supported
+
+2. Simplify the `find_original_update_blocks` function:
    - Split into smaller functions for better readability and testability
    - Extract shell command handling into a separate function
    - Extract filename handling into a separate function
    - Improve error handling to be more consistent
-
-2. Improve the `find_filename` function:
-   - Simplify the logic for finding filenames
-   - Make the function more focused by removing some of the flexible filename matching
-   - Add better documentation of what filename formats are actually supported
 
 3. Improve the `replace_most_similar_chunk` function:
    - Remove the fuzzy matching code that is currently disabled
@@ -129,6 +129,8 @@ The edit block functionality is implemented in `editblock_coder.py` and tested i
    - Add more focused unit tests for the smaller functions
    - Add more test cases for error conditions
    - Add tests for the shell command handling
+
+### ( ) Improve the `find_filename` function
 
 ### ( ) Simplify the `find_original_update_blocks` function
 
