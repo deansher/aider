@@ -16,37 +16,49 @@ class TestUtils(unittest.TestCase):
     def setUp(self):
         self.GPT35 = Model("gpt-3.5-turbo")
 
+    def test_strip_filename(self):
+        # Test basic cases
+        self.assertEqual(eb.strip_filename("file.py"), "file.py")
+        self.assertEqual(eb.strip_filename(" file.py "), "file.py")
+
+        # Test individual removals
+        self.assertEqual(eb.strip_filename("#file.py"), "file.py")
+        self.assertEqual(eb.strip_filename("file.py:"), "file.py")
+        self.assertEqual(eb.strip_filename("`file.py`"), "file.py")
+
+        # Test combinations
+        self.assertEqual(eb.strip_filename("#file.py:"), "file.py")
+        self.assertEqual(eb.strip_filename("# `file.py`"), "file.py")
+        self.assertEqual(eb.strip_filename("# `file.py:"), "`file.py")
+
+        # Test empty results
+        self.assertEqual(eb.strip_filename(""), "")
+        self.assertEqual(eb.strip_filename("  "), "")
+
     def test_find_filename(self):
-        fence = ("```", "```")
-        valid_fnames = ["file1.py", "file2.py", "dir/file3.py", r"\windows\__init__.py"]
+        # Test with valid_fnames provided
+        valid_fnames = ["file1.py", "dir/file2.py", "path/to/file3.py"]
 
-        # Test with filename on a single line
-        lines = ["file1.py", "```"]
-        self.assertEqual(eb.find_filename(lines, fence, valid_fnames), "file1.py")
+        # Test exact matches
+        self.assertEqual(eb.find_filename("file1.py", valid_fnames), "file1.py")
+        self.assertEqual(eb.find_filename("dir/file2.py", valid_fnames), "dir/file2.py")
 
-        # Test with filename in fence
-        lines = ["```python", "file3.py", "```"]
-        self.assertEqual(eb.find_filename(lines, fence, valid_fnames), "dir/file3.py")
+        # Test basename matches
+        self.assertEqual(eb.find_filename("file2.py", valid_fnames), "dir/file2.py")
+        self.assertEqual(eb.find_filename("file3.py", valid_fnames), "path/to/file3.py")
 
-        # Test with no valid filename
-        lines = ["```", "invalid_file.py", "```"]
-        self.assertEqual("invalid_file.py", eb.find_filename(lines, fence, valid_fnames))
+        # Test with strippable characters
+        self.assertEqual(eb.find_filename("#file1.py:", valid_fnames), "file1.py")
+        self.assertEqual(eb.find_filename("`dir/file2.py`", valid_fnames), "dir/file2.py")
 
-        # Test with multiple fences
-        lines = ["```python", "file1.py", "```", "```", "file2.py", "```"]
-        self.assertEqual(eb.find_filename(lines, fence, valid_fnames), "file2.py")
+        # Test no matches
+        self.assertIsNone(eb.find_filename("nonexistent.py", valid_fnames))
+        self.assertIsNone(eb.find_filename("", valid_fnames))
 
-        # Test with filename having extra characters
-        lines = ["# file1.py", "```"]
-        self.assertEqual(eb.find_filename(lines, fence, valid_fnames), "file1.py")
-
-        # Test with fuzzy matching
-        lines = ["file1_py", "```"]
-        self.assertEqual(eb.find_filename(lines, fence, valid_fnames), "file1.py")
-
-        # Test with fuzzy matching
-        lines = [r"\windows__init__.py", "```"]
-        self.assertEqual(eb.find_filename(lines, fence, valid_fnames), r"\windows\__init__.py")
+        # Test without valid_fnames
+        self.assertEqual(eb.find_filename("newfile.py", None), "newfile.py")
+        self.assertEqual(eb.find_filename("path/to/newfile.py", None), "path/to/newfile.py")
+        self.assertIsNone(eb.find_filename("invalid", None))  # No extension
 
     # fuzzy logic disabled v0.11.2-dev
     def __test_replace_most_similar_chunk(self):
@@ -88,49 +100,7 @@ class TestUtils(unittest.TestCase):
         result = eb.strip_quoted_wrapping(input_text)
         self.assertEqual(result, expected_output)
 
-    def test_find_original_update_blocks(self):
-        edit = """
-Here's the change:
-
-```text
-foo.txt
-<<<<<<< SEARCH
-Two
-=======
-Tooooo
->>>>>>> REPLACE
-```
-
-Hope you like it!
-"""
-
-        edits = list(eb.find_original_update_blocks(edit))
-        self.assertEqual(edits, [("foo.txt", "Two\n", "Tooooo\n")])
-
-    def test_find_original_update_blocks_mangled_filename_w_source_tag(self):
-        source = "source"
-
-        edit = """
-Here's the change:
-
-<%s>foo.txt
-<<<<<<< SEARCH
-One
-=======
-Two
->>>>>>> REPLACE
-</%s>
-
-Hope you like it!
-""" % (source, source)
-
-        fence = ("<%s>" % source, "</%s>" % source)
-
-        with self.assertRaises(ValueError) as cm:
-            _edits = list(eb.find_original_update_blocks(edit, fence))
-        self.assertIn("missing filename", str(cm.exception))
-
-    def test_find_original_update_blocks_quote_below_filename(self):
+    def test_find_original_update_blocks_basic(self):
         edit = """
 Here's the change:
 
@@ -145,57 +115,99 @@ Tooooo
 
 Hope you like it!
 """
-
         edits = list(eb.find_original_update_blocks(edit))
         self.assertEqual(edits, [("foo.txt", "Two\n", "Tooooo\n")])
 
-    def test_find_original_update_blocks_unclosed(self):
+    def test_find_original_update_blocks_shell_commands(self):
         edit = """
-Here's the change:
+Here's what to do:
 
-```text
+```bash
+echo "Hello"
+mv old.txt new.txt
+```
+
+And then this change:
+
 foo.txt
-<<<<<<< SEARCH
-Two
-=======
-Tooooo
-
-
-oops!
-"""
-
-        with self.assertRaises(ValueError) as cm:
-            list(eb.find_original_update_blocks(edit))
-        self.assertIn("Expected `>>>>>>> REPLACE` or `=======`", str(cm.exception))
-
-    def test_find_original_update_blocks_missing_filename(self):
-        edit = """
-Here's the change:
-
 ```text
 <<<<<<< SEARCH
 Two
 =======
 Tooooo
-
-
-oops!
+>>>>>>> REPLACE
+```
 """
+        edits = list(eb.find_original_update_blocks(edit))
+        self.assertEqual(len(edits), 2)
+        self.assertEqual(edits[0], (None, 'echo "Hello"\nmv old.txt new.txt\n'))
+        self.assertEqual(edits[1], ("foo.txt", "Two\n", "Tooooo\n"))
 
+    def test_find_original_update_blocks_new_file(self):
+        edit = """
+Create a new file:
+
+path/to/new.txt
+```text
+<<<<<<< SEARCH
+=======
+Hello World
+>>>>>>> REPLACE
+```
+"""
+        edits = list(eb.find_original_update_blocks(edit))
+        self.assertEqual(edits, [("path/to/new.txt", "", "Hello World\n")])
+
+    def test_find_original_update_blocks_validation(self):
+        # Test missing filename
+        edit = """```text
+<<<<<<< SEARCH
+Two
+=======
+Tooooo
+>>>>>>> REPLACE
+```"""
         with self.assertRaises(ValueError) as cm:
             list(eb.find_original_update_blocks(edit))
         self.assertIn("filename", str(cm.exception))
 
+        # Test unclosed block
+        edit = """foo.txt
+```text
+<<<<<<< SEARCH
+Two
+=======
+Tooooo
+"""
+        with self.assertRaises(ValueError) as cm:
+            list(eb.find_original_update_blocks(edit))
+        self.assertIn("Expected `>>>>>>> REPLACE` or `=======`", str(cm.exception))
+
+        # Test missing fence
+        edit = """foo.txt
+<<<<<<< SEARCH
+Two
+=======
+Tooooo
+>>>>>>> REPLACE
+"""
+        with self.assertRaises(ValueError) as cm:
+            list(eb.find_original_update_blocks(edit))
+        self.assertIn("must begin with a filename and a fence", str(cm.exception))
+
     def test_find_original_update_blocks_no_final_newline(self):
         edit = """
 aider/coder.py
+```python
 <<<<<<< SEARCH
             self.console.print("[red]^C again to quit")
 =======
             self.io.tool_error("^C again to quit")
 >>>>>>> REPLACE
+```
 
 aider/coder.py
+```python
 <<<<<<< SEARCH
             self.io.tool_error("Malformed ORIGINAL/UPDATE blocks, retrying...")
             self.io.tool_error(err)
@@ -205,18 +217,22 @@ aider/coder.py
 >>>>>>> REPLACE
 
 aider/coder.py
+```python
 <<<<<<< SEARCH
             self.console.print("[red]Unable to get commit message from gpt-3.5-turbo. Use /commit to try again.\n")
 =======
             self.io.tool_error("Unable to get commit message from gpt-3.5-turbo. Use /commit to try again.")
 >>>>>>> REPLACE
+```
 
 aider/coder.py
+```python
 <<<<<<< SEARCH
             self.console.print("[red]Skipped commit.")
 =======
             self.io.tool_error("Skipped commit.")
->>>>>>> REPLACE"""
+>>>>>>> REPLACE
+```"""
 
         # Should not raise a ValueError
         list(eb.find_original_update_blocks(edit))
@@ -225,8 +241,8 @@ aider/coder.py
         edit = """
 No problem! Here are the changes to patch `subprocess.check_output` instead of `subprocess.run` in both tests:
 
-```python
 tests/test_repomap.py
+```python
 <<<<<<< SEARCH
     def test_check_for_ctags_failure(self):
         with patch("subprocess.run") as mock_run:
@@ -236,7 +252,10 @@ tests/test_repomap.py
         with patch("subprocess.check_output") as mock_check_output:
             mock_check_output.side_effect = Exception("ctags not found")
 >>>>>>> REPLACE
+```
 
+tests/test_repomap.py
+```python
 <<<<<<< SEARCH
     def test_check_for_ctags_success(self):
         with patch("subprocess.run") as mock_run:
@@ -358,12 +377,13 @@ These changes replace the `subprocess.run` patches with `subprocess.check_output
 Do this:
 
 {Path(file1).name}
+```text
 <<<<<<< SEARCH
 two
 =======
 new
 >>>>>>> REPLACE
-
+```
 """
             coder.partial_response_function_call = dict()
             return []
@@ -419,12 +439,12 @@ new
         content = Path(file1).read_text(encoding="utf-8")
         self.assertEqual(content, orig_content)
 
-    def test_find_original_update_blocks_mupltiple_same_file(self):
+    def test_find_original_update_blocks_multiple_same_file(self):
         edit = """
 Here's the change:
 
-```text
 foo.txt
+```text
 <<<<<<< SEARCH
 one
 =======
@@ -433,6 +453,8 @@ two
 
 ...
 
+foo.txt
+```text
 <<<<<<< SEARCH
 three
 =======
@@ -449,32 +471,6 @@ Hope you like it!
             [
                 ("foo.txt", "one\n", "two\n"),
                 ("foo.txt", "three\n", "four\n"),
-            ],
-        )
-
-    def test_deepseek_coder_v2_filename_mangling(self):
-        edit = """
-Here's the change:
-
- ```python
-foo.txt
-```
-```python
-<<<<<<< SEARCH
-one
-=======
-two
->>>>>>> REPLACE
-```
-
-Hope you like it!
-"""
-
-        edits = list(eb.find_original_update_blocks(edit))
-        self.assertEqual(
-            edits,
-            [
-                ("foo.txt", "one\n", "two\n"),
             ],
         )
 

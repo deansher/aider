@@ -413,11 +413,12 @@ class TestCoder(unittest.TestCase):
 Do this:
 
 {str(fname)}
+```text
 <<<<<<< SEARCH
 =======
 new
 >>>>>>> REPLACE
-
+```
 """
                 coder.partial_response_function_call = dict()
                 return []
@@ -464,12 +465,13 @@ new
 Do this:
 
 {str(fname2)}
+```text
 <<<<<<< SEARCH
 two
 =======
 TWO
 >>>>>>> REPLACE
-
+```
 """
                 coder.partial_response_function_call = dict()
                 return []
@@ -517,12 +519,13 @@ TWO
 Do this:
 
 {str(fname)}
+```text
 <<<<<<< SEARCH
 two
 =======
 three
 >>>>>>> REPLACE
-
+```
 """
                 coder.partial_response_function_call = dict()
                 return []
@@ -595,12 +598,13 @@ three
 Do this:
 
 {str(fname)}
+```text
 <<<<<<< SEARCH
 one
 =======
 two
 >>>>>>> REPLACE
-
+```
 """
                 coder.partial_response_function_call = dict()
                 return []

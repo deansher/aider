@@ -126,6 +126,7 @@ Every *SEARCH/REPLACE block* must use this format:
 1. The *FULL* file path alone on a line, relative to the project root, verbatim, with no 
    punctuation. No bold asterisks, no quotes around it, no escaping of characters, etc.
 2. The opening fence and code language, eg: {fence[0]}python
+   Pay attention to the file's extension and contents to get the language right.
 3. The start of search block: <<<<<<< SEARCH
 4. A contiguous chunk of lines to search for in the existing source code
 5. The dividing line: =======
@@ -153,12 +154,11 @@ portion of the file.
 
 It is helpful for both you and your partner when a *SEARCH/REPLACE* block can start at
 a logical point in the file, such as the beginning of a top-level declaration or the header
-of a document section. But try to keep the unchanged context at the top and bottom to
-between 10 and 20 lines. This provides enough context for the change without burying the
-change in a large block of unchanged code.
+of a document section. But avoid using more than about 20 lines of unchanged context. 
+This provides enough context for the change without burying the change in a large block of unchanged code.
 
 Only write *SEARCH/REPLACE* blocks for files in <editable_files>...</editable_files> or
-files that you propose to create. If you feel strongly that you need to change a file in
+for files that you propose to create. If you feel strongly that you need to change a file in
 <readonly_files>...</readonly_files> that is within this project, you can write an edit
 block for that.
 

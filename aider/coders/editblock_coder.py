@@ -148,20 +148,20 @@ def perfect_replace(whole_lines, part_lines, replace_lines):
 
 def replace_most_similar_chunk(whole, part, replace):
     """Best efforts to find the `part` lines in `whole` and replace them with `replace`.
-    
+
     The code is more flexible than what we tell the model about matching:
-    
+
     1. Perfect match - tries for exact character-by-character match first
-    
+
     2. Whitespace flexibility:
     - Handles mismatched leading whitespace
     - Can match content with different indentation levels
-    
+
     3. Elided content with "...":
     - Supports matching across elided sections marked with ...
     - The ... must match exactly between search and replace sections
     - The non-elided chunks must match exactly
-    
+
     4. Empty search sections:
     - Allowed for new files
     - Results in appending content to existing files
@@ -412,38 +412,20 @@ missing_filename_err = (
 )
 
 
-def strip_filename(filename, fence):
-    """Clean up a filename from various allowed formats.
-    
-    The code is flexible about filename formatting:
-    - Can have trailing colons (stripped)
-    - Can have leading # (stripped) 
-    - Can have surrounding backticks (stripped)
-    - Can have surrounding asterisks (stripped)
-    - Can be preceded by multiple fences
-    - Can be the basename of a valid file path
-    - Can be a fuzzy match to a valid file path
-    
+def strip_filename(filename):
+    """Clean up a filename by stripping certain surrounding characters.
+
     Returns:
-        The cleaned filename or None if invalid
+        str: the filename with strippable characters stripped, which might then be empty
     """
     filename = filename.strip()
-
-    if filename == "...":
-        return
-
-    start_fence = fence[0]
-    if filename.startswith(start_fence):
-        return
-
-    filename = filename.rstrip(":")
-    filename = filename.lstrip("#")
+    if filename.startswith("#"):
+        filename = filename[1:]
+    if filename.endswith(":"):
+        filename = filename[:-1]
     filename = filename.strip()
-    filename = filename.strip("`")
-    filename = filename.strip("*")
-
-    # https://github.com/Aider-AI/aider/issues/1158
-    # filename = filename.replace("\\_", "_")
+    if filename.startswith("`") and filename.endswith("`"):
+        filename = filename[1:-1]
 
     return filename
 
@@ -481,7 +463,6 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
     """
     lines = content.splitlines(keepends=True)
     i = 0
-    current_filename = None
 
     head_pattern = re.compile(HEAD)
     divider_pattern = re.compile(DIVIDER)
@@ -522,19 +503,26 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
         # Check for SEARCH/REPLACE blocks
         if head_pattern.match(line.strip()):
             try:
-                # if next line after HEAD exists and is DIVIDER, it's a new file
-                if i + 1 < len(lines) and divider_pattern.match(lines[i + 1].strip()):
-                    filename = find_filename(lines[max(0, i - 3) : i], fence, None)
-                else:
-                    filename = find_filename(lines[max(0, i - 3) : i], fence, valid_fnames)
+                if i < 2:
+                    raise ValueError(
+                        "Each SEARCH/REPLACE block must begin with a filename and a fence; "
+                        f"Found a {HEAD} on line {i}"
+                    )
+                if i < 2 or not lines[i - 1].startswith(fence[0]):
+                    raise ValueError(
+                        "Each SEARCH/REPLACE block must begin with a filename and a fence.\n"
+                        f"""Expected "{fence[0]}" at the start of line {i - 1}, but got this:\n"""
+                        f"{lines[i - 1]!r}\n"
+                    )
 
+                filename_line = lines[i - 2]
+                if not strip_filename(filename_line) and i >= 3:
+                    filename_line = lines[i - 3]
+                is_new_file = i + 1 < len(lines) and divider_pattern.match(lines[i + 1].strip())
+                use_valid_fnames = None if is_new_file else valid_fnames
+                filename = find_filename(filename_line, use_valid_fnames)
                 if not filename:
-                    if current_filename:
-                        filename = current_filename
-                    else:
-                        raise ValueError(missing_filename_err.format(fence=fence))
-
-                current_filename = filename
+                    raise ValueError(missing_filename_err.format(fence=fence))
 
                 original_text = []
                 i += 1
@@ -570,68 +558,43 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
         i += 1
 
 
-def find_filename(lines, fence, valid_fnames):
+def find_filename(line, valid_fnames):
+    """Find a filename in line.
+
+    The filename must be alone on the line, optionally preceded by # or
+    surrounded by backticks.
+
+    If valid_fnames is provided, the stripped filename must be in the list.
+
+    Args:
+        lines (list): the lines that may contain the filename in priority order
+        fence (tuple): Opening and closing fence markers
+        valid_fnames (list): List of valid filenames to match against
+           If empty or not provided, then any syntactically valid filename is accepted.
+
+    Returns:
+        str: The found filename, or None if no valid filename found
     """
-    Deepseek Coder v2 has been doing this:
+    filename = strip_filename(line)
+    if not filename:
+        return None
 
+    # For existing files, require an exact match
+    if valid_fnames:
+        # Check for exact match first
+        if filename in valid_fnames:
+            return filename
 
-     ```python
-    word_count.py
-    ```
-    ```python
-    <<<<<<< SEARCH
-    ...
+        # Check for basename match
+        for valid_fname in valid_fnames:
+            if filename == Path(valid_fname).name:
+                return valid_fname
 
-    This is a more flexible search back for filenames.
-    """
+    # For new files, require a file extension
+    elif "." in filename:
+        return filename
 
-    if valid_fnames is None:
-        valid_fnames = []
-
-    # Go back through the 3 preceding lines
-    lines.reverse()
-    lines = lines[:3]
-
-    filenames = []
-    for line in lines:
-        # If we find a filename, done
-        filename = strip_filename(line, fence)
-        if filename:
-            filenames.append(filename)
-
-        # Only continue as long as we keep seeing fences
-        if not line.startswith(fence[0]):
-            break
-
-    if not filenames:
-        return
-
-    # pick the *best* filename found
-
-    # Check for exact match first
-    for fname in filenames:
-        if fname in valid_fnames:
-            return fname
-
-    # Check for partial match (basename match)
-    for fname in filenames:
-        for vfn in valid_fnames:
-            if fname == Path(vfn).name:
-                return vfn
-
-    # Perform fuzzy matching with valid_fnames
-    for fname in filenames:
-        close_matches = difflib.get_close_matches(fname, valid_fnames, n=1, cutoff=0.8)
-        if len(close_matches) == 1:
-            return close_matches[0]
-
-    # If no fuzzy match, look for a file w/extension
-    for fname in filenames:
-        if "." in fname:
-            return fname
-
-    if filenames:
-        return filenames[0]
+    return None
 
 
 def find_similar_lines(search_lines, content_lines, threshold=0.6):
