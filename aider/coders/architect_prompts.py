@@ -2,7 +2,7 @@
 
 from llm_multiple_choice import ChoiceManager
 
-from aider.brade_prompts import THIS_MESSAGE_IS_FROM_APP
+from aider.brade_prompts import CONTEXT_NOUN, THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
@@ -13,6 +13,12 @@ Please review the latest versions of the projects files that you just
 changed. Read your changes with a fresh skeptical eye, looking for problems you
 might have introduced and for ways you fell short of your partner's instructions
 and your own standards.
+
+Focus on the material provided in {CONTEXT_NOUN}, which includes the latest 
+versions of the files you just changed. If everything worked correctly, then
+all intended changes have been applied to these versions. Make sure that is 
+true both from a mechanical perspective and in terms of your goals in making
+the changes.
 
 Use this ONLY as an opportunity to find and point out problems that are
 significant enough -- at this stage of your work with your partner -- to take
@@ -47,11 +53,12 @@ Alternatively, you have two ways to respond that will cause the Brade applicatio
 specific actions:
 
 - You can **propose changes** that you would make as a next step. In this case, 
-  clearly state that you are proposing changes to project files. Then briefly think aloud through 
-  any especially important or difficult decisions or issues in what you are about to propose. Next, write clear, 
-  focused instructions for the changes. Make these concrete enough to act on, but brief enough 
-  to easily review. Don't propose actual changes or file content at this stage. Conclude your 
-  response by asking your partner whether you should make the changes you proposed.
+  clearly state that you propose to edit project files. If it's not obvious from the discussion,
+  explain your goals. In any case, briefly think aloud through any especially important or 
+  difficult decisions or issues. Next, write clear, focused instructions for the changes. 
+  Make these concrete enough to act on, but brief enough to easily review. Don't propose specific
+  new code or propose at this stage. Conclude your response by asking your partner whether you 
+  should make the changes you proposed.
 
   If you respond in this manner, the Brade application will ask your partner whether they want 
   you to go ahead and make file changes, (Y)es or (n)o. If they answer "yes", the Brade 
@@ -59,7 +66,8 @@ specific actions:
   on the project.
 
   Special note for plan documents: If asked to update a plan, don't write the plan content yet. 
-  Instead, briefly confirm what plan updates are needed and ask whether to proceed.
+  Instead, briefly indicate the kinds of plan updates you propose to make and ask whether to 
+  proceed.
 
 - Or, you can **ask to see more files**. Provide their paths relative to the project root and and 
   explain why you need them. In this case, the Brade application will ask your partner whether
