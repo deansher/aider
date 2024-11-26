@@ -114,6 +114,13 @@ def test_context_and_task_placement() -> None:
         test_platform,
         "</platform_info>",
         "</context>",
+        "<task_instructions>",
+        test_instructions,
+        "</task_instructions>",
+        "<task_examples>",
+        "Example request",
+        "Example response",
+        "</task_examples>",
     ]
 
     last_pos = context_pos
@@ -137,10 +144,6 @@ def test_context_and_task_placement() -> None:
     user_msg = messages[-1]
     assert user_msg["role"] == "user"
     assert user_msg["content"] == "Test message"
-    assert "<context>" not in user_msg["content"]
-    assert "<task_instructions>" not in user_msg["content"]
-    assert "<task_examples>" not in user_msg["content"]
-    assert REST_OF_MESSAGE_IS_FROM_APP not in user_msg["content"]
 
 
 def test_basic_message_structure(
@@ -245,8 +248,6 @@ def test_format_task_examples() -> None:
     with pytest.raises(ValueError, match="must contain pairs"):
         odd_examples = examples[:-1]  # Remove last message
         format_task_examples(odd_examples)
-
-
 
 
 def test_system_message_handling() -> None:
