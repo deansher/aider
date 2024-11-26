@@ -389,7 +389,7 @@ def format_brade_messages(
         # Combine the user's message with the context
     final_user_message = {
         "role": "user",
-        "content": final_user_content["content"] + "\n\n" + context_content,
+        "content": context_content + "\n\n" + final_user_content["content"],
     }
 
     messages.append(final_user_message)
