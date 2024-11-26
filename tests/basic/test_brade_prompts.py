@@ -56,9 +56,9 @@ def sample_files() -> list[FileContent]:
     ]
 
 
-def test_context_placement() -> None:
-    """Tests that context is properly placed in system message and not in user messages.
-    
+def test_context_and_task_placement() -> None:
+    """Tests that <context>, <task_instructions>, and <task_examples> are properly placed.
+
     Validates:
     - Context appears in system message
     - Context sections are properly ordered in system message
@@ -106,7 +106,9 @@ def test_context_placement() -> None:
     for section in sections:
         pos = system_content.find(section, last_pos)
         assert pos != -1, f"Missing section {section!r} after <context> in:\n{system_content}"
-        assert pos > last_pos, f"Section {section!r} out of order after <context> in:\n{system_content}"
+        assert (
+            pos > last_pos
+        ), f"Section {section!r} out of order after <context> in:\n{system_content}"
         last_pos = pos
 
     # Verify user message remains pure
@@ -697,11 +699,21 @@ def test_message_combination() -> None:
 
     # Verify context sections are present in system message
     system_content = messages[0]["content"]
-    assert "<context>" in system_content, f"Expected context tag in system message:\n{system_content}"
-    assert "<repository_map>" in system_content, f"Expected repository_map tag in system message:\n{system_content}"
-    assert "Test map" in system_content, f"Expected repository map content in system message:\n{system_content}"
-    assert "<platform_info>" in system_content, f"Expected platform_info tag in system message:\n{system_content}"
-    assert "Test platform" in system_content, f"Expected platform info in system message:\n{system_content}"
+    assert (
+        "<context>" in system_content
+    ), f"Expected context tag in system message:\n{system_content}"
+    assert (
+        "<repository_map>" in system_content
+    ), f"Expected repository_map tag in system message:\n{system_content}"
+    assert (
+        "Test map" in system_content
+    ), f"Expected repository map content in system message:\n{system_content}"
+    assert (
+        "<platform_info>" in system_content
+    ), f"Expected platform_info tag in system message:\n{system_content}"
+    assert (
+        "Test platform" in system_content
+    ), f"Expected platform info in system message:\n{system_content}"
 
     # Test with single message
     messages = format_brade_messages(
