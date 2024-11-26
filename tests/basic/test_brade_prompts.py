@@ -60,19 +60,26 @@ def test_context_and_task_placement() -> None:
     """Tests that <context>, <task_instructions>, and <task_examples> are properly placed.
 
     Validates:
-    - Context appears in system message
-    - Context sections are properly ordered in system message
-    - User messages remain pure without context
+    - All sections appear in system message
+    - Sections appear in correct order
+    - User messages remain pure without any sections
+    - Content of each section is preserved correctly
     """
     from aider.brade_prompts import format_brade_messages
 
     test_platform = "Test platform info"
     test_repo_map = "Sample repo structure"
     test_file = ("test.py", "print('test')")
+    test_instructions = "Test task instructions"
+    test_examples = [
+        {"role": "user", "content": "Example request"},
+        {"role": "assistant", "content": "Example response"},
+    ]
 
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
-        task_instructions="Test task instructions",
+        task_instructions=test_instructions,
+        task_examples=test_examples,
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map=test_repo_map,
@@ -81,13 +88,20 @@ def test_context_and_task_placement() -> None:
         platform_info=test_platform,
     )
 
-    # Verify system message contains context
+    # Verify system message contains all sections
     system_msg = messages[0]
     assert system_msg["role"] == "system"
     system_content = system_msg["content"]
 
-    # Check context sections appear in correct order
+    # Check all sections appear in correct order
     context_pos = system_content.index("<context>")
+    task_instructions_pos = system_content.index("<task_instructions>")
+    task_examples_pos = system_content.index("<task_examples>")
+
+    # Verify order of sections
+    assert context_pos < task_instructions_pos < task_examples_pos, "Sections out of order"
+
+    # Check context subsections appear in correct order
     sections = [
         "<repository_map>",
         test_repo_map,
@@ -111,11 +125,21 @@ def test_context_and_task_placement() -> None:
         ), f"Section {section!r} out of order after <context> in:\n{system_content}"
         last_pos = pos
 
+    # Verify task instructions content
+    assert test_instructions in system_content
+
+    # Verify task examples content
+    assert "<example>" in system_content
+    assert "<message role='user'>Example request</message>" in system_content
+    assert "<message role='assistant'>Example response</message>" in system_content
+
     # Verify user message remains pure
     user_msg = messages[-1]
     assert user_msg["role"] == "user"
     assert user_msg["content"] == "Test message"
     assert "<context>" not in user_msg["content"]
+    assert "<task_instructions>" not in user_msg["content"]
+    assert "<task_examples>" not in user_msg["content"]
     assert REST_OF_MESSAGE_IS_FROM_APP not in user_msg["content"]
 
 
@@ -223,39 +247,6 @@ def test_format_task_examples() -> None:
         format_task_examples(odd_examples)
 
 
-def test_task_examples_integration() -> None:
-    """Tests integration of format_task_examples with format_brade_messages.
-
-    Validates that task examples are properly included in the final formatted message.
-    """
-    from aider.brade_prompts import format_brade_messages
-
-    examples = [
-        {"role": "user", "content": "Example request"},
-        {"role": "assistant", "content": "Example response"},
-    ]
-
-    messages = format_brade_messages(
-        system_prompt="Test prompt",
-        task_instructions="Test task instructions",
-        done_messages=[],
-        cur_messages=[{"role": "user", "content": "Test"}],
-        task_examples=examples,
-        readonly_text_files=[],
-        editable_text_files=[],
-        platform_info="Test platform info",
-    )
-
-    final_msg = messages[-1]
-    content = final_msg["content"]
-
-    # Check that user's message appears first
-    assert content.startswith("Test")
-
-    # Check examples appear in context after user's message
-    assert "<task_examples>" in content
-    assert "<message role='user'>Example request</message>" in content
-    assert "<message role='assistant'>Example response</message>" in content
 
 
 def test_system_message_handling() -> None:
