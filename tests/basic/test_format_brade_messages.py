@@ -87,9 +87,18 @@ def test_basic_message_structure(
     assert isinstance(messages, list)
     assert len(messages) > 0
 
-    # 1. System message must be first
+    # 1. System message must be first and include context
     assert messages[0]["role"] == "system"
-    assert messages[0]["content"] == "You are a helpful AI assistant"
+    system_content = messages[0]["content"]
+    
+    # Verify system message has both prompt and context
+    assert system_content.startswith("You are a helpful AI assistant")
+    assert "<context>" in system_content
+    assert "<repository_map>" in system_content
+    assert test_repo_map in system_content
+    assert "<platform_info>" in system_content
+    assert test_platform in system_content
+    assert "</context>" in system_content
 
     # 2. Done messages must follow system message exactly
     assert messages[1]["role"] == "user"
@@ -103,45 +112,15 @@ def test_basic_message_structure(
     assert messages[4]["role"] == "assistant"
     assert messages[4]["content"] == "Intermediate response"
 
-    # 4. Final message should contain both user content and context
+    # 4. Final message should contain only user content
     final_msg = messages[-1]
     assert final_msg["role"] == "user"
     content = final_msg["content"]
 
-    # Check that user's original message appears first
-    assert content.startswith(
-        "Final current message"
-    ), f"Content should start with user message but got:\n{content}"
-
-    # Check that context follows
-    assert REST_OF_MESSAGE_IS_FROM_APP in content, f"Expected app message marker in:\n{content}"
-    assert (
-        "more recent and reliable than anything in earlier chat messages" in content
-    ), f"Expected context message in:\n{content}"
-
-    # XML sections must appear in correct order. Start at the last <context> tag
-    # to allow a mention of <context> in preface material.
-
-    last_pos = content.rindex("<context>")
-    assert last_pos >= 0
-
-    sections = [
-        "<repository_map>",
-        test_repo_map,
-        "</repository_map>",
-        "<platform_info>",
-        test_platform,
-        "</platform_info>",
-        "</context>",
-    ]
-
-    for section in sections:
-        pos = content.find(section, last_pos)
-        assert pos != -1, f"Missing section {section!r} after last <context> in:\n{content}"
-        assert (
-            pos > last_pos
-        ), f"Section {section!r} out of order after last <context> in:\n{content}"
-        last_pos = pos
+    # Check that user's original message appears without context
+    assert content == "Final current message", f"Expected only user message but got:\n{content}"
+    assert "<context>" not in content
+    assert REST_OF_MESSAGE_IS_FROM_APP not in content
 
 
 def test_format_task_examples() -> None:
@@ -664,24 +643,22 @@ def test_message_combination() -> None:
     assert messages[4]["role"] == "assistant"
     assert messages[4]["content"] == "Second response"
 
-    # Check final combined message
+    # Check final message contains only user content
     final_msg = messages[-1]
     content = final_msg["content"]
 
-    # Verify user's message appears first
-    assert content.startswith(
-        "Final message"
-    ), f"Content should start with user message but got:\n{content}"
+    # Verify user's message appears without context
+    assert content == "Final message", f"Expected only user message but got:\n{content}"
+    assert "<context>" not in content
+    assert REST_OF_MESSAGE_IS_FROM_APP not in content
 
-    # Verify context follows with proper separation
-    assert REST_OF_MESSAGE_IS_FROM_APP in content, f"Expected app message marker in:\n{content}"
-
-    # Verify context sections are present
-    assert "<context>" in content, f"Expected context tag in:\n{content}"
-    assert "<repository_map>" in content, f"Expected repository_map tag in:\n{content}"
-    assert "Test map" in content, f"Expected repository map content in:\n{content}"
-    assert "<platform_info>" in content, f"Expected platform_info tag in:\n{content}"
-    assert "Test platform" in content, f"Expected platform info in:\n{content}"
+    # Verify context sections are present in system message
+    system_content = messages[0]["content"]
+    assert "<context>" in system_content, f"Expected context tag in system message:\n{system_content}"
+    assert "<repository_map>" in system_content, f"Expected repository_map tag in system message:\n{system_content}"
+    assert "Test map" in system_content, f"Expected repository map content in system message:\n{system_content}"
+    assert "<platform_info>" in system_content, f"Expected platform_info tag in system message:\n{system_content}"
+    assert "Test platform" in system_content, f"Expected platform info in system message:\n{system_content}"
 
     # Test with single message
     messages = format_brade_messages(
