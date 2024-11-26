@@ -56,6 +56,67 @@ def sample_files() -> list[FileContent]:
     ]
 
 
+def test_context_placement() -> None:
+    """Tests that context is properly placed in system message and not in user messages.
+    
+    Validates:
+    - Context appears in system message
+    - Context sections are properly ordered in system message
+    - User messages remain pure without context
+    """
+    from aider.brade_prompts import format_brade_messages
+
+    test_platform = "Test platform info"
+    test_repo_map = "Sample repo structure"
+    test_file = ("test.py", "print('test')")
+
+    messages = format_brade_messages(
+        system_prompt="You are a helpful AI assistant",
+        task_instructions="Test task instructions",
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test message"}],
+        repo_map=test_repo_map,
+        readonly_text_files=[test_file],
+        editable_text_files=[],
+        platform_info=test_platform,
+    )
+
+    # Verify system message contains context
+    system_msg = messages[0]
+    assert system_msg["role"] == "system"
+    system_content = system_msg["content"]
+
+    # Check context sections appear in correct order
+    context_pos = system_content.index("<context>")
+    sections = [
+        "<repository_map>",
+        test_repo_map,
+        "</repository_map>",
+        "<readonly_files>",
+        "<file path='test.py'>",
+        "print('test')",
+        "</readonly_files>",
+        "<platform_info>",
+        test_platform,
+        "</platform_info>",
+        "</context>",
+    ]
+
+    last_pos = context_pos
+    for section in sections:
+        pos = system_content.find(section, last_pos)
+        assert pos != -1, f"Missing section {section!r} after <context> in:\n{system_content}"
+        assert pos > last_pos, f"Section {section!r} out of order after <context> in:\n{system_content}"
+        last_pos = pos
+
+    # Verify user message remains pure
+    user_msg = messages[-1]
+    assert user_msg["role"] == "user"
+    assert user_msg["content"] == "Test message"
+    assert "<context>" not in user_msg["content"]
+    assert REST_OF_MESSAGE_IS_FROM_APP not in user_msg["content"]
+
+
 def test_basic_message_structure(
     sample_done_messages: list[ChatMessage], sample_cur_messages: list[ChatMessage]
 ) -> None:
@@ -63,42 +124,29 @@ def test_basic_message_structure(
 
     Validates:
     - Message sequence follows required structure
-    - XML sections appear in correct order
     - Message content is preserved appropriately
-    - Context message contains all required sections
+    - Basic system message content
     """
     from aider.brade_prompts import format_brade_messages
-
-    test_platform = "Test platform info"
-    test_repo_map = "Sample repo structure"
 
     messages = format_brade_messages(
         system_prompt="You are a helpful AI assistant",
         task_instructions="Test task instructions",
         done_messages=sample_done_messages,
         cur_messages=sample_cur_messages,
-        repo_map=test_repo_map,
+        repo_map=None,
         readonly_text_files=[],
         editable_text_files=[],
-        platform_info=test_platform,
+        platform_info=None,
     )
 
     # Verify message sequence structure
     assert isinstance(messages, list)
     assert len(messages) > 0
 
-    # 1. System message must be first and include context
+    # 1. System message must be first
     assert messages[0]["role"] == "system"
-    system_content = messages[0]["content"]
-    
-    # Verify system message has both prompt and context
-    assert system_content.startswith("You are a helpful AI assistant")
-    assert "<context>" in system_content
-    assert "<repository_map>" in system_content
-    assert test_repo_map in system_content
-    assert "<platform_info>" in system_content
-    assert test_platform in system_content
-    assert "</context>" in system_content
+    assert messages[0]["content"].startswith("You are a helpful AI assistant")
 
     # 2. Done messages must follow system message exactly
     assert messages[1]["role"] == "user"
@@ -115,12 +163,7 @@ def test_basic_message_structure(
     # 4. Final message should contain only user content
     final_msg = messages[-1]
     assert final_msg["role"] == "user"
-    content = final_msg["content"]
-
-    # Check that user's original message appears without context
-    assert content == "Final current message", f"Expected only user message but got:\n{content}"
-    assert "<context>" not in content
-    assert REST_OF_MESSAGE_IS_FROM_APP not in content
+    assert final_msg["content"] == "Final current message"
 
 
 def test_format_task_examples() -> None:
