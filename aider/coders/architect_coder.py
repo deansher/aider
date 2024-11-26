@@ -25,7 +25,7 @@ class ArchitectExchange:
     - The reviewer validating changes
 
     It provides methods to generate the appropriate message sequences needed by each
-    participant and to record the final conversation.
+    participant and for recording the entire exchange.
 
     Attributes:
         architect_response: The architect's response proposing changes
@@ -51,7 +51,7 @@ class ArchitectExchange:
         """
         return {"role": "assistant", "content": self.architect_response}
 
-    def _editor_exchange(self) -> list[dict[str, str]]:
+    def _architect_editor_exchange(self) -> list[dict[str, str]]:
         """Get the architect-editor exchange messages.
 
         Returns:
@@ -83,10 +83,11 @@ class ArchitectExchange:
         Returns:
             List of messages for the reviewer's context
         """
-        return self._editor_exchange()
+        return self._architect_editor_exchange()
 
-    def get_conversation_messages(self) -> list[dict[str, str]]:
-        """Get the complete conversation record.
+    def get_entire_exchange(self) -> list[dict[str, str]]:
+        """Get the complete conversation record, after the architect, editor, and reviewer
+        have all participated.
 
         Returns:
             List of all messages in the exchange
@@ -97,7 +98,7 @@ class ArchitectExchange:
         if not self.editor_response or not self.reviewer_response:
             raise ValueError("Exchange not complete")
 
-        return self._editor_exchange() + [
+        return self._architect_editor_exchange() + [
             {"role": "user", "content": REVIEW_CHANGES_PROMPT},
             {"role": "assistant", "content": self.reviewer_response},
         ]
@@ -116,6 +117,16 @@ class ArchitectCoder(AskCoder):
         produces_code_edits: Whether this coder directly produces code edits
         gpt_prompts: The prompts configuration for this coder
     """
+
+    # Implementation Notes:
+    #
+    # We don't extend ArchitectCoder's chat history until the entire exchange is complete.
+    #
+    # When we create a subordinate model (editor or reviewer), it inherits the architect's
+    # chat history. We extend the subordinate's chat history to include the messages that have
+    # occurred so far in the exchange. We then capture the subordinate's response message
+    # in the ArchitectExchange object for use by the next subordinate or for recording the entire
+    # exchange at the end.
 
     edit_format = "architect"
     produces_code_edits = False  # Architect coder doesn't produce code edits directly
@@ -158,7 +169,6 @@ class ArchitectCoder(AskCoder):
         """Process the architect's response and coordinate with editor/reviewer as needed."""
         architect_response = self.partial_response_content
 
-        # Analyze just the assistant's response
         architect_response_codes = analyze_assistant_response(
             possible_architect_responses,
             (
@@ -186,7 +196,7 @@ class ArchitectCoder(AskCoder):
 
         self.execute_changes(exchange)
         self.review_changes(exchange)
-        self.record_conversation(exchange)
+        self.record_entire_exchange(exchange)
 
     def execute_changes(self, exchange: ArchitectExchange) -> None:
         """Run the editor coder to implement changes.
@@ -230,12 +240,12 @@ class ArchitectCoder(AskCoder):
         self.total_cost += reviewer_coder.total_cost
         exchange.reviewer_response = reviewer_coder.partial_response_content
 
-    def record_conversation(self, exchange: ArchitectExchange) -> None:
+    def record_entire_exchange(self, exchange: ArchitectExchange) -> None:
         """Record the complete conversation history.
 
         Args:
             exchange: The completed exchange containing all responses
         """
-        self.cur_messages = self.cur_messages + exchange.get_conversation_messages()
+        self.cur_messages = self.cur_messages + exchange.get_entire_exchange()
         self.move_back_cur_messages(CHANGES_COMMITTED_MESSAGE)
         self.partial_response_content = ""  # Clear to prevent redundant message
