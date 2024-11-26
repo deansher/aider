@@ -373,7 +373,7 @@ def format_brade_messages(
     task_examples_section = format_task_examples(task_examples)
 
     context_content = (
-        +f"{wrap_xml('context', context)}\n"
+        f"{wrap_xml('context', context)}\n"
         + wrap_xml("task_instructions", task_instructions)
         + f"{task_examples_section}"
     )
