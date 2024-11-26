@@ -288,74 +288,59 @@ def format_brade_messages(
     if system_prompt is None:
         raise ValueError("system_prompt cannot be None")
 
-    messages = [{"role": "system", "content": system_prompt}]
+    # Build the context section
+    context_parts = []
 
-    # Add conversation history
-    messages.extend(done_messages)
+    # Add repository map if provided and contains non-whitespace content
+    if repo_map and repo_map.strip():
+        context_parts.append(wrap_xml("repository_map", repo_map))
 
-    # Transform the final user message to include context
-    if cur_messages:
-        # Copy all but last message
-        messages.extend(cur_messages[:-1])
+    # Add file sections if provided
+    if readonly_text_files:
+        files_xml = format_file_section(readonly_text_files)
+        context_parts.append(wrap_xml("readonly_files", files_xml))
 
-        # Build the context section
-        context_parts = []
+    if editable_text_files:
+        files_xml = format_file_section(editable_text_files)
+        context_parts.append(wrap_xml("editable_files", files_xml))
 
-        # Add repository map if provided and contains non-whitespace content
-        if repo_map and repo_map.strip():
-            context_parts.append(wrap_xml("repository_map", repo_map))
+    # Add platform info if provided
+    if platform_info:
+        context_parts.append(wrap_xml("platform_info", platform_info))
 
-        # Add file sections if provided
-        if readonly_text_files:
-            files_xml = format_file_section(readonly_text_files)
-            context_parts.append(wrap_xml("readonly_files", files_xml))
+    # Combine all context with proper nesting
+    context = "".join(context_parts) if context_parts else "\n"
 
-        if editable_text_files:
-            files_xml = format_file_section(editable_text_files)
-            context_parts.append(wrap_xml("editable_files", files_xml))
+    # Format task examples if provided
+    task_examples_section = format_task_examples(task_examples)
 
-        # Add platform info if provided
-        if platform_info:
-            context_parts.append(wrap_xml("platform_info", platform_info))
-
-        # Combine all context with proper nesting
-        context = "".join(context_parts) if context_parts else "\n"
-
-        # Format task examples if provided
-        task_examples_section = format_task_examples(task_examples)
-
-        # Format the final message with all sections in order
-        # Get the final user message
-        final_message = cur_messages[-1]
-
-        # Build the context section to append
-        context_preface = (
-            REST_OF_MESSAGE_IS_FROM_APP
-            + """Carefully follow the <task_instructions>...</task_instructions> below as
+    # Build the context section to append
+    context_preface = (
+        REST_OF_MESSAGE_IS_FROM_APP
+        + """Carefully follow the <task_instructions>...</task_instructions> below as
 essential requirements for your response. Carefully emulate any provided
 <task_examples>...</task_examples>.
 
 Use the material in <context>...</context> to understand the current state
 of the project. This information is more recent and reliable than anything in earlier chat messages.
 """
-        )
-        context_content = (
-            context_preface
-            + "\n"
-            + f"{wrap_xml('context', context)}\n"
-            + wrap_xml("task_instructions", task_instructions)
-            + f"{task_examples_section}"
-        )
+    )
+    context_content = (
+        context_preface
+        + "\n"
+        + f"{wrap_xml('context', context)}\n"
+        + wrap_xml("task_instructions", task_instructions)
+        + f"{task_examples_section}"
+    )
 
-        # Combine the user's message with the context
-        combined_message = {
-            "role": "user",
-            "content": final_message["content"] + "\n\n" + context_content,
-        }
+    # Create system message with context appended
+    messages = [{"role": "system", "content": system_prompt + "\n\n" + context_content}]
 
-        # Add all messages except the last one
-        messages.extend(cur_messages[:-1])
-        # Add the combined message
-        messages.append(combined_message)
+    # Add conversation history
+    messages.extend(done_messages)
+
+    # Add current messages
+    if cur_messages:
+        messages.extend(cur_messages)
 
     return messages
