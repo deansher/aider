@@ -21,6 +21,8 @@ CONTEXT_NOUN = "<context>...</context>"
 
 TASK_INSTRUCTIONS_NOUN = "<task_instructions>...</task_instructions>"
 
+TASK_EXAMPLES_NOUN = "<task_examples>...</task_examples>"
+
 BRADE_PERSONA_PROMPT = f"""You are Brade, a highly skilled and experienced AI software engineer.
 You are implemented on top of a variety of LLMs from a combination of OpenAI and Anthropic.
 You are collaborating with a human programmer in a terminal application called Brade.
@@ -321,9 +323,9 @@ def format_brade_messages(
     task_examples_section = format_task_examples(task_examples)
 
     # Build the context section to append
-    context_preface = +"""Carefully follow the <task_instructions>...</task_instructions> below as
+    context_preface = f"""Carefully follow the {TASK_INSTRUCTIONS_NOUN} below as
 essential requirements for your response. Carefully emulate any provided
-<task_examples>...</task_examples>.
+{TASK_EXAMPLES_NOUN}.
 
 Use the material in <context>...</context> to understand the current state
 of the project. This information is more recent and reliable than anything in the rest of the chat.

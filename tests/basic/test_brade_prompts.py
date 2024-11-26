@@ -94,14 +94,6 @@ def test_context_and_task_placement() -> None:
     system_content = system_msg["content"]
 
     # Check all sections appear in correct order
-    context_pos = system_content.index("<context>")
-    task_instructions_pos = system_content.index("<task_instructions>")
-    task_examples_pos = system_content.index("<task_examples>")
-
-    # Verify order of sections
-    assert context_pos < task_instructions_pos < task_examples_pos, "Sections out of order"
-
-    # Check context subsections appear in correct order
     sections = [
         "<repository_map>",
         test_repo_map,
@@ -122,8 +114,9 @@ def test_context_and_task_placement() -> None:
         "Example response",
         "</task_examples>",
     ]
-
-    last_pos = context_pos
+    # Start with the last instance of <context> to skip over any mentions of the sections
+    # in the system prompt preface.
+    last_pos = system_content.rindex("<context>")
     for section in sections:
         pos = system_content.find(section, last_pos)
         assert pos != -1, f"Missing section {section!r} after <context> in:\n{system_content}"
