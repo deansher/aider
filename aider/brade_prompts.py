@@ -385,7 +385,7 @@ def format_brade_messages(
 
     if cur_messages:
         messages.extend(cur_messages[:-1])
-        final_user_content = cur_messages[-1]
+        final_user_content = cur_messages[-1]["content"]
     else:
         final_user_content = ""
 
