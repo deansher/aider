@@ -144,8 +144,10 @@ def test_basic_message_structure(
     """
     from aider.brade_prompts import format_brade_messages
 
+    system_prompt = "You are a helpful AI assistant"
+
     messages = format_brade_messages(
-        system_prompt="You are a helpful AI assistant",
+        system_prompt=system_prompt,
         task_instructions="Test task instructions",
         done_messages=sample_done_messages,
         cur_messages=sample_cur_messages,
@@ -161,7 +163,7 @@ def test_basic_message_structure(
 
     # 1. System message must be first
     assert messages[0]["role"] == "system"
-    assert messages[0]["content"].startswith("You are a helpful AI assistant")
+    assert messages[0]["content"] == system_prompt
 
     # 2. Done messages must follow system message exactly
     assert messages[1]["role"] == "user"
@@ -175,10 +177,10 @@ def test_basic_message_structure(
     assert messages[4]["role"] == "assistant"
     assert messages[4]["content"] == "Intermediate response"
 
-    # 4. Final message should contain only user content
+    # 4. Final current message must include user content. (It has other stuff.)
     final_msg = messages[-1]
     assert final_msg["role"] == "user"
-    assert final_msg["content"] == "Final current message"
+    assert "Final current message" in final_msg["content"]
 
 
 def test_format_task_examples() -> None:
@@ -320,7 +322,7 @@ def test_message_combination() -> None:
     assert messages[4]["role"] == "assistant"
     assert messages[4]["content"] == "Second response"
     assert messages[5]["role"] == "user"
-    assert messages[5]["content"] == "Final message"
+    assert "Final message" in messages[5]["content"]
 
     # Test with single message
     messages = format_brade_messages(
@@ -337,4 +339,4 @@ def test_message_combination() -> None:
     assert len(messages) == 2  # Just system prompt and combined message
 
     assert messages[1]["role"] == "user"
-    assert messages[1]["content"] == "Single message"
+    assert "Single message" in messages[1]["content"]

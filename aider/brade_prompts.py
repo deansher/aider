@@ -380,7 +380,6 @@ def format_brade_messages(
 
     messages = [{"role": "system", "content": system_prompt}]
 
-    # Add done messages after system message
     if done_messages:
         messages.extend(done_messages)
 
@@ -390,10 +389,9 @@ def format_brade_messages(
     else:
         final_user_content = ""
 
-        # Combine the user's message with the context
     final_user_message = {
         "role": "user",
-        "content": context_content + "\n\n" + final_user_content["content"],
+        "content": context_content + "\n\n" + final_user_content,
     }
 
     messages.append(final_user_message)
