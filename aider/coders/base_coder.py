@@ -165,11 +165,13 @@ class Coder:
         if from_coder:
             use_kwargs = dict(from_coder.original_kwargs)  # copy orig kwargs
 
+            # Shallow-copy from_coder's done_messages in case the list is mutated.
+            use_done_messages = list(from_coder.done_messages)
+
             # If the edit format changes, we can't leave old ASSISTANT
             # messages in the chat history. The old edit format will
             # confuse the new LLM. It will likely imitate it, disobeying
             # the system prompt.
-            use_done_messages = from_coder.done_messages
             if (
                 edit_format != from_coder.edit_format
                 and from_coder.produces_code_edits
@@ -870,7 +872,7 @@ class Coder:
             The history (done_messages) may be summarized before the new messages are added,
             if it has grown too large, but the newly added messages will be preserved verbatim.
         """
-        self.done_messages += self.cur_messages
+        self.done_messages = self.done_messages + self.cur_messages
         self.summarize_start()
 
         # TODO check for impact on image messages
