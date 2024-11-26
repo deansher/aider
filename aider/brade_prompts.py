@@ -3,14 +3,8 @@
 
 """Functions for formatting chat messages according to Brade's prompt structure.
 
-This module implements Brade's approach to structuring prompts for LLM interactions,
-following the guidelines in design_docs/anthropic_docs/claude_prompting_guide.md.
-
-Key aspects of the prompt structure:
-- Single system message focused purely on role and context
-- Supporting material organized in XML sections (with loose XML syntax focusing on readability)
-- Clear separation between context and user message
-- Consistent document organization patterns
+This module implements Brade's approach to structuring prompts for LLM interactions.
+It follows the guidelines in design_docs/anthropic_docs/claude_prompting_guide.md:
 """
 
 from typing import Tuple
@@ -125,6 +119,62 @@ this Step 2. Carefully follow the instructions in {TASK_INSTRUCTIONS_NOUN}.
 Finally, you look over your file changes and either tell your partner that they
 look good to you or explain any concerns.
 
+# Context and Task Information Prepended to Final User Message
+
+In the final user message, before your partner's response to you, we prepend context
+and task information. This information is not visible to your partner. It is organized
+as follows:
+
+```
+<context>
+  <!-- Repository overview and structure -->
+  <repository_map>
+    Repository map content appears here, using existing map formatting.
+  </repository_map>
+
+  <!-- Project source files -->
+  <!-- Read-only reference files -->
+  <readonly_files>
+    <file path="path/to/file.py">
+      <content>
+def hello():
+    print("Hello & welcome!")
+    if x < 3:
+        return True
+      </content>
+    </file>
+  </readonly_files>
+
+  <!-- Files available for editing -->
+  <editable_files>
+    <file path="path/to/other_file.py">
+      <content>
+def goodbye(name):
+    print(f"Goodbye Brade!")
+      </content>
+    </file>
+  </editable_files>
+
+  <!-- System environment details -->
+  <platform_info>
+    Operating system, shell, language settings, etc.
+  </platform_info>
+</context>
+
+<!-- Task-specific instructions and examples -->
+<task_instructions>
+  Current task requirements, constraints, and workflow guidance.
+</task_instructions>
+
+<task_examples>
+  Example conversation demonstrating desired behavior for this task.
+    <!-- Example interactions demonstrating desired behavior -->
+    <example>
+      <message role="user">Example user request</message>
+      <message role="assistant">Example assistant response</message>
+    </example>
+</task_examples>
+```
 """
 
 THIS_MESSAGE_IS_FROM_APP = (
@@ -322,30 +372,26 @@ def format_brade_messages(
     # Format task examples if provided
     task_examples_section = format_task_examples(task_examples)
 
-    # Build the context section to append
-    context_preface = f"""Carefully follow the {TASK_INSTRUCTIONS_NOUN} below as
-essential requirements for your response. Carefully emulate any provided
-{TASK_EXAMPLES_NOUN}.
-
-Use the material in <context>...</context> to understand the current state
-of the project. This information is more recent and reliable than anything in the rest of the chat.
-"""
     context_content = (
-        context_preface
-        + "\n"
-        + f"{wrap_xml('context', context)}\n"
+        +f"{wrap_xml('context', context)}\n"
         + wrap_xml("task_instructions", task_instructions)
         + f"{task_examples_section}"
     )
 
-    # Create system message with context appended
-    messages = [{"role": "system", "content": system_prompt + "\n\n" + context_content}]
+    messages = [{"role": "system", "content": system_prompt}]
 
-    # Add conversation history
-    messages.extend(done_messages)
-
-    # Add current messages
     if cur_messages:
-        messages.extend(cur_messages)
+        messages.extend(cur_messages[:-1])
+        final_user_content = cur_messages[-1]
+    else:
+        final_user_content = ""
+
+        # Combine the user's message with the context
+    final_user_message = {
+        "role": "user",
+        "content": final_user_content["content"] + "\n\n" + context_content,
+    }
+
+    messages.append(final_user_message)
 
     return messages
