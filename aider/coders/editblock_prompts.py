@@ -126,9 +126,13 @@ Every *SEARCH/REPLACE block* must use this format:
 1. The *FULL* file path alone on a line, relative to the project root, verbatim, with no 
    punctuation. No bold asterisks, no quotes around it, no escaping of characters, etc.
 2. The opening fence and code language, eg: {fence[0]}python
-   Pay attention to the file's extension and contents to get the language right.
+   a. You *MUST* use the correct opening and closing fences for this particular response:
+      {fence[0]}
+      {fence[1]}
+   b. Pay attention to the file's extension and contents to get the language right.
+
 3. The start of search block: <<<<<<< SEARCH
-4. A contiguous chunk of lines to search for in the existing source code
+4. A contiguous chunk of lines verbatim from the existing file contents
 5. The dividing line: =======
 6. The lines to replace into the source code
 7. The end of the replace block: >>>>>>> REPLACE
@@ -136,26 +140,48 @@ Every *SEARCH/REPLACE block* must use this format:
 
 Use the *FULL* file path, as shown to you in <context>...</context>
 
+Here is an example of a correct and complete *SEARCH/REPLACE* block, if the target file's
+path relative to the project root is `utils/echo.py`:
+
+utils/echo.py
+{fence[0]}python
+<<<<<<< SEARCH
+def echo(msg):
+    "print a message"
+
+    print(msg)
+=======
+def echo(msg):
+    "print a message"
+
+    print("Echo: " + msg)
+>>>>>>> REPLACE
+{fence[1]}
+
 Every *SEARCH* section must *EXACTLY MATCH* the existing file content, character for 
-character, including all comments, docstrings, etc.
-If the file contains code or other data wrapped/escaped in json/xml/quotes or other 
-containers, you need to propose edits to the literal contents of the file, including the 
-container markup.
+character, including all comments, docstrings, etc. If the file contains code or other 
+data wrapped/escaped in json/xml/quotes or other  containers, then both your SEARCH 
+and your REPLACE sections must contain content exactly as it does or will appear in the 
+file, with all wrapping, escaping, quoting, containers, etc.
 
-*SEARCH/REPLACE* blocks will *only* replace the first match occurrence.
-Including multiple unique *SEARCH/REPLACE* blocks if needed.
-Include enough lines in each SEARCH section to uniquely match each set of lines that need to 
-change.
-
-Keep *SEARCH/REPLACE* blocks concise.
-
-Break large *SEARCH/REPLACE* blocks into a series of smaller blocks that each change a small 
-portion of the file.
+Each *SEARCH/REPLACE* blocks will *only* replace the first match occurrence. Include
+enough context to ensure a unique match. If you need to replace multiple occurrences,
+use context to make multiple *SEARCH/REPLACE* blocks unique.
 
 It is helpful for both you and your partner when a *SEARCH/REPLACE* block can start at
 a logical point in the file, such as the beginning of a top-level declaration or the header
-of a document section. But avoid using more than about 20 lines of unchanged context. 
-This provides enough context for the change without burying the change in a large block of unchanged code.
+of a document section. But avoid including more than about 10 lines of unchanged context. 
+This provides enough context for the change without burying the change in a large block of 
+unchanged code. If you have to start your SEARCH text in the middle of a declaration or
+subsection to avoid excessive unchanged context, that's ok. Even so, it is good to look
+for logical starting and ending points, such as higher-level statements or paragraph
+boundaries.
+
+Large *SEARCH/REPLACE* blocks are more likely to be incorrect. Plus, they are harder for
+your human partner to review. If you need to make multiple changes to one top-level declaration 
+(for code) or subsection (for documents), then use multiple *SEARCH/REPLACE* blocks.
+When you change multiple top-level declarations or subsections, use separate *SEARCH/REPLACE* 
+blocks for each.
 
 Only write *SEARCH/REPLACE* blocks for files in <editable_files>...</editable_files> or
 for files that you propose to create. If you feel strongly that you need to change a file in
