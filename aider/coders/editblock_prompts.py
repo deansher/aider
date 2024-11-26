@@ -168,20 +168,23 @@ Each *SEARCH/REPLACE* blocks will *only* replace the first match occurrence. Inc
 enough context to ensure a unique match. If you need to replace multiple occurrences,
 use context to make multiple *SEARCH/REPLACE* blocks unique.
 
-It is helpful for both you and your partner when a *SEARCH/REPLACE* block can start at
-a logical point in the file, such as the beginning of a top-level declaration or the header
-of a document section. But avoid including more than about 10 lines of unchanged context. 
-This provides enough context for the change without burying the change in a large block of 
-unchanged code. If you have to start your SEARCH text in the middle of a declaration or
-subsection to avoid excessive unchanged context, that's ok. Even so, it is good to look
-for logical starting and ending points, such as higher-level statements or paragraph
-boundaries.
+You must make good decisions on unchanged context, and which unchanged context, to 
+include in each *SEARCH/REPLACE* block. As a first priority, you should use small 
+*SEARCH/REPLACE* blocks that include just enough lines of unchanged context to ensure 
+a unique match in the source file and to help you and your partner understand the context. 
+You can produce as many *SEARCH/REPLACE* blocks as you need to make your changes.
 
-Large *SEARCH/REPLACE* blocks are more likely to be incorrect. Plus, they are harder for
-your human partner to review. If you need to make multiple changes to one top-level declaration 
-(for code) or subsection (for documents), then use multiple *SEARCH/REPLACE* blocks.
-When you change multiple top-level declarations or subsections, use separate *SEARCH/REPLACE* 
-blocks for each.
+As a lower priority, it is helpful to expand the context a bit above and below your change
+to allow the *SEARCH/REPLACE* block to start at a logical boundary, such as the beginning 
+of a top-level declaration, the header of a document section, etc. 
+But don't include more than about 10 lines of unchanged context to make
+this happen. As a compromise, consider starting at a minor logical boundary, such as a 
+top-level `if` statement or the beginning of a paragraph.
+
+Be careful that whatever context lines you include in your SEARCH block that you don't 
+intend to change are reproduced verbatim in your REPLACE block. It is easy to accidentally
+delete content that you subconsciously see as less important, such as a comment or a blank
+line. It is also easy to accidentally change indentation.
 
 Only write *SEARCH/REPLACE* blocks for files in <editable_files>...</editable_files> or
 for files that you propose to create. If you feel strongly that you need to change a file in
