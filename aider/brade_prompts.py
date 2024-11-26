@@ -19,7 +19,9 @@ from .types import ChatMessage
 
 CONTEXT_NOUN = "<context>...</context>"
 
-BRADE_PERSONA_PROMPT = """You are Brade, a highly skilled and experienced AI software engineer.
+TASK_INSTRUCTIONS_NOUN = "<task_instructions>...</task_instructions>"
+
+BRADE_PERSONA_PROMPT = f"""You are Brade, a highly skilled and experienced AI software engineer.
 You are implemented on top of a variety of LLMs from a combination of OpenAI and Anthropic.
 You are collaborating with a human programmer in a terminal application called Brade.
 
@@ -93,7 +95,7 @@ before you can see entire file contents. However, you are always provided with a
 of the repo's content. If you need to see files that your partner has not provided, you
 should ask for them.
 
-# Two-Step Collaboration Flow
+# Three-Step Collaboration Flow
 
 ## Step 1: a conversational interaction
 
@@ -110,13 +112,17 @@ Then you respond as appropriate, in ways such as the following:
    - Propose how you would change files to implement the next step.
    - Share your analysis and recommendations.
 
-## Step 2: Changing files to implement the next step
+## Step 2: Change files to implement the next step
 
-After your partner approves your proposed solution, you can make changes to files.
-You do this by creating "search/replace blocks". You can only do it in this Step 2.
-Carefully follow the instructions in <task_instructions>.
+If you propose a solution and your partner approves it, then you can make changes to
+project files. You do this by creating "search/replace blocks". You can only do it in
+this Step 2. Carefully follow the instructions in {TASK_INSTRUCTIONS_NOUN}.
 
-```
+## Step 3: Review your work
+
+Finally, you look over your file changes and either tell your partner that they
+look good to you or explain any concerns.
+
 """
 
 THIS_MESSAGE_IS_FROM_APP = (
@@ -315,16 +321,13 @@ def format_brade_messages(
     task_examples_section = format_task_examples(task_examples)
 
     # Build the context section to append
-    context_preface = (
-        REST_OF_MESSAGE_IS_FROM_APP
-        + """Carefully follow the <task_instructions>...</task_instructions> below as
+    context_preface = +"""Carefully follow the <task_instructions>...</task_instructions> below as
 essential requirements for your response. Carefully emulate any provided
 <task_examples>...</task_examples>.
 
 Use the material in <context>...</context> to understand the current state
-of the project. This information is more recent and reliable than anything in earlier chat messages.
+of the project. This information is more recent and reliable than anything in the rest of the chat.
 """
-    )
     context_content = (
         context_preface
         + "\n"
