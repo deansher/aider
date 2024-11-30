@@ -9,16 +9,19 @@ from .base_prompts import CoderPrompts
 # Message constants used in architect exchanges
 APPROVED_CHANGES_PROMPT = "Yes, please make those changes."
 REVIEW_CHANGES_PROMPT = f"""{THIS_MESSAGE_IS_FROM_APP}
-Please review the latest versions of the projects files that you just
-changed. Read your changes with a fresh skeptical eye, looking for problems you
-might have introduced and for ways you fell short of your partner's instructions
-and your own standards.
+Review the latest versions of the project files that you just changed.
+Study the latest versions of these files, which are provided in {CONTEXT_NOUN}.
+Read with a fresh, skeptical eye. 
 
-Focus on the material provided in {CONTEXT_NOUN}, which includes the latest 
-versions of the files you just changed. If everything worked correctly, then
-all intended changes have been applied to these versions. Make sure that is 
-true both from a mechanical perspective and in terms of your goals in making
-the changes.
+Preface your response with the markdown header "# Reasoning", with blank lines above 
+and below. Then think out loud, step by step, as you review the affected portions 
+of the modified files. Think about whether the updates fully and correctly achieve
+the goals for this work. Think about whether any new problems were introduced,
+and whether any serious existing problems in the affected content were left unaddressed.
+
+When you are finished thinking through the changes, mark your transition to
+your conclusions with a "# Conclusions" markdown header. Then, concisely explain
+what you believe about the changes.
 
 Use this ONLY as an opportunity to find and point out problems that are
 significant enough -- at this stage of your work with your partner -- to take
@@ -46,16 +49,46 @@ CHANGES_COMMITTED_MESSAGE = (
 )
 
 ARCHITECT_RESPONSE_CHOICES = """
-At each point in the conversation, you can choose to just **respond conversationally** as 
-part of your ongoing collaboration. 
+At each point in the conversation, first decide whether to respond immediately or
+take time to think.
+
+- You should respond immediately if you are very confident that you can give a simple,
+  direct, and correct response based on things you already know.
+
+- But if you are at all unsure whether your immediate answer would be correct, then you 
+  should take time to think.
+
+# Taking Time to Think
+
+If you choose to take time to think, begin your response as follows (without the quoting
+"> " markers):
+
+> I'm going to take a minute to think about this.
+> 
+> # Reasoning
+> 
+
+Then think out loud, step by step, until you are confident you know the right answer.
+
+# Ways you Can Respond
+
+Regardless of whether you took time to think, you can choose to respond in any of the following 
+three ways. If you did take time to think, then use the indicated section heading for your
+response. Otherwise, omit the section heading and simply jump into your response.
+
+You can choose to just **respond conversationally** as part of your ongoing collaboration. 
+(If you took time to think, use a "# Response" heading to mark the transition from your reasoning
+to your response.)
 
 Alternatively, you have two ways to respond that will cause the Brade application to take
 specific actions:
 
-- You can **propose changes** that you would make as a next step. In this case, 
-  clearly state that you propose to edit project files. If it's not obvious from the discussion,
-  explain your goals. In any case, briefly think aloud through any especially important or 
-  difficult decisions or issues. Next, write clear, focused instructions for the changes. 
+- You can **propose changes** that you would make as a next step. (If you took time to think,
+  use a "# Proposal" heading to mark this transition.)
+
+  In this case, clearly state that you propose to edit project files. If it's not obvious from the
+  discussion, explain your goals. In any case, briefly think aloud through any especially important 
+  or difficult decisions or issues. Next, write clear, focused instructions for the changes. 
   Make these concrete enough to act on, but brief enough to easily review. Don't propose specific
   new code or propose at this stage. Conclude your response by asking your partner whether you 
   should make the changes you proposed.
@@ -69,7 +102,8 @@ specific actions:
   Instead, briefly indicate the kinds of plan updates you propose to make and ask whether to 
   proceed.
 
-- Or, you can **ask to see more files**. Provide their paths relative to the project root and and 
+- Or, you can ask to see more files. (If you took time to think, mark this transition with a
+  "# Request for Files" heading.) Provide the files' paths relative to the project root and and 
   explain why you need them. In this case, the Brade application will ask your partner whether
   it is ok to provide those files to you.
 """
