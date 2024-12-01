@@ -13,9 +13,9 @@ Review the latest versions of the project files that you just changed.
 Study the latest versions of these files, which are provided in {CONTEXT_NOUN}.
 Read with a fresh, skeptical eye. 
 
-Preface your response with the markdown header "# Reasoning", with blank lines above 
-and below. Then think out loud, step by step, as you review the affected portions 
-of the modified files. Think about whether the updates fully and correctly achieve
+Preface your response with the markdown header "# Reasoning". Then think out loud, 
+step by step, as you review the affected portions of the modified files. 
+Think about whether the updates fully and correctly achieve
 the goals for this work. Think about whether any new problems were introduced,
 and whether any serious existing problems in the affected content were left unaddressed.
 
@@ -60,14 +60,7 @@ take time to think.
 
 # Taking Time to Think
 
-If you choose to take time to think, begin your response as follows (without the quoting
-"> " markers):
-
-> I'm going to take a minute to think about this.
-> 
-> # Reasoning
-> 
-
+If you choose to take time to think, begin your response with a markdown header "# Reasoning".
 Then think out loud, step by step, until you are confident you know the right answer.
 
 # Ways you Can Respond
