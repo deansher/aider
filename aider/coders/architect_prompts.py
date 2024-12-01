@@ -1,3 +1,6 @@
+# This file uses the Brade coding style: full modern type hints and strong documentation.
+# Expect to resolve merges manually. See CONTRIBUTING.md.
+
 # flake8: noqa: E501
 
 from llm_multiple_choice import ChoiceManager
@@ -7,8 +10,9 @@ from aider.brade_prompts import CONTEXT_NOUN, THIS_MESSAGE_IS_FROM_APP
 from .base_prompts import CoderPrompts
 
 # Message constants used in architect exchanges
-APPROVED_CHANGES_PROMPT = "Yes, please make those changes."
-REVIEW_CHANGES_PROMPT = f"""{THIS_MESSAGE_IS_FROM_APP}
+APPROVED_CHANGES_PROMPT: str = "Yes, please make those changes."
+
+REVIEW_CHANGES_PROMPT: str = f"""{THIS_MESSAGE_IS_FROM_APP}
 Review the latest versions of the project files that you just changed.
 Study the latest versions of these files, which are provided in {CONTEXT_NOUN}.
 Read with a fresh, skeptical eye. 
@@ -43,12 +47,13 @@ so repeatedly without knowing it. All that said, if you see an immediately conce
 problem in parts of the code that you didn't just change, and if you believe it is
 appropriate to say so to your partner, trust your judgment and do so.
 """
-CHANGES_COMMITTED_MESSAGE = (
+
+CHANGES_COMMITTED_MESSAGE: str = (
     THIS_MESSAGE_IS_FROM_APP
     + "The Brade application made those changes in the project files and committed them."
 )
 
-ARCHITECT_RESPONSE_CHOICES = """
+ARCHITECT_RESPONSE_CHOICES: str = """
 At each point in the conversation, first decide whether to respond immediately or
 take time to think.
 
@@ -102,11 +107,11 @@ specific actions:
 """
 
 # Define the choice manager for analyzing architect responses
-possible_architect_responses = ChoiceManager()
+possible_architect_responses: ChoiceManager = ChoiceManager()
 
 
 # Preface each line of ARCHITECT_RESPONSE_CHOICES with "> " to quote it.
-quoted_response_choices = "> " + "\n> ".join(ARCHITECT_RESPONSE_CHOICES.split("\n")) + "\n"
+quoted_response_choices: str = "> " + "\n> ".join(ARCHITECT_RESPONSE_CHOICES.split("\n")) + "\n"
 
 
 response_section = possible_architect_responses.add_section(
@@ -139,9 +144,21 @@ architect_continued_conversation = response_section.add_choice(
 
 
 class ArchitectPrompts(CoderPrompts):
+    """Prompts and configuration for the architect workflow.
+    
+    This class extends CoderPrompts to provide specialized prompts and configuration
+    for the architect workflow, which focuses on collaborative software development
+    with a human partner.
+    """
+
     @property
     def task_instructions(self) -> str:
-        """Task-specific instructions for the architect workflow."""
+        """Task-specific instructions for the architect workflow.
+        
+        Returns:
+            Instructions for collaborating naturally with a human partner to make
+            steady project progress through small, focused steps.
+        """
         return f"""Collaborate naturally with your partner. Together, seek ways to
 make steady project progress through a series of small, focused steps. Try to do
 as much of the work as you feel qualified to do well. Rely on your partner mainly
@@ -155,29 +172,29 @@ low confidence.
 {ARCHITECT_RESPONSE_CHOICES}
 """
 
-    architect_response_analysis_prompt = ()
+    architect_response_analysis_prompt: tuple = ()
 
-    example_messages = []
+    example_messages: list = []
 
-    files_content_prefix = ""
+    files_content_prefix: str = ""
 
-    files_content_assistant_reply = (
+    files_content_assistant_reply: str = (
         "Ok, I will use that as the true, current contents of the files."
     )
 
-    files_no_full_files = (
+    files_no_full_files: str = (
         THIS_MESSAGE_IS_FROM_APP
         + "Your partner has not shared the full contents of any files with you yet."
     )
 
-    files_no_full_files_with_repo_map = ""
-    files_no_full_files_with_repo_map_reply = ""
+    files_no_full_files_with_repo_map: str = ""
+    files_no_full_files_with_repo_map_reply: str = ""
 
-    repo_content_prefix = ""
+    repo_content_prefix: str = ""
 
-    system_reminder = ""
+    system_reminder: str = ""
 
-    editor_response_placeholder = (
+    editor_response_placeholder: str = (
         THIS_MESSAGE_IS_FROM_APP
         + """An editor AI persona has followed your instructions to make changes to the project
         files. They probably made changes, but they may have responded in some other way.
