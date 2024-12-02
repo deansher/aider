@@ -22,6 +22,7 @@ class ContextPositionInMessage(Enum):
     """Controls where in the message context and task elements are placed."""
     PREPEND = "prepend"
 
+
 CONTEXT_NOUN = "<context>...</context>"
 
 TASK_INSTRUCTIONS_NOUN = "<task_instructions>...</task_instructions>"
