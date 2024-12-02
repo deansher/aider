@@ -519,11 +519,14 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                 if not strip_filename(filename_line) and i >= 3:
                     filename_line = lines[i - 3]
                 is_new_file = i + 1 < len(lines) and divider_pattern.match(lines[i + 1].strip())
-                use_valid_fnames = None if is_new_file else valid_fnames
+                if is_new_file:
+                    use_valid_fnames = None
+                else:
+                    # Include both editable and read-only files as valid candidates
+                    use_valid_fnames = list(valid_fnames)
+                    for fname in self.abs_read_only_fnames:
+                        use_valid_fnames.append(self.get_rel_fname(fname))
                 filename = find_filename(filename_line, use_valid_fnames)
-                if not filename:
-                    # Try again including read-only files
-                    filename = find_filename(filename_line, None)
                 if not filename:
                     raise ValueError(missing_filename_err.format(fence=fence))
 
