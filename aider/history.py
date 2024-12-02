@@ -207,28 +207,3 @@ class ChatSummary:
                 print(f"Summarization failed for model {model.name}: {str(e)}")
 
         raise ValueError("summarizer unexpectedly failed for all models")
-
-
-def main() -> None:
-    """Command-line interface for chat history summarization.
-
-    Parses a markdown file containing chat history and summarizes it using
-    the ChatSummary class with default models.
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("filename", help="Markdown file to parse")
-    args = parser.parse_args()
-
-    model_names = ["gpt-3.5-turbo", "gpt-4"]  # Add more model names as needed
-    model_list = [models.Model(name) for name in model_names]
-    summarizer = ChatSummary(model_list)
-
-    with open(args.filename, "r") as f:
-        text = f.read()
-
-    summary = summarizer.summarize_chat_history_markdown(text)
-    dump(summary)
-
-
-if __name__ == "__main__":
-    main()
