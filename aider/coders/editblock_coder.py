@@ -522,6 +522,9 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                 use_valid_fnames = None if is_new_file else valid_fnames
                 filename = find_filename(filename_line, use_valid_fnames)
                 if not filename:
+                    # Try again including read-only files
+                    filename = find_filename(filename_line, None)
+                if not filename:
                     raise ValueError(missing_filename_err.format(fence=fence))
 
                 original_text = []
