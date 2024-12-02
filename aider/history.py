@@ -37,6 +37,8 @@ class ChatSummary:
                    Models are tried in order if earlier ones fail.
             max_tokens: Maximum number of tokens allowed in summarized history.
                        Default is 1024.
+            io: Optional InputOutput instance for logging summarization progress.
+            label: Optional label to prefix log messages with.
 
         Raises:
             ValueError: If no models are provided.
@@ -48,6 +50,7 @@ class ChatSummary:
         self.token_count: TokenCountFunc = self.models[0].token_count
         self.io = io
         self.label = label
+        self._prefix = f"[{self.label}] " if self.label else ""
 
     def _format_message_preview(self, tokens: int, msg: ChatMessage) -> str:
         """Format a message preview with token count, role, and content.
@@ -75,8 +78,7 @@ class ChatSummary:
         sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
         if self.io:
-            prefix = f"[{self.label}] " if self.label else ""
-            self.io.tool_output(f"{prefix}Checking message size: {total:,} tokens vs limit of {self.max_tokens:,}")
+            self.io.tool_output(f"{self._prefix}Checking message size: {total:,} tokens vs limit of {self.max_tokens:,}")
         return total > self.max_tokens
 
     def tokenize(self, messages: list[ChatMessage]) -> list[tuple[int, ChatMessage]]:
@@ -93,8 +95,7 @@ class ChatSummary:
             tokens = self.token_count(msg)
             sized.append((tokens, msg))
             if self.io:
-                prefix = f"[{self.label}] " if self.label else ""
-                self.io.tool_output(f"{prefix}{self._format_message_preview(tokens, msg)}")
+                self.io.tool_output(f"{self._prefix}{self._format_message_preview(tokens, msg)}")
         return sized
 
     def summarize(self, messages: list[ChatMessage], recursion_depth: int = 0) -> list[ChatMessage]:
@@ -139,8 +140,7 @@ class ChatSummary:
         half_max_tokens = self.max_tokens // 2
 
         if self.io:
-            prefix = f"[{self.label}] " if self.label else ""
-            self.io.tool_output(f"\n{prefix}Finding split point targeting {half_max_tokens:,} tokens for tail")
+            self.io.tool_output(f"\n{self._prefix}Finding split point targeting {half_max_tokens:,} tokens for tail")
 
         for i in range(len(sized) - 1, -1, -1):
             tokens, _msg = sized[i]
@@ -148,8 +148,7 @@ class ChatSummary:
                 tail_tokens += tokens
                 split_index = i
                 if self.io:
-                    prefix = f"[{self.label}] " if self.label else ""
-                    self.io.tool_output(f"{prefix}Including message {i} in tail, now at {tail_tokens:,} tokens")
+                    self.io.tool_output(f"{self._prefix}Including message {i} in tail, now at {tail_tokens:,} tokens")
             else:
                 break
 
@@ -157,8 +156,7 @@ class ChatSummary:
         while messages[split_index - 1]["role"] != "assistant" and split_index > 1:
             split_index -= 1
             if self.io:
-                prefix = f"[{self.label}] " if self.label else ""
-                self.io.tool_output(f"{prefix}Adjusting split point to {split_index} to get clean break")
+                self.io.tool_output(f"{self._prefix}Adjusting split point to {split_index} to get clean break")
 
         if split_index <= min_split:
             return self.summarize_all(messages)
@@ -178,20 +176,17 @@ class ChatSummary:
         model_max_input_tokens = self.models[0].info.get("max_input_tokens") or 4096
 
         if self.io:
-            prefix = f"[{self.label}] " if self.label else ""
-            self.io.tool_output(f"\n{prefix}Keeping messages up to {model_max_input_tokens:,} tokens")
+            self.io.tool_output(f"\n{self._prefix}Keeping messages up to {model_max_input_tokens:,} tokens")
 
         for i in range(split_index):
             total += sized[i][0]
             if total > model_max_input_tokens:
                 if self.io:
-                    prefix = f"[{self.label}] " if self.label else ""
-                    self.io.tool_output(f"{prefix}Stopping at {total:,} tokens")
+                    self.io.tool_output(f"{self._prefix}Stopping at {total:,} tokens")
                 break
             keep.append(head[i])
             if self.io:
-                prefix = f"[{self.label}] " if self.label else ""
-                self.io.tool_output(f"{prefix}Keeping message {i}, now at {total:,} tokens")
+                self.io.tool_output(f"{self._prefix}Keeping message {i}, now at {total:,} tokens")
 
         keep.reverse()  # restore forward order
 
@@ -205,13 +200,11 @@ class ChatSummary:
         if summary_tokens + tail_tokens < self.max_tokens:
             # Show summarized and remaining messages if some were summarized away
             if self.io and len(summary) < len(keep):
-                prefix = f"[{self.label}] " if self.label else ""
-                self.io.tool_output(f"\n{prefix}Messages that were summarized away:")
+                self.io.tool_output(f"\n{self._prefix}Messages that were summarized away:")
                 for msg in keep[len(summary):]:
                     self.io.tool_output(self._format_message_preview(self.token_count(msg), msg))
                 
-                prefix = f"[{self.label}] " if self.label else ""
-                self.io.tool_output(f"\n{prefix}Messages that remain:")
+                self.io.tool_output(f"\n{self._prefix}Messages that remain:")
                 for msg in result:
                     self.io.tool_output(self._format_message_preview(self.token_count(msg), msg))
 
