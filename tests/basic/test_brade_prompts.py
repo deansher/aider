@@ -140,9 +140,9 @@ def test_invalid_context_placement() -> None:
     """Tests that invalid context placement values raise exceptions."""
     from aider.brade_prompts import format_brade_messages
 
-    # Create a new enum value just for testing
-    class TestEnum(ContextMessagePlacement):
-        INVALID = "invalid"
+    # Create a mock object that looks like an enum value
+    class MockEnum:
+        value = "invalid"
 
     with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
         format_brade_messages(
@@ -150,7 +150,7 @@ def test_invalid_context_placement() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_message_placement=TestEnum.INVALID,
+            context_message_placement=MockEnum(),
         )
 
 
@@ -158,9 +158,9 @@ def test_invalid_context_position() -> None:
     """Tests that invalid context position values raise exceptions."""
     from aider.brade_prompts import format_brade_messages
 
-    # Create a new enum value just for testing
-    class TestEnum(ContextPositionInMessage):
-        INVALID = "invalid"
+    # Create a mock object that looks like an enum value
+    class MockEnum:
+        value = "invalid"
 
     with pytest.raises(ValueError, match="Only PREPEND position"):
         format_brade_messages(
@@ -168,7 +168,7 @@ def test_invalid_context_position() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_position=TestEnum.INVALID,
+            context_position=MockEnum(),
         )
 
 
