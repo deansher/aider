@@ -457,6 +457,8 @@ class Coder:
         self.summarizer = summarizer or ChatSummary(
             [self.main_model.weak_model, self.main_model],
             self.main_model.max_chat_history_tokens,
+            self.io,
+            self.__class__.__name__,
         )
 
         self.summarizer_thread = None
