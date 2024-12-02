@@ -24,7 +24,10 @@ class ChatSummary:
     """
 
     def __init__(
-        self, models: Optional[models.Model | list[models.Model]] = None, max_tokens: int = 1024
+        self,
+        models: Optional[models.Model | list[models.Model]] = None,
+        max_tokens: int = 1024,
+        io: Optional["InputOutput"] = None,
     ) -> None:
         """Initialize a ChatSummary instance.
 
@@ -42,6 +45,7 @@ class ChatSummary:
         self.models = models if isinstance(models, list) else [models]
         self.max_tokens = max_tokens
         self.token_count: TokenCountFunc = self.models[0].token_count
+        self.io = io
 
     def too_big(self, messages: list[ChatMessage]) -> bool:
         """Check if messages exceed the token limit.
@@ -54,6 +58,8 @@ class ChatSummary:
         """
         sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
+        if self.io:
+            self.io.tool_output(f"Checking message size: {total:,} tokens vs limit of {self.max_tokens:,}")
         return total > self.max_tokens
 
     def tokenize(self, messages: list[ChatMessage]) -> list[tuple[int, ChatMessage]]:
@@ -69,6 +75,9 @@ class ChatSummary:
         for msg in messages:
             tokens = self.token_count(msg)
             sized.append((tokens, msg))
+            if self.io:
+                preview = msg["content"][:30]
+                self.io.tool_output(f"{tokens:6,} tokens  {msg['role']:10} {preview}")
         return sized
 
     def summarize(self, messages: list[ChatMessage], recursion_depth: int = 0) -> list[ChatMessage]:
@@ -112,17 +121,24 @@ class ChatSummary:
         split_index = len(messages)
         half_max_tokens = self.max_tokens // 2
 
+        if self.io:
+            self.io.tool_output(f"\nFinding split point targeting {half_max_tokens:,} tokens for tail")
+
         for i in range(len(sized) - 1, -1, -1):
             tokens, _msg = sized[i]
             if tail_tokens + tokens < half_max_tokens:
                 tail_tokens += tokens
                 split_index = i
+                if self.io:
+                    self.io.tool_output(f"Including message {i} in tail, now at {tail_tokens:,} tokens")
             else:
                 break
 
         # Adjust split point to ensure clean conversation breaks
         while messages[split_index - 1]["role"] != "assistant" and split_index > 1:
             split_index -= 1
+            if self.io:
+                self.io.tool_output(f"Adjusting split point to {split_index} to get clean break")
 
         if split_index <= min_split:
             return self.summarize_all(messages)
@@ -141,11 +157,18 @@ class ChatSummary:
         # Calculate how many older messages we can keep
         model_max_input_tokens = self.models[0].info.get("max_input_tokens") or 4096
 
+        if self.io:
+            self.io.tool_output(f"\nKeeping messages up to {model_max_input_tokens:,} tokens")
+
         for i in range(split_index):
             total += sized[i][0]
             if total > model_max_input_tokens:
+                if self.io:
+                    self.io.tool_output(f"Stopping at {total:,} tokens")
                 break
             keep.append(head[i])
+            if self.io:
+                self.io.tool_output(f"Keeping message {i}, now at {total:,} tokens")
 
         keep.reverse()  # restore forward order
 
