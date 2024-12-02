@@ -1749,6 +1749,46 @@ class Coder:
         self.need_commit_before_edits.add(path)
 
     def allowed_to_edit(self, path):
+        """Determine if a file can be edited and handle necessary setup.
+
+        This method manages the workflow for determining if a file can be edited and
+        preparing it for editing. It handles several cases:
+
+        1. Files already in self.abs_fnames:
+           - Allowed to edit
+           - May trigger dirty commit if configured
+
+        2. New files that don't exist:
+           - Requires user confirmation
+           - Creates empty file
+           - Adds to git repo if needed
+           - Adds to self.abs_fnames
+
+        3. Existing files not in chat or marked read-only:
+           - Requires user confirmation
+           - Adds to git repo if needed
+           - Adds to self.abs_fnames
+           - May trigger dirty commit
+
+        The method maintains important invariants:
+        - Files must be explicitly added before editing
+        - New files require user confirmation
+        - Git repo state is properly maintained
+        - Dirty files are committed if configured
+
+        Args:
+            path (str|Path): Path to the file, relative to project root
+
+        Returns:
+            bool: True if the file can be edited, False otherwise
+
+        Side Effects:
+            - May create new files
+            - May add files to git repo
+            - May trigger dirty commits
+            - Updates self.abs_fnames
+            - Updates self.check_added_files()
+        """
         full_path = self.abs_root_path(path)
         if self.repo:
             need_to_add = not self.repo.path_in_repo(path)
@@ -1780,7 +1820,7 @@ class Coder:
             return True
 
         if not self.io.confirm_ask(
-            "Allow edits to file that has not been added to the chat?",
+            "Allow edits to file that has not been added to the chat, or was added as read-only?",
             subject=path,
         ):
             self.io.tool_output(f"Skipping edits to {path}")

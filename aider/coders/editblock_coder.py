@@ -27,16 +27,22 @@ class EditBlockCoder(Coder):
 
         Returns:
             list[Edit]: List of (path, original, updated) tuples representing the edits.
-                       For shell commands, path will be None.
+                     For shell commands, path will be None.
         """
         content = self.partial_response_content
+
+        # Get both editable and read-only filenames
+        valid_fnames = list(self.get_inchat_relative_files())
+        if self.abs_read_only_fnames:
+            for fname in self.abs_read_only_fnames:
+                valid_fnames.append(self.get_rel_fname(fname))
 
         # might raise ValueError for malformed ORIG/UPD blocks
         edits = list(
             find_original_update_blocks(
                 content,
                 self.fence,
-                self.get_inchat_relative_files(),
+                valid_fnames,
             )
         )
 
@@ -441,6 +447,7 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
     - For new files, an empty SEARCH section is allowed
     - The path can be relative to project root
     - The path must be valid (either match an existing file or be a new file path)
+    - For existing files, path must match a filename in valid_fnames
 
     Block Structure Requirements:
     - Opening fence (e.g. ```python) - language specifier is optional
@@ -460,6 +467,11 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
     - Multiple blocks for the same file are allowed
     - Each block is processed independently
     - Only the first match in a file is replaced
+
+    Args:
+        content (str): The content to parse for search/replace blocks
+        fence (tuple): Opening and closing fence markers
+        valid_fnames (list): Combined list of editable and read-only filenames that can be edited
     """
     lines = content.splitlines(keepends=True)
     i = 0
@@ -522,10 +534,7 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                 if is_new_file:
                     use_valid_fnames = None
                 else:
-                    # Include both editable and read-only files as valid candidates
-                    use_valid_fnames = list(valid_fnames)
-                    for fname in self.abs_read_only_fnames:
-                        use_valid_fnames.append(self.get_rel_fname(fname))
+                    use_valid_fnames = valid_fnames
                 filename = find_filename(filename_line, use_valid_fnames)
                 if not filename:
                     raise ValueError(missing_filename_err.format(fence=fence))
