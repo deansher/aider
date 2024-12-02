@@ -5,7 +5,11 @@
 
 import pytest
 
-from aider.brade_prompts import FileContent
+from aider.brade_prompts import (
+    CONTEXT_MESSAGE_PLACEMENT,
+    CONTEXT_POSITION_IN_MESSAGE,
+    FileContent,
+)
 from aider.types import ChatMessage
 
 
@@ -130,6 +134,42 @@ def test_context_and_task_placement() -> None:
             pos > last_pos
         ), f"Section {section!r} out of order after <context> in:\n{final_user_content}"
         last_pos = pos
+
+
+def test_invalid_context_placement() -> None:
+    """Tests that invalid context placement values raise exceptions."""
+    from aider.brade_prompts import format_brade_messages
+
+    # Create a new enum value just for testing
+    class TestEnum(CONTEXT_MESSAGE_PLACEMENT):
+        INVALID = "invalid"
+
+    with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+            context_message_placement=TestEnum.INVALID,
+        )
+
+
+def test_invalid_context_position() -> None:
+    """Tests that invalid context position values raise exceptions."""
+    from aider.brade_prompts import format_brade_messages
+
+    # Create a new enum value just for testing
+    class TestEnum(CONTEXT_POSITION_IN_MESSAGE):
+        INVALID = "invalid"
+
+    with pytest.raises(ValueError, match="Only PREPEND position"):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+            context_position=TestEnum.INVALID,
+        )
 
 
 def test_basic_message_structure(
