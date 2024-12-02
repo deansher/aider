@@ -6,8 +6,8 @@
 import pytest
 
 from aider.brade_prompts import (
-    CONTEXT_MESSAGE_PLACEMENT,
-    CONTEXT_POSITION_IN_MESSAGE,
+    ContextMessagePlacement,
+    ContextPositionInMessage,
     FileContent,
 )
 from aider.types import ChatMessage
@@ -141,7 +141,7 @@ def test_invalid_context_placement() -> None:
     from aider.brade_prompts import format_brade_messages
 
     # Create a new enum value just for testing
-    class TestEnum(CONTEXT_MESSAGE_PLACEMENT):
+    class TestEnum(ContextMessagePlacement):
         INVALID = "invalid"
 
     with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
@@ -159,7 +159,7 @@ def test_invalid_context_position() -> None:
     from aider.brade_prompts import format_brade_messages
 
     # Create a new enum value just for testing
-    class TestEnum(CONTEXT_POSITION_IN_MESSAGE):
+    class TestEnum(ContextPositionInMessage):
         INVALID = "invalid"
 
     with pytest.raises(ValueError, match="Only PREPEND position"):

@@ -13,12 +13,12 @@ from typing import Tuple
 from .types import ChatMessage
 
 
-class CONTEXT_MESSAGE_PLACEMENT(Enum):
+class ContextMessagePlacement(Enum):
     """Controls which message gets context and task elements."""
     FINAL_USER_MESSAGE = "final_user_message"
 
 
-class CONTEXT_POSITION_IN_MESSAGE(Enum):
+class ContextPositionInMessage(Enum):
     """Controls where in the message context and task elements are placed."""
     PREPEND = "prepend"
 
@@ -323,8 +323,8 @@ def format_brade_messages(
     image_files: list[FileContent] | None = None,
     platform_info: str | None = None,
     task_examples: list[ChatMessage] | None = None,
-    context_message_placement: CONTEXT_MESSAGE_PLACEMENT = CONTEXT_MESSAGE_PLACEMENT.FINAL_USER_MESSAGE,
-    context_position: CONTEXT_POSITION_IN_MESSAGE = CONTEXT_POSITION_IN_MESSAGE.PREPEND,
+    context_message_placement: ContextMessagePlacement = ContextMessagePlacement.FINAL_USER_MESSAGE,
+    context_position: ContextPositionInMessage = ContextPositionInMessage.PREPEND,
 ) -> list[ChatMessage]:
     """Formats chat messages according to Brade's prompt structure.
 
@@ -359,10 +359,10 @@ def format_brade_messages(
     if system_prompt is None:
         raise ValueError("system_prompt cannot be None")
 
-    if context_message_placement != CONTEXT_MESSAGE_PLACEMENT.FINAL_USER_MESSAGE:
+    if context_message_placement != ContextMessagePlacement.FINAL_USER_MESSAGE:
         raise ValueError("Only FINAL_USER_MESSAGE placement is currently supported")
 
-    if context_position != CONTEXT_POSITION_IN_MESSAGE.PREPEND:
+    if context_position != ContextPositionInMessage.PREPEND:
         raise ValueError("Only PREPEND position is currently supported")
 
     # Build the context section
