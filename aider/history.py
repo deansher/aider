@@ -193,6 +193,16 @@ class ChatSummary:
         # Check if combined result fits in token limit
         result = summary + tail
         if summary_tokens + tail_tokens < self.max_tokens:
+            # Show summarized and remaining messages if some were summarized away
+            if self.io and len(summary) < len(keep):
+                self.io.tool_output("\nMessages that were summarized away:")
+                for msg in keep[len(summary):]:
+                    self.io.tool_output(self._format_message_preview(self.token_count(msg), msg))
+                
+                self.io.tool_output("\nMessages that remain:")
+                for msg in result:
+                    self.io.tool_output(self._format_message_preview(self.token_count(msg), msg))
+
             return result
 
         # If still too large, recurse on combined result
