@@ -47,6 +47,20 @@ class ChatSummary:
         self.token_count: TokenCountFunc = self.models[0].token_count
         self.io = io
 
+    def _format_message_preview(self, tokens: int, msg: ChatMessage) -> str:
+        """Format a message preview with token count, role, and content.
+        
+        Args:
+            tokens: Number of tokens in the message
+            msg: The chat message to preview
+            
+        Returns:
+            Formatted string with fixed-width fields for token count and role,
+            followed by first 30 chars of content
+        """
+        preview = msg["content"][:30]
+        return f"{tokens:6,} tokens  {msg['role']:10} {preview}"
+
     def too_big(self, messages: list[ChatMessage]) -> bool:
         """Check if messages exceed the token limit.
 
@@ -76,8 +90,7 @@ class ChatSummary:
             tokens = self.token_count(msg)
             sized.append((tokens, msg))
             if self.io:
-                preview = msg["content"][:30]
-                self.io.tool_output(f"{tokens:6,} tokens  {msg['role']:10} {preview}")
+                self.io.tool_output(self._format_message_preview(tokens, msg))
         return sized
 
     def summarize(self, messages: list[ChatMessage], recursion_depth: int = 0) -> list[ChatMessage]:
