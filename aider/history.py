@@ -1,11 +1,11 @@
 # This file uses the Brade coding style: full modern type hints and strong documentation.
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 
-import argparse
 from typing import Optional
 
 from aider import models, prompts
 from aider.dump import dump  # noqa: F401
+from aider.io import InputOutput
 from aider.sendchat import simple_send_with_retries
 from aider.types import ChatMessage, TokenCountFunc
 
@@ -27,7 +27,7 @@ class ChatSummary:
         self,
         models: Optional[models.Model | list[models.Model]] = None,
         max_tokens: int = 1024,
-        io: Optional["InputOutput"] = None,
+        io: Optional[InputOutput] = None,
         label: Optional[str] = None,
     ) -> None:
         """Initialize a ChatSummary instance.
@@ -54,11 +54,11 @@ class ChatSummary:
 
     def _format_message_preview(self, tokens: int, msg: ChatMessage) -> str:
         """Format a message preview with token count, role, and content.
-        
+
         Args:
             tokens: Number of tokens in the message
             msg: The chat message to preview
-            
+
         Returns:
             Formatted string with fixed-width fields for token count and role,
             followed by first 30 chars of content
@@ -78,7 +78,10 @@ class ChatSummary:
         sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
         if self.io:
-            self.io.tool_output(f"{self._prefix}Checking message size: {total:,} tokens vs limit of {self.max_tokens:,}")
+            self.io.tool_output(
+                f"{self._prefix}Checking message size: {total:,} tokens vs limit of"
+                f" {self.max_tokens:,}"
+            )
         return total > self.max_tokens
 
     def tokenize(self, messages: list[ChatMessage]) -> list[tuple[int, ChatMessage]]:
@@ -94,8 +97,6 @@ class ChatSummary:
         for msg in messages:
             tokens = self.token_count(msg)
             sized.append((tokens, msg))
-            if self.io:
-                self.io.tool_output(f"{self._prefix}{self._format_message_preview(tokens, msg)}")
         return sized
 
     def summarize(self, messages: list[ChatMessage], recursion_depth: int = 0) -> list[ChatMessage]:
@@ -129,6 +130,12 @@ class ChatSummary:
         if total <= self.max_tokens and recursion_depth == 0:
             return messages
 
+        if self.io:
+            self.io.tool_output(
+                f"\n{self._prefix}Summarizing as necessary from {len(messages):,} messages with"
+                f" {total:,} tokens"
+            )
+
         # Handle base cases: too small to split or max recursion reached
         min_split = 4
         if len(messages) <= min_split or recursion_depth > 3:
@@ -140,7 +147,9 @@ class ChatSummary:
         half_max_tokens = self.max_tokens // 2
 
         if self.io:
-            self.io.tool_output(f"\n{self._prefix}Finding split point targeting {half_max_tokens:,} tokens for tail")
+            self.io.tool_output(
+                f"\n{self._prefix}Finding split point targeting {half_max_tokens:,} tokens for tail"
+            )
 
         for i in range(len(sized) - 1, -1, -1):
             tokens, _msg = sized[i]
@@ -148,7 +157,10 @@ class ChatSummary:
                 tail_tokens += tokens
                 split_index = i
                 if self.io:
-                    self.io.tool_output(f"{self._prefix}Including message {i} in tail, now at {tail_tokens:,} tokens")
+                    self.io.tool_output(
+                        f"{self._prefix}Including message {i} in tail, now at"
+                        f" {tail_tokens:,} tokens"
+                    )
             else:
                 break
 
@@ -156,7 +168,9 @@ class ChatSummary:
         while messages[split_index - 1]["role"] != "assistant" and split_index > 1:
             split_index -= 1
             if self.io:
-                self.io.tool_output(f"{self._prefix}Adjusting split point to {split_index} to get clean break")
+                self.io.tool_output(
+                    f"{self._prefix}Adjusting split point to {split_index} to get clean break"
+                )
 
         if split_index <= min_split:
             return self.summarize_all(messages)
@@ -176,7 +190,9 @@ class ChatSummary:
         model_max_input_tokens = self.models[0].info.get("max_input_tokens") or 4096
 
         if self.io:
-            self.io.tool_output(f"\n{self._prefix}Keeping messages up to {model_max_input_tokens:,} tokens")
+            self.io.tool_output(
+                f"\n{self._prefix}Keeping messages up to {model_max_input_tokens:,} tokens"
+            )
 
         for i in range(split_index):
             total += sized[i][0]
@@ -201,9 +217,9 @@ class ChatSummary:
             # Show summarized and remaining messages if some were summarized away
             if self.io and len(summary) < len(keep):
                 self.io.tool_output(f"\n{self._prefix}Messages that were summarized away:")
-                for msg in keep[len(summary):]:
+                for msg in keep[len(summary) :]:
                     self.io.tool_output(self._format_message_preview(self.token_count(msg), msg))
-                
+
                 self.io.tool_output(f"\n{self._prefix}Messages that remain:")
                 for msg in result:
                     self.io.tool_output(self._format_message_preview(self.token_count(msg), msg))
@@ -228,16 +244,23 @@ class ChatSummary:
         Raises:
             ValueError: If summarization fails for all available models
         """
+        if self.io:
+            self.io.tool_output(f"\n{self._prefix}Summarizing {len(messages):,} messages")
         content = ""
         for msg in messages:
             role = msg["role"].upper()
             if role not in ("USER", "ASSISTANT"):
                 continue
             content += f"# {role}\n"
-            content += msg["content"]
+            msg_content = msg["content"]
+            if isinstance(msg_content, list):
+                for block in msg_content:
+                    if block.get("type") == "text" and block.get("text"):
+                        content += block["text"] or ""
+            else:
+                content += msg_content
             if not content.endswith("\n"):
                 content += "\n"
-
         summarize_messages = [
             dict(role="system", content=prompts.summarize),
             dict(role="user", content=content),
