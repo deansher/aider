@@ -432,28 +432,6 @@ If a release fails:
    - Ensure Docker Hub credentials are correctly set
    - Check multi-architecture build configuration
 
-### PyPI Project Setup
-
-To set up the project on PyPI:
-
-1. Create a PyPI account at https://pypi.org/account/register/
-2. Generate an API token:
-   - Go to https://pypi.org/manage/account/token/
-   - Create a token with "Upload" scope
-   - Save the token securely - you won't be able to see it again
-
-3. Add the PyPI token to GitHub Actions:
-   - Go to your repository's Settings > Secrets and variables > Actions
-   - Create a new repository secret named `PYPI_API_TOKEN`
-   - Paste your PyPI token as the value
-
-4. Verify the release workflow:
-   - Check `.github/workflows/release.yml` is properly configured
-   - Ensure the workflow uses the `PYPI_API_TOKEN` secret
-   - Test with a pre-release version if needed
-
-Note: Only repository maintainers need PyPI access. Contributors can submit PRs without it.
-
 ### Pre-commit Hooks
 
 The project uses [pre-commit](https://pre-commit.com/) hooks to automatically format code, lint, and run other checks before committing changes. After cloning the repository, run the following command to set up the pre-commit hooks:
@@ -528,3 +506,28 @@ Since Brade is a fork of Aider:
 - We document violations we discover but don't believe we should fix.
 
 This helps us improve the architecture incrementally while staying close to upstream Aider.
+
+## PyPI Project Setup for Forks
+
+To set up the project on PyPI:
+
+1. Change the project name, and perhaps description, in `pyproject.toml` and `README.md`.
+2. Create a PyPI account at https://pypi.org/account/register/
+3. Generate an API token:
+   - Go to https://pypi.org/manage/account/token/
+   - Create a token with "Upload" scope
+   - Save the token securely - you won't be able to see it again
+
+4. Add the PyPI token to GitHub Actions:
+   - Go to your repository's Settings > Secrets and variables > Actions
+   - Create a new repository secret named `PYPI_API_TOKEN`
+   - Paste your PyPI token as the value
+
+5. Verify the release workflow:
+   - Check `.github/workflows/release.yml` is properly configured
+   - Ensure the workflow uses the `PYPI_API_TOKEN` secret
+   - Test with a pre-release version if needed
+
+Note: Only repository maintainers need PyPI access. Contributors can submit PRs without it.
+
+
