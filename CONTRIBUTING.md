@@ -363,6 +363,8 @@ The project uses automated workflows to publish releases to both PyPI and Docker
 
 ### Version Numbering
 
+Version number syntax is `brade-v[0-9]+.[0-9]+.[0-9]+`.
+
 The project uses semantic versioning (MAJOR.MINOR.PATCH):
 - MAJOR version for incompatible API changes
 - MINOR version for new functionality in a backward compatible manner
@@ -378,8 +380,8 @@ The project uses semantic versioning (MAJOR.MINOR.PATCH):
 2. Create and push a version tag for PyPI:
    ```bash
    # Replace X.Y.Z with the new version number
-   git tag vX.Y.Z
-   git push origin vX.Y.Z
+   git tag brade-vX.Y.Z
+   git push origin brade-vX.Y.Z
    ```
 
 3. Create and push a version tag for Docker:
