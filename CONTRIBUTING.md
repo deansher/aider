@@ -146,7 +146,8 @@ To test the Docker image locally, you'll need to:
 1. Build the image (as shown above)
 2. Run a container with appropriate permissions and volume mounts
 
-Here's the recommended run command:
+Here's a recommended run command. If the docker image can't then read and write to your current working directory, 
+leave out the `--user ...` line.
 
 ```bash
 docker run --rm -it \
@@ -156,7 +157,7 @@ docker run --rm -it \
 ```
 
 Key options explained:
-- `--user $(id -u):$(id -g)`: Runs container as your user to avoid permission issues
+- `--user $(id -u):$(id -g)`: Runs brade within container as your user and group
 - `-v "$PWD:/app"`: Mounts current directory into container for accessing local files
 - `--rm`: Automatically removes container when it exits
 - `-it`: Provides interactive terminal for input/output
