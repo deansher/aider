@@ -530,4 +530,32 @@ To set up the project on PyPI:
 
 Note: Only repository maintainers need PyPI access. Contributors can submit PRs without it.
 
+## Docker Hub Project Setup for Forks
+
+To set up the project on Docker Hub:
+
+1. Create a Docker Hub account at https://hub.docker.com/signup
+2. Generate an access token:
+   - Go to https://hub.docker.com/settings/security
+   - Click "New Access Token"
+   - Give it a description and select "Read & Write" permissions
+   - Save the token securely - you won't be able to see it again
+
+3. Add Docker Hub credentials to GitHub Actions:
+   - Go to your repository's Settings > Secrets and variables > Actions
+   - Create two new repository secrets:
+     - `DOCKERHUB_USERNAME`: Your Docker Hub username
+     - `DOCKERHUB_PASSWORD`: Your Docker Hub access token
+
+4. Update Docker-related files:
+   - Modify image names in `docker/Dockerfile` if needed
+   - Update Docker tags in `.github/workflows/docker-release.yml`
+   - Consider updating Docker build configurations
+
+5. Verify the Docker workflow:
+   - Check `.github/workflows/docker-release.yml` is properly configured
+   - Ensure the workflow uses both Docker Hub secrets
+   - Test with a pre-release version if needed
+
+Note: Only repository maintainers need Docker Hub access. Contributors can submit PRs without it.
 
