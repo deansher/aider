@@ -509,24 +509,33 @@ This helps us improve the architecture incrementally while staying close to upst
 
 ## PyPI Project Setup for Forks
 
-To set up the project on PyPI:
+To set up the project on PyPI using OpenID Connect (OIDC):
 
 1. Change the project name, and perhaps description, in `pyproject.toml` and `README.md`.
+
 2. Create a PyPI account at https://pypi.org/account/register/
-3. Generate an API token:
-   - Go to https://pypi.org/manage/account/token/
-   - Create a token with "Upload" scope
-   - Save the token securely - you won't be able to see it again
 
-4. Add the PyPI token to GitHub Actions:
-   - Go to your repository's Settings > Secrets and variables > Actions
-   - Create a new repository secret named `PYPI_API_TOKEN`
-   - Paste your PyPI token as the value
+3. Configure PyPI trusted publisher:
+   - Go to your project page on PyPI
+   - Navigate to Settings > Publishing
+   - Click "Add a new publisher"
+   - Set the following values:
+     - Publisher: GitHub Actions
+     - Organization: your GitHub username or org
+     - Repository: brade
+     - Workflow name: release
+     - Environment: (leave blank)
 
-5. Verify the release workflow:
+4. Update the release workflow:
    - Check `.github/workflows/release.yml` is properly configured
-   - Ensure the workflow uses the `PYPI_API_TOKEN` secret
+   - Ensure it includes the OIDC configuration:
+     ```yaml
+     permissions:
+       id-token: write
+     ```
    - Test with a pre-release version if needed
+
+The OIDC approach eliminates the need to manage API tokens, providing better security through automated credential management. GitHub Actions will automatically authenticate to PyPI using your configured trusted publisher relationship.
 
 Note: Only repository maintainers need PyPI access. Contributors can submit PRs without it.
 
