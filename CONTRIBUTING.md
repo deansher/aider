@@ -377,14 +377,7 @@ The project uses semantic versioning (MAJOR.MINOR.PATCH):
    pytest
    ```
 
-2. Create and push a version tag for PyPI:
-   ```bash
-   # Replace X.Y.Z with the new version number
-   git tag brade-vX.Y.Z
-   git push origin brade-vX.Y.Z
-   ```
-
-3. Create and push a version tag for Docker:
+2. Create and push a version tag:
    ```bash
    # Replace X.Y.Z with the new version number
    git tag brade-vX.Y.Z
@@ -396,7 +389,7 @@ The project uses semantic versioning (MAJOR.MINOR.PATCH):
 The release process is automated through GitHub Actions workflows:
 
 1. PyPI Release (`.github/workflows/release.yml`):
-   - Triggered by pushing a tag matching `v[0-9]+.[0-9]+.[0-9]+`
+   - Triggered by pushing a tag matching `brade-v[0-9]+.[0-9]+.[0-9]+`
    - Builds the Python package
    - Publishes to PyPI using twine
 
