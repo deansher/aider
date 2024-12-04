@@ -6,5 +6,8 @@
 llama-index-core
 llama-index-embeddings-huggingface
 
+# Override llama-index-core's tenacity requirement to be compatible with streamlit
+tenacity>=8.5.0
+
 # requirement-help and requirements-playwright choose different versions
 greenlet==3.0.3
