@@ -357,6 +357,81 @@ If you want to upgrade all dependencies, use the `--upgrade` flag:
 
 Given pip's limitations, it is wise to create a fresh venv after upgrading dependencies. (And you may want to consider doing so after adding a dependency.)
 
+## Releases
+
+The project uses automated workflows to publish releases to both PyPI and Docker Hub. Here's how to create a new release:
+
+### Version Numbering
+
+The project uses semantic versioning (MAJOR.MINOR.PATCH):
+- MAJOR version for incompatible API changes
+- MINOR version for new functionality in a backward compatible manner
+- PATCH version for backward compatible bug fixes
+
+### Creating a Release
+
+1. Ensure all tests pass and the code is ready for release:
+   ```bash
+   pytest
+   ```
+
+2. Create and push a version tag for PyPI:
+   ```bash
+   # Replace X.Y.Z with the new version number
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+   ```
+
+3. Create and push a version tag for Docker:
+   ```bash
+   # Replace X.Y.Z with the new version number
+   git tag brade-vX.Y.Z
+   git push origin brade-vX.Y.Z
+   ```
+
+### Automated Release Process
+
+The release process is automated through GitHub Actions workflows:
+
+1. PyPI Release (`.github/workflows/release.yml`):
+   - Triggered by pushing a tag matching `v[0-9]+.[0-9]+.[0-9]+`
+   - Builds the Python package
+   - Publishes to PyPI using twine
+
+2. Docker Release (`.github/workflows/docker-release.yml`):
+   - Triggered by pushing a tag matching `brade-v[0-9]+.[0-9]+.[0-9]+`
+   - Builds multi-architecture Docker images (amd64, arm64)
+   - Pushes to Docker Hub with version-specific and 'latest' tags
+
+### Verifying the Release
+
+After the workflows complete:
+
+1. Check PyPI listing at https://pypi.org/project/brade/
+   ```bash
+   # Test installation from PyPI
+   python -m pip install --no-cache-dir brade==${VERSION}
+   ```
+
+2. Check Docker Hub at https://hub.docker.com/r/deansher/brade
+   ```bash
+   # Test the Docker image
+   docker pull deansher/brade:${VERSION}
+   docker run --rm deansher/brade:${VERSION} --version
+   ```
+
+### Troubleshooting Releases
+
+If a release fails:
+
+1. Check the GitHub Actions logs for error details
+2. For PyPI issues:
+   - Ensure the version tag follows the correct format
+   - Verify PyPI credentials are correctly set
+3. For Docker issues:
+   - Ensure Docker Hub credentials are correctly set
+   - Check multi-architecture build configuration
+
 ### Pre-commit Hooks
 
 The project uses [pre-commit](https://pre-commit.com/) hooks to automatically format code, lint, and run other checks before committing changes. After cloning the repository, run the following command to set up the pre-commit hooks:
