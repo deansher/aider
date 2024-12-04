@@ -292,7 +292,8 @@ def wrap_xml(tag: str, content: str | None) -> str:
     if not content.strip():
         return f"<{tag}>\n</{tag}>\n"
 
-    return f"<{tag}>\n{content.rstrip('\n')}\n</{tag}>\n"
+    stripped_content = content.rstrip('\n')
+    return f"<{tag}>\n{stripped_content}\n</{tag}>\n"
 
 
 def format_file_section(files: list[FileContent] | None) -> str:
