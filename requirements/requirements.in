@@ -54,6 +54,10 @@ importlib-metadata<8.0.0
 # Because sentence-transformers doesn't like >=2
 numpy<2
 
+# llama-index-core (from help) wants tenacity>=8.2.0,<9.0.0,!=8.4.0
+# streamlit (from browser) wants tenacity>=8.1.0,<10
+tenacity>=8.2.0,<9.0.0
+
 # Going past this makes dependencies unresolvable
 # Seems to be caused by sentence-transformers
 tokenizers==0.19.1
