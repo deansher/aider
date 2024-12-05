@@ -2,7 +2,7 @@
 
 Brade is a fork of Aider that lets you pair program with LLMs, editing code in your local git repository.
 Start a new project or work with an existing git repo.
-Brade works best with GPT-4o & Claude 3.5 Sonnet and can connect to almost any LLM.
+Brade works best with Claude 3.5 Sonnet and is only tested with that model.
 
 ## Quick Start
 
@@ -22,9 +22,7 @@ docker run -it --rm \
 ## Available Tags
 
 - `latest`: Latest stable release
-- `vX.Y.Z`: Specific version releases
-- `full`: Includes all optional dependencies
-- `core`: Minimal image with core functionality only
+- `brade-vX.Y.Z`: Specific version releases
 
 ## Configuration
 
@@ -46,7 +44,7 @@ docker run -it --rm \
 
 ### User Permissions
 
-To avoid file permission issues, run as your user:
+If necessary to avoid file permission issues, run as your own user:
 
 ```bash
 docker run -it --rm \
@@ -60,14 +58,13 @@ docker run -it --rm \
 - Edit multiple files at once
 - Automatic git commits with sensible messages
 - Works with most popular languages
-- Connects to GPT-4o, Claude 3.5 Sonnet, and many other LLMs
 - Voice coding support
 - Add images and URLs to the chat
 - Uses a map of your git repo to work well in larger codebases
 
 ## Documentation
 
-Full documentation available at:
+Full documentation of the upstream project available here:
 - [Installation](https://aider.chat/docs/install.html)
 - [Usage](https://aider.chat/docs/usage.html)
 - [LLM Support](https://aider.chat/docs/llms.html)
