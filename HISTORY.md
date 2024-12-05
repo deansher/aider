@@ -1,6 +1,14 @@
 
 # Release history
 
+### brade-v0.60.2
+
+First seriously-intended release of the Brade fork of Aider.
+
+### brade-v0.60.1
+
+First rough release of the Brade fork of Aider.
+
 ### v0.60.0
 
 - Full support for Sonnet 10/22, the new SOTA model on aider's code editing benchmark.
