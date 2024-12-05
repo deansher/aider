@@ -42,3 +42,11 @@ jobs:
           ${{ secrets.DOCKERHUB_USERNAME }}/brade:${{ github.ref_name }}
           ${{ secrets.DOCKERHUB_USERNAME }}/brade:latest
         target: brade-full
+
+    - name: Update Docker Hub Description
+      uses: peter-evans/dockerhub-description@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        repository: ${{ secrets.DOCKERHUB_USERNAME }}/brade
+        readme-filepath: ./docker/README.md
