@@ -66,6 +66,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 write_to = "aider/__version__.py"
+git_describe_command = "git describe --tags --match 'brade-v[0-9]*.[0-9]*.[0-9]*'"
 
 [tool.codespell]
 skip = "*.svg,Gemfile.lock"
