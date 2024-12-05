@@ -377,6 +377,8 @@ The project uses semantic versioning (MAJOR.MINOR.PATCH):
    pytest
    ```
 
+2. Update `HISTORY.md`.
+
 2. Create and push a version tag:
    ```bash
    # Replace X.Y.Z with the new version number
