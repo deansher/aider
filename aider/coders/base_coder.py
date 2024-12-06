@@ -823,6 +823,16 @@ class Coder:
         self.last_keyboard_interrupt = now
 
     def summarize_start(self):
+        if self.verbose:
+            if self.summarizer.io is None:
+                sumio_description = "None"
+            elif self.summarizer.io is self.io:
+                sumio_description = "same as Coder.io"
+            else:
+                sumio_description = "unique"
+            self.io.tool_output(
+                f"summarize_start: self.summarizer.io is {sumio_description}"
+            )
         if not self.summarizer.too_big(self.done_messages):
             return
 
