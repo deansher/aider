@@ -1,20 +1,39 @@
 """
 RepoMap provides a dynamic, ranked view of a code repository's structure and relationships.
 
-Key features:
-- Builds a graph of code relationships using tree-sitter for parsing
-- Uses PageRank to identify important code elements
-- Caches parsed tags for performance
-- Creates a hierarchical view focused on relevant code
-- Adapts map size to fit LLM context windows
-- Supports interactive development by tracking chat vs other files
+Implementation Design Decisions
+-----------------------------
 
-The main workflow:
-1. Parse files to extract definitions and references
-2. Build a graph of code relationships
-3. Use PageRank to identify important elements
-4. Generate a hierarchical view sized to fit context
-5. Cache results for performance
+1. Token Budget Management
+   - Uses binary search to find how many ranked tags can fit within token limit
+   - Targets 85-115% of limit (ok_err = 0.15) to balance coverage vs. context space
+   - Truncates long lines to 100 chars to handle minified/generated code
+   - Skips files already in chat to avoid redundancy
+
+2. Code Element Ranking Strategy
+   - Builds directed graph of code relationships using tree-sitter parsing
+   - Weights relationships based on:
+     * Reference frequency (scaled by sqrt to prevent high-freq dominance)
+     * Private vs public identifiers (_prefixed = 0.1x weight)
+     * Mentioned identifiers (10x weight)
+     * Files in chat (personalization bias)
+   - Uses PageRank to identify important elements based on:
+     * Reference relationships between elements
+     * Files currently in chat
+     * Recently mentioned files and identifiers
+
+3. Performance Optimizations
+   - Caches parsed tags with file mtime validation
+   - Caches tree context for file rendering
+   - Caches map results based on inputs (chat files, other files, mentions)
+   - Uses sampling to estimate token counts for large files
+   - Progressively shows progress bar for repos with >100 uncached files
+
+4. Map Refresh Strategy
+   - 'manual': Only updates on explicit refresh
+   - 'files': Updates when file set changes
+   - 'auto': Updates on file changes + mentions if processing time < 1s
+   - 'always': Updates on every request
 
 Dependencies:
 - tree-sitter for code parsing
