@@ -464,6 +464,10 @@ class Coder:
             self.__class__.__name__,
         )
 
+        # Ensure summarizer has the correct io
+        if self.summarizer.io is None:
+            self.summarizer.io = self.io
+
         self.summarizer_thread = None
         self.summarized_done_messages = []
 
