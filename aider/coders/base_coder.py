@@ -228,11 +228,11 @@ class Coder:
             prefix = "Model"
 
         output = f"{prefix}: {main_model.name} with {self.edit_format} edit format"
-        output += f" ({main_model.max_chat_history_tokens:,} history tokens)"
         if self.add_cache_headers or main_model.caches_by_default:
             output += ", prompt cache"
         if main_model.info.get("supports_assistant_prefill"):
             output += ", infinite output"
+        output += f", {main_model.max_chat_history_tokens:,} history tokens"
         lines.append(output)
 
         if self.edit_format == "architect":
@@ -240,12 +240,12 @@ class Coder:
                 f"Editor model: {main_model.editor_model.name} with"
                 f" {main_model.editor_edit_format} edit format"
             )
-            output += f" ({main_model.editor_model.max_chat_history_tokens:,} history tokens)"
+            output += f", {main_model.max_chat_history_tokens:,} history tokens"
             lines.append(output)
 
         if weak_model is not main_model:
             output = f"Weak model: {weak_model.name}"
-            output += f" ({weak_model.max_chat_history_tokens:,} history tokens)"
+            output += f", {main_model.max_chat_history_tokens:,} history tokens"
             lines.append(output)
 
         # Repo
