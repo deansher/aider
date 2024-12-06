@@ -5,25 +5,28 @@ Implementation Design Decisions
 -----------------------------
 
 1. Token Budget Management
-   - Uses binary search to find how many ranked tags can fit within token limit
+   - Uses binary search to find how many code elements can fit within token limit
    - Targets 85-115% of limit (ok_err = 0.15) to balance coverage vs. context space
    - Truncates long lines to 100 chars to handle minified/generated code
    - Skips files already in chat to avoid redundancy
 
 2. Code Element Ranking Strategy
-   - Builds directed graph of code relationships using tree-sitter parsing
+   - Extracts code elements (functions, classes, variables) using tree-sitter tags
+   - Builds directed graph of relationships between code elements:
+     * Nodes are files containing definitions and references
+     * Edges represent references between files via identifiers
    - Weights relationships based on:
      * Reference frequency (scaled by sqrt to prevent high-freq dominance)
      * Private vs public identifiers (_prefixed = 0.1x weight)
      * Mentioned identifiers (10x weight)
      * Files in chat (personalization bias)
-   - Uses PageRank to identify important elements based on:
+   - Uses PageRank to identify important code elements based on:
      * Reference relationships between elements
      * Files currently in chat
      * Recently mentioned files and identifiers
 
 3. Performance Optimizations
-   - Caches parsed tags with file mtime validation
+   - Caches tree-sitter tags with file mtime validation
    - Caches tree context for file rendering
    - Caches map results based on inputs (chat files, other files, mentions)
    - Uses sampling to estimate token counts for large files
