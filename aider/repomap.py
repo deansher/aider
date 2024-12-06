@@ -12,17 +12,16 @@ Implementation Design Decisions
 
 2. Code Element Ranking Strategy
    - Extracts code elements (functions, classes, variables) using tree-sitter tags
-   - Builds directed graph of relationships between code elements:
-     * Nodes are files containing definitions and references
+   - Builds directed graph of relationships between files:
+     * Nodes are files in the repository
      * Edges represent references between files via identifiers
-   - Weights relationships based on:
-     * Reference frequency (scaled by sqrt to prevent high-freq dominance)
-     * Private vs public identifiers (_prefixed = 0.1x weight)
-     * Mentioned identifiers (10x weight)
-     * Files in chat (personalization bias)
-   - Uses PageRank to identify important code elements based on:
-     * Reference relationships between elements
-     * Files currently in chat
+     * Edge weights are scaled by:
+       - Reference frequency (sqrt scaling to prevent high-freq dominance)
+       - Private vs public identifiers (_prefixed = 0.1x weight)
+       - Mentioned identifiers (10x weight)
+   - Uses PageRank with personalization to rank files based on:
+     * Reference relationships between files
+     * Files currently in chat (personalization bias)
      * Recently mentioned files and identifiers
 
 3. Performance Optimizations
