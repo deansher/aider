@@ -24,7 +24,23 @@ Implementation Design Decisions
      * Files currently in chat (personalization bias)
      * Recently mentioned files and identifiers
 
-3. Performance Optimizations
+3. Content Selection and Formatting
+   - For files with identified tags (functions, classes, etc):
+     * Shows lines containing the definitions
+     * Shows context around those lines via TreeContext
+   - For files without tags:
+     * Shows only the filename
+   - All content is consistently formatted:
+     * Lines truncated to 100 chars to handle minified/generated code
+     * No line numbers or syntax coloring
+     * No parent scope context
+   - Content style remains consistent regardless of available space
+   - When space is limited:
+     * Files are prioritized by PageRank score
+     * Binary search finds how many files can fit within token limit
+     * No variation in content style or detail level per file
+
+4. Performance Optimizations
    - Caches tree-sitter tags with file mtime validation
    - Caches tree context for file rendering
    - Caches map results based on inputs (chat files, other files, mentions)
