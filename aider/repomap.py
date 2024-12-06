@@ -74,28 +74,6 @@ SQLITE_ERRORS = (sqlite3.OperationalError, sqlite3.DatabaseError)
 
 
 class RepoMap:
-    """
-    Creates and manages a dynamic map of repository content and code relationships.
-
-    This class analyzes source code to build a graph of relationships between
-    code elements (functions, classes, etc), then uses PageRank to identify
-    the most relevant elements based on the current development context.
-    
-    Key features:
-    - Parses code using tree-sitter to extract definitions and references
-    - Builds a weighted directed graph of code relationships
-    - Uses PageRank to rank elements by importance
-    - Caches parsed tags for performance
-    - Adapts map size to fit LLM context windows
-    - Tracks chat files vs other files for relevance
-    
-    The map updates based on:
-    - Files currently being discussed in chat
-    - Recently mentioned files and identifiers
-    - Repository structure and code relationships
-    - Available context window size
-    """
-
     CACHE_VERSION = 3
     TAGS_CACHE_DIR = f".aider.tags.cache.v{CACHE_VERSION}"
 
