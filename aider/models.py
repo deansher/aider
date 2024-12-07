@@ -18,13 +18,16 @@ from aider.dump import dump  # noqa: F401
 from aider.llm import litellm
 
 
-def max_chat_history_tokens(max_input_tokens: int) -> int:
+def max_chat_history_tokens(max_input_tokens):
     """Return the maximum number of tokens to use for chat history based on model context size."""
-    if max_input_tokens < 17000:
+    if max_input_tokens < 9000:
         return 1000
+    if max_input_tokens < 17000:
+        return 1500
     if max_input_tokens < 33000:
-        return 2000
+        return 2500
     return min(5000, int(max_input_tokens * 0.1))
+
 
 DEFAULT_MODEL_NAME = "gpt-4o"
 ANTHROPIC_BETA_HEADER = "prompt-caching-2024-07-31"
