@@ -35,8 +35,8 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 ```
 ### ( ) Complex Task.
 
-- (✔︎) Subtask
-  - (✔︎) Subsubtask
+- (✅) Subtask
+  - (✅) Subsubtask
 - ( ) Another subtask
 ```
 
@@ -67,7 +67,7 @@ The current EditBlockCoder uses complex heuristics to parse search/replace block
 
 ## Tasks
 
-### (✓) Document how this works today.
+### (✅) Document how this works today.
 
 The edit block functionality is implemented in `editblock_coder.py` and tested in `test_editblock.py`. Each edit block has a file path followed by a body.
 
@@ -101,7 +101,7 @@ The edit block functionality is implemented in `editblock_coder.py` and tested i
 - Each block is processed independently
 - Only the first match in a file is replaced
 
-### (✓) List simplifications that we want to apply as individual refactorings.
+### (✅) List simplifications that we want to apply as individual refactorings.
 
 1. Improve the `find_filename` function:
    - Simplify the logic for finding filenames
