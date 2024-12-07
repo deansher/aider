@@ -43,3 +43,62 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 ## Requirements
 
 We will improve the repo map in small, safe steps. We'll do this gradually over a period of time, making a few careful changes and then getting practical experience with the effect of those enhancements before proceeding further. We will update this plan and `test_repomap.py` at each step.
+
+## Tasks
+
+### ( ) Add Documentation Context
+
+Tree-sitter can identify documentation comments. We should show these above definitions to provide better context about purpose and usage.
+
+#### Requirements
+
+1. Documentation comments should be shown above their associated definitions
+2. Support common documentation formats:
+   - Python docstrings (""" and ''')
+   - JavaScript/TypeScript // and /* */ comments
+   - Java/C++ /** */ comments
+   - Other language-specific formats
+
+#### Implementation Steps
+
+- ( ) Analyze tree-sitter query files to identify which already capture doc comments
+- ( ) Modify tree-sitter queries as needed to capture doc comments
+- ( ) Update TreeContext to:
+  - ( ) Associate doc comments with their definitions
+  - ( ) Include doc comments in context display
+  - ( ) Handle multi-line comments appropriately
+- ( ) Add test cases for:
+  - ( ) Python docstrings
+  - ( ) JavaScript/TypeScript comments
+  - ( ) Multi-line comment formatting
+  - ( ) Edge cases (multiple comments, nested definitions)
+
+### ( ) Add Relationship Context
+
+Tree-sitter can identify inheritance and implementation relationships. We should show these to help understand code organization.
+
+#### Requirements
+
+1. For classes, show:
+   - Parent classes they inherit from
+   - Interfaces they implement
+   - Inner classes/methods they contain
+2. Support common OOP languages:
+   - Python class inheritance
+   - TypeScript/JavaScript class extends
+   - Java/C++ class inheritance
+   - Interface implementations
+
+#### Implementation Steps
+
+- ( ) Analyze tree-sitter query files to identify relationship captures
+- ( ) Modify queries as needed to capture relationships
+- ( ) Update TreeContext to:
+  - ( ) Track parent/child class relationships
+  - ( ) Track interface implementations
+  - ( ) Show relationships in rendered output
+- ( ) Add test cases for:
+  - ( ) Basic inheritance
+  - ( ) Multiple inheritance
+  - ( ) Interface implementation
+  - ( ) Nested class definitions
