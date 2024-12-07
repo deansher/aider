@@ -18,7 +18,7 @@ from aider.dump import dump  # noqa: F401
 from aider.llm import litellm
 
 
-def get_max_chat_history_tokens(max_input_tokens: int) -> int:
+def max_chat_history_tokens(max_input_tokens: int) -> int:
     """Return the maximum number of tokens to use for chat history based on model context size."""
     if max_input_tokens < 17000:
         return 1000
@@ -748,7 +748,7 @@ class Model(ModelSettings):
         self.keys_in_environment = res.get("keys_in_environment")
 
         max_input_tokens = self.info.get("max_input_tokens") or 0
-        self.max_chat_history_tokens = get_max_chat_history_tokens(max_input_tokens)
+        self.max_chat_history_tokens = max_chat_history_tokens(max_input_tokens)
 
         self.configure_model_settings(model)
         if weak_model is False:
