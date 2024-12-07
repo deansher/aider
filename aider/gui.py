@@ -405,9 +405,6 @@ class GUI:
     def prompt_pending(self):
         return self.state.prompt is not None
 
-    def cost(self):
-        cost = random.random() * 0.003 + 0.001
-        st.caption(f"${cost:0.4f}")
 
     def process_chat(self):
         prompt = self.state.prompt

@@ -1689,11 +1689,10 @@ class Coder:
         self.usage_report = tokens_report + sep + cost_report
 
     def show_usage_report(self):
-        if self.usage_report:
-            self.io.tool_output(self.usage_report)
-            self.message_cost = 0.0
-            self.message_tokens_sent = 0
-            self.message_tokens_received = 0
+        # Don't display usage report in normal flow
+        self.message_cost = 0.0
+        self.message_tokens_sent = 0
+        self.message_tokens_received = 0
 
     def get_multi_response_content(self, final=False):
         cur = self.multi_response_content or ""
