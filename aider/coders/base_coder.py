@@ -1225,7 +1225,7 @@ class Coder:
 
         self.io.tool_output()
 
-        self.show_usage_report()
+        self.compute_usage()
 
         if exhausted:
             self.show_exhausted_error()
@@ -1688,8 +1688,7 @@ class Coder:
 
         self.usage_report = tokens_report + sep + cost_report
 
-    def show_usage_report(self):
-        # Don't display usage report in normal flow
+    def compute_usage(self):
         self.message_cost = 0.0
         self.message_tokens_sent = 0
         self.message_tokens_received = 0

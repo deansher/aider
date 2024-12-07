@@ -405,7 +405,6 @@ class GUI:
     def prompt_pending(self):
         return self.state.prompt is not None
 
-
     def process_chat(self):
         prompt = self.state.prompt
         self.state.prompt = None
