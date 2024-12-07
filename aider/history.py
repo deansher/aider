@@ -4,8 +4,6 @@
 from typing import Optional
 
 from aider import models, prompts
-from aider.dump import dump  # noqa: F401
-from aider.io import InputOutput
 from aider.sendchat import simple_send_with_retries
 from aider.types import ChatMessage, TokenCountFunc
 
@@ -24,11 +22,7 @@ class ChatSummary:
     """
 
     def __init__(
-        self,
-        models: Optional[models.Model | list[models.Model]] = None,
-        max_tokens: int = 1024,
-        io: Optional[InputOutput] = None,
-        label: Optional[str] = None,
+        self, models: Optional[models.Model | list[models.Model]] = None, max_tokens: int = 1024
     ) -> None:
         """Initialize a ChatSummary instance.
 
@@ -37,8 +31,6 @@ class ChatSummary:
                    Models are tried in order if earlier ones fail.
             max_tokens: Maximum number of tokens allowed in summarized history.
                        Default is 1024.
-            io: Optional InputOutput instance for logging summarization progress.
-            label: Optional label to prefix log messages with.
 
         Raises:
             ValueError: If no models are provided.
@@ -48,23 +40,6 @@ class ChatSummary:
         self.models = models if isinstance(models, list) else [models]
         self.max_tokens = max_tokens
         self.token_count: TokenCountFunc = self.models[0].token_count
-        self.io = io
-        self.label = label
-        self._prefix = f"[{self.label}] " if self.label else ""
-
-    def _format_message_preview(self, tokens: int, msg: ChatMessage) -> str:
-        """Format a message preview with token count, role, and content.
-
-        Args:
-            tokens: Number of tokens in the message
-            msg: The chat message to preview
-
-        Returns:
-            Formatted string with fixed-width fields for token count and role,
-            followed by first 30 chars of content
-        """
-        preview = msg["content"][:30]
-        return f"{tokens:6,} tokens  {msg['role']:10} {preview}"
 
     def too_big(self, messages: list[ChatMessage]) -> bool:
         """Check if messages exceed the token limit.
@@ -77,11 +52,6 @@ class ChatSummary:
         """
         sized = self.tokenize(messages)
         total = sum(tokens for tokens, _msg in sized)
-        if self.io:
-            self.io.tool_output(
-                f"{self._prefix}Checking message size: {total:,} tokens vs limit of"
-                f" {self.max_tokens:,}"
-            )
         return total > self.max_tokens
 
     def tokenize(self, messages: list[ChatMessage]) -> list[tuple[int, ChatMessage]]:
@@ -130,12 +100,6 @@ class ChatSummary:
         if total <= self.max_tokens and recursion_depth == 0:
             return messages
 
-        if self.io:
-            self.io.tool_output(
-                f"\n{self._prefix}Summarizing as necessary from {len(messages):,} messages with"
-                f" {total:,} tokens"
-            )
-
         # Handle base cases: too small to split or max recursion reached
         min_split = 4
         if len(messages) <= min_split or recursion_depth > 3:
@@ -146,31 +110,17 @@ class ChatSummary:
         split_index = len(messages)
         half_max_tokens = self.max_tokens // 2
 
-        if self.io:
-            self.io.tool_output(
-                f"\n{self._prefix}Finding split point targeting {half_max_tokens:,} tokens for tail"
-            )
-
         for i in range(len(sized) - 1, -1, -1):
             tokens, _msg = sized[i]
             if tail_tokens + tokens < half_max_tokens:
                 tail_tokens += tokens
                 split_index = i
-                if self.io:
-                    self.io.tool_output(
-                        f"{self._prefix}Including message {i} in tail, now at"
-                        f" {tail_tokens:,} tokens"
-                    )
             else:
                 break
 
         # Adjust split point to ensure clean conversation breaks
         while messages[split_index - 1]["role"] != "assistant" and split_index > 1:
             split_index -= 1
-            if self.io:
-                self.io.tool_output(
-                    f"{self._prefix}Adjusting split point to {split_index} to get clean break"
-                )
 
         if split_index <= min_split:
             return self.summarize_all(messages)
@@ -189,20 +139,11 @@ class ChatSummary:
         # Calculate how many older messages we can keep
         model_max_input_tokens = self.models[0].info.get("max_input_tokens") or 4096
 
-        if self.io:
-            self.io.tool_output(
-                f"\n{self._prefix}Keeping messages up to {model_max_input_tokens:,} tokens"
-            )
-
         for i in range(split_index):
             total += sized[i][0]
             if total > model_max_input_tokens:
-                if self.io:
-                    self.io.tool_output(f"{self._prefix}Stopping at {total:,} tokens")
                 break
             keep.append(head[i])
-            if self.io:
-                self.io.tool_output(f"{self._prefix}Keeping message {i}, now at {total:,} tokens")
 
         keep.reverse()  # restore forward order
 
@@ -214,16 +155,6 @@ class ChatSummary:
         # Check if combined result fits in token limit
         result = summary + tail
         if summary_tokens + tail_tokens < self.max_tokens:
-            # Show summarized and remaining messages if some were summarized away
-            if self.io and len(summary) < len(keep):
-                self.io.tool_output(f"\n{self._prefix}Messages that were summarized away:")
-                for msg in keep[len(summary) :]:
-                    self.io.tool_output(self._format_message_preview(self.token_count(msg), msg))
-
-                self.io.tool_output(f"\n{self._prefix}Messages that remain:")
-                for msg in result:
-                    self.io.tool_output(self._format_message_preview(self.token_count(msg), msg))
-
             return result
 
         # If still too large, recurse on combined result
@@ -244,8 +175,6 @@ class ChatSummary:
         Raises:
             ValueError: If summarization fails for all available models
         """
-        if self.io:
-            self.io.tool_output(f"\n{self._prefix}Summarizing {len(messages):,} messages")
         content = ""
         for msg in messages:
             role = msg["role"].upper()

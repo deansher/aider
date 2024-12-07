@@ -460,13 +460,7 @@ class Coder:
         self.summarizer = summarizer or ChatSummary(
             [self.main_model.weak_model, self.main_model],
             self.main_model.max_chat_history_tokens,
-            self.io,
-            self.__class__.__name__,
         )
-
-        # Ensure summarizer has the correct io
-        if self.summarizer.io is None:
-            self.summarizer.io = self.io
 
         self.summarizer_thread = None
         self.summarized_done_messages = []
@@ -834,9 +828,7 @@ class Coder:
                 sumio_description = "same as Coder.io"
             else:
                 sumio_description = "unique"
-            self.io.tool_output(
-                f"summarize_start: self.summarizer.io is {sumio_description}"
-            )
+            self.io.tool_output(f"summarize_start: self.summarizer.io is {sumio_description}")
         if not self.summarizer.too_big(self.done_messages):
             return
 
