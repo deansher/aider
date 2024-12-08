@@ -244,10 +244,10 @@ class ArchitectCoder(AskCoder):
         if self.verbose:
             editor_coder.show_announcements()
 
-        self.editor_go_ahead_prompt = (
+        exchange.editor_go_ahead_prompt = (
             APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
         )
-        editor_coder.run(with_message=self.editor_go_ahead_prompt, preproc=False)
+        editor_coder.run(with_message=exchange.editor_go_ahead_prompt, preproc=False)
         self.total_cost += editor_coder.total_cost
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
         exchange.editor_response = editor_coder.partial_response_content
