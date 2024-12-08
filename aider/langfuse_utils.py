@@ -137,7 +137,7 @@ class LangfuseTracer:
         messages: list[dict[str, Any]],
         model: str,
         stream: bool = False,
-        name: str = "llm-call",
+        name: str = "generation",
         metadata: dict[str, Any] | None = None,
     ) -> Iterator[Any]:
         """Create a trace for an LLM API call.
@@ -191,7 +191,7 @@ class LangfuseTracer:
     def trace(
         self, name: str, metadata: dict[str, Any] | None = None, **kwargs: Any
     ) -> Iterator[Any]:
-        """Create a trace for a high-level operation.
+        """Create a trace for a high-level operation (as opposed to a generation).
 
         This context manager creates and manages a trace for any high-level operation.
         It supports arbitrary attributes via kwargs and handles cleanup automatically.
