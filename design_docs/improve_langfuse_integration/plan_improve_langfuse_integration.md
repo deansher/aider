@@ -60,6 +60,7 @@ Here are some specific requirements:
 - Continue capturing the useful information that we capture today.
 - Cleanly capture streamed model responses as `output` of "generation" traces.
 - Create a module aider/langfuse_utils.py that provides our own customized abstractions around Langfuse. (We may even define some of our own decorators here, if we see ways to use them more ergonomically.)
+- Follow project conventions as documented in CONTRIBUTING.md.
 
 ## Tasks
 
@@ -97,38 +98,7 @@ Our current Langfuse integration is primarily based on decorators from the Langf
 
 ### (✅) Document the design of our reworked integration.
 
-We will create a new module `aider/langfuse_utils.py` that provides clean abstractions around the Langfuse low-level SDK. Here's the design:
-
-1. Core Classes and Functions
-
-   ```python
-   class LangfuseTracer:
-       """Main class for managing Langfuse tracing in Brade.
-       
-       This provides a clean interface for all our Langfuse operations.
-       It manages configuration, initialization, and provides methods
-       for creating and managing traces.
-       """
-       
-       def __init__(self):
-           # Initialize Langfuse client
-           pass
-           
-       def trace_llm_call(self, messages, model, stream=False):
-           """Create a trace for an LLM API call.
-           
-           Handles both streaming and non-streaming responses.
-           Returns a context manager that manages the trace lifecycle.
-           """
-           pass
-           
-       def trace_operation(self, name, **kwargs):
-           """Create a trace for a high-level operation.
-           
-           Returns a context manager for the trace.
-           """
-           pass
-   ```
+1. We will create a new module `aider/langfuse_utils.py` that provides clean abstractions around the Langfuse low-level SDK. 
 
 2. Context Managers
    - Use context managers to cleanly manage trace/span lifecycles
@@ -146,24 +116,7 @@ We will create a new module `aider/langfuse_utils.py` that provides clean abstra
    - Properly capture streamed output in traces
    - Support progress callbacks
 
-5. Usage Example
-
-   ```python
-   # Initialize once
-   tracer = LangfuseTracer()
-   
-   # Trace an LLM call
-   with tracer.trace_llm_call(messages, model="gpt-4") as trace:
-       response = openai.chat.completions.create(...)
-       trace.add_response(response)
-   
-   # Trace a high-level operation
-   with tracer.trace_operation("process_files") as trace:
-       # Do work
-       trace.add_event("processed", count=len(files))
-   ```
-
-6. Migration Strategy
+5. Migration Strategy
    1. Create langfuse_utils.py with core abstractions
    2. Start with one narrow piece of functionality
    3. Gradually migrate existing code
