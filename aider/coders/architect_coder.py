@@ -210,7 +210,11 @@ class ArchitectCoder(AskCoder):
         except KeyboardInterrupt:
             return
 
-        self.review_changes(exchange)
+        try:
+            self.review_changes(exchange)
+        except KeyboardInterrupt:
+            return
+
         self.record_entire_exchange(exchange)
 
     def execute_changes(self, exchange: ArchitectExchange) -> None:
