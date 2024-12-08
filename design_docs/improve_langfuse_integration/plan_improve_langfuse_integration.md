@@ -123,6 +123,46 @@ Our current Langfuse integration is primarily based on decorators from the Langf
    4. Remove old decorator-based code
    5. Clean up initialization logic
 
+### ( ) Comment out existing Langfuse integration.
+
+This task prepares us to migrate to our new langfuse_utils-based approach by commenting out existing Langfuse code. We'll do this methodically to maintain visibility into what needs to be migrated.
+
+1. ( ) Document existing tracing points
+   - Create a new design_docs/improve_langfuse_integration/existing_tracing.md
+   - For each file with Langfuse integration:
+     - List each tracing point
+     - Note what information it captures
+     - Note any special handling (e.g., streaming)
+     - Note any dependencies on the tracing
+
+2. ( ) Comment out initialization code
+   - Use this format: `# TODO(langfuse): <description of what needs to be migrated>`
+   - Comment out in this order:
+     - llm.py Langfuse initialization
+     - main.py Langfuse configuration
+     - Other initialization points
+
+3. ( ) Comment out tracing points
+   - One file at a time, in this order:
+     - sendchat.py (core LLM interaction)
+     - base_coder.py (high-level operations)
+     - Any remaining files
+   - For each file:
+     - Comment out @observe decorators
+     - Comment out langfuse_context usage
+     - Test that basic functionality still works
+     - Note any broken functionality in existing_tracing.md
+
+4. ( ) Validation
+   - Run all tests
+   - Do basic manual testing
+   - Verify all TODO(langfuse) items are findable
+   - Update existing_tracing.md with any new findings
+
+5. ( ) Clean up
+   - Remove any commented code that won't be migrated
+   - Move any useful comments into design docs
+
 ### ( ) Rework one narrow piece of our integration.
 
 Implement this using `langfuse_utils` APIs that we find we wish we had. Just scaffold them for now.
