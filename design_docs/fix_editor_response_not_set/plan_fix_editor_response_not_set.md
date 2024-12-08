@@ -242,8 +242,6 @@ Did you mean to match some of these actual lines from design_docs/upgrade_0_67/p
 
 <source>
 
-We'll update this plan as we progress and discover new requirements or dependencies.
-
 ## Tasks
 
 ### ( ) Command Improvements
@@ -384,12 +382,33 @@ KeyboardInterrupt:
 
 ## Tasks
 
-### ( ) Indentify the source files that implement the current ^C handling.
+### (✅) Understand the intended design for handling ^C and the way it fails in the above situation.
 
-### ( ) Document the design patterns that make our desired handling of ^C reliable.
-
-### ( ) Identify the source files we'll need to examine to understand the "Editor response not yet set" error.
-
-### ( ) Document the cause of the error.
+1 Files Involved:
+    • aider/main.py: Top-level error handling
+    • aider/coders/base_coder.py: Core ^C handling
+    • aider/coders/architect_coder.py: Where the error occurs
+ 2 Core ^C Handling:
+    • The keyboard_interrupt() method in base_coder.py implements the desired behavior
+    • First ^C shows warning and starts 2-second window
+    • Second ^C within window exits
+    • Second ^C after window just shows warning again
+ 3 The Error Path:
+    • Error occurs in architect_coder.py during review_changes()
+    • Root cause: exchange.editor_response was not set
+    • This suggests the editor phase was interrupted by ^C
+ 4 The Architect Flow:
+    • ArchitectExchange class manages the full exchange
+    • process_architect_change_proposal() coordinates the flow:
+       1 execute_changes() runs editor
+       2 review_changes() runs reviewer
+       3 record_entire_exchange() saves history
+    • The error occurs because a ^C during execute_changes() leaves editor_response unset
+    • Then review_changes() fails when trying to use it
 
 ### ( ) Fix the error.
+
+The fix needs to:
+1. Catch KeyboardInterrupt during execute_changes()
+2. Clean up the incomplete exchange
+3. Return to the prompt without trying to continue the flow
