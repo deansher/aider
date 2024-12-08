@@ -4,13 +4,21 @@ Brade and Dean are using this document to support their collaborative process. B
 
 We want to work efficiently in an organized way. For the portions of the code that we must change to meet our functionality goals, we want to move toward beautiful, idiomatic Python code. We also want to move toward more testable code with simple unit tests that cover the most important paths.
 
-This document contains three kinds of material:
+This document is a living record of our work. It contains:
 
-- requirements
-- specific plans for meeting those requirements
-- our findings as we analyze our code along the way
+- Requirements that define what we want to achieve
+- Specific plans for meeting those requirements
+- Our findings as we analyze our code
+- Our learnings as we complete tasks
 
-For major step of the work, (each top-level bullet of each "### ( ) task" section) we will follow this process:
+As we work, we:
+
+- Check off tasks as we complete them (✅)
+- Document what we learn under each task
+- Revise our plans based on what we learn
+- Add new tasks as we discover them
+
+For major steps of the work (each top-level bullet of each "### ( ) task" section) we follow this process:
 
 - Make sure our plan is current.
 - Make sure we have the information we need for our next step.
@@ -21,6 +29,7 @@ For major step of the work, (each top-level bullet of each "### ( ) task" sectio
 - Make the code changes.
 - Run the unit tests.
 - Manually validate the change.
+- Document what we learned.
 
 We only intend for this plan to cover straightforward next steps to our next demonstrable milestone. We'll extend it as we go.
 
@@ -37,6 +46,8 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 
 - (✅) Subtask
   - (✅) Subsubtask
+  - Added support for X
+  - Discovered Y needs to be handled differently
 - ( ) Another subtask
 ```
 
