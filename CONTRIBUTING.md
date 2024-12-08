@@ -239,7 +239,7 @@ When a file adopts the Brade coding style, place the following comment at the ve
 
 ```
 # This file uses the Brade coding style: full modern type hints and strong documentation.
-# Expect to resolve merges manually. See CONTRIBUTING.md.
+# Expect to resolve merges from upstream manually. See CONTRIBUTING.md.
 ```
 
 Brade source files use full type hints, following these conventions:
