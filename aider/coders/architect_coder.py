@@ -188,13 +188,28 @@ class ArchitectCoder(AskCoder):
 
         Args:
             exchange: The exchange containing the architect's proposed changes
+
+        The method coordinates the full flow:
+        1. Get user confirmation to proceed with edits
+        2. Execute changes via editor coder
+        3. Review changes via reviewer coder
+        4. Record the complete exchange
+
+        If the user interrupts during execute_changes(), we:
+        1. Return cleanly to the prompt
+        2. Skip review_changes() since editor_response is not set
+        3. Do not record the incomplete exchange
         """
         if not self.io.confirm_ask(
             'Should I edit files now? (Respond "No" to continue the conversation instead.)'
         ):
             return
 
-        self.execute_changes(exchange)
+        try:
+            self.execute_changes(exchange)
+        except KeyboardInterrupt:
+            return
+
         self.review_changes(exchange)
         self.record_entire_exchange(exchange)
 
