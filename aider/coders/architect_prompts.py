@@ -9,8 +9,12 @@ from aider.brade_prompts import CONTEXT_NOUN, THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
-# Message constants used in architect exchanges
-APPROVED_CHANGES_PROMPT: str = "Yes, please make those changes."
+APPROVED_NON_PLAN_CHANGES_PROMPT: str = "Please make those changes as you propose."
+
+APPROVED_PLAN_CHANGES_PROMPT: str = (
+    "Please make the plan changes as you propose. Then give me a chance to review our "
+    "revised plan before you change any other files."
+)
 
 REVIEW_CHANGES_PROMPT: str = f"""{THIS_MESSAGE_IS_FROM_APP}
 Review the latest versions of the project files that you just changed.
@@ -96,10 +100,6 @@ specific actions:
   application will walk you through a process for making the changes. This is how you do work
   on the project.
 
-  Special note for plan documents: If asked to update a plan, don't write the plan content yet. 
-  Instead, briefly indicate the kinds of plan updates you propose to make and ask whether to 
-  proceed.
-
 - Or, you can ask to see more files. (If you took time to think, mark this transition with a
   "# Request for Files" heading.) Provide the files' paths relative to the project root and and 
   explain why you need them. In this case, the Brade application will ask your partner whether
@@ -132,8 +132,11 @@ Here is the explanation we gave to the assistant on how it could choose to respo
 {quoted_response_choices}
 """
 )
-architect_proposed_changes = response_section.add_choice(
-    "The assistant **proposed changes** that she could make."
+architect_proposed_plan_changes = response_section.add_choice(
+    "The assistant **proposed changes** to a plan document."
+)
+architect_proposed_non_plan_changes = response_section.add_choice(
+    "The assistant **proposed changes** to project files beyond just a plan document."
 )
 architect_asked_to_see_files = response_section.add_choice(
     "The assistant **asked to see more files**."
@@ -145,7 +148,7 @@ architect_continued_conversation = response_section.add_choice(
 
 class ArchitectPrompts(CoderPrompts):
     """Prompts and configuration for the architect workflow.
-    
+
     This class extends CoderPrompts to provide specialized prompts and configuration
     for the architect workflow, which focuses on collaborative software development
     with a human partner.
@@ -154,7 +157,7 @@ class ArchitectPrompts(CoderPrompts):
     @property
     def task_instructions(self) -> str:
         """Task-specific instructions for the architect workflow.
-        
+
         Returns:
             Instructions for collaborating naturally with a human partner to make
             steady project progress through small, focused steps.

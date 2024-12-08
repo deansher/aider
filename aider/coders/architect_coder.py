@@ -1,15 +1,17 @@
 # This file uses the Brade coding style: full modern type hints and strong documentation.
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 
-from typing import Any, Optional
+from typing import Any
 
 from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
-    APPROVED_CHANGES_PROMPT,
+    APPROVED_NON_PLAN_CHANGES_PROMPT,
+    APPROVED_PLAN_CHANGES_PROMPT,
     CHANGES_COMMITTED_MESSAGE,
     REVIEW_CHANGES_PROMPT,
     ArchitectPrompts,
-    architect_proposed_changes,
+    architect_proposed_non_plan_changes,
+    architect_proposed_plan_changes,
     possible_architect_responses,
 )
 from .ask_coder import AskCoder
@@ -40,8 +42,10 @@ class ArchitectExchange:
             architect_response: The architect's response proposing changes
         """
         self.architect_response = architect_response
-        self.editor_response: Optional[str] = None
-        self.reviewer_response: Optional[str] = None
+
+        self.editor_go_ahead_prompt: str | None = None
+        self.editor_response: str | None = None
+        self.reviewer_response: str | None = None
 
     def _architect_message(self) -> dict[str, str]:
         """Get the architect's proposal message.
@@ -62,10 +66,12 @@ class ArchitectExchange:
         """
         if not self.editor_response:
             raise ValueError("Editor response not yet set")
+        if not self.editor_go_ahead_prompt:
+            raise ValueError("Editor go ahead prompt not yet set")
 
         return [
             self._architect_message(),
-            {"role": "user", "content": APPROVED_CHANGES_PROMPT},
+            {"role": "user", "content": self.editor_go_ahead_prompt},
             {"role": "assistant", "content": self.editor_response},
         ]
 
@@ -179,11 +185,17 @@ class ArchitectCoder(AskCoder):
             architect_response,
         )
 
-        if architect_response_codes.has(architect_proposed_changes):
+        if architect_response_codes.has(
+            architect_proposed_plan_changes
+        ) or architect_response_codes.has(architect_proposed_non_plan_changes):
             exchange = ArchitectExchange(architect_response)
-            self.process_architect_change_proposal(exchange)
+            self.process_architect_change_proposal(
+                exchange, architect_response_codes.has(architect_proposed_plan_changes)
+            )
 
-    def process_architect_change_proposal(self, exchange: ArchitectExchange) -> None:
+    def process_architect_change_proposal(
+        self, exchange: ArchitectExchange, is_plan_change: bool
+    ) -> None:
         """Handle when architect proposes changes.
 
         Args:
@@ -206,18 +218,13 @@ class ArchitectCoder(AskCoder):
             return
 
         try:
-            self.execute_changes(exchange)
-        except KeyboardInterrupt:
-            return
-
-        try:
+            self.execute_changes(exchange, is_plan_change)
             self.review_changes(exchange)
+            self.record_entire_exchange(exchange)
         except KeyboardInterrupt:
             return
 
-        self.record_entire_exchange(exchange)
-
-    def execute_changes(self, exchange: ArchitectExchange) -> None:
+    def execute_changes(self, exchange: ArchitectExchange, is_plan_change: bool) -> None:
         """Run the editor coder to implement changes.
 
         Args:
@@ -237,7 +244,10 @@ class ArchitectCoder(AskCoder):
         if self.verbose:
             editor_coder.show_announcements()
 
-        editor_coder.run(with_message=APPROVED_CHANGES_PROMPT, preproc=False)
+        self.editor_go_ahead_prompt = (
+            APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
+        )
+        editor_coder.run(with_message=self.editor_go_ahead_prompt, preproc=False)
         self.total_cost += editor_coder.total_cost
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
         exchange.editor_response = editor_coder.partial_response_content
