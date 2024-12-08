@@ -63,9 +63,112 @@ Here are some specific requirements:
 
 ## Tasks
 
-### ( ) Document the current state of our Langfuse integration.
+### (✅) Document the current state of our Langfuse integration.
 
-### ( ) Document the design of our reworked integration.
+Our current Langfuse integration is primarily based on decorators from the Langfuse Python SDK. Here are the key aspects:
+
+1. Configuration
+   - We configure Langfuse in main.py using environment variables
+   - We use langfuse_context.configure() to set up the integration
+   - We have a LazyLiteLLM class in llm.py that manages Langfuse initialization
+
+2. Core Tracing
+   - We use @observe decorators extensively, especially in sendchat.py
+   - The @observe decorator automatically creates traces and spans
+   - We use langfuse_context.update_current_observation() to add details
+   - We capture:
+     - Input messages and output responses
+     - Model name and parameters
+     - Usage statistics (tokens, costs)
+     - Timing information
+
+3. Key Files
+   - llm.py: Configures Langfuse and manages initialization
+   - sendchat.py: Uses decorators to trace LLM interactions
+   - main.py: Configures Langfuse via environment variables
+   - base_coder.py: Uses decorators to trace high-level operations
+
+4. Limitations of Current Approach
+   - Decorator-based approach can be awkward for complex flows
+   - Stream handling could be cleaner
+   - Some duplication of configuration logic
+   - No centralized place for our Langfuse abstractions
+   - Initialization is spread across multiple files
+
+### (✅) Document the design of our reworked integration.
+
+We will create a new module `aider/langfuse_utils.py` that provides clean abstractions around the Langfuse low-level SDK. Here's the design:
+
+1. Core Classes and Functions
+
+   ```python
+   class LangfuseTracer:
+       """Main class for managing Langfuse tracing in Brade.
+       
+       This provides a clean interface for all our Langfuse operations.
+       It manages configuration, initialization, and provides methods
+       for creating and managing traces.
+       """
+       
+       def __init__(self):
+           # Initialize Langfuse client
+           pass
+           
+       def trace_llm_call(self, messages, model, stream=False):
+           """Create a trace for an LLM API call.
+           
+           Handles both streaming and non-streaming responses.
+           Returns a context manager that manages the trace lifecycle.
+           """
+           pass
+           
+       def trace_operation(self, name, **kwargs):
+           """Create a trace for a high-level operation.
+           
+           Returns a context manager for the trace.
+           """
+           pass
+   ```
+
+2. Context Managers
+   - Use context managers to cleanly manage trace/span lifecycles
+   - Automatically handle start/end times
+   - Support both sync and async contexts
+   - Handle exceptions properly
+
+3. Configuration
+   - Move all Langfuse configuration into langfuse_utils.py
+   - Provide a clean interface for initialization
+   - Support both environment variables and explicit configuration
+
+4. Stream Handling
+   - Clean abstractions for handling streaming responses
+   - Properly capture streamed output in traces
+   - Support progress callbacks
+
+5. Usage Example
+
+   ```python
+   # Initialize once
+   tracer = LangfuseTracer()
+   
+   # Trace an LLM call
+   with tracer.trace_llm_call(messages, model="gpt-4") as trace:
+       response = openai.chat.completions.create(...)
+       trace.add_response(response)
+   
+   # Trace a high-level operation
+   with tracer.trace_operation("process_files") as trace:
+       # Do work
+       trace.add_event("processed", count=len(files))
+   ```
+
+6. Migration Strategy
+   1. Create langfuse_utils.py with core abstractions
+   2. Start with one narrow piece of functionality
+   3. Gradually migrate existing code
+   4. Remove old decorator-based code
+   5. Clean up initialization logic
 
 ### ( ) Rework one narrow piece of our integration.
 
