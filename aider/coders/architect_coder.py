@@ -44,6 +44,7 @@ class ArchitectExchange:
         self.architect_response = architect_response
         self.editor_response: str | None = None
         self.reviewer_response: str | None = None
+        self.editor_prompt: str | None = None
 
     def get_editor_prompt(self, is_plan_change: bool) -> str:
         """Get the appropriate editor prompt based on whether this is a plan change.
@@ -75,12 +76,12 @@ class ArchitectExchange:
         """
         if not self.editor_response:
             raise ValueError("Editor response not yet set")
-        if not self.editor_go_ahead_prompt:
-            raise ValueError("Editor go ahead prompt not yet set")
+        if not self.editor_prompt:
+            raise ValueError("Editor prompt not yet set")
 
         return [
             self._architect_message(),
-            {"role": "user", "content": self.editor_go_ahead_prompt},
+            {"role": "user", "content": self.editor_prompt},
             {"role": "assistant", "content": self.editor_response},
         ]
 
@@ -253,8 +254,8 @@ class ArchitectCoder(AskCoder):
         if self.verbose:
             editor_coder.show_announcements()
 
-        editor_prompt = exchange.get_editor_prompt(is_plan_change)
-        editor_coder.run(with_message=editor_prompt, preproc=False)
+        exchange.editor_prompt = exchange.get_editor_prompt(is_plan_change)
+        editor_coder.run(with_message=exchange.editor_prompt, preproc=False)
         self.total_cost += editor_coder.total_cost
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
         exchange.editor_response = editor_coder.partial_response_content
