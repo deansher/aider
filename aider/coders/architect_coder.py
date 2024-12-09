@@ -46,8 +46,8 @@ class ArchitectExchange:
         self.reviewer_response: str | None = None
         self.editor_prompt: str | None = None
 
-    def get_editor_prompt(self, is_plan_change: bool) -> str:
-        """Get and set the appropriate editor prompt based on whether this is a plan change.
+    def prepare_editor_prompt(self, is_plan_change: bool) -> str:
+        """Select and set the appropriate editor prompt based on whether this is a plan change.
         
         Args:
             is_plan_change: Whether this exchange involves changing a plan document
@@ -255,7 +255,7 @@ class ArchitectCoder(AskCoder):
         if self.verbose:
             editor_coder.show_announcements()
 
-        editor_prompt = exchange.get_editor_prompt(is_plan_change)
+        editor_prompt = exchange.prepare_editor_prompt(is_plan_change)
         editor_coder.run(with_message=editor_prompt, preproc=False)
         self.total_cost += editor_coder.total_cost
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
