@@ -174,7 +174,7 @@ class TestArchitectCoder(unittest.TestCase):
         
         self.coder.record_exchange(exchange)
         
-        # Verify messages were recorded and moved to done_messages
+        # Verify messages were moved to done_messages
         # The done_messages will include:
         # - The exchange messages
         # - The commit message
