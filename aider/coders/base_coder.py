@@ -1320,7 +1320,8 @@ class Coder:
         The base implementation does nothing. Subclasses override this to implement their
         specific response handling logic.
 
-        Note: The LLM's response has already been added to cur_messages before this is called.
+        Note: The LLM's response has already been added to cur_messages by base_coder.py
+        before this is called.
         """
         pass
 
