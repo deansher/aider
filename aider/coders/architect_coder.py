@@ -3,6 +3,8 @@
 
 from typing import Any
 
+from aider.types import ChatMessage
+
 from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
     APPROVED_NON_PLAN_CHANGES_PROMPT,
@@ -14,7 +16,6 @@ from .architect_prompts import (
     architect_proposed_plan_changes,
     possible_architect_responses,
 )
-from .ask_coder import AskCoder
 from .base_coder import Coder
 
 
@@ -26,7 +27,7 @@ class ArchitectExchange:
     - The editor implementing changes
     - The reviewer validating changes
 
-    Messages are appended as they occur, maintaining the exact sequence of the exchange.
+    Messages are appended to self.messages as they occur.
     """
 
     def __init__(self, architect_response: str):
@@ -35,8 +36,8 @@ class ArchitectExchange:
         Args:
             architect_response: The architect's response proposing changes
         """
-        self.messages: list[dict[str, str]] = [
-            {"role": "assistant", "content": architect_response}
+        self.messages: list[ChatMessage] = [
+            ChatMessage(role="assistant", content=architect_response)
         ]
 
     def append_editor_prompt(self, is_plan_change: bool) -> str:
@@ -48,7 +49,9 @@ class ArchitectExchange:
         Returns:
             The editor prompt that was appended
         """
-        prompt = APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
+        prompt = (
+            APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
+        )
         self.messages.append({"role": "user", "content": prompt})
         return prompt
 
@@ -60,9 +63,10 @@ class ArchitectExchange:
         """
         self.messages.append({"role": "assistant", "content": response})
 
-    def append_reviewer_prompt(self) -> None:
-        """Append the reviewer prompt."""
+    def append_reviewer_prompt(self) -> str:
+        """Append and return the reviewer prompt."""
         self.messages.append({"role": "user", "content": REVIEW_CHANGES_PROMPT})
+        return REVIEW_CHANGES_PROMPT
 
     def append_reviewer_response(self, response: str) -> None:
         """Append the reviewer's response validating changes.
@@ -72,7 +76,7 @@ class ArchitectExchange:
         """
         self.messages.append({"role": "assistant", "content": response})
 
-    def get_messages(self) -> list[dict[str, str]]:
+    def get_messages(self) -> list[ChatMessage]:
         """Get all messages in the exchange.
 
         Returns:
@@ -89,7 +93,7 @@ class ArchitectExchange:
         return len(self.messages) >= 3  # Architect + editor prompt + editor response
 
 
-class ArchitectCoder(AskCoder):
+class ArchitectCoder(Coder):
     """Manages high-level code architecture decisions and coordinates with editor/reviewer coders.
 
     This coder acts as an architect that:
@@ -180,7 +184,7 @@ class ArchitectCoder(AskCoder):
         Args:
             exchange: The exchange containing the architect's proposed changes
 
-        The method coordinates the full flow:
+        The method coordinates the flow that occurs after the architect proposes changes:
         1. Get user confirmation to proceed with edits
         2. Execute changes via editor coder
         3. Review changes via reviewer coder
@@ -192,7 +196,7 @@ class ArchitectCoder(AskCoder):
             return
 
         self.execute_changes(exchange, is_plan_change)
-        # Only review if editing succeeded. A KeyboardInterrupt or model failure might 
+        # Only review if editing succeeded. A KeyboardInterrupt or model failure might
         # yield an empty response.
         if exchange.has_editor_response():
             self.review_changes(exchange)
@@ -231,8 +235,8 @@ class ArchitectCoder(AskCoder):
         reviewer_coder = self.create_coder("ask")
         # Instead of mutating cur_messages, create new extended copy
         reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_messages()
-        exchange.append_reviewer_prompt()
-        reviewer_coder.run(with_message=REVIEW_CHANGES_PROMPT, preproc=False)
+        reviewer_prompt = exchange.append_reviewer_prompt()
+        reviewer_coder.run(with_message=reviewer_prompt, preproc=False)
         self.total_cost += reviewer_coder.total_cost
         exchange.append_reviewer_response(reviewer_coder.partial_response_content)
 
