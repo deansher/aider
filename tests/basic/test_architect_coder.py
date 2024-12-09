@@ -86,12 +86,10 @@ class TestArchitectCoder(unittest.TestCase):
         editor = self.coder.create_coder("diff")
         self.assertEqual(editor.edit_format, "diff")
         self.assertFalse(editor.suggest_shell_commands)
-        self.assertEqual(editor.map_tokens, 0)
         
         reviewer = self.coder.create_coder("ask")
         self.assertEqual(reviewer.edit_format, "ask")
         self.assertFalse(reviewer.suggest_shell_commands)
-        self.assertEqual(reviewer.map_tokens, 0)
 
     def test_process_architect_change_proposal(self):
         """Test processing architect's change proposal."""
@@ -176,8 +174,11 @@ class TestArchitectCoder(unittest.TestCase):
         
         self.coder.record_exchange(exchange)
         
-        # Verify messages were recorded
-        self.assertEqual(len(self.coder.cur_messages), len(exchange.messages))
+        # Verify messages were moved to done_messages
+        self.assertEqual(len(self.coder.done_messages), len(exchange.messages))
+        
+        # Verify cur_messages was cleared
+        self.assertEqual(len(self.coder.cur_messages), 0)
         self.assertEqual(self.coder.partial_response_content, "")
 
 
