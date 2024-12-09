@@ -21,18 +21,12 @@ from .base_coder import Coder
 class ArchitectExchange:
     """Encapsulates a complete architect-editor-reviewer exchange.
 
-    This class manages the messages and responses for a complete exchange between:
+    This class maintains the sequence of messages that occur during an exchange between:
     - The architect proposing changes
     - The editor implementing changes
     - The reviewer validating changes
 
-    It provides methods to generate the appropriate message sequences needed by each
-    participant and for recording the entire exchange.
-
-    Attributes:
-        architect_response: The architect's response proposing changes
-        editor_response: The editor's response after implementing changes
-        reviewer_response: The reviewer's response after validating changes
+    Messages are appended as they occur, maintaining the exact sequence of the exchange.
     """
 
     def __init__(self, architect_response: str):
@@ -41,86 +35,50 @@ class ArchitectExchange:
         Args:
             architect_response: The architect's response proposing changes
         """
-        self.architect_response = architect_response
-        self.editor_response: str | None = None
-        self.reviewer_response: str | None = None
-        self.editor_prompt: str | None = None
+        self.messages: list[dict[str, str]] = [
+            {"role": "assistant", "content": architect_response}
+        ]
 
-    def prepare_editor_prompt(self, is_plan_change: bool) -> str:
-        """Select and set the appropriate editor prompt based on whether this is a plan change.
+    def append_editor_prompt(self, is_plan_change: bool) -> str:
+        """Append the appropriate editor prompt based on whether this is a plan change.
 
         Args:
             is_plan_change: Whether this exchange involves changing a plan document
 
         Returns:
-            The appropriate editor prompt for this type of change
+            The editor prompt that was appended
         """
-        self.editor_prompt = (
-            APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
-        )
-        return self.editor_prompt
+        prompt = APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
+        self.messages.append({"role": "user", "content": prompt})
+        return prompt
 
-    def _architect_message(self) -> dict[str, str]:
-        """Get the architect's proposal message.
+    def append_editor_response(self, response: str) -> None:
+        """Append the editor's response implementing changes.
+
+        Args:
+            response: The editor's response after implementing changes
+        """
+        self.messages.append({"role": "assistant", "content": response})
+
+    def append_reviewer_prompt(self) -> None:
+        """Append the reviewer prompt."""
+        self.messages.append({"role": "user", "content": REVIEW_CHANGES_PROMPT})
+
+    def append_reviewer_response(self, response: str) -> None:
+        """Append the reviewer's response validating changes.
+
+        Args:
+            response: The reviewer's response after validating changes
+        """
+        self.messages.append({"role": "assistant", "content": response})
+
+    def get_messages(self) -> list[dict[str, str]]:
+        """Get all messages in the exchange.
 
         Returns:
-            The architect's message proposing changes
+            List of all messages that have occurred
         """
-        return {"role": "assistant", "content": self.architect_response}
-
-    def _architect_editor_exchange(self) -> list[dict[str, str]]:
-        """Get the architect-editor exchange messages.
-
-        Returns:
-            List of messages for the architect-editor exchange
-
-        Raises:
-            ValueError: If editor response is not yet set
-        """
-        if not self.editor_response:
-            raise ValueError("Editor response not yet set")
-        if not self.editor_prompt:
-            raise ValueError("Editor prompt not yet set")
-
-        return [
-            self._architect_message(),
-            {"role": "user", "content": self.editor_prompt},
-            {"role": "assistant", "content": self.editor_response},
-        ]
-
-    def get_editor_messages(self) -> list[dict[str, str]]:
-        """Get messages needed by editor to implement changes.
-
-        Returns:
-            List of messages for the editor's context
-        """
-        return [self._architect_message()]
-
-    def get_reviewer_messages(self) -> list[dict[str, str]]:
-        """Get messages needed by reviewer to validate changes.
-
-        Returns:
-            List of messages for the reviewer's context
-        """
-        return self._architect_editor_exchange()
-
-    def get_exchange(self) -> list[dict[str, str]]:
-        """Get the complete conversation record, after the architect, editor, and reviewer
-        have all participated.
-
-        Returns:
-            List of all messages in the exchange
-
-        Raises:
-            ValueError: If exchange is not complete
-        """
-        if not self.editor_response or not self.reviewer_response:
-            raise ValueError("Exchange not complete")
-
-        return self._architect_editor_exchange() + [
-            {"role": "user", "content": REVIEW_CHANGES_PROMPT},
-            {"role": "assistant", "content": self.reviewer_response},
-        ]
+        return self.messages
 
 
 class ArchitectCoder(AskCoder):
@@ -228,7 +186,7 @@ class ArchitectCoder(AskCoder):
         self.execute_changes(exchange, is_plan_change)
         # Only review if editing succeeded. A KeyboardInterrupt or model failure might 
         # yield an empty response.
-        if exchange.editor_response:
+        if len(exchange.get_messages()) >= 3:  # Has editor response
             self.review_changes(exchange)
         self.record_exchange(exchange)
 
@@ -237,9 +195,6 @@ class ArchitectCoder(AskCoder):
 
         Args:
             exchange: The exchange containing the architect's proposed changes
-
-        Returns:
-            The editor's response after implementing changes
         """
         editor_model = self.main_model.editor_model or self.main_model
         editor_coder = self.create_coder(
@@ -247,33 +202,31 @@ class ArchitectCoder(AskCoder):
             main_model=editor_model,
         )
         # Instead of mutating cur_messages, create new extended copy
-        editor_coder.cur_messages = editor_coder.cur_messages + exchange.get_editor_messages()
+        editor_coder.cur_messages = editor_coder.cur_messages + exchange.get_messages()
 
         if self.verbose:
             editor_coder.show_announcements()
 
-        editor_prompt = exchange.prepare_editor_prompt(is_plan_change)
+        editor_prompt = exchange.append_editor_prompt(is_plan_change)
         editor_coder.run(with_message=editor_prompt, preproc=False)
         self.total_cost += editor_coder.total_cost
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
-        exchange.editor_response = editor_coder.partial_response_content
+        exchange.append_editor_response(editor_coder.partial_response_content)
 
     def review_changes(self, exchange: ArchitectExchange) -> None:
         """Run the reviewer coder to validate changes.
 
         Args:
             exchange: The exchange containing the architect and editor responses
-
-        Returns:
-            The reviewer's response after validating changes
         """
         self.io.tool_output("\nLooking over my changes ...")
         reviewer_coder = self.create_coder("ask")
         # Instead of mutating cur_messages, create new extended copy
-        reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_reviewer_messages()
+        reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_messages()
+        exchange.append_reviewer_prompt()
         reviewer_coder.run(with_message=REVIEW_CHANGES_PROMPT, preproc=False)
         self.total_cost += reviewer_coder.total_cost
-        exchange.reviewer_response = reviewer_coder.partial_response_content
+        exchange.append_reviewer_response(reviewer_coder.partial_response_content)
 
     def record_exchange(self, exchange: ArchitectExchange) -> None:
         """Record the complete conversation history.
@@ -281,6 +234,6 @@ class ArchitectCoder(AskCoder):
         Args:
             exchange: The completed exchange containing all responses
         """
-        self.cur_messages = self.cur_messages + exchange.get_exchange()
+        self.cur_messages = self.cur_messages + exchange.get_messages()
         self.move_back_cur_messages(CHANGES_COMMITTED_MESSAGE)
         self.partial_response_content = ""  # Clear to prevent redundant message
