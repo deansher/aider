@@ -1,6 +1,10 @@
 
 # Release history
 
+### brade-v0.60.3
+
+Bug fixes.
+
 ### brade-v0.60.2
 
 First seriously-intended release of the Brade fork of Aider.
