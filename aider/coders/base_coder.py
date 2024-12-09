@@ -17,11 +17,13 @@ from collections import defaultdict
 from datetime import datetime
 from json.decoder import JSONDecodeError
 from pathlib import Path
+from typing import ClassVar
 
 from langfuse.decorators import langfuse_context, observe
 
 from aider import __version__, models, prompts, urls, utils
 from aider.brade_prompts import format_brade_messages
+from aider.coders.base_prompts import CoderPrompts
 from aider.commands import Commands
 from aider.history import ChatSummary
 from aider.io import ConfirmGroup, InputOutput
@@ -97,6 +99,8 @@ class Coder:
     - ChatSummary: Manages chat history size
     """
 
+    gpt_prompts: ClassVar[CoderPrompts | None]
+    edit_format: ClassVar[str | None]
     abs_fnames = None
     abs_read_only_fnames = None
     repo = None
