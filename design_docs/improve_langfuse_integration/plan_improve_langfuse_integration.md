@@ -128,7 +128,9 @@ Our current Langfuse integration is primarily based on decorators from the Langf
 This task prepares us to migrate to our new langfuse_utils-based approach by commenting out existing Langfuse code. We'll do this methodically to maintain visibility into what needs to be migrated.
 
 1. ( ) Document existing tracing points
-   - Create a new design_docs/improve_langfuse_integration/existing_tracing.md
+
+Capture the following information in this section of our plan:
+
    - For each file with Langfuse integration:
      - List each tracing point
      - Note what information it captures

@@ -48,14 +48,16 @@ class ArchitectExchange:
 
     def prepare_editor_prompt(self, is_plan_change: bool) -> str:
         """Select and set the appropriate editor prompt based on whether this is a plan change.
-        
+
         Args:
             is_plan_change: Whether this exchange involves changing a plan document
-            
+
         Returns:
             The appropriate editor prompt for this type of change
         """
-        self.editor_prompt = APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
+        self.editor_prompt = (
+            APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
+        )
         return self.editor_prompt
 
     def _architect_message(self) -> dict[str, str]:
