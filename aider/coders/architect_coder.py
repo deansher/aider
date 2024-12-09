@@ -52,7 +52,7 @@ class ArchitectExchange:
         prompt = (
             APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
         )
-        self.messages.append({"role": "user", "content": prompt})
+        self.messages.append(ChatMessage(role="user", content=prompt))
         return prompt
 
     def append_editor_response(self, response: str) -> None:
@@ -61,11 +61,11 @@ class ArchitectExchange:
         Args:
             response: The editor's response after implementing changes
         """
-        self.messages.append({"role": "assistant", "content": response})
+        self.messages.append(ChatMessage(role="assistant", content=response))
 
     def append_reviewer_prompt(self) -> str:
         """Append and return the reviewer prompt."""
-        self.messages.append({"role": "user", "content": REVIEW_CHANGES_PROMPT})
+        self.messages.append(ChatMessage(role="user", content=REVIEW_CHANGES_PROMPT))
         return REVIEW_CHANGES_PROMPT
 
     def append_reviewer_response(self, response: str) -> None:
@@ -74,7 +74,7 @@ class ArchitectExchange:
         Args:
             response: The reviewer's response after validating changes
         """
-        self.messages.append({"role": "assistant", "content": response})
+        self.messages.append(ChatMessage(role="assistant", content=response))
 
     def get_messages(self) -> list[ChatMessage]:
         """Get all messages in the exchange.
