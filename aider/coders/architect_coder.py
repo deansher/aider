@@ -80,6 +80,14 @@ class ArchitectExchange:
         """
         return self.messages
 
+    def has_editor_response(self) -> bool:
+        """Check if the exchange includes an editor response.
+
+        Returns:
+            True if the exchange includes an editor response
+        """
+        return len(self.messages) >= 3  # Architect + editor prompt + editor response
+
 
 class ArchitectCoder(AskCoder):
     """Manages high-level code architecture decisions and coordinates with editor/reviewer coders.
@@ -186,7 +194,7 @@ class ArchitectCoder(AskCoder):
         self.execute_changes(exchange, is_plan_change)
         # Only review if editing succeeded. A KeyboardInterrupt or model failure might 
         # yield an empty response.
-        if len(exchange.get_messages()) >= 3:  # Has editor response
+        if exchange.has_editor_response():
             self.review_changes(exchange)
         self.record_exchange(exchange)
 
