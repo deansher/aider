@@ -174,10 +174,14 @@ class TestArchitectCoder(unittest.TestCase):
         
         self.coder.record_exchange(exchange)
         
-        # Verify messages were moved to done_messages
-        self.assertEqual(len(self.coder.done_messages), len(exchange.messages))
+        # Verify messages were recorded and moved to done_messages
+        # The done_messages will include:
+        # - The exchange messages
+        # - The commit message
+        # - The "Understood" response
+        self.assertEqual(len(self.coder.done_messages), len(exchange.messages) + 2)
         
-        # Verify cur_messages was cleared
+        # Verify cur_messages was cleared after move_back_cur_messages
         self.assertEqual(len(self.coder.cur_messages), 0)
         self.assertEqual(self.coder.partial_response_content, "")
 
