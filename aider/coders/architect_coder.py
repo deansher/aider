@@ -104,7 +104,7 @@ class ArchitectExchange:
         """
         return self._architect_editor_exchange()
 
-    def get_entire_exchange(self) -> list[dict[str, str]]:
+    def get_exchange(self) -> list[dict[str, str]]:
         """Get the complete conversation record, after the architect, editor, and reviewer
         have all participated.
 
@@ -219,23 +219,18 @@ class ArchitectCoder(AskCoder):
         2. Execute changes via editor coder
         3. Review changes via reviewer coder
         4. Record the complete exchange
-
-        If the user interrupts during execute_changes(), we:
-        1. Return cleanly to the prompt
-        2. Skip review_changes() since editor_response is not set
-        3. Do not record the incomplete exchange
         """
         if not self.io.confirm_ask(
             'Should I edit files now? (Respond "No" to continue the conversation instead.)'
         ):
             return
 
-        try:
-            self.execute_changes(exchange, is_plan_change)
+        self.execute_changes(exchange, is_plan_change)
+        # Only review if editing succeeded. A KeyboardInterrupt or model failure might 
+        # yield an empty response.
+        if exchange.editor_response:
             self.review_changes(exchange)
-            self.record_entire_exchange(exchange)
-        except KeyboardInterrupt:
-            return
+        self.record_exchange(exchange)
 
     def execute_changes(self, exchange: ArchitectExchange, is_plan_change: bool) -> None:
         """Run the editor coder to implement changes.
@@ -280,12 +275,12 @@ class ArchitectCoder(AskCoder):
         self.total_cost += reviewer_coder.total_cost
         exchange.reviewer_response = reviewer_coder.partial_response_content
 
-    def record_entire_exchange(self, exchange: ArchitectExchange) -> None:
+    def record_exchange(self, exchange: ArchitectExchange) -> None:
         """Record the complete conversation history.
 
         Args:
             exchange: The completed exchange containing all responses
         """
-        self.cur_messages = self.cur_messages + exchange.get_entire_exchange()
+        self.cur_messages = self.cur_messages + exchange.get_exchange()
         self.move_back_cur_messages(CHANGES_COMMITTED_MESSAGE)
         self.partial_response_content = ""  # Clear to prevent redundant message
