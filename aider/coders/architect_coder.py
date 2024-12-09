@@ -155,7 +155,12 @@ class ArchitectCoder(Coder):
         return coder
 
     def reply_completed(self) -> None:
-        """Process the architect's response and coordinate with editor/reviewer as needed."""
+        """Process the architect's response and coordinate with editor/reviewer as needed.
+
+        Note: The architect's proposal has already been added to cur_messages by base_coder.py
+        before this method is called. We analyze the proposal and, if appropriate, coordinate
+        with editor and reviewer coders to implement and validate the changes.
+        """
         architect_response = self.partial_response_content
 
         architect_response_codes = analyze_assistant_response(

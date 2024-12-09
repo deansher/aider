@@ -165,7 +165,12 @@ class TestArchitectCoder(unittest.TestCase):
             self.assertEqual(self.coder.total_cost, 0.001)
 
     def test_record_exchange(self):
-        """Test recording a completed exchange."""
+        """Test recording a completed exchange.
+
+        Note: The architect's proposal is added to cur_messages by base_coder.py before
+        reply_completed() is called. This test verifies that the exchange is properly
+        recorded in done_messages after the changes are implemented and reviewed.
+        """
         exchange = ArchitectExchange("Here's my proposal...")
         exchange.append_editor_prompt(is_plan_change=False)
         exchange.append_editor_response("Changes implemented...")

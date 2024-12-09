@@ -1307,6 +1307,20 @@ class Coder:
                 self.reflected_message = add_rel_files_message
 
     def reply_completed(self):
+        """Process the LLM's response after it completes.
+
+        This method is called after the LLM's response is fully received. It is responsible for:
+        1. Processing the response content in self.partial_response_content
+        2. Extracting and applying any code edits
+        3. Handling any function calls
+        4. Managing git commits and other side effects
+        5. Updating conversation history
+
+        The base implementation does nothing. Subclasses override this to implement their
+        specific response handling logic.
+
+        Note: The LLM's response has already been added to cur_messages before this is called.
+        """
         pass
 
     def show_exhausted_error(self):
