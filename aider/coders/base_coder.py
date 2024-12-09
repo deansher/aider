@@ -1222,9 +1222,7 @@ class Coder:
                 self.mdstream = None
 
             self.partial_response_content = self.get_multi_response_content(True)
-            # TODO: Is this what causes the following warning?
-            #    WARNING - Item exceeds size limit (size: 1374855), dropping ...
-            # langfuse_context.update_current_observation(output=self.partial_response_content)
+            langfuse_context.update_current_observation(output=self.partial_response_content)
             self.multi_response_content = ""
 
         self.io.tool_output()

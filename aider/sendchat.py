@@ -233,7 +233,7 @@ def send_completion(
     return hash_object, res
 
 
-@observe(as_type="generation")
+@observe(as_type="generation", capture_output=False)
 def _send_completion_to_litellm(
     model_name,
     messages,
