@@ -1307,9 +1307,10 @@ class Coder:
                 self.reflected_message = add_rel_files_message
 
     def reply_completed(self):
-        """Process the LLM's response after it completes.
+        """Post-process the LLM's response if needed.
 
-        This method is called after the LLM's response is fully received. It is responsible for:
+        This method is called after the LLM's response is fully received. It is responsible for
+        performing any follow-up logic that may be specific to the Coder subclass. Examples include:
         1. Processing the response content in self.partial_response_content
         2. Extracting and applying any code edits
         3. Handling any function calls
