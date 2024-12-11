@@ -1,6 +1,15 @@
 
 # Release history
 
+### brade-v0.60.4
+
+Enabled streaming for
+
+- openai/o1-preview
+- openai/o1-mini
+- o1-preview
+- o1-mini
+
 ### brade-v0.60.3
 
 Bug fixes.
