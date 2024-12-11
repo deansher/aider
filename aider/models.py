@@ -575,7 +575,7 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
+        streaming=True,
     ),
     ModelSettings(
         "azure/o1-mini",
@@ -599,7 +599,7 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
+        streaming=True,
     ),
     ModelSettings(
         "openai/o1-preview",
@@ -611,7 +611,7 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
+        streaming=True,
     ),
     ModelSettings(
         "azure/o1-preview",
@@ -635,7 +635,7 @@ MODEL_SETTINGS = [
         reminder="user",
         use_system_prompt=False,
         use_temperature=False,
-        streaming=False,
+        streaming=True,
     ),
     ModelSettings(
         "openrouter/openai/o1-mini",
