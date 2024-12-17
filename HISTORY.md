@@ -1,6 +1,10 @@
 
 # Release history
 
+### brade-v0.60.5
+
+Prompt tweak for o1-mini: in the archtect's review prompt, explained SEARCH/REPLACE blocks.
+
 ### brade-v0.60.4
 
 Enabled streaming for

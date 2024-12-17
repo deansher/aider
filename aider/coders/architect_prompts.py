@@ -17,8 +17,16 @@ APPROVED_PLAN_CHANGES_PROMPT: str = (
 )
 
 REVIEW_CHANGES_PROMPT: str = f"""{THIS_MESSAGE_IS_FROM_APP}
-Review the latest versions of the project files that you just changed.
-Study the latest versions of these files, which are provided in {CONTEXT_NOUN}.
+Review your intended changes and the latest versions of the affected project files.
+
+You can see your intended changes in SEARCH/REPLACE blocks in the chat above. You
+use this special syntax, which looks like diffs or git conflict markers, to specify changes
+that the Brade application should make to project files on your behalf.
+
+If the process worked correctly, then the Brade application has applied those changes
+to the latest versions of the files, which are provided for you in {CONTEXT_NOUN}. 
+Double-check that the changes were applied completely and correctly.
+
 Read with a fresh, skeptical eye. 
 
 Preface your response with the markdown header "# Reasoning". Then think out loud, 
