@@ -22,6 +22,7 @@ class ContextMessagePlacement(Enum):
         INITIAL_USER_MESSAGE: Add context and task elements to the first user message.
             This option is not yet supported.
     """
+
     FINAL_USER_MESSAGE = "final_user_message"
     INITIAL_USER_MESSAGE = "initial_user_message"
 
@@ -35,6 +36,7 @@ class ContextPositionInMessage(Enum):
         INSERT: Add context and task elements after the first line of the message.
             This option is not yet supported.
     """
+
     PREPEND = "prepend"
     INSERT = "insert"
 
@@ -133,7 +135,6 @@ First, you carefully review:
 Then you respond as appropriate, in ways such as the following:
    - Ask follow-up questions if you need more context.
    - Propose a solution and wait for your partner's feedback.
-   - Propose how you would change files to implement the next step.
    - Share your analysis and recommendations.
 
 ## Step 2: Change files to implement the next step
@@ -292,7 +293,7 @@ def wrap_xml(tag: str, content: str | None) -> str:
     if not content.strip():
         return f"<{tag}>\n</{tag}>\n"
 
-    stripped_content = content.rstrip('\n')
+    stripped_content = content.rstrip("\n")
     return f"<{tag}>\n{stripped_content}\n</{tag}>\n"
 
 

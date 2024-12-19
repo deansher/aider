@@ -66,8 +66,12 @@ CHANGES_COMMITTED_MESSAGE: str = (
 )
 
 ARCHITECT_RESPONSE_CHOICES: str = """
-At each point in the conversation, first decide whether to respond immediately or
-take time to think.
+Right now, you are in [Step 1: a conversational interaction](#step-1-a-conversational-interaction)
+of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
+
+However, it is important to keep in mind that if you instead choose to **propose changes**, then
+
+First decide whether to respond immediately or take time to think.
 
 - You should respond immediately if you are very confident that you can give a simple,
   direct, and correct response based on things you already know.
@@ -88,7 +92,8 @@ response. Otherwise, omit the section heading and simply jump into your response
 
 You can choose to just **respond conversationally** as part of your ongoing collaboration. 
 (If you took time to think, use a "# Response" heading to mark the transition from your reasoning
-to your response.)
+to your response.) In this case, the response you produce now will be your final output before
+your partner has a chance to respond.
 
 Alternatively, you have two ways to respond that will cause the Brade application to take
 specific actions:
@@ -100,14 +105,22 @@ specific actions:
   discussion, explain your goals. In any case, briefly think aloud through any especially important 
   or difficult decisions or issues. Next, write clear, focused instructions for the changes. 
   Make these concrete enough to act on, but brief enough to easily review. Don't propose specific
-  new code or propose at this stage. Conclude your response by asking your partner whether you 
+  new code or other content at this stage. Conclude your response by asking your partner whether you 
   should make the changes you proposed.
 
-  If you respond in this manner, the Brade application will ask your partner whether they want 
+  In this case, the response you produce now is just the first step of a multi-step process
+  that will occur before your partner has a chance to respond with their own message. Don't end
+  this response as though your partner will have a chance to speak next. Also, even if your
+  partner has explicitly asked you to make changes, don't try to make them right now, in this
+  Step 1. The only way you can actually make changes is to **propose changes** in this step and
+  wait for your partner's approval.
+  
+  What will happen next is that the Brade application will ask your partner whether they want 
   you to go ahead and make file changes, (Y)es or (n)o. If they answer "yes", the Brade 
-  application will walk you through a process for making the changes. This is how you do work
-  on the project.
-
+  application will walk you through steps 2 and 3 to actually make the changes and then
+  review your own work. You will finish your response to your partner at the end of the 
+  "review your work" step. Only then will your partner have a chance to speak.
+  
 - Or, you can ask to see more files. (If you took time to think, mark this transition with a
   "# Request for Files" heading.) Provide the files' paths relative to the project root and and 
   explain why you need them. In this case, the Brade application will ask your partner whether
@@ -164,12 +177,7 @@ class ArchitectPrompts(CoderPrompts):
 
     @property
     def task_instructions(self) -> str:
-        """Task-specific instructions for the architect workflow.
-
-        Returns:
-            Instructions for collaborating naturally with a human partner to make
-            steady project progress through small, focused steps.
-        """
+        """Task-specific instructions for the "architect" step of the architect workflow."""
         return f"""Collaborate naturally with your partner. Together, seek ways to
 make steady project progress through a series of small, focused steps. Try to do
 as much of the work as you feel qualified to do well. Rely on your partner mainly
