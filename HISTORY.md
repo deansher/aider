@@ -1,6 +1,12 @@
 
 # Release history
 
+### brade-v0.60.6
+
+Add o1 model.
+
+Improve prompts for the architect process.
+
 ### brade-v0.60.5
 
 Prompt tweak for o1-mini: in the archtect's review prompt, explained SEARCH/REPLACE blocks.
