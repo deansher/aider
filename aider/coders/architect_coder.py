@@ -7,10 +7,6 @@ from aider.types import ChatMessage
 
 from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
-    APPROVED_NON_PLAN_CHANGES_PROMPT,
-    APPROVED_PLAN_CHANGES_PROMPT,
-    CHANGES_COMMITTED_MESSAGE,
-    REVIEW_CHANGES_PROMPT,
     ArchitectPrompts,
     architect_proposed_non_plan_changes,
     architect_proposed_plan_changes,
@@ -50,7 +46,8 @@ class ArchitectExchange:
             The editor prompt that was appended
         """
         prompt = (
-            APPROVED_PLAN_CHANGES_PROMPT if is_plan_change else APPROVED_NON_PLAN_CHANGES_PROMPT
+            self.gpt_prompts.approved_plan_changes_prompt() if is_plan_change 
+            else self.gpt_prompts.approved_non_plan_changes_prompt()
         )
         self.messages.append(ChatMessage(role="user", content=prompt))
         return prompt
@@ -65,8 +62,9 @@ class ArchitectExchange:
 
     def append_reviewer_prompt(self) -> str:
         """Append and return the reviewer prompt."""
-        self.messages.append(ChatMessage(role="user", content=REVIEW_CHANGES_PROMPT))
-        return REVIEW_CHANGES_PROMPT
+        prompt = self.gpt_prompts.review_changes_prompt()
+        self.messages.append(ChatMessage(role="user", content=prompt))
+        return prompt
 
     def append_reviewer_response(self, response: str) -> None:
         """Append the reviewer's response validating changes.
@@ -332,5 +330,5 @@ class ArchitectCoder(Coder):
             exchange: The completed exchange containing all responses
         """
         self.cur_messages = self.cur_messages + exchange.get_messages()
-        self.move_back_cur_messages(CHANGES_COMMITTED_MESSAGE)
+        self.move_back_cur_messages(self.gpt_prompts.changes_committed_message)
         self.partial_response_content = ""  # Clear to prevent redundant message

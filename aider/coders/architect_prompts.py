@@ -9,67 +9,6 @@ from aider.brade_prompts import CONTEXT_NOUN, THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
-APPROVED_NON_PLAN_CHANGES_PROMPT: str = (
-    "Please make those changes as you propose. When you are done making changes, stop and wait "
-    "for input. After the Brade application has applied your changes to the project files, "
-    "you will be prompted to review them."
-)
-
-APPROVED_PLAN_CHANGES_PROMPT: str = (
-    "Please make the plan changes as you propose. When you are done making changes, stop and wait "
-    "for input. After the Brade application has applied your changes to the project files, "
-    "you will be prompted to review them. Then give me a chance to review our revised plan "
-    "before you change any other files."
-)
-
-REVIEW_CHANGES_PROMPT: str = f"""{THIS_MESSAGE_IS_FROM_APP}
-Review your intended changes and the latest versions of the affected project files.
-
-You can see your intended changes in SEARCH/REPLACE blocks in the chat above. You
-use this special syntax, which looks like diffs or git conflict markers, to specify changes
-that the Brade application should make to project files on your behalf.
-
-If the process worked correctly, then the Brade application has applied those changes
-to the latest versions of the files, which are provided for you in {CONTEXT_NOUN}. 
-Double-check that the changes were applied completely and correctly.
-
-Read with a fresh, skeptical eye. 
-
-Preface your response with the markdown header "# Reasoning". Then think out loud, 
-step by step, as you review the affected portions of the modified files. 
-Think about whether the updates fully and correctly achieve
-the goals for this work. Think about whether any new problems were introduced,
-and whether any serious existing problems in the affected content were left unaddressed.
-
-When you are finished thinking through the changes, mark your transition to
-your conclusions with a "# Conclusions" markdown header. Then, concisely explain
-what you believe about the changes.
-
-Use this ONLY as an opportunity to find and point out problems that are
-significant enough -- at this stage of your work with your partner -- to take
-time together to address them. If you believe you already did an excellent job
-with your partner's request, just say you are fully satisfied with your changes
-and stop there. If you see opportunities to improve but believe they are good
-enough for now, give an extremely concise summary of opportunities to improve
-(in a sentence or two), but also say you believe this could be fine for now.
-
-If you see substantial problems in the changes you made, explain what you see
-in some detail.
-
-Don't point out other problems in these files unless they are immediately concerning.
-Take into account the overall state of development of the code, and the cost
-of interrupting the process that you and your partner are following together.
-Your partner may clear the chat -- they may choose to do this frequently -- so
-one cost of pointing out problems in other areas of the code is that you may do
-so repeatedly without knowing it. All that said, if you see an immediately concerning
-problem in parts of the code that you didn't just change, and if you believe it is
-appropriate to say so to your partner, trust your judgment and do so.
-"""
-
-CHANGES_COMMITTED_MESSAGE: str = (
-    THIS_MESSAGE_IS_FROM_APP
-    + "The Brade application made those changes in the project files and committed them."
-)
 
 ARCHITECT_RESPONSE_CHOICES: str = """
 Right now, you are in [Step 1: a conversational interaction](#step-1-a-conversational-interaction)
@@ -177,7 +116,124 @@ class ArchitectPrompts(CoderPrompts):
     This class extends CoderPrompts to provide specialized prompts and configuration
     for the architect workflow, which focuses on collaborative software development
     with a human partner.
+
+    Attributes:
+        main_model: The Model instance for the architect role
+        editor_model: The Model instance for the editor role
     """
+
+    def __init__(self, main_model, editor_model):
+        """Initialize ArchitectPrompts with models for architect and editor roles.
+
+        Args:
+            main_model: The Model instance for the architect role
+            editor_model: The Model instance for the editor role
+        """
+        super().__init__()
+        self.main_model = main_model
+        self.editor_model = editor_model
+
+    def _get_reasoning_instructions(self, model) -> str:
+        """Get reasoning-specific instructions if the model is not a reasoning model.
+
+        Args:
+            model: The Model instance to check
+
+        Returns:
+            Reasoning instructions if needed, empty string otherwise
+        """
+        if model.is_reasoning_model:
+            return ""
+        return (
+            'Preface your response with the markdown header "# Reasoning". Then think out loud, '
+            "step by step, as you review the affected portions of the modified files. "
+        )
+
+    def _get_conclusions_instructions(self, model) -> str:
+        """Get conclusions-specific instructions if the model is not a reasoning model.
+
+        Args:
+            model: The Model instance to check
+
+        Returns:
+            Conclusions instructions if needed, empty string otherwise
+        """
+        if model.is_reasoning_model:
+            return ""
+        return (
+            'When you are finished thinking through the changes, mark your transition to '
+            'your conclusions with a "# Conclusions" markdown header. Then, concisely explain '
+            "what you believe about the changes."
+        )
+
+    def approved_non_plan_changes_prompt(self) -> str:
+        """Get the prompt for approved non-plan changes."""
+        return (
+            "Please make those changes as you propose. When you are done making changes, stop and wait "
+            "for input. After the Brade application has applied your changes to the project files, "
+            "you will be prompted to review them."
+        )
+
+    def approved_plan_changes_prompt(self) -> str:
+        """Get the prompt for approved plan changes."""
+        return (
+            "Please make the plan changes as you propose. When you are done making changes, stop and wait "
+            "for input. After the Brade application has applied your changes to the project files, "
+            "you will be prompted to review them. Then give me a chance to review our revised plan "
+            "before you change any other files."
+        )
+
+    def review_changes_prompt(self) -> str:
+        """Get the prompt for reviewing changes."""
+        return f"""{THIS_MESSAGE_IS_FROM_APP}
+Review your intended changes and the latest versions of the affected project files.
+
+You can see your intended changes in SEARCH/REPLACE blocks in the chat above. You
+use this special syntax, which looks like diffs or git conflict markers, to specify changes
+that the Brade application should make to project files on your behalf.
+
+If the process worked correctly, then the Brade application has applied those changes
+to the latest versions of the files, which are provided for you in {CONTEXT_NOUN}. 
+Double-check that the changes were applied completely and correctly.
+
+Read with a fresh, skeptical eye. 
+
+{self._get_reasoning_instructions(self.main_model)}
+
+Think about whether the updates fully and correctly achieve
+the goals for this work. Think about whether any new problems were introduced,
+and whether any serious existing problems in the affected content were left unaddressed.
+
+{self._get_conclusions_instructions(self.main_model)}
+
+Use this ONLY as an opportunity to find and point out problems that are
+significant enough -- at this stage of your work with your partner -- to take
+time together to address them. If you believe you already did an excellent job
+with your partner's request, just say you are fully satisfied with your changes
+and stop there. If you see opportunities to improve but believe they are good
+enough for now, give an extremely concise summary of opportunities to improve
+(in a sentence or two), but also say you believe this could be fine for now.
+
+If you see substantial problems in the changes you made, explain what you see
+in some detail.
+
+Don't point out other problems in these files unless they are immediately concerning.
+Take into account the overall state of development of the code, and the cost
+of interrupting the process that you and your partner are following together.
+Your partner may clear the chat -- they may choose to do this frequently -- so
+one cost of pointing out problems in other areas of the code is that you may do
+so repeatedly without knowing it. All that said, if you see an immediately concerning
+problem in parts of the code that you didn't just change, and if you believe it is
+appropriate to say so to your partner, trust your judgment and do so.
+"""
+
+    @property
+    def changes_committed_message(self) -> str:
+        """Get the message indicating changes were committed."""
+        return (
+            THIS_MESSAGE_IS_FROM_APP
+            + "The Brade application made those changes in the project files and committed them."
+        )
 
     @property
     def task_instructions(self) -> str:
