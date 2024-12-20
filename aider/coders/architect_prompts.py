@@ -234,28 +234,9 @@ appropriate to say so to your partner, trust your judgment and do so.
             + "The Brade application made those changes in the project files and committed them."
         )
 
-    @property
-    def task_instructions(self) -> str:
-        """Task-specific instructions for the "architect" step of the architect workflow."""
-        base_instructions = """Collaborate naturally with your partner. Together, seek ways to
-make steady project progress through a series of small, focused steps. Try to do
-as much of the work as you feel qualified to do well. Rely on your partner mainly
-for review. If your partner wants you to do something that you don't feel you can
-do well, explain your concerns and work with them on a more approachable next step.
-Perhaps they need to define the task more clearly, give you a smaller task, do a 
-piece of the work themselves, provide more context, or something else. Just be direct
-and honest with them about your skills, understanding of the context, and high or
-low confidence."""
-
-        if self.main_model.is_reasoning_model:
-            # For a reasoning model, omit instructions about taking time to think and using headers
-            response_choices = """
-Right now, you are in [Step 1: a conversational interaction](#step-1-a-conversational-interaction)
-of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
-
-# Ways you Can Respond
-
-You can respond in any of the following three ways:
+    def _get_shared_response_instructions(self) -> str:
+        """Get the shared instructions for all response types."""
+        return """You can respond in any of the following three ways:
 
 You can choose to just **respond conversationally** as part of your ongoing collaboration. 
 In this case, the response you produce now will be your final output before
@@ -288,11 +269,57 @@ specific actions:
   
 - Or, you can ask to see more files. Provide the files' paths relative to the project root and and 
   explain why you need them. In this case, the Brade application will ask your partner whether
-  it is ok to provide those files to you.
-"""
+  it is ok to provide those files to you."""
+
+    def _get_base_instructions(self) -> str:
+        """Get the base collaboration instructions."""
+        return """Collaborate naturally with your partner. Together, seek ways to
+make steady project progress through a series of small, focused steps. Try to do
+as much of the work as you feel qualified to do well. Rely on your partner mainly
+for review. If your partner wants you to do something that you don't feel you can
+do well, explain your concerns and work with them on a more approachable next step.
+Perhaps they need to define the task more clearly, give you a smaller task, do a 
+piece of the work themselves, provide more context, or something else. Just be direct
+and honest with them about your skills, understanding of the context, and high or
+low confidence."""
+
+    def _get_thinking_instructions(self) -> str:
+        """Get instructions about taking time to think."""
+        return """First decide whether to respond immediately or take time to think.
+
+- You should respond immediately if you are very confident that you can give a simple,
+  direct, and correct response based on things you already know.
+
+- But if you are at all unsure whether your immediate answer would be correct, then you 
+  should take time to think.
+
+# Taking Time to Think
+
+If you choose to take time to think, begin your response with a markdown header "# Reasoning".
+Then think out loud, step by step, until you are confident you know the right answer."""
+
+    @property
+    def task_instructions(self) -> str:
+        """Task-specific instructions for the "architect" step of the architect workflow."""
+        base_instructions = self._get_base_instructions()
+        shared_response = self._get_shared_response_instructions()
+
+        if self.main_model.is_reasoning_model:
+            # For a reasoning model, omit instructions about taking time to think
+            response_choices = f"""
+Right now, you are in [Step 1: a conversational interaction](#step-1-a-conversational-interaction)
+of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
+
+# Ways you Can Respond
+
+{shared_response}"""
         else:
-            # For a non-reasoning model, include all instructions
-            response_choices = ARCHITECT_RESPONSE_CHOICES
+            # For a non-reasoning model, include thinking instructions
+            response_choices = f"""{self._get_thinking_instructions()}
+
+# Ways you Can Respond
+
+{shared_response}"""
 
         return f"{base_instructions}\n\n{response_choices}"
 
