@@ -119,7 +119,7 @@ class ArchitectCoder(Coder):
 
     edit_format = "architect"
     produces_code_edits = False  # Architect coder doesn't produce code edits directly
-    gpt_prompts = ArchitectPrompts()
+    gpt_prompts: ClassVar[ArchitectPrompts] = None
 
     def create_coder(self, edit_format: str, **kwargs: Any) -> Coder:
         """Creates a new coder instance from this architect coder.
