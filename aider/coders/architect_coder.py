@@ -119,7 +119,87 @@ class ArchitectCoder(Coder):
 
     edit_format = "architect"
     produces_code_edits = False  # Architect coder doesn't produce code edits directly
-    gpt_prompts: ClassVar[ArchitectPrompts] = None
+
+    def __init__(
+        self,
+        main_model,
+        io,
+        repo=None,
+        fnames=None,
+        read_only_fnames=None,
+        show_diffs=False,
+        auto_commits=True,
+        dirty_commits=True,
+        dry_run=False,
+        map_tokens=1024,
+        verbose=False,
+        stream=True,
+        use_git=True,
+        cur_messages=None,
+        done_messages=None,
+        restore_chat_history=False,
+        auto_lint=True,
+        auto_test=False,
+        lint_cmds=None,
+        test_cmd=None,
+        aider_commit_hashes=None,
+        map_mul_no_files=8,
+        commands=None,
+        summarizer=None,
+        total_cost=0.0,
+        map_refresh="auto",
+        cache_prompts=False,
+        num_cache_warming_pings=0,
+        suggest_shell_commands=True,
+        chat_language=None,
+    ):
+        """Initialize an ArchitectCoder instance.
+
+        This method:
+        1. Delegates to Coder.__init__() for base initialization
+        2. Initializes gpt_prompts with both main_model and editor_model
+
+        Args:
+            main_model: The Model instance for the architect role
+            io: The InputOutput instance for user interaction
+            **kwargs: Additional arguments passed through to Coder.__init__()
+        """
+        super().__init__(
+            main_model=main_model,
+            io=io,
+            repo=repo,
+            fnames=fnames,
+            read_only_fnames=read_only_fnames,
+            show_diffs=show_diffs,
+            auto_commits=auto_commits,
+            dirty_commits=dirty_commits,
+            dry_run=dry_run,
+            map_tokens=map_tokens,
+            verbose=verbose,
+            stream=stream,
+            use_git=use_git,
+            cur_messages=cur_messages,
+            done_messages=done_messages,
+            restore_chat_history=restore_chat_history,
+            auto_lint=auto_lint,
+            auto_test=auto_test,
+            lint_cmds=lint_cmds,
+            test_cmd=test_cmd,
+            aider_commit_hashes=aider_commit_hashes,
+            map_mul_no_files=map_mul_no_files,
+            commands=commands,
+            summarizer=summarizer,
+            total_cost=total_cost,
+            map_refresh=map_refresh,
+            cache_prompts=cache_prompts,
+            num_cache_warming_pings=num_cache_warming_pings,
+            suggest_shell_commands=suggest_shell_commands,
+            chat_language=chat_language,
+        )
+        self.gpt_prompts = ArchitectPrompts(
+            main_model=main_model,
+            editor_model=main_model.editor_model,
+        )
 
     def create_coder(self, edit_format: str, **kwargs: Any) -> Coder:
         """Creates a new coder instance from this architect coder.
