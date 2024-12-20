@@ -75,7 +75,7 @@ ARCHITECT_RESPONSE_CHOICES: str = """
 Right now, you are in [Step 1: a conversational interaction](#step-1-a-conversational-interaction)
 of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
 
-First decide whether to respond immediately or take time to think.  If you are determined right
+First decide whether to respond immediately or take time to think.
 
 - You should respond immediately if you are very confident that you can give a simple,
   direct, and correct response based on things you already know.
