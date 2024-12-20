@@ -9,7 +9,6 @@ from aider.brade_prompts import CONTEXT_NOUN, THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
-
 ARCHITECT_RESPONSE_CHOICES: str = """
 Right now, you are in [Step 1: a conversational interaction](#step-1-a-conversational-interaction)
 of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
@@ -133,7 +132,7 @@ class ArchitectPrompts(CoderPrompts):
         self.main_model = main_model
         self.editor_model = editor_model
 
-    def _get_reasoning_instructions(self, model) -> str:
+    def _get_review_reasoning_instructions(self, model) -> str:
         """Get reasoning-specific instructions if the model is not a reasoning model.
 
         Args:
@@ -149,7 +148,7 @@ class ArchitectPrompts(CoderPrompts):
             "step by step, as you review the affected portions of the modified files. "
         )
 
-    def _get_conclusions_instructions(self, model) -> str:
+    def _get_review_conclusions_instructions(self, model) -> str:
         """Get conclusions-specific instructions if the model is not a reasoning model.
 
         Args:
@@ -161,7 +160,7 @@ class ArchitectPrompts(CoderPrompts):
         if model.is_reasoning_model:
             return ""
         return (
-            'When you are finished thinking through the changes, mark your transition to '
+            "When you are finished thinking through the changes, mark your transition to "
             'your conclusions with a "# Conclusions" markdown header. Then, concisely explain '
             "what you believe about the changes."
         )
@@ -169,18 +168,18 @@ class ArchitectPrompts(CoderPrompts):
     def approved_non_plan_changes_prompt(self) -> str:
         """Get the prompt for approved non-plan changes."""
         return (
-            "Please make those changes as you propose. When you are done making changes, stop and wait "
-            "for input. After the Brade application has applied your changes to the project files, "
-            "you will be prompted to review them."
+            "Please make those changes as you propose. When you are done making changes, stop and"
+            " wait for input. After the Brade application has applied your changes to the project"
+            " files, you will be prompted to review them."
         )
 
     def approved_plan_changes_prompt(self) -> str:
         """Get the prompt for approved plan changes."""
         return (
-            "Please make the plan changes as you propose. When you are done making changes, stop and wait "
-            "for input. After the Brade application has applied your changes to the project files, "
-            "you will be prompted to review them. Then give me a chance to review our revised plan "
-            "before you change any other files."
+            "Please make the plan changes as you propose. When you are done making changes, stop"
+            " and wait for input. After the Brade application has applied your changes to the"
+            " project files, you will be prompted to review them. Then give me a chance to review"
+            " our revised plan before you change any other files."
         )
 
     def review_changes_prompt(self) -> str:
@@ -198,13 +197,13 @@ Double-check that the changes were applied completely and correctly.
 
 Read with a fresh, skeptical eye. 
 
-{self._get_reasoning_instructions(self.main_model)}
+{self._get_review_reasoning_instructions(self.main_model)}
 
 Think about whether the updates fully and correctly achieve
 the goals for this work. Think about whether any new problems were introduced,
 and whether any serious existing problems in the affected content were left unaddressed.
 
-{self._get_conclusions_instructions(self.main_model)}
+{self._get_review_conclusions_instructions(self.main_model)}
 
 Use this ONLY as an opportunity to find and point out problems that are
 significant enough -- at this stage of your work with your partner -- to take
