@@ -94,6 +94,7 @@ class ModelSettings:
     streaming: bool = True
     editor_model_name: Optional[str] = None
     editor_edit_format: Optional[str] = None
+    is_reasoning_model: bool = False
 
 
 # https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
@@ -576,6 +577,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=True,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "azure/o1-mini",
@@ -588,6 +590,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=False,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "o1-mini",
@@ -600,6 +603,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=True,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "openai/o1-preview",
@@ -612,6 +616,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=True,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "azure/o1-preview",
@@ -624,6 +629,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=False,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "o1-preview",
@@ -636,6 +642,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=True,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "openai/o1",
@@ -648,6 +655,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=True,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "azure/o1",
@@ -660,6 +668,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=False,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "o1",
@@ -672,6 +681,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=False,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "openrouter/openai/o1-mini",
@@ -684,6 +694,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=False,
+        is_reasoning_model=True,
     ),
     ModelSettings(
         "openrouter/openai/o1-preview",
@@ -696,6 +707,7 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=False,
+        is_reasoning_model=True,
     ),
 ]
 
