@@ -237,7 +237,7 @@ appropriate to say so to your partner, trust your judgment and do so.
     @property
     def task_instructions(self) -> str:
         """Task-specific instructions for the "architect" step of the architect workflow."""
-        return f"""Collaborate naturally with your partner. Together, seek ways to
+        base_instructions = """Collaborate naturally with your partner. Together, seek ways to
 make steady project progress through a series of small, focused steps. Try to do
 as much of the work as you feel qualified to do well. Rely on your partner mainly
 for review. If your partner wants you to do something that you don't feel you can
@@ -245,10 +245,56 @@ do well, explain your concerns and work with them on a more approachable next st
 Perhaps they need to define the task more clearly, give you a smaller task, do a 
 piece of the work themselves, provide more context, or something else. Just be direct
 and honest with them about your skills, understanding of the context, and high or
-low confidence.
+low confidence."""
 
-{ARCHITECT_RESPONSE_CHOICES}
+        if self.main_model.is_reasoning_model:
+            # For a reasoning model, omit instructions about taking time to think and using headers
+            response_choices = """
+Right now, you are in [Step 1: a conversational interaction](#step-1-a-conversational-interaction)
+of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
+
+# Ways you Can Respond
+
+You can respond in any of the following three ways:
+
+You can choose to just **respond conversationally** as part of your ongoing collaboration. 
+In this case, the response you produce now will be your final output before
+your partner has a chance to respond.
+
+Alternatively, you have two ways to respond that will cause the Brade application to take
+specific actions:
+
+- You can **propose changes** that you would make as a next step.
+
+  In this case, clearly state that you propose to edit project files. If it's not obvious from the
+  discussion, explain your goals. In any case, briefly think aloud through any especially important 
+  or difficult decisions or issues. Next, write clear, focused instructions for the changes. 
+  Make these concrete enough to act on, but brief enough to easily review. Don't propose specific
+  new code or other content at this stage. Conclude your response by asking your partner whether you 
+  should make the changes you proposed.
+
+  In this case, the response you produce now is just the first step of a multi-step process
+  that will occur before your partner has a chance to respond with their own message. Don't end
+  this response as though your partner will have a chance to speak next. Also, even if your
+  partner has explicitly asked you to make changes, don't try to make them right now, in this
+  Step 1. The only way you can actually make changes is to **propose changes** in this step and
+  wait for your partner's approval.
+  
+  What will happen next is that the Brade application will ask your partner whether they want 
+  you to go ahead and make file changes, (Y)es or (n)o. If they answer "yes", the Brade 
+  application will walk you through steps 2 and 3 to actually make the changes and then
+  review your own work. You will finish your response to your partner at the end of the 
+  "review your work" step. Only then will your partner have a chance to speak.
+  
+- Or, you can ask to see more files. Provide the files' paths relative to the project root and and 
+  explain why you need them. In this case, the Brade application will ask your partner whether
+  it is ok to provide those files to you.
 """
+        else:
+            # For a non-reasoning model, include all instructions
+            response_choices = ARCHITECT_RESPONSE_CHOICES
+
+        return f"{base_instructions}\n\n{response_choices}"
 
     architect_response_analysis_prompt: tuple = ()
 
