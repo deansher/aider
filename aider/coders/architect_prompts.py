@@ -9,74 +9,10 @@ from aider.brade_prompts import CONTEXT_NOUN, THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
-ARCHITECT_RESPONSE_CHOICES: str = """
-Right now, you are in [Step 1: a conversational interaction](#step-1-a-conversational-interaction)
-of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
-
-First decide whether to respond immediately or take time to think.
-
-- You should respond immediately if you are very confident that you can give a simple,
-  direct, and correct response based on things you already know.
-
-- But if you are at all unsure whether your immediate answer would be correct, then you 
-  should take time to think.
-
-# Taking Time to Think
-
-If you choose to take time to think, begin your response with a markdown header "# Reasoning".
-Then think out loud, step by step, until you are confident you know the right answer.
-
-# Ways you Can Respond
-
-Regardless of whether you took time to think, you can choose to respond in any of the following 
-three ways. If you did take time to think, then use the indicated section heading for your
-response. Otherwise, omit the section heading and simply jump into your response.
-
-You can choose to just **respond conversationally** as part of your ongoing collaboration. 
-(If you took time to think, use a "# Response" heading to mark the transition from your reasoning
-to your response.) In this case, the response you produce now will be your final output before
-your partner has a chance to respond.
-
-Alternatively, you have two ways to respond that will cause the Brade application to take
-specific actions:
-
-- You can **propose changes** that you would make as a next step. (If you took time to think,
-  use a "# Proposal" heading to mark this transition.)
-
-  In this case, clearly state that you propose to edit project files. If it's not obvious from the
-  discussion, explain your goals. In any case, briefly think aloud through any especially important 
-  or difficult decisions or issues. Next, write clear, focused instructions for the changes. 
-  Make these concrete enough to act on, but brief enough to easily review. Don't propose specific
-  new code or other content at this stage. Conclude your response by asking your partner whether you 
-  should make the changes you proposed.
-
-  In this case, the response you produce now is just the first step of a multi-step process
-  that will occur before your partner has a chance to respond with their own message. Don't end
-  this response as though your partner will have a chance to speak next. Also, even if your
-  partner has explicitly asked you to make changes, don't try to make them right now, in this
-  Step 1. The only way you can actually make changes is to **propose changes** in this step and
-  wait for your partner's approval.
-  
-  What will happen next is that the Brade application will ask your partner whether they want 
-  you to go ahead and make file changes, (Y)es or (n)o. If they answer "yes", the Brade 
-  application will walk you through steps 2 and 3 to actually make the changes and then
-  review your own work. You will finish your response to your partner at the end of the 
-  "review your work" step. Only then will your partner have a chance to speak.
-  
-- Or, you can ask to see more files. (If you took time to think, mark this transition with a
-  "# Request for Files" heading.) Provide the files' paths relative to the project root and and 
-  explain why you need them. In this case, the Brade application will ask your partner whether
-  it is ok to provide those files to you.
-"""
-
 # Define the choice manager for analyzing architect responses
 possible_architect_responses: ChoiceManager = ChoiceManager()
 
-
-# Preface each line of ARCHITECT_RESPONSE_CHOICES with "> " to quote it.
-quoted_response_choices: str = "> " + "\n> ".join(ARCHITECT_RESPONSE_CHOICES.split("\n")) + "\n"
-
-
+# Define the analysis choices used by the architect coder
 response_section = possible_architect_responses.add_section(
     f"""Compare the assistant's response to the choices we gave it for how to respond. 
 Decide whether the assistant's human partner will be best served by having the Brade 
@@ -86,13 +22,9 @@ as conversation. Do this by choosing the single best option from the list below.
 Select the **proposed changes** option if you think there's a reasonable chance the
 user would like to interpret the assistants's answer as a proposal to make changes,
 and would like to be able to say "yes" to it. This gives the assistant's human partner 
-an opportunity to make that decision for themself.  But if it is clear to you that the 
+an opportunity to make that decision for themself. But if it is clear to you that the 
 assistant has not proposed anything concrete enough to say "yes" to, then choose one of
 the other options.
-
-Here is the explanation we gave to the assistant on how it could choose to respond:
-
-{quoted_response_choices}
 """
 )
 architect_proposed_plan_changes = response_section.add_choice(
@@ -132,39 +64,6 @@ class ArchitectPrompts(CoderPrompts):
         self.main_model = main_model
         self.editor_model = editor_model
 
-    def _get_review_reasoning_instructions(self, model) -> str:
-        """Get reasoning-specific instructions if the model is not a reasoning model.
-
-        Args:
-            model: The Model instance to check
-
-        Returns:
-            Reasoning instructions if needed, empty string otherwise
-        """
-        if model.is_reasoning_model:
-            return ""
-        return (
-            'Preface your response with the markdown header "# Reasoning". Then think out loud, '
-            "step by step, as you review the affected portions of the modified files. "
-        )
-
-    def _get_review_conclusions_instructions(self, model) -> str:
-        """Get conclusions-specific instructions if the model is not a reasoning model.
-
-        Args:
-            model: The Model instance to check
-
-        Returns:
-            Conclusions instructions if needed, empty string otherwise
-        """
-        if model.is_reasoning_model:
-            return ""
-        return (
-            "When you are finished thinking through the changes, mark your transition to "
-            'your conclusions with a "# Conclusions" markdown header. Then, concisely explain '
-            "what you believe about the changes."
-        )
-
     def approved_non_plan_changes_prompt(self) -> str:
         """Get the prompt for approved non-plan changes."""
         return (
@@ -183,7 +82,7 @@ class ArchitectPrompts(CoderPrompts):
         )
 
     def review_changes_prompt(self) -> str:
-        """Get the prompt for reviewing changes."""
+        """Get the prompt for reviewing changes, conditionally adjusting instructions based on model type."""
         return f"""{THIS_MESSAGE_IS_FROM_APP}
 Review your intended changes and the latest versions of the affected project files.
 
@@ -195,7 +94,7 @@ If the process worked correctly, then the Brade application has applied those ch
 to the latest versions of the files, which are provided for you in {CONTEXT_NOUN}. 
 Double-check that the changes were applied completely and correctly.
 
-Read with a fresh, skeptical eye. 
+Read with a fresh, skeptical eye.
 
 {self._get_review_reasoning_instructions(self.main_model)}
 
@@ -228,10 +127,43 @@ appropriate to say so to your partner, trust your judgment and do so.
 
     @property
     def changes_committed_message(self) -> str:
-        """Get the message indicating changes were committed."""
+        """Get the message indicating that changes were committed."""
         return (
             THIS_MESSAGE_IS_FROM_APP
             + "The Brade application made those changes in the project files and committed them."
+        )
+
+    def _get_review_reasoning_instructions(self, model) -> str:
+        """Get reasoning-specific instructions if the model is not a reasoning model.
+
+        Args:
+            model: The Model instance to check
+
+        Returns:
+            Reasoning instructions if needed, empty string otherwise.
+        """
+        if model.is_reasoning_model:
+            return ""
+        return (
+            'Preface your response with the markdown header "# Reasoning". Then think out loud, '
+            "step by step, as you review the affected portions of the modified files.\n"
+        )
+
+    def _get_review_conclusions_instructions(self, model) -> str:
+        """Get conclusions-specific instructions if the model is not a reasoning model.
+
+        Args:
+            model: The Model instance to check
+
+        Returns:
+            Conclusions instructions if needed, empty string otherwise.
+        """
+        if model.is_reasoning_model:
+            return ""
+        return (
+            "When you are finished thinking through the changes, mark your transition to "
+            'your conclusions with a "# Conclusions" markdown header. Then, concisely explain '
+            "what you believe about the changes.\n"
         )
 
     def _get_shared_response_instructions(self) -> str:
@@ -267,7 +199,7 @@ specific actions:
   review your own work. You will finish your response to your partner at the end of the 
   "review your work" step. Only then will your partner have a chance to speak.
   
-- Or, you can ask to see more files. Provide the files' paths relative to the project root and and 
+- Or, you can ask to see more files. Provide the files' paths relative to the project root and 
   explain why you need them. In this case, the Brade application will ask your partner whether
   it is ok to provide those files to you."""
 
@@ -300,12 +232,16 @@ Then think out loud, step by step, until you are confident you know the right an
 
     @property
     def task_instructions(self) -> str:
-        """Task-specific instructions for the "architect" step of the architect workflow."""
+        """Task-specific instructions for the 'architect' step of the architect workflow.
+
+        This property must remain as the API expects, but we adapt instructions based on
+        whether the main model is a reasoning model or not.
+        """
         base_instructions = self._get_base_instructions()
         shared_response = self._get_shared_response_instructions()
 
         if self.main_model.is_reasoning_model:
-            # For a reasoning model, omit instructions about taking time to think
+            # For a reasoning model, we omit instructions about taking time to think
             response_choices = f"""
 Right now, you are in [Step 1: a conversational interaction](#step-1-a-conversational-interaction)
 of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
@@ -314,7 +250,7 @@ of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
 
 {shared_response}"""
         else:
-            # For a non-reasoning model, include thinking instructions
+            # For a non-reasoning model, we include thinking instructions
             response_choices = f"""{self._get_thinking_instructions()}
 
 # Ways you Can Respond
@@ -324,27 +260,19 @@ of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
         return f"{base_instructions}\n\n{response_choices}"
 
     architect_response_analysis_prompt: tuple = ()
-
     example_messages: list = []
-
     files_content_prefix: str = ""
-
     files_content_assistant_reply: str = (
         "Ok, I will use that as the true, current contents of the files."
     )
-
     files_no_full_files: str = (
         THIS_MESSAGE_IS_FROM_APP
         + "Your partner has not shared the full contents of any files with you yet."
     )
-
     files_no_full_files_with_repo_map: str = ""
     files_no_full_files_with_repo_map_reply: str = ""
-
     repo_content_prefix: str = ""
-
     system_reminder: str = ""
-
     editor_response_placeholder: str = (
         THIS_MESSAGE_IS_FROM_APP
         + """An editor AI persona has followed your instructions to make changes to the project
