@@ -9,11 +9,17 @@ from aider.brade_prompts import CONTEXT_NOUN, THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
-APPROVED_NON_PLAN_CHANGES_PROMPT: str = "Please make those changes as you propose."
+APPROVED_NON_PLAN_CHANGES_PROMPT: str = (
+    "Please make those changes as you propose. When you are done making changes, stop and wait "
+    "for input. After the Brade application has applied your changes to the project files, "
+    "you will be prompted to review them."
+)
 
 APPROVED_PLAN_CHANGES_PROMPT: str = (
-    "Please make the plan changes as you propose. Then give me a chance to review our "
-    "revised plan before you change any other files."
+    "Please make the plan changes as you propose. When you are done making changes, stop and wait "
+    "for input. After the Brade application has applied your changes to the project files, "
+    "you will be prompted to review them. Then give me a chance to review our revised plan "
+    "before you change any other files."
 )
 
 REVIEW_CHANGES_PROMPT: str = f"""{THIS_MESSAGE_IS_FROM_APP}
