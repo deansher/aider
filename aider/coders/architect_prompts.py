@@ -77,7 +77,7 @@ of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
 
 However, it is important to keep in mind that if you instead choose to **propose changes**, then
 
-First decide whether to respond immediately or take time to think.
+First decide whether to respond immediately or take time to think.  If you are determined right
 
 - You should respond immediately if you are very confident that you can give a simple,
   direct, and correct response based on things you already know.
