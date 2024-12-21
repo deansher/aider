@@ -26,12 +26,13 @@ class ArchitectExchange:
     Messages are appended to self.messages as they occur.
     """
 
-    def __init__(self, architect_response: str):
+    def __init__(self, architect_prompts: ArchitectPrompts, architect_response: str):
         """Initialize a new exchange.
 
         Args:
             architect_response: The architect's response proposing changes
         """
+        self.architect_prompts = architect_prompts
         self.messages: list[ChatMessage] = [
             ChatMessage(role="assistant", content=architect_response)
         ]
@@ -46,8 +47,9 @@ class ArchitectExchange:
             The editor prompt that was appended
         """
         prompt = (
-            self.gpt_prompts.approved_plan_changes_prompt() if is_plan_change 
-            else self.gpt_prompts.approved_non_plan_changes_prompt()
+            self.architect_prompts.get_approved_plan_changes_prompt()
+            if is_plan_change
+            else self.architect_prompts.get_approved_non_plan_changes_prompt()
         )
         self.messages.append(ChatMessage(role="user", content=prompt))
         return prompt
@@ -62,7 +64,7 @@ class ArchitectExchange:
 
     def append_reviewer_prompt(self) -> str:
         """Append and return the reviewer prompt."""
-        prompt = self.gpt_prompts.review_changes_prompt()
+        prompt = self.architect_prompts.get_review_changes_prompt()
         self.messages.append(ChatMessage(role="user", content=prompt))
         return prompt
 
@@ -194,10 +196,12 @@ class ArchitectCoder(Coder):
             suggest_shell_commands=suggest_shell_commands,
             chat_language=chat_language,
         )
-        self.gpt_prompts = ArchitectPrompts(
+        self.architect_prompts = ArchitectPrompts(
             main_model=main_model,
             editor_model=main_model.editor_model,
         )
+        # Provide the same prompts for use by our superclass Coder.
+        self.gpt_prompts = self.architect_prompts
 
     def create_coder(self, edit_format: str, **kwargs: Any) -> Coder:
         """Creates a new coder instance from this architect coder.
@@ -254,7 +258,7 @@ class ArchitectCoder(Coder):
         if architect_response_codes.has(
             architect_proposed_plan_changes
         ) or architect_response_codes.has(architect_proposed_non_plan_changes):
-            exchange = ArchitectExchange(architect_response)
+            exchange = ArchitectExchange(self.architect_prompts, architect_response)
             self.process_architect_change_proposal(
                 exchange, architect_response_codes.has(architect_proposed_plan_changes)
             )
@@ -330,5 +334,5 @@ class ArchitectCoder(Coder):
             exchange: The completed exchange containing all responses
         """
         self.cur_messages = self.cur_messages + exchange.get_messages()
-        self.move_back_cur_messages(self.gpt_prompts.changes_committed_message)
+        self.move_back_cur_messages(self.architect_prompts.changes_committed_message)
         self.partial_response_content = ""  # Clear to prevent redundant message
