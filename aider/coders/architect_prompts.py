@@ -17,38 +17,60 @@ of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
 
 You can respond in any of the following three ways:
 
+## Option A: **Respond Conversationally**
+
 You can choose to just **respond conversationally** as part of your ongoing collaboration. 
 In this case, the response you produce now will be your final output before
 your partner has a chance to respond.
 
-Alternatively, you have two ways to respond that will cause the Brade application to take
-specific actions:
+## Option B: **Propose Changes**
 
-- You can **propose changes** that you would make as a next step.
+You can **propose changes** that you would make as a next step.
 
-  In this case, clearly state that you propose to edit project files. If it's not obvious from the
-  discussion, explain your goals. In any case, briefly think aloud through any especially important 
-  or difficult decisions or issues. Next, write clear, focused instructions for the changes. 
-  Make these concrete enough to act on, but brief enough to easily review. Don't propose specific
-  new code or other content at this stage. Conclude your response by asking your partner whether you 
-  should make the changes you proposed.
+If you choose this option, then clearly state that you propose to edit project files. If it's
+not obvious from the discussion, explain your goals. In any case, briefly think aloud through 
+any especially important or difficult decisions or issues. Next, write clear, focused instructions
+for the changes. Make these concrete enough to act on, but brief enough to easily review. Don't 
+propose specific new code or other content at this stage. Conclude your response by asking your 
+partner whether you should make the changes you proposed.
 
-  In this case, the response you produce now is just the first step of a multi-step process
-  that will occur before your partner has a chance to respond with their own message. Don't end
-  this response as though your partner will have a chance to speak next. Also, even if your
-  partner has explicitly asked you to make changes, don't try to make them right now, in this
-  Step 1. The only way you can actually make changes is to **propose changes** in this step and
-  wait for your partner's approval.
+If you choose this path, then the response you produce now is just the first step of a multi-step
+process that will occur before your partner has a chance to respond with their own message. Don't 
+end this response as though your partner will have a chance to speak next. Also, even if your
+partner has explicitly asked you to make changes, don't try to make them right now, in this
+Step 1. The only way you can actually make changes is to **propose changes** in this step and
+wait for your partner's approval.
+
+Identify important architectural, design or implementation decisions that must be made to
+establish the direction for this change. For each of these, explain why the decision is
+important, the main tradeoffs, and your choice.
+
+Then provide a clear, complete list of the changes that will be made if approved. Break this down 
+into logical steps if helpful. Make the plan
+     - specific enough that another AI can implement it without having to make major decisions,
+     - clear about what should change and what principles or patterns to follow,
+     - brief enough that a human can quickly review and understand the scope,
+     - and free of specific code or content - leave the writing to step 2.
+     
+  Conclude by asking your partner if you should proceed with these changes.
+
+  The goals of your proposal are to
+  - help your human partner make an informed decision about whether to approve the changes,
+  - provide clear guidance to the AI that will implement the changes in step 2,
+  - and create a record of key decisions and their rationale.
+
+What will happen next is that the Brade application will ask your partner whether they want 
+you to go ahead and make file changes, (Y)es or (n)o. If they answer "yes", the Brade 
+application will walk you through steps 2 and 3 to actually make the changes and then
+review your own work. You will finish your response to your partner at the end of the 
+"review your work" step. Only then will your partner have a chance to speak.
+
+## Option C: **Ask to See More Files**
   
-  What will happen next is that the Brade application will ask your partner whether they want 
-  you to go ahead and make file changes, (Y)es or (n)o. If they answer "yes", the Brade 
-  application will walk you through steps 2 and 3 to actually make the changes and then
-  review your own work. You will finish your response to your partner at the end of the 
-  "review your work" step. Only then will your partner have a chance to speak.
-  
-- Or, you can ask to see more files. Provide the files' paths relative to the project root and 
-  explain why you need them. In this case, the Brade application will ask your partner whether
-  it is ok to provide those files to you."""
+Or, you can ask to see more files. Provide the files' paths relative to the project root and 
+explain why you need them. In this case, the Brade application will ask your partner whether
+it is ok to provide those files to you.
+"""
 
 _quoted_ways_to_respond_instructions = (
     "> " + "\n> ".join(_ways_to_respond_instructions.split("\n")) + "\n"
@@ -159,19 +181,32 @@ considered response.
 
     def get_approved_non_plan_changes_prompt(self) -> str:
         """Get the prompt for approved non-plan changes."""
-        return (
-            "Please make those changes as you propose. When you are done making changes, stop and"
-            " wait for input. After the Brade application has applied your changes to the project"
-            " files, you will be prompted to review them."
-        )
+        return """
+Yes, please make the changes proposed above. When you are done making changes, stop and
+wait for input. After the Brade application has applied your changes to the project
+files, you will be prompted to review them.
+
+Right now, you are in 
+[Step 2: Change files to implement the next step](#step-2-change-files-to-implement-the-next-step)
+of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
+
+The AI that carried out Step 1 has already made the high-level decisions. Here is your job:
+- Adhere to the decisions made in the step 1 proposal.
+- Write clean, maintainable code or other content.
+- Make all changes outlined in the step 1 proposal.
+- Make supporting changes as needed.
+
+If you encounter an issue that seems to require deviating from or expanding the proposal, 
+stop and explain the issue rather than proceeding.
+"""
 
     def get_approved_plan_changes_prompt(self) -> str:
         """Get the prompt for approved plan changes."""
         return (
             "Please make the plan changes as you propose. When you are done making changes, stop"
-            " and wait for input. After the Brade application has applied your changes to the"
-            " project files, you will be prompted to review them. Then give me a chance to review"
-            " our revised plan before you change any other files."
+            "and wait for input. After the Brade application has applied your changes to the"
+            "plan, you will be prompted to review them. Then give your partner a chance to review"
+            "our revised plan before you change any other files."
         )
 
     def get_review_changes_prompt(self) -> str:
