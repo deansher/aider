@@ -164,6 +164,14 @@ class ArchitectCoder(Coder):
             io: The InputOutput instance for user interaction
             **kwargs: Additional arguments passed through to Coder.__init__()
         """
+        self.architect_prompts = ArchitectPrompts(
+            main_model=main_model,
+            editor_model=main_model.editor_model,
+        )
+        # Provide the same prompts for use by our superclass Coder.
+        # Coder requires self.gpt_prompts in its __init__().
+        self.gpt_prompts = self.architect_prompts
+
         super().__init__(
             main_model=main_model,
             io=io,
@@ -196,12 +204,6 @@ class ArchitectCoder(Coder):
             suggest_shell_commands=suggest_shell_commands,
             chat_language=chat_language,
         )
-        self.architect_prompts = ArchitectPrompts(
-            main_model=main_model,
-            editor_model=main_model.editor_model,
-        )
-        # Provide the same prompts for use by our superclass Coder.
-        self.gpt_prompts = self.architect_prompts
 
     def create_coder(self, edit_format: str, **kwargs: Any) -> Coder:
         """Creates a new coder instance from this architect coder.
