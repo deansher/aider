@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import dataclass
 from unittest.mock import MagicMock, patch
 
 import httpx
@@ -11,6 +12,12 @@ from aider.sendchat import (
     send_completion,
     simple_send_with_retries,
 )
+
+
+@dataclass
+class MockModel:
+    name: str
+    extra_params: dict = None
 
 
 class PrintCalled(Exception):
@@ -68,11 +75,14 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         mock_send.side_effect = [(None, invalid_response), (None, valid_response)]
 
+        # Create a mock model object
+        model = MockModel(name="test-model")
+
         # Call should succeed after retry
         result = analyze_assistant_response(
             self.choice_manager,
             self.introduction,
-            self.model_name,
+            model,  # Pass model object instead of model name
             "test response",
         )
 
