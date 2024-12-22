@@ -2,13 +2,12 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import httpx
-from llm_multiple_choice import ChoiceManager, InvalidChoicesResponseError
+from llm_multiple_choice import ChoiceManager
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
 from aider.sendchat import (
     analyze_assistant_response,
-    analyze_chat_situation,
     send_completion,
     simple_send_with_retries,
 )
@@ -55,41 +54,6 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.messages = [{"role": "user", "content": "test message"}]
         self.model_name = "test-model"
         self.introduction = "Test introduction"
-
-    @patch("aider.sendchat.send_completion")
-    def test_analyze_chat_situation_success(self, mock_send):
-        # Mock a valid response from the LLM
-        mock_response = MagicMock()
-        mock_response.choices = [MagicMock()]
-        mock_response.choices[0].message.content = "1"
-        mock_send.return_value = (None, mock_response)
-
-        # Call analyze_chat_situation and verify the result
-        result = analyze_chat_situation(
-            self.choice_manager,
-            self.introduction,
-            self.model_name,
-            self.messages,
-        )
-        self.assertTrue(result.has(self.choice1))
-        self.assertFalse(result.has(self.choice2))
-
-    @patch("aider.sendchat.send_completion")
-    def test_analyze_chat_situation_invalid_response(self, mock_send):
-        # Mock an invalid response from the LLM
-        mock_response = MagicMock()
-        mock_response.choices = [MagicMock()]
-        mock_response.choices[0].message.content = "invalid"
-        mock_send.return_value = (None, mock_response)
-
-        # Verify that invalid response raises appropriate error
-        with self.assertRaises(InvalidChoicesResponseError):
-            analyze_chat_situation(
-                self.choice_manager,
-                self.introduction,
-                self.model_name,
-                self.messages,
-            )
 
     @patch("aider.sendchat.send_completion")
     def test_analyze_assistant_response_retry_success(self, mock_send):
