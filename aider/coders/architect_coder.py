@@ -292,17 +292,18 @@ class ArchitectCoder(Coder):
         self.record_exchange(exchange)
 
     def execute_changes(self, exchange: ArchitectExchange, is_plan_change: bool) -> None:
-        """Run the editor coder to implement changes.
+        """Run the editor coder to implement changes proposed by the architect.
 
         Args:
             exchange: The exchange containing the architect's proposed changes
+            is_plan_change: Whether these changes affect plan documents
         """
         editor_model = self.main_model.editor_model or self.main_model
         editor_coder = self.create_coder(
             edit_format=self.main_model.editor_edit_format,
             main_model=editor_model,
         )
-        # Instead of mutating cur_messages, create new extended copy
+        # Give editor_coder the conversation so far
         editor_coder.cur_messages = editor_coder.cur_messages + exchange.get_messages()
 
         if self.verbose:
@@ -312,6 +313,12 @@ class ArchitectCoder(Coder):
         editor_coder.run(with_message=editor_prompt, preproc=False)
         self.total_cost += editor_coder.total_cost
         self.aider_commit_hashes = editor_coder.aider_commit_hashes
+
+        # Copy the subordinate coder's newly known files back to the architect coder
+        # I don't understand the mypy error that # type: ignore is suppressing here.
+        self.abs_fnames.update(editor_coder.abs_fnames)  # type: ignore
+        self.abs_read_only_fnames.update(editor_coder.abs_read_only_fnames)  # type: ignore
+
         exchange.append_editor_response(editor_coder.partial_response_content)
 
     def review_changes(self, exchange: ArchitectExchange) -> None:
