@@ -1,0 +1,8 @@
+Decide the best way to meet the following requirements. Then walk me through the necessary code changes, 
+providing all new and revised new code and telling me where to place it. I'll be doing this by copy/paste,
+so provide blocks of code that are of manageable size and that I can paste over or into existing code in a 
+straightforward way. Preserve indentation level, using spaces not tabs. Follow the project's 
+conventions as documented in CONTRIBUTING.md.
+
+Requirements:
+
