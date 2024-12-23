@@ -1299,13 +1299,6 @@ class Coder:
                     self.update_cur_messages()
                     return
 
-        add_rel_files_message = self.check_for_file_mentions(content)
-        if add_rel_files_message:
-            if self.reflected_message:
-                self.reflected_message += "\n\n" + add_rel_files_message
-            else:
-                self.reflected_message = add_rel_files_message
-
     def reply_completed(self):
         """Post-process the LLM's response if needed.
 
@@ -1459,9 +1452,6 @@ class Coder:
                 added_fnames.append(rel_fname)
             else:
                 self.ignore_mentions.add(rel_fname)
-
-        if added_fnames:
-            return prompts.added_files.format(fnames=", ".join(added_fnames))
 
     def send(self, messages, model=None, functions=None, purpose="send"):
         if not model:
