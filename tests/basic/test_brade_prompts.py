@@ -495,7 +495,7 @@ def test_file_section_formatting() -> None:
 
     # Test error handling for malformed tuples
     with pytest.raises(ValueError):
-        format_brade_messages(
+        format_brade_messages(  # type: ignore[arg-type]  # Intentionally testing malformed tuple
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
@@ -504,7 +504,7 @@ def test_file_section_formatting() -> None:
         )
 
     with pytest.raises(ValueError):
-        format_brade_messages(
+        format_brade_messages(  # type: ignore[arg-type]  # Intentionally testing malformed tuple
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
@@ -513,7 +513,7 @@ def test_file_section_formatting() -> None:
         )
 
     with pytest.raises(ValueError):
-        format_brade_messages(
+        format_brade_messages(  # type: ignore[arg-type]  # Intentionally testing wrong type
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
@@ -618,7 +618,7 @@ def test_malformed_input_errors() -> None:
 
     # Test missing system prompt
     with pytest.raises(ValueError):
-        format_brade_messages(
+        format_brade_messages(  # type: ignore[arg-type]  # Intentionally testing None system_prompt
             system_prompt=None,
             task_instructions="Test instructions",
             done_messages=[],
@@ -627,7 +627,7 @@ def test_malformed_input_errors() -> None:
 
     # Test malformed task examples
     with pytest.raises(ValueError):
-        format_brade_messages(
+        format_brade_messages(  # type: ignore[list-item]  # Intentionally testing wrong role sequence
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
@@ -640,7 +640,7 @@ def test_malformed_input_errors() -> None:
 
     # Test odd number of task examples
     with pytest.raises(ValueError):
-        format_brade_messages(
+        format_brade_messages(  # type: ignore[list-item]  # Intentionally testing incomplete pair
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
@@ -654,7 +654,7 @@ def test_malformed_input_errors() -> None:
 
     # Test invalid file content type
     with pytest.raises(TypeError):
-        format_brade_messages(
+        format_brade_messages(  # type: ignore[arg-type]  # Intentionally testing wrong type
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
