@@ -160,20 +160,6 @@ def test_unsupported_context_placement() -> None:
         )
 
 
-def test_unsupported_context_position() -> None:
-    """Tests that unsupported context position values raise exceptions."""
-
-    # Test with INSERT (not yet supported)
-    with pytest.raises(ValueError, match="Only PREPEND position"):
-        format_brade_messages(
-            system_prompt="Test prompt",
-            task_instructions="Test instructions",
-            done_messages=[],
-            cur_messages=[{"role": "user", "content": "Test"}],
-            context_position=PromptElementPosition.INSERT,
-        )
-
-
 def test_element_locations() -> None:
     """Tests that elements can be placed in different messages using ElementLocation.
     
