@@ -178,7 +178,7 @@ def test_unsupported_context_position() -> None:
 
 
 def test_basic_message_structure(
-    sample_done_messages: list[ChatMessage], sample_cur_messages: list[ChatMessage]
+    sample_done_messages: list[dict[str, str]], sample_cur_messages: list[dict[str, str]]
 ) -> None:
     """Tests that format_brade_messages returns correctly structured message list.
 
