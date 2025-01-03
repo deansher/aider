@@ -228,7 +228,7 @@ def test_element_locations() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_position=PromptElementPosition.INSERT,
+            context_position=PromptElementPosition.APPEND,
         )
 
 

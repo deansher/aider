@@ -36,12 +36,12 @@ class PromptElementPosition(Enum):
     Values:
         PREPEND: Add element at the start of the message.
             This is currently the only supported option.
-        INSERT: Add element after the first line of the message.
+        APPEND: Add element at the end of the message.
             This option is not yet supported.
     """
 
     PREPEND = "prepend"
-    INSERT = "insert"
+    APPEND = "append"
 
 
 CONTEXT_NOUN = "<context>...</context>"
