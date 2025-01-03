@@ -142,7 +142,7 @@ def test_unsupported_context_placement() -> None:
     # Test with INITIAL_USER_MESSAGE (not yet supported)
     with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
         format_brade_messages(
-            system_prompt="Test prompt",  # Changed from None to valid string
+            system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
