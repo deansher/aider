@@ -7,6 +7,7 @@ This module implements Brade's approach to structuring prompts for LLM interacti
 It follows the guidelines in design_docs/anthropic_docs/claude_prompting_guide.md:
 """
 
+from dataclasses import dataclass
 from enum import Enum
 from typing import Tuple
 
@@ -334,6 +335,18 @@ def format_file_section(files: list[FileContent] | None) -> str:
     return result
 
 
+@dataclass(frozen=True)
+class ElementLocation:
+    """Specifies where to place a prompt element in the message sequence.
+    
+    Attributes:
+        placement: Which message receives the element
+        position: Where in the message the element appears
+    """
+    placement: PromptElementPlacement
+    position: PromptElementPosition
+
+
 def format_brade_messages(
     system_prompt: str,
     task_instructions: str,
@@ -345,8 +358,13 @@ def format_brade_messages(
     image_files: list[FileContent] | None = None,
     platform_info: str | None = None,
     task_examples: list[dict[str, str]] | None = None,
+    # Keep old parameters for backward compatibility
     context_message_placement: PromptElementPlacement = PromptElementPlacement.FINAL_USER_MESSAGE,
     context_position: PromptElementPosition = PromptElementPosition.PREPEND,
+    # Add new parameters
+    context_location: ElementLocation | None = None,
+    task_instructions_location: ElementLocation | None = None,
+    task_examples_location: ElementLocation | None = None,
 ) -> list[dict[str, str]]:
     """Formats chat messages according to Brade's prompt structure.
 
