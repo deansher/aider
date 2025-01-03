@@ -9,6 +9,7 @@ from aider.brade_prompts import (
     ContextMessagePlacement,
     ContextPositionInMessage,
     FileContent,
+    format_brade_messages,
 )
 from aider.types import ChatMessage
 
@@ -164,6 +165,20 @@ def test_invalid_context_placement() -> None:
         )
 
 
+def test_system_message_placement_not_yet_supported() -> None:
+    """Tests that using SYSTEM_MESSAGE for context placement raises the same not-yet-supported error."""
+    from aider.brade_prompts import format_brade_messages, ContextMessagePlacement
+
+    with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Testing new system message placement"}],
+            context_message_placement=ContextMessagePlacement.SYSTEM_MESSAGE,
+        )
+
+
 def test_initial_message_insert_position() -> None:
     """Tests that context can be inserted after first line in initial user message.
 
@@ -171,12 +186,6 @@ def test_initial_message_insert_position() -> None:
     context_position is INSERT, the context is placed after the first line of the
     initial user message.
     """
-    from aider.brade_prompts import (
-        format_brade_messages,
-        ContextMessagePlacement,
-        ContextPositionInMessage,
-    )
-
     # Test with both INITIAL_USER_MESSAGE and INSERT
     with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
         format_brade_messages(

@@ -14,26 +14,28 @@ from .types import ChatMessage
 
 
 class ContextMessagePlacement(Enum):
-    """Controls which message gets context and task elements.
+    """Controls which message gets context or task elements.
 
     Values:
-        FINAL_USER_MESSAGE: Add context and task elements to the final user message.
-            This is currently the only supported option.
-        INITIAL_USER_MESSAGE: Add context and task elements to the first user message.
+        FINAL_USER_MESSAGE: Add elements to the final user message.
+        INITIAL_USER_MESSAGE: Add elements to the first user message.
             This option is not yet supported.
+        SYSTEM_MESSAGE: Add elements to the system message.
+            This option is also not yet supported.
     """
 
     FINAL_USER_MESSAGE = "final_user_message"
     INITIAL_USER_MESSAGE = "initial_user_message"
+    SYSTEM_MESSAGE = "system_message"
 
 
 class ContextPositionInMessage(Enum):
-    """Controls where in the message context and task elements are placed.
+    """Controls where in the message context or task elements are placed.
 
     Values:
-        PREPEND: Add context and task elements at the start of the message.
+        PREPEND: Add elements at the start of the message.
             This is currently the only supported option.
-        INSERT: Add context and task elements after the first line of the message.
+        INSERT: Add elements after the first line of the message.
             This option is not yet supported.
     """
 
