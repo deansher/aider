@@ -347,6 +347,18 @@ class ElementLocation:
     position: PromptElementPosition
 
 
+@dataclass
+class MessageElement:
+    """A message element to be placed in a specific location.
+    
+    Attributes:
+        content: The element's content as a string
+        location: Where to place the element in the message sequence
+    """
+    content: str
+    location: ElementLocation
+
+
 def format_brade_messages(
     system_prompt: str,
     task_instructions: str,
@@ -412,8 +424,6 @@ def format_brade_messages(
         if loc is not None:
             if loc.placement == PromptElementPlacement.INITIAL_USER_MESSAGE:
                 raise ValueError("Only FINAL_USER_MESSAGE or SYSTEM_MESSAGE are supported at this time")
-            if loc.position == PromptElementPosition.APPEND:
-                raise ValueError("Only PREPEND is supported at this time")
 
     # Build the context section
     context_parts = []
@@ -439,18 +449,28 @@ def format_brade_messages(
 
     instructions_str = wrap_xml("task_instructions", task_instructions)
 
+    # Create message elements with their locations
+    elements: list[MessageElement] = []
+    if context_location:
+        elements.append(MessageElement(context_str, context_location))
+    if task_instructions_location:
+        elements.append(MessageElement(instructions_str, task_instructions_location))
+    if task_examples_location:
+        elements.append(MessageElement(task_examples_section, task_examples_location))
+
     # messages array always starts with the system message
     messages = [{"role": "system", "content": system_prompt}]
 
     if done_messages:
         messages.extend(done_messages)
 
-    # We'll handle system message insertion for context/task_examples if requested
-    if context_location and context_location.placement == PromptElementPlacement.SYSTEM_MESSAGE:
-        messages[0]["content"] = context_str + messages[0]["content"]
-
-    if task_examples_location and task_examples_location.placement == PromptElementPlacement.SYSTEM_MESSAGE:
-        messages[0]["content"] = task_examples_section + messages[0]["content"]
+    # Add elements to system message if requested
+    system_elements = [elem for elem in elements if elem.location.placement == PromptElementPlacement.SYSTEM_MESSAGE]
+    for elem in system_elements:
+        if elem.location.position == PromptElementPosition.PREPEND:
+            messages[0]["content"] = elem.content + messages[0]["content"]
+        else:  # APPEND
+            messages[0]["content"] += elem.content
 
     # Prepare the final user message
     final_user_content = ""
@@ -462,19 +482,15 @@ def format_brade_messages(
     # Start building the final message's content
     final_msg_content = ""
 
-    # If context is requested in the final user message, prepend it
-    if context_location and context_location.placement == PromptElementPlacement.FINAL_USER_MESSAGE:
-        final_msg_content += context_str
+    # Add elements to final user message if requested
+    final_elements = [elem for elem in elements if elem.location.placement == PromptElementPlacement.FINAL_USER_MESSAGE]
+    for elem in final_elements:
+        if elem.location.position == PromptElementPosition.PREPEND:
+            final_msg_content += elem.content
+        else:  # APPEND
+            final_user_content += elem.content
 
-    # If task instructions go to the final user message, prepend them
-    if task_instructions_location and task_instructions_location.placement == PromptElementPlacement.FINAL_USER_MESSAGE:
-        final_msg_content += instructions_str
-
-    # If task examples go to the final user message, prepend them
-    if task_examples_location and task_examples_location.placement == PromptElementPlacement.FINAL_USER_MESSAGE:
-        final_msg_content += task_examples_section
-
-    # Finally, add two newlines plus the actual user message
+    # Add two newlines plus the actual user message
     final_msg_content += "\n\n" + final_user_content
 
     # Now create the final user message object
