@@ -70,8 +70,6 @@ def test_context_and_task_placement() -> None:
     - User messages remain pure without any sections
     - Content of each section is preserved correctly
     """
-    from aider.brade_prompts import format_brade_messages
-
     system_prompt = "You are a helpful AI assistant"
 
     test_platform = "Test platform info"
