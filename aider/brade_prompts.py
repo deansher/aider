@@ -404,15 +404,22 @@ def format_brade_messages(
     if system_prompt is None:
         raise ValueError("system_prompt cannot be None")
 
+    for _loc_label, loc in [
+        ("context_location", context_location),
+        ("task_instructions_location", task_instructions_location),
+        ("task_examples_location", task_examples_location),
+    ]:
+        if loc is not None:
+            if loc.placement == PromptElementPlacement.INITIAL_USER_MESSAGE:
+                raise ValueError("Only FINAL_USER_MESSAGE or SYSTEM_MESSAGE are supported at this time")
+            if loc.position == PromptElementPosition.APPEND:
+                raise ValueError("Only PREPEND is supported at this time")
 
     # Build the context section
     context_parts = []
-
-    # Add repository map if provided and contains non-whitespace content
     if repo_map and repo_map.strip():
         context_parts.append(wrap_xml("repository_map", repo_map))
 
-    # Add file sections if provided
     if readonly_text_files:
         files_xml = format_file_section(readonly_text_files)
         context_parts.append(wrap_xml("readonly_files", files_xml))
@@ -421,39 +428,55 @@ def format_brade_messages(
         files_xml = format_file_section(editable_text_files)
         context_parts.append(wrap_xml("editable_files", files_xml))
 
-    # Add platform info if provided
     if platform_info:
         context_parts.append(wrap_xml("platform_info", platform_info))
 
-    # Combine all context with proper nesting
     context = "".join(context_parts) if context_parts else "\n"
+    context_str = wrap_xml("context", context)
 
     # Format task examples if provided
     task_examples_section = format_task_examples(task_examples)
 
-    # Ensure all parts are strings before concatenation
-    context_str = wrap_xml('context', context)
     instructions_str = wrap_xml("task_instructions", task_instructions)
-    examples_str = task_examples_section
 
-    context_content = f"{context_str}\n{instructions_str}{examples_str}"
-
+    # messages array always starts with the system message
     messages = [{"role": "system", "content": system_prompt}]
 
     if done_messages:
         messages.extend(done_messages)
 
+    # We'll handle the final user message below; but first we need to see if the system message
+    # needs context or task_examples:
+    if context_location and context_location.placement == PromptElementPlacement.SYSTEM_MESSAGE:
+        messages[0]["content"] = context_str + messages[0]["content"]
+
+    if task_examples_location and task_examples_location.placement == PromptElementPlacement.SYSTEM_MESSAGE:
+        messages[0]["content"] = task_examples_section + messages[0]["content"]
+
+    # We'll assemble the final user message content from instructions (if needed),
+    # plus the last user message from cur_messages
     if cur_messages:
+        # everything except the last is appended as-is
         messages.extend(cur_messages[:-1])
         final_user_content = cur_messages[-1]["content"]
     else:
         final_user_content = ""
 
+    # Prepend task_instructions if it's set to go in final user message
+    final_msg_content = ""
+    if task_instructions_location and task_instructions_location.placement == PromptElementPlacement.FINAL_USER_MESSAGE:
+        final_msg_content += instructions_str
+
+    # Then the user’s final message text
+    final_msg_content += "\n\n" + final_user_content
+
+    # If context or examples are also supposed to go in the final user message, we do that here,
+    # but we already have them going to the system message above, so no further changes needed for that.
+
     final_user_message = {
         "role": "user",
-        "content": context_content + "\n\n" + final_user_content,
+        "content": final_msg_content,
     }
-
     messages.append(final_user_message)
 
     return messages

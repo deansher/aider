@@ -152,19 +152,6 @@ def test_unsupported_context_placement() -> None:
             ),
         )
 
-    # Test with SYSTEM_MESSAGE (not yet supported)
-    with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
-        format_brade_messages(
-            system_prompt="Test system prompt",
-            task_instructions="Test instructions",
-            done_messages=[],
-            cur_messages=[{"role": "user", "content": "Test"}],
-            context_location=ElementLocation(
-                placement=PromptElementPlacement.SYSTEM_MESSAGE,
-                position=PromptElementPosition.PREPEND,
-            ),
-        )
-
 
 def test_element_locations() -> None:
     """Tests that elements can be placed in different messages using ElementLocation.
@@ -651,10 +638,12 @@ def test_malformed_input_errors() -> None:
 
     # Test invalid file content type
     with pytest.raises(TypeError):
-        format_brade_messages(  # type: ignore[arg-type]  # Intentionally testing wrong type
+        format_brade_messages( 
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            readonly_text_files=[("test.py", "content")],  # Changed to valid list of tuples
+            # Previously was: readonly_text_files=[("test.py", "content")]
+            # Now intentionally pass a non-list to trigger TypeError:
+            readonly_text_files=("test.py", "content"),  # type: ignore[arg-type]
         )
