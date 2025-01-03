@@ -615,8 +615,8 @@ def test_malformed_input_errors() -> None:
 
     # Test missing system prompt
     with pytest.raises(ValueError):
-        format_brade_messages(  # type: ignore[arg-type]  # Intentionally testing None system_prompt
-            system_prompt=None,
+        format_brade_messages(
+            system_prompt=None,  # type: ignore[arg-type]  # Intentionally testing None system_prompt
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
