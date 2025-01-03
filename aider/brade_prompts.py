@@ -445,34 +445,39 @@ def format_brade_messages(
     if done_messages:
         messages.extend(done_messages)
 
-    # We'll handle the final user message below; but first we need to see if the system message
-    # needs context or task_examples:
+    # We'll handle system message insertion for context/task_examples if requested
     if context_location and context_location.placement == PromptElementPlacement.SYSTEM_MESSAGE:
         messages[0]["content"] = context_str + messages[0]["content"]
 
     if task_examples_location and task_examples_location.placement == PromptElementPlacement.SYSTEM_MESSAGE:
         messages[0]["content"] = task_examples_section + messages[0]["content"]
 
-    # We'll assemble the final user message content from instructions (if needed),
-    # plus the last user message from cur_messages
+    # Prepare the final user message
+    final_user_content = ""
     if cur_messages:
-        # everything except the last is appended as-is
+        # We put everything except the last message unchanged
         messages.extend(cur_messages[:-1])
         final_user_content = cur_messages[-1]["content"]
-    else:
-        final_user_content = ""
 
-    # Prepend task_instructions if it's set to go in final user message
+    # Start building the final message's content
     final_msg_content = ""
+
+    # If context is requested in the final user message, prepend it
+    if context_location and context_location.placement == PromptElementPlacement.FINAL_USER_MESSAGE:
+        final_msg_content += context_str
+
+    # If task instructions go to the final user message, prepend them
     if task_instructions_location and task_instructions_location.placement == PromptElementPlacement.FINAL_USER_MESSAGE:
         final_msg_content += instructions_str
 
-    # Then the user’s final message text
+    # If task examples go to the final user message, prepend them
+    if task_examples_location and task_examples_location.placement == PromptElementPlacement.FINAL_USER_MESSAGE:
+        final_msg_content += task_examples_section
+
+    # Finally, add two newlines plus the actual user message
     final_msg_content += "\n\n" + final_user_content
 
-    # If context or examples are also supposed to go in the final user message, we do that here,
-    # but we already have them going to the system message above, so no further changes needed for that.
-
+    # Now create the final user message object
     final_user_message = {
         "role": "user",
         "content": final_msg_content,
