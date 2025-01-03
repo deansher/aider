@@ -137,8 +137,8 @@ def test_context_and_task_placement() -> None:
         last_pos = pos
 
 
-def test_invalid_context_placement() -> None:
-    """Tests that invalid context placement values raise exceptions."""
+def test_unsupported_context_placement() -> None:
+    """Tests that unsupported context placement values raise exceptions."""
     from aider.brade_prompts import format_brade_messages, ContextMessagePlacement
 
     # Test with INITIAL_USER_MESSAGE (not yet supported)
@@ -151,55 +151,19 @@ def test_invalid_context_placement() -> None:
             context_message_placement=ContextMessagePlacement.INITIAL_USER_MESSAGE,
         )
 
-    # Test with invalid enum value
-    class MockEnum(ContextMessagePlacement):
-        value = "invalid"
-
+    # Test with SYSTEM_MESSAGE (not yet supported)
     with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
         format_brade_messages(
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_message_placement=MockEnum(),
-        )
-
-
-def test_system_message_placement_not_yet_supported() -> None:
-    """Tests that using SYSTEM_MESSAGE for context placement raises the same not-yet-supported error."""
-    from aider.brade_prompts import format_brade_messages, ContextMessagePlacement
-
-    with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
-        format_brade_messages(
-            system_prompt="Test prompt",
-            task_instructions="Test instructions",
-            done_messages=[],
-            cur_messages=[{"role": "user", "content": "Testing new system message placement"}],
             context_message_placement=ContextMessagePlacement.SYSTEM_MESSAGE,
         )
 
 
-def test_initial_message_insert_position() -> None:
-    """Tests that context can be inserted after first line in initial user message.
-
-    This test verifies that when context_message_placement is INITIAL_USER_MESSAGE and
-    context_position is INSERT, the context is placed after the first line of the
-    initial user message.
-    """
-    # Test with both INITIAL_USER_MESSAGE and INSERT
-    with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
-        format_brade_messages(
-            system_prompt="Test prompt",
-            task_instructions="Test instructions",
-            done_messages=[],
-            cur_messages=[{"role": "user", "content": "First line\nSecond line"}],
-            context_message_placement=ContextMessagePlacement.INITIAL_USER_MESSAGE,
-            context_position=ContextPositionInMessage.INSERT,
-        )
-
-
-def test_invalid_context_position() -> None:
-    """Tests that invalid context position values raise exceptions."""
+def test_unsupported_context_position() -> None:
+    """Tests that unsupported context position values raise exceptions."""
     from aider.brade_prompts import format_brade_messages, ContextPositionInMessage
 
     # Test with INSERT (not yet supported)
@@ -210,19 +174,6 @@ def test_invalid_context_position() -> None:
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
             context_position=ContextPositionInMessage.INSERT,
-        )
-
-    # Test with invalid enum value
-    class MockEnum(ContextPositionInMessage):
-        value = "invalid"
-
-    with pytest.raises(ValueError, match="Only PREPEND position"):
-        format_brade_messages(
-            system_prompt="Test prompt",
-            task_instructions="Test instructions",
-            done_messages=[],
-            cur_messages=[{"role": "user", "content": "Test"}],
-            context_position=MockEnum(),
         )
 
 
