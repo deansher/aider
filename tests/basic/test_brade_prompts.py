@@ -146,7 +146,10 @@ def test_unsupported_context_placement() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_message_placement=PromptElementPlacement.INITIAL_USER_MESSAGE,
+            context_location=ElementLocation(
+                placement=PromptElementPlacement.INITIAL_USER_MESSAGE,
+                position=PromptElementPosition.PREPEND,
+            ),
         )
 
     # Test with SYSTEM_MESSAGE (not yet supported)
@@ -156,7 +159,10 @@ def test_unsupported_context_placement() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_message_placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            context_location=ElementLocation(
+                placement=PromptElementPlacement.SYSTEM_MESSAGE,
+                position=PromptElementPosition.PREPEND,
+            ),
         )
 
 
