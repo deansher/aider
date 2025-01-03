@@ -440,3 +440,215 @@ def test_message_combination() -> None:
 
     assert messages[1]["role"] == "user"
     assert "Single message" in messages[1]["content"]
+
+
+def test_file_section_formatting() -> None:
+    """Tests file section formatting and validation.
+
+    Validates:
+    - Correct XML structure for file sections
+    - Proper handling of empty file lists
+    - Error handling for malformed file content tuples
+    """
+    from aider.brade_prompts import format_brade_messages
+
+    # Test empty file lists
+    messages = format_brade_messages(
+        system_prompt="Test prompt",
+        task_instructions="Test instructions",
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test"}],
+        readonly_text_files=[],
+        editable_text_files=[],
+    )
+    final_content = messages[-1]["content"]
+    assert "<readonly_files>" not in final_content
+    assert "<editable_files>" not in final_content
+
+    # Test valid file content
+    test_files = [
+        ("test.py", "def test():\n    pass\n"),
+        ("data.txt", "Sample data\n"),
+    ]
+    messages = format_brade_messages(
+        system_prompt="Test prompt",
+        task_instructions="Test instructions",
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test"}],
+        readonly_text_files=test_files,
+    )
+    final_content = messages[-1]["content"]
+    assert "<readonly_files>" in final_content
+    assert "<file path='test.py'>" in final_content
+    assert "<file path='data.txt'>" in final_content
+    assert "def test():" in final_content
+    assert "Sample data" in final_content
+
+    # Test error handling for malformed tuples
+    with pytest.raises(ValueError):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+            readonly_text_files=[("test.py",)],  # Missing content
+        )
+
+    with pytest.raises(ValueError):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+            readonly_text_files=[("test.py", "content", "extra")],  # Extra element
+        )
+
+    with pytest.raises(ValueError):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+            readonly_text_files=[(42, "content")],  # Wrong type for filename
+        )
+
+
+def test_platform_info_handling() -> None:
+    """Tests platform info formatting and handling.
+
+    Validates:
+    - Platform info appears in correct location
+    - Empty platform info is handled gracefully
+    - Platform info content is preserved correctly
+    """
+    from aider.brade_prompts import format_brade_messages
+
+    # Test with platform info
+    test_platform = "Test platform details\nMultiple lines\nOf information"
+    messages = format_brade_messages(
+        system_prompt="Test prompt",
+        task_instructions="Test instructions",
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test"}],
+        platform_info=test_platform,
+    )
+    final_content = messages[-1]["content"]
+    assert "<platform_info>" in final_content
+    assert test_platform in final_content
+    assert "</platform_info>" in final_content
+
+    # Test without platform info
+    messages = format_brade_messages(
+        system_prompt="Test prompt",
+        task_instructions="Test instructions",
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test"}],
+        platform_info=None,
+    )
+    final_content = messages[-1]["content"]
+    assert "<platform_info>" not in final_content
+
+    # Test with empty platform info
+    messages = format_brade_messages(
+        system_prompt="Test prompt",
+        task_instructions="Test instructions",
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test"}],
+        platform_info="",
+    )
+    final_content = messages[-1]["content"]
+    assert "<platform_info>" not in final_content
+
+
+def test_empty_content_handling() -> None:
+    """Tests handling of empty and whitespace-only content.
+
+    Validates:
+    - Empty strings are handled properly
+    - Whitespace-only strings are handled properly
+    - None values are handled properly
+    """
+    from aider.brade_prompts import format_brade_messages, wrap_xml
+
+    # Test empty string handling
+    assert wrap_xml("test", "") == "<test>\n</test>\n"
+    assert wrap_xml("test", None) == "<test>\n</test>\n"
+
+    # Test whitespace-only strings
+    assert wrap_xml("test", "   ") == "<test>\n</test>\n"
+    assert wrap_xml("test", "\n") == "<test>\n</test>\n"
+    assert wrap_xml("test", "\t  \n  ") == "<test>\n</test>\n"
+
+    # Test empty content in format_brade_messages
+    messages = format_brade_messages(
+        system_prompt="Test prompt",
+        task_instructions="Test instructions",
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": ""}],
+        repo_map="",
+        platform_info="",
+        readonly_text_files=[],
+        editable_text_files=[],
+    )
+    final_content = messages[-1]["content"]
+    assert "<repository_map>" not in final_content
+    assert "<platform_info>" not in final_content
+    assert "<readonly_files>" not in final_content
+    assert "<editable_files>" not in final_content
+
+
+def test_malformed_input_errors() -> None:
+    """Tests error handling for malformed input.
+
+    Validates proper error handling for:
+    - Invalid file content tuples
+    - Malformed task examples
+    - Missing required parameters
+    """
+    from aider.brade_prompts import format_brade_messages, format_task_examples
+
+    # Test missing system prompt
+    with pytest.raises(ValueError):
+        format_brade_messages(
+            system_prompt=None,
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+        )
+
+    # Test malformed task examples
+    with pytest.raises(ValueError):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+            task_examples=[
+                {"role": "user", "content": "Example request"},
+                {"role": "user", "content": "Wrong role"},  # Should be assistant
+            ],
+        )
+
+    # Test odd number of task examples
+    with pytest.raises(ValueError):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+            task_examples=[
+                {"role": "user", "content": "Example request"},
+                {"role": "assistant", "content": "Example response"},
+                {"role": "user", "content": "Unpaired request"},  # Missing response
+            ],
+        )
+
+    # Test invalid file content type
+    with pytest.raises(TypeError):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+            readonly_text_files="not a list",  # Should be list of tuples
+        )
