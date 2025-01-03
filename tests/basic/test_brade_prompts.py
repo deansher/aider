@@ -203,26 +203,108 @@ def test_element_locations() -> None:
     assert "<task_examples>" in system_msg, "Task examples should be in system message"
     assert "Example request" in system_msg, "Example content should be in system message"
 
-    # Verify final user message contains only task instructions
+def test_append_positions() -> None:
+    """Tests that elements can be appended to messages.
+
+    Validates:
+    - Elements can be appended to system messages
+    - Elements can be appended to final user messages
+    - Mixed prepend/append scenarios work correctly
+    """
+    system_prompt = "Test system prompt"
+    task_instructions = "Test task instructions"
+    task_examples = [
+        {"role": "user", "content": "Example request"},
+        {"role": "assistant", "content": "Example response"},
+    ]
+    repo_map = "Test repo map"
+    platform_info = "Test platform"
+
+    # Test appending to system message
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=task_instructions,
+        task_examples=task_examples,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test message"}],
+        repo_map=repo_map,
+        platform_info=platform_info,
+        # Move context to system message and append it
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+    )
+
+    # Verify system message has context appended
+    system_msg = messages[0]["content"]
+    assert system_msg.startswith(system_prompt), "System prompt should come first"
+    assert "<context>" in system_msg, "Context should be in system message"
+    assert repo_map in system_msg, "Repo map should be in system message"
+    assert platform_info in system_msg, "Platform info should be in system message"
+
+    # Test appending to final user message
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=task_instructions,
+        task_examples=task_examples,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test message"}],
+        repo_map=repo_map,
+        platform_info=platform_info,
+        # Append context to final user message
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+    )
+
+    # Verify final user message has context appended
+    final_msg = messages[-1]["content"]
+    assert final_msg.startswith("Test message"), "User message should come first"
+    assert "<context>" in final_msg, "Context should be in final message"
+    assert repo_map in final_msg, "Repo map should be in final message"
+    assert platform_info in final_msg, "Platform info should be in final message"
+
+    # Test mixed prepend/append scenario
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=task_instructions,
+        task_examples=task_examples,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test message"}],
+        repo_map=repo_map,
+        platform_info=platform_info,
+        # Mix of prepend and append in different messages
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+        task_instructions_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
+        task_examples_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+    )
+
+    # Verify system message
+    system_msg = messages[0]["content"]
+    assert system_msg.startswith(system_prompt), "System prompt should come first"
+    assert "<context>" in system_msg, "Context should be in system message"
+
+    # Verify final user message
     final_msg = messages[-1]["content"]
     assert "<task_instructions>" in final_msg, "Task instructions should be in final message"
-    assert task_instructions in final_msg, "Task instructions content should be in final message"
-    assert "<context>" not in final_msg, "Context should not be in final message"
-    assert "<task_examples>" not in final_msg, "Task examples should not be in final message"
-    """Tests that unsupported context position values raise exceptions."""
-
-    # Test with APPEND (not yet supported)
-    with pytest.raises(ValueError, match="Only PREPEND is supported at this time"):
-        format_brade_messages(
-            system_prompt="Test prompt",
-            task_instructions="Test instructions",
-            done_messages=[],
-            cur_messages=[{"role": "user", "content": "Test"}],
-            context_location=ElementLocation(
-                placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-                position=PromptElementPosition.APPEND,
-            ),
-        )
+    assert "Test message" in final_msg, "User message should be in final message"
+    assert "<task_examples>" in final_msg, "Task examples should be in final message"
+    # Check order
+    task_instr_pos = final_msg.find("<task_instructions>")
+    msg_pos = final_msg.find("Test message")
+    task_ex_pos = final_msg.find("<task_examples>")
+    assert task_instr_pos < msg_pos < task_ex_pos, "Elements should be in correct order"
 
 
 def test_basic_message_structure(
