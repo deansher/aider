@@ -6,8 +6,8 @@
 import pytest
 
 from aider.brade_prompts import (
-    ContextMessagePlacement,
-    ContextPositionInMessage,
+    PromptElementPlacement,
+    ElementPosition,
     FileContent,
     format_brade_messages,
 )
@@ -145,7 +145,7 @@ def test_unsupported_context_placement() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_message_placement=ContextMessagePlacement.INITIAL_USER_MESSAGE,
+            context_message_placement=PromptElementPlacement.INITIAL_USER_MESSAGE,
         )
 
     # Test with SYSTEM_MESSAGE (not yet supported)
@@ -155,7 +155,7 @@ def test_unsupported_context_placement() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_message_placement=ContextMessagePlacement.SYSTEM_MESSAGE,
+            context_message_placement=PromptElementPlacement.SYSTEM_MESSAGE,
         )
 
 
@@ -169,7 +169,7 @@ def test_unsupported_context_position() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_position=ContextPositionInMessage.INSERT,
+            context_position=ElementPosition.INSERT,
         )
 
 
