@@ -221,14 +221,17 @@ def test_element_locations() -> None:
     assert "<task_examples>" not in final_msg, "Task examples should not be in final message"
     """Tests that unsupported context position values raise exceptions."""
 
-    # Test with INSERT (not yet supported)
+    # Test with APPEND (not yet supported)
     with pytest.raises(ValueError, match="Only PREPEND position"):
         format_brade_messages(
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_position=PromptElementPosition.APPEND,
+            context_location=ElementLocation(
+                placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+                position=PromptElementPosition.APPEND,
+            ),
         )
 
 
@@ -491,7 +494,7 @@ def test_file_section_formatting() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            readonly_text_files=[("test.py",)],  # Missing content
+            readonly_text_files=[("test.py",)],  # type: ignore  # Missing content - intentional test case
         )
 
     with pytest.raises(ValueError):
@@ -500,7 +503,7 @@ def test_file_section_formatting() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            readonly_text_files=[("test.py", "content", "extra")],  # Extra element
+            readonly_text_files=[("test.py", "content", "extra")],  # type: ignore  # Extra element - intentional test case
         )
 
     with pytest.raises(ValueError):
@@ -509,7 +512,7 @@ def test_file_section_formatting() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            readonly_text_files=[(42, "content")],  # Wrong type for filename
+            readonly_text_files=[(42, "content")],  # type: ignore  # Wrong type for filename - intentional test case
         )
 
 
