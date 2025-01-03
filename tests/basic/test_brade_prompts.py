@@ -137,7 +137,6 @@ def test_context_and_task_placement() -> None:
 
 def test_unsupported_context_placement() -> None:
     """Tests that unsupported context placement values raise exceptions."""
-    from aider.brade_prompts import format_brade_messages, ContextMessagePlacement
 
     # Test with INITIAL_USER_MESSAGE (not yet supported)
     with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
@@ -162,7 +161,6 @@ def test_unsupported_context_placement() -> None:
 
 def test_unsupported_context_position() -> None:
     """Tests that unsupported context position values raise exceptions."""
-    from aider.brade_prompts import format_brade_messages, ContextPositionInMessage
 
     # Test with INSERT (not yet supported)
     with pytest.raises(ValueError, match="Only PREPEND position"):
