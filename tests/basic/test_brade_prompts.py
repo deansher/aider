@@ -659,5 +659,5 @@ def test_malformed_input_errors() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            readonly_text_files="not a list",  # Should be list of tuples
+            readonly_text_files=[("test.py", "content")],  # Changed to valid list of tuples
         )
