@@ -358,13 +358,18 @@ def format_brade_messages(
     image_files: list[FileContent] | None = None,
     platform_info: str | None = None,
     task_examples: list[dict[str, str]] | None = None,
-    # Keep old parameters for backward compatibility
-    context_message_placement: PromptElementPlacement = PromptElementPlacement.FINAL_USER_MESSAGE,
-    context_position: PromptElementPosition = PromptElementPosition.PREPEND,
-    # Add new parameters
-    context_location: ElementLocation | None = None,
-    task_instructions_location: ElementLocation | None = None,
-    task_examples_location: ElementLocation | None = None,
+    context_location: ElementLocation | None = ElementLocation(
+        placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+        position=PromptElementPosition.PREPEND
+    ),
+    task_instructions_location: ElementLocation | None = ElementLocation(
+        placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+        position=PromptElementPosition.PREPEND
+    ),
+    task_examples_location: ElementLocation | None = ElementLocation(
+        placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+        position=PromptElementPosition.PREPEND
+    ),
 ) -> list[dict[str, str]]:
     """Formats chat messages according to Brade's prompt structure.
 
@@ -399,11 +404,6 @@ def format_brade_messages(
     if system_prompt is None:
         raise ValueError("system_prompt cannot be None")
 
-    if context_message_placement != PromptElementPlacement.FINAL_USER_MESSAGE:
-        raise ValueError("Only FINAL_USER_MESSAGE placement is currently supported")
-
-    if context_position != PromptElementPosition.PREPEND:
-        raise ValueError("Only PREPEND position is currently supported")
 
     # Build the context section
     context_parts = []
