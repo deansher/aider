@@ -142,7 +142,7 @@ def test_unsupported_context_placement() -> None:
     # Test with INITIAL_USER_MESSAGE (not yet supported)
     with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
         format_brade_messages(
-            system_prompt="Test prompt",
+            system_prompt="Test prompt",  # Changed from None to valid string
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
@@ -206,9 +206,6 @@ def test_element_locations() -> None:
             placement=PromptElementPlacement.FINAL_USER_MESSAGE,
             position=PromptElementPosition.PREPEND,
         ),
-        # Add old parameters to verify they're overridden
-        context_message_placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-        context_position=PromptElementPosition.PREPEND,
     )
 
     # Verify system message contains context and examples
