@@ -252,8 +252,16 @@ def test_append_positions() -> None:
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map=repo_map,
         platform_info=platform_info,
-        # Append context to final user message
+        # Append all elements to final user message
         context_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+        task_instructions_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+        task_examples_location=ElementLocation(
             placement=PromptElementPlacement.FINAL_USER_MESSAGE,
             position=PromptElementPosition.APPEND,
         ),
