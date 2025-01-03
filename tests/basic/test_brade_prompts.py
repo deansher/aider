@@ -6,6 +6,7 @@
 import pytest
 
 from aider.brade_prompts import (
+    ElementLocation,
     PromptElementPlacement,
     PromptElementPosition,
     FileContent,
@@ -160,6 +161,78 @@ def test_unsupported_context_placement() -> None:
 
 
 def test_unsupported_context_position() -> None:
+    """Tests that unsupported context position values raise exceptions."""
+
+    # Test with INSERT (not yet supported)
+    with pytest.raises(ValueError, match="Only PREPEND position"):
+        format_brade_messages(
+            system_prompt="Test prompt",
+            task_instructions="Test instructions",
+            done_messages=[],
+            cur_messages=[{"role": "user", "content": "Test"}],
+            context_position=PromptElementPosition.INSERT,
+        )
+
+
+def test_element_locations() -> None:
+    """Tests that elements can be placed in different messages using ElementLocation.
+    
+    Validates:
+    - Elements can be placed independently in different messages
+    - New location parameters override old ones when both are present
+    - Content appears correctly in specified locations
+    """
+    system_prompt = "Test system prompt"
+    task_instructions = "Test task instructions"
+    task_examples = [
+        {"role": "user", "content": "Example request"},
+        {"role": "assistant", "content": "Example response"},
+    ]
+    repo_map = "Test repo map"
+    platform_info = "Test platform"
+
+    # Test moving context and examples to system message
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=task_instructions,
+        task_examples=task_examples,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test message"}],
+        repo_map=repo_map,
+        platform_info=platform_info,
+        # Use new location parameters
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
+        task_examples_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
+        # Keep task instructions in final user message
+        task_instructions_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
+        # Add old parameters to verify they're overridden
+        context_message_placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+        context_position=PromptElementPosition.PREPEND,
+    )
+
+    # Verify system message contains context and examples
+    system_msg = messages[0]["content"]
+    assert "<context>" in system_msg, "Context should be in system message"
+    assert repo_map in system_msg, "Repo map should be in system message"
+    assert platform_info in system_msg, "Platform info should be in system message"
+    assert "<task_examples>" in system_msg, "Task examples should be in system message"
+    assert "Example request" in system_msg, "Example content should be in system message"
+
+    # Verify final user message contains only task instructions
+    final_msg = messages[-1]["content"]
+    assert "<task_instructions>" in final_msg, "Task instructions should be in final message"
+    assert task_instructions in final_msg, "Task instructions content should be in final message"
+    assert "<context>" not in final_msg, "Context should not be in final message"
+    assert "<task_examples>" not in final_msg, "Task examples should not be in final message"
     """Tests that unsupported context position values raise exceptions."""
 
     # Test with INSERT (not yet supported)
