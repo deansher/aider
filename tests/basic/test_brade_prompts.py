@@ -140,7 +140,7 @@ def test_unsupported_context_placement() -> None:
     """Tests that unsupported context placement values raise exceptions."""
 
     # Test with INITIAL_USER_MESSAGE (not yet supported)
-    with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
+    with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE or SYSTEM_MESSAGE are supported at this time"):
         format_brade_messages(
             system_prompt="Test system prompt",
             task_instructions="Test instructions",
@@ -155,7 +155,7 @@ def test_unsupported_context_placement() -> None:
 
 def test_element_locations() -> None:
     """Tests that elements can be placed in different messages using ElementLocation.
-    
+
     Validates:
     - Elements can be placed independently in different messages
     - New location parameters override old ones when both are present
@@ -212,7 +212,7 @@ def test_element_locations() -> None:
     """Tests that unsupported context position values raise exceptions."""
 
     # Test with APPEND (not yet supported)
-    with pytest.raises(ValueError, match="Only PREPEND position"):
+    with pytest.raises(ValueError, match="Only PREPEND is supported at this time"):
         format_brade_messages(
             system_prompt="Test prompt",
             task_instructions="Test instructions",
