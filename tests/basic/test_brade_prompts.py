@@ -15,7 +15,7 @@ from aider.types import ChatMessage
 
 
 @pytest.fixture
-def sample_done_messages() -> list[ChatMessage]:
+def sample_done_messages() -> list[dict[str, str]]:
     """Provides sample conversation history messages.
 
     This fixture provides messages that represent previous completed exchanges.
@@ -31,7 +31,7 @@ def sample_done_messages() -> list[ChatMessage]:
 
 
 @pytest.fixture
-def sample_cur_messages() -> list[ChatMessage]:
+def sample_cur_messages() -> list[dict[str, str]]:
     """Provides sample current conversation messages.
 
     This fixture provides messages for the active exchange.
@@ -152,7 +152,7 @@ def test_invalid_context_placement() -> None:
         )
 
     # Test with invalid enum value
-    class MockEnum:
+    class MockEnum(ContextMessagePlacement):
         value = "invalid"
 
     with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE placement"):
@@ -213,7 +213,7 @@ def test_invalid_context_position() -> None:
         )
 
     # Test with invalid enum value
-    class MockEnum:
+    class MockEnum(ContextPositionInMessage):
         value = "invalid"
 
     with pytest.raises(ValueError, match="Only PREPEND position"):

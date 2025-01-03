@@ -223,16 +223,17 @@ Your partner does not see this portion of the message.)
 )
 
 
-def format_task_examples(task_examples: list[ChatMessage] | None) -> str:
+def format_task_examples(task_examples: list[dict[str, str]] | None) -> str:
     """Formats task example messages into XML structure.
 
     This function validates and transforms example conversations into XML format,
     showing paired user/assistant interactions that demonstrate desired behavior.
 
     Args:
-        task_examples: List of ChatMessages containing example conversations.
+        task_examples: List of message dictionaries containing example conversations.
             Messages must be in pairs (user, assistant) demonstrating desired behavior.
             Can be None to indicate no examples.
+            Each message must be a dict with 'role' and 'content' string fields.
 
     Returns:
         XML formatted string containing the example conversations.
@@ -336,17 +337,17 @@ def format_file_section(files: list[FileContent] | None) -> str:
 def format_brade_messages(
     system_prompt: str,
     task_instructions: str,
-    done_messages: list[ChatMessage],
-    cur_messages: list[ChatMessage],
+    done_messages: list[dict[str, str]],
+    cur_messages: list[dict[str, str]],
     repo_map: str | None = None,
     readonly_text_files: list[FileContent] | None = None,
     editable_text_files: list[FileContent] | None = None,
     image_files: list[FileContent] | None = None,
     platform_info: str | None = None,
-    task_examples: list[ChatMessage] | None = None,
+    task_examples: list[dict[str, str]] | None = None,
     context_message_placement: ContextMessagePlacement = ContextMessagePlacement.FINAL_USER_MESSAGE,
     context_position: ContextPositionInMessage = ContextPositionInMessage.PREPEND,
-) -> list[ChatMessage]:
+) -> list[dict[str, str]]:
     """Formats chat messages according to Brade's prompt structure.
 
     This function implements Brade's approach to structuring prompts for LLM interactions.
@@ -412,11 +413,12 @@ def format_brade_messages(
     # Format task examples if provided
     task_examples_section = format_task_examples(task_examples)
 
-    context_content = (
-        f"{wrap_xml('context', context)}\n"
-        + wrap_xml("task_instructions", task_instructions)
-        + f"{task_examples_section}"
-    )
+    # Ensure all parts are strings before concatenation
+    context_str = wrap_xml('context', context)
+    instructions_str = wrap_xml("task_instructions", task_instructions)
+    examples_str = task_examples_section
+
+    context_content = f"{context_str}\n{instructions_str}{examples_str}"
 
     messages = [{"role": "system", "content": system_prompt}]
 
