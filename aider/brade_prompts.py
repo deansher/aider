@@ -14,13 +14,13 @@ from .types import ChatMessage
 
 
 class PromptElementPlacement(Enum):
-    """Controls which message gets context or task elements.
+    """Controls which message gets a prompt element, such as a context or task element.
 
     Values:
-        FINAL_USER_MESSAGE: Add elements to the final user message.
-        INITIAL_USER_MESSAGE: Add elements to the first user message.
+        FINAL_USER_MESSAGE: Add element to the final user message.
+        INITIAL_USER_MESSAGE: Add element to the first user message.
             This option is not yet supported.
-        SYSTEM_MESSAGE: Add elements to the system message.
+        SYSTEM_MESSAGE: Add element to the system message.
             This option is also not yet supported.
     """
 
@@ -29,13 +29,13 @@ class PromptElementPlacement(Enum):
     SYSTEM_MESSAGE = "system_message"
 
 
-class ElementPosition(Enum):
-    """Controls where in the message context or task elements are placed.
+class PromptElementPosition(Enum):
+    """Controls where a prompt element, such as a context or task element, is placed in the message.
 
     Values:
-        PREPEND: Add elements at the start of the message.
+        PREPEND: Add element at the start of the message.
             This is currently the only supported option.
-        INSERT: Add elements after the first line of the message.
+        INSERT: Add element after the first line of the message.
             This option is not yet supported.
     """
 
@@ -346,7 +346,7 @@ def format_brade_messages(
     platform_info: str | None = None,
     task_examples: list[dict[str, str]] | None = None,
     context_message_placement: PromptElementPlacement = PromptElementPlacement.FINAL_USER_MESSAGE,
-    context_position: ElementPosition = ElementPosition.PREPEND,
+    context_position: PromptElementPosition = PromptElementPosition.PREPEND,
 ) -> list[dict[str, str]]:
     """Formats chat messages according to Brade's prompt structure.
 
@@ -384,7 +384,7 @@ def format_brade_messages(
     if context_message_placement != PromptElementPlacement.FINAL_USER_MESSAGE:
         raise ValueError("Only FINAL_USER_MESSAGE placement is currently supported")
 
-    if context_position != ElementPosition.PREPEND:
+    if context_position != PromptElementPosition.PREPEND:
         raise ValueError("Only PREPEND position is currently supported")
 
     # Build the context section

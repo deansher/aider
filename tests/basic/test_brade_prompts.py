@@ -7,7 +7,7 @@ import pytest
 
 from aider.brade_prompts import (
     PromptElementPlacement,
-    ElementPosition,
+    PromptElementPosition,
     FileContent,
     format_brade_messages,
 )
@@ -169,7 +169,7 @@ def test_unsupported_context_position() -> None:
             task_instructions="Test instructions",
             done_messages=[],
             cur_messages=[{"role": "user", "content": "Test"}],
-            context_position=ElementPosition.INSERT,
+            context_position=PromptElementPosition.INSERT,
         )
 
 
