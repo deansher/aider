@@ -119,28 +119,35 @@ from hello import hello
         ),
     ]
 
-    system_reminder = """# *SEARCH/REPLACE block* Rules:
+    system_reminder = """# Quick Reference: SEARCH/REPLACE Block Format
 
-Every *SEARCH/REPLACE block* must use this format:
+┌──────────────────┬────────────────────────────────────────┐
+│ Block Component  │ Requirements                           │
+├──────────────────┼────────────────────────────────────────┤
+│ 1. File Path     │ - Full path from project root         │
+│                  │ - No quotes, asterisks, or escaping    │
+├──────────────────┼────────────────────────────────────────┤
+│ 2. Code Fence    │ - {fence[0]}language                   │
+│                  │ - Match file extension                 │
+├──────────────────┼────────────────────────────────────────┤
+│ 3. Search Block  │ - Starts with <<<<<<< SEARCH          │
+│                  │ - Exact match of existing content      │
+├──────────────────┼────────────────────────────────────────┤
+│ 4. Divider       │ - =======                             │
+├──────────────────┼────────────────────────────────────────┤
+│ 5. Replace Block │ - Your new content                     │
+│                  │ - Ends with >>>>>>> REPLACE           │
+└──────────────────┴────────────────────────────────────────┘
 
-1. The *FULL* file path alone on a line, relative to the project root, verbatim, with no 
-   punctuation. No bold asterisks, no quotes around it, no escaping of characters, etc.
-2. The opening fence and code language, eg: {fence[0]}python
-   a. You *MUST* use the correct opening and closing fences for this particular response:
-      {fence[0]}
-      {fence[1]}
-   b. Pay attention to the file's extension and contents to get the language right.
+# Example
 
-3. The start of search block: <<<<<<< SEARCH
-4. A contiguous chunk of lines verbatim from the existing file contents
-5. The dividing line: =======
-6. The lines to replace into the source code
-7. The end of the replace block: >>>>>>> REPLACE
-8. The closing fence: {fence[1]}
+utils/echo.py
+{fence[0]}python
+<<<<<<< SEARCH
+def echo(msg):
+    "print a message"
 
-Use the *FULL* file path, as shown to you in <context>...</context>
-
-Here is an example of a correct and complete *SEARCH/REPLACE* block, if the target file's
+    print(msg)
 path relative to the project root is `utils/echo.py`:
 
 utils/echo.py
