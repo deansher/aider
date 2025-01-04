@@ -4,7 +4,27 @@
 """Functions for formatting chat messages according to Brade's prompt structure.
 
 This module implements Brade's approach to structuring prompts for LLM interactions.
-It follows the guidelines in design_docs/anthropic_docs/claude_prompting_guide.md:
+It follows the guidelines in design_docs/anthropic_docs/claude_prompting_guide.md.
+
+# Guidelines for Writing Prompts
+
+When writing or modifying prompts in this module:
+
+1. Clarity and Structure
+   - Use clear, concise language
+   - Break complex ideas into bullet points or numbered lists
+   - Use consistent formatting and indentation
+   - Include examples for complex concepts
+
+2. XML Sections
+   - Use XML tags to clearly separate different prompt components
+   - Maintain consistent tag naming and structure
+   - Document the purpose and content of each section
+
+3. Documentation
+   - Keep docstrings focused and specific
+   - Document key invariants and assumptions
+   - Explain the "why" behind complex decisions
 """
 
 from dataclasses import dataclass
