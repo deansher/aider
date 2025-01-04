@@ -23,3 +23,5 @@ types-Pygments
 types-jsonschema
 types-beautifulsoup4
 pandas-stubs
+types-psutil
+types-tree-sitter-languages
