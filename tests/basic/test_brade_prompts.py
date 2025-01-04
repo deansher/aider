@@ -310,9 +310,9 @@ def test_append_positions() -> None:
     assert "<task_examples>" in final_msg, "Task examples should be in final message"
     # Check order
     task_instr_pos = final_msg.find("<task_instructions>")
-    msg_pos = final_msg.find("Test message")
+    user_msg_pos = final_msg.find("Test message")
     task_ex_pos = final_msg.find("<task_examples>")
-    assert task_instr_pos < msg_pos < task_ex_pos, "Elements should be in correct order"
+    assert task_instr_pos < user_msg_pos < task_ex_pos, "Elements should be in correct order. Got this:\n" + final_msg
 
 
 def test_basic_message_structure(
