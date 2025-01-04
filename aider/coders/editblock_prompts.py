@@ -121,12 +121,12 @@ from hello import hello
 
 
 
-    system_reminder = """# Step 2: Implementation Requirements
+    system_reminder = """# Implementation Requirements
 
-## Implement Approved Changes.
-- Implement ONLY the changes approved in Step 1. 
-  (Avoid starting new analysis, proposing new changes, or expanding scope.)
-- If you encounter issues, then explain them, stop, and wait for your partner's feedback.
+## Stay Focused
+- Implement ONLY the specified changes
+- Avoid starting new analysis, proposing new changes, or expanding scope
+- If you encounter issues, then explain them, stop, and wait for your partner's feedback
 
 ## SEARCH/REPLACE Block Format Reference
 
