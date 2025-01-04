@@ -261,8 +261,9 @@ class ArchitectCoder(Coder):
 
         if architect_response_codes.has(architect_proposed_changes):
             exchange = ArchitectExchange(self.architect_prompts, architect_response)
-            # TODO: Implement plan vs non-plan distinction
-            # For now, always treat as non-plan changes
+            # TODO: Implement plan vs non-plan distinction by analyzing the content
+            # of architect_response to determine if it proposes changes to plan
+            # documents vs other project files
             self.process_architect_change_proposal(
                 exchange, False
             )
