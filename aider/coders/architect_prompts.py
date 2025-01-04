@@ -97,34 +97,44 @@ possible_architect_responses: ChoiceManager = ChoiceManager()
 
 # Define the analysis choices used by the architect coder
 response_section = possible_architect_responses.add_section(
-    f"""Compare the assistant's response to the choices we gave it for how to respond. 
-Decide whether the assistant's human partner will be best served by having the Brade 
-application take one of the special actions, or by simply treating the assistant's response 
-as conversation. Do this by choosing the single best option from the list below.
+    f"""Compare the assistant's response to the four response types we gave it:
 
-Select the **proposed changes** option if you think there's a reasonable chance the
-user would like to interpret the assistants's answer as a proposal to make changes,
-and would like to be able to say "yes" to it. This gives the assistant's human partner 
-an opportunity to make that decision for themself. But if it is clear to you that the 
-assistant has not proposed anything concrete enough to say "yes" to, then choose one of
-the other options.
+┌─────────────────┬────────────────────────────┬────────────────────────┐
+│ Response Type   │ When to Use                │ Next Step              │
+├─────────────────┼────────────────────────────┼────────────────────────┤
+│ Ask Questions   │ Request is unclear or      │ Stay in Step 1         │
+│                 │ incomplete                │ Partner clarifies      │
+├─────────────────┼────────────────────────────┼────────────────────────┤
+│ Request Files   │ Need to see more files     │ Stay in Step 1         │
+│                 │ before proposing changes   │ Partner shares files  │
+├─────────────────┼────────────────────────────┼────────────────────────┤
+│ Analyze/Explain │ Share your understanding   │ Stay in Step 1         │
+│                 │ or recommendations        │ Partner responds      │
+├─────────────────┼────────────────────────────┼────────────────────────┤
+│ Propose Changes │ Ready with specific,       │ Move to Step 2 if      │
+│                 │ actionable changes        │ partner approves      │
+└─────────────────┴────────────────────────────┴────────────────────────┘
+
+Choose the single response type that best characterizes the assistant's response.
+If the assistant proposed changes, we'll determine separately whether they affect
+plan documents or other project files.
 
 Here are the choices we gave the assistant for how it could respond:
 
 ${_quoted_ways_to_respond_instructions}
 """
 )
-architect_proposed_plan_changes = response_section.add_choice(
-    "The assistant **proposed changes** to a plan document."
+architect_asked_questions = response_section.add_choice(
+    "The assistant **asked questions** because the request was unclear or incomplete."
 )
-architect_proposed_non_plan_changes = response_section.add_choice(
-    "The assistant **proposed changes** to project files beyond just a plan document."
+architect_requested_files = response_section.add_choice(
+    "The assistant **requested files** needed to propose changes."
 )
-architect_asked_to_see_files = response_section.add_choice(
-    "The assistant **asked to see more files**."
+architect_analyzed_or_explained = response_section.add_choice(
+    "The assistant **analyzed or explained** to share understanding or recommendations."
 )
-architect_continued_conversation = response_section.add_choice(
-    "The assistant **responded conversationally**."
+architect_proposed_changes = response_section.add_choice(
+    "The assistant **proposed specific, actionable changes** ready for implementation."
 )
 
 
