@@ -158,52 +158,45 @@ def echo(msg):
 >>>>>>> REPLACE
 {fence[1]}
 
-Every *SEARCH* section must *EXACTLY MATCH* the existing file content, character for 
-character, including all comments, docstrings, etc. If the file contains code or other 
-data wrapped/escaped in json/xml/quotes or other  containers, then both your SEARCH 
-and your REPLACE sections must contain content exactly as it does or will appear in the 
-file, with all wrapping, escaping, quoting, containers, etc.
+# Key Requirements
 
-Each *SEARCH/REPLACE* blocks will *only* replace the first match occurrence. Include
-enough context to ensure a unique match. If you need to replace multiple occurrences,
-use context to make multiple *SEARCH/REPLACE* blocks unique.
+1. **Exact Matching**
+   - Match every character exactly, including:
+     - Whitespace and indentation
+     - Comments and docstrings
+     - Container syntax (quotes, XML, etc.)
 
-You must make good decisions on unchanged context, and which unchanged context, to 
-include in each *SEARCH/REPLACE* block. As a first priority, you should use small 
-*SEARCH/REPLACE* blocks that include just enough lines of unchanged context to ensure 
-a unique match in the source file and to help you and your partner understand the context. 
-You can produce as many *SEARCH/REPLACE* blocks as you need to make your changes.
+2. **Context Selection**
+   - Primary goal: Ensure unique matches
+   - Secondary goal: Start at logical boundaries
+   - Maximum: ~10 lines of unchanged context
+   - Use multiple blocks for multiple changes
 
-As a lower priority, it is helpful to expand the context a bit above and below your change
-to allow the *SEARCH/REPLACE* block to start at a logical boundary, such as the beginning 
-of a top-level declaration, the header of a document section, etc. 
-But don't include more than about 10 lines of unchanged context to make
-this happen. As a compromise, consider starting at a minor logical boundary, such as a 
-top-level `if` statement or the beginning of a paragraph.
+3. **Common Mistakes to Avoid**
+   - Don't accidentally delete comments
+   - Don't accidentally change indentation
+   - Don't accidentally remove blank lines
+   - Don't forget to copy unchanged context exactly
 
-Be careful that whatever context lines you include in your SEARCH block that you don't 
-intend to change are reproduced verbatim in your REPLACE block. It is easy to accidentally
-delete content that you subconsciously see as less important, such as a comment or a blank
-line. It is also easy to accidentally change indentation.
+# Special Cases
 
-Only write *SEARCH/REPLACE* blocks for files in <editable_files>...</editable_files> or
-for files that you propose to create. If you feel strongly that you need to change a file in
-<readonly_files>...</readonly_files> that is within this project, you can write an edit
-block for that.
+1. **File Selection**
+   - Default to files in <editable_files>
+   - Only touch <readonly_files> if essential
+   - Follow partner's filename requests exactly
 
-To move code within a file, use 2 *SEARCH/REPLACE* blocks: 1 to delete it from its current 
-location, 1 to insert it in the new location.
+2. **Creating New Files**
+   - Use empty SEARCH section
+   - Put new content in REPLACE section
+   - Use full path from project root
 
-Pay attention to which filenames your partner wants you to edit, especially if they are 
-asking you to create a new file.
+3. **Moving Code**
+   - Use two blocks:
+     1. Delete from original location
+     2. Insert at new location
 
-If you want to put code in a new file, use a *SEARCH/REPLACE block* with:
-- A new file path relative to the project root
-- An empty `SEARCH` section
-- The new file's contents in the `REPLACE` section
-
-To rename files which have been added to the chat, use shell commands at the end of your 
-response.
+4. **Renaming Files**
+   - Use shell commands at end of response
 
 {lazy_prompt}
 ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
