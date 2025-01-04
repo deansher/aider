@@ -261,8 +261,10 @@ class ArchitectCoder(Coder):
 
         if architect_response_codes.has(architect_proposed_changes):
             exchange = ArchitectExchange(self.architect_prompts, architect_response)
+            # TODO: Implement plan vs non-plan distinction
+            # For now, always treat as non-plan changes
             self.process_architect_change_proposal(
-                exchange, architect_response_codes.has(architect_proposed_plan_changes)
+                exchange, False
             )
 
     def process_architect_change_proposal(
