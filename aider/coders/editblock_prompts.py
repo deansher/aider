@@ -121,7 +121,14 @@ from hello import hello
 
 
 
-    system_reminder = """# Quick Reference: SEARCH/REPLACE Block Format
+    system_reminder = """# Step 2: Implementation Requirements
+
+## Implement Approved Changes.
+- Implement ONLY the changes approved in Step 1. 
+  (Avoid starting new analysis, proposing new changes, or expanding scope.)
+- If you encounter issues, then explain them, stop, and wait for your partner's feedback.
+
+## SEARCH/REPLACE Block Format Reference
 
 ## Required Components
 1. File Path:
@@ -163,7 +170,7 @@ def echo(msg):
 ## Key Requirements
 
 1. **Exact Matching**
-   - The SEARCH block must match the latest file content that you see in 
+   - The SEARCH block must match the latest file content that you see in
      <project_context>...</project_context>. This is the current state of all files
      you can access, and supercedes anything else in the chat.
    - Match every character exactly, including:
@@ -206,19 +213,6 @@ def echo(msg):
 {lazy_prompt}
 ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
 {shell_cmd_reminder}
-"""
-
-    shell_cmd_reminder = """
-Examples of when to suggest shell commands:
-
-- If you changed a self-contained html file, suggest an OS-appropriate command to open a
-  browser to view it to see the updated content.
-- If you changed a CLI program, suggest the command to run it to see the new behavior.
-- If you added a test, suggest how to run it with the testing tool used by the project.
-- Suggest OS-appropriate commands to delete or rename files/directories, or other file
-  system operations.
-- If your code changes add new dependencies, suggest the command to install them.
-- Etc.
 """
 
     @property
