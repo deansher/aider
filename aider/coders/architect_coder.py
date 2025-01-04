@@ -100,6 +100,25 @@ class ArchitectCoder(Coder):
     2. Coordinates with editor coder to implement changes
     3. Coordinates with reviewer coder to validate changes
 
+    # Architectural Design Decisions
+
+    ## Separation of Concerns
+    The architect's role is strictly separated from implementation details:
+    - Architect SPECIFIES changes but does not MAKE them
+    - Implementation details are encapsulated in EditBlockCoder
+    - Small code snippets allowed only to clarify proposals
+
+    ## Message Stream Isolation
+    EditBlockCoder's output is deliberately hidden from ArchitectCoder to:
+    1. Maintain role separation (avoid architect trying to do implementation)
+    2. Keep proposals concise and high-level
+    3. Avoid micro-managing the implementation step
+
+    ## Implementation Notes
+    - ArchitectCoder's prompts explicitly prohibit generating implementation
+    - EditBlockCoder handles all actual file modifications
+    - This separation supports cleaner architecture and better review flow
+
     Attributes:
         edit_format: The edit format identifier for this coder type
         produces_code_edits: Whether this coder directly produces code edits
