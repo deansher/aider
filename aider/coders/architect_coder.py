@@ -259,7 +259,7 @@ class ArchitectCoder(Coder):
         if architect_response_codes.has(architect_proposed_changes):
             exchange = ArchitectExchange(self.architect_prompts, architect_response)
             self.process_architect_change_proposal(
-                exchange, False
+                exchange, False  # TODO: add logic to make this distinction if necessary
             )
 
     def process_architect_change_proposal(
