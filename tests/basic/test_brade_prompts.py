@@ -316,9 +316,17 @@ def test_append_positions() -> None:
     assert "<task_examples>" in final_msg, "Task examples should be in final message"
     # Check order by finding tags at start of lines
     import re
-    task_instr_pos = re.search(r'^\s*<task_instructions>\s*$', final_msg, re.MULTILINE).start()
+    task_instr_match = re.search(r'^\s*<task_instructions>\s*$', final_msg, re.MULTILINE)
+    assert task_instr_match is not None, "Could not find <task_instructions> tag in:\n" + final_msg
+    task_instr_pos = task_instr_match.start()
+
     user_msg_pos = final_msg.find("Test message")
-    task_ex_pos = re.search(r'^\s*<task_examples>\s*$', final_msg, re.MULTILINE).start()
+    assert user_msg_pos != -1, "Could not find user message in:\n" + final_msg
+
+    task_ex_match = re.search(r'^\s*<task_examples>\s*$', final_msg, re.MULTILINE)
+    assert task_ex_match is not None, "Could not find <task_examples> tag in:\n" + final_msg
+    task_ex_pos = task_ex_match.start()
+
     assert task_instr_pos < user_msg_pos < task_ex_pos, "Elements should be in correct order. Got this:\n" + final_msg
 
 
