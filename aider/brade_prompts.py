@@ -9,9 +9,14 @@ It follows the guidelines in design_docs/anthropic_docs/claude_prompting_guide.m
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
+from typing import List, Optional, Tuple, TypeAlias
 
 from .types import ChatMessage
+
+# Type definitions for prompt formatting
+FileContent: TypeAlias = Tuple[str, str]  # (filename, content)
+
+
 
 
 class PromptElementPlacement(Enum):
@@ -223,10 +228,6 @@ def format_task_examples(task_examples: list[dict[str, str]] | None) -> str:
         )
 
     return wrap_xml("task_examples", examples_xml)
-
-
-# Type alias for file content tuples (filename, content)
-FileContent = Tuple[str, str]
 
 
 def wrap_xml(tag: str, content: str | None) -> str:
