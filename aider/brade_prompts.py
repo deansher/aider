@@ -488,17 +488,23 @@ def format_brade_messages(
     final_elements = [elem for elem in elements if elem.location.placement == PromptElementPlacement.FINAL_USER_MESSAGE]
 
     # First add all PREPEND elements
+    has_prepend = False
     for elem in final_elements:
         if elem.location.position == PromptElementPosition.PREPEND:
+            if final_msg_content:
+                final_msg_content += "\n\n"
             final_msg_content += elem.content
+            has_prepend = True
 
     # Add the user message with newlines for readability
-    final_msg_content += "\n\n" + final_user_content
+    if has_prepend:
+        final_msg_content += "\n\n"
+    final_msg_content += final_user_content
 
     # Then add all APPEND elements
     for elem in final_elements:
         if elem.location.position == PromptElementPosition.APPEND:
-            final_msg_content += elem.content
+            final_msg_content += "\n\n" + elem.content
 
     # Now create the final user message object
     final_user_message = {
