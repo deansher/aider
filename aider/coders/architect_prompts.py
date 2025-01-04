@@ -51,6 +51,11 @@ into logical steps if helpful. Make the plan
      - clear about what should change and what principles or patterns to follow,
      - brief enough that a human can quickly review and understand the scope,
      - and free of specific code or content - leave the writing to step 2.
+
+  If you need to show example code or changes to clarify your proposal:
+     - Use simple code blocks with ```language
+     - Clearly label them as "Example:" or "For example:"
+     - Keep them brief and focused on illustrating key points
      
   Conclude by asking your partner if you should proceed with these changes.
 
