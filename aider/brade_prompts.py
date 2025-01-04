@@ -481,32 +481,30 @@ def format_brade_messages(
         messages.extend(cur_messages[:-1])
         final_user_content = cur_messages[-1]["content"]
 
-    # Start building the final message's content
-    final_msg_content = ""
-
-    # Add elements to final user message if requested
+    # Build the final message content in three phases:
+    # 1. All PREPEND elements
+    # 2. User message
+    # 3. All APPEND elements
     final_elements = [elem for elem in elements if elem.location.placement == PromptElementPlacement.FINAL_USER_MESSAGE]
-
-    # First add all PREPEND elements
-    has_prepend = False
+    
+    # Phase 1: PREPEND elements
+    prepend_elements = [elem for elem in final_elements if elem.location.position == PromptElementPosition.PREPEND]
     prepend_content = ""
-    for elem in final_elements:
-        if elem.location.position == PromptElementPosition.PREPEND:
-            if prepend_content:
-                prepend_content += "\n\n"
-            prepend_content += elem.content
-            has_prepend = True
+    for elem in prepend_elements:
+        if prepend_content:
+            prepend_content += "\n\n"
+        prepend_content += elem.content
 
-    # Build the final content in the correct order
+    # Phase 2: User message
     final_msg_content = prepend_content
-    if has_prepend and final_user_content:
+    if prepend_content and final_user_content:
         final_msg_content += "\n\n"
     final_msg_content += final_user_content
 
-    # Then add all APPEND elements
-    for elem in final_elements:
-        if elem.location.position == PromptElementPosition.APPEND:
-            final_msg_content += "\n\n" + elem.content
+    # Phase 3: APPEND elements
+    append_elements = [elem for elem in final_elements if elem.location.position == PromptElementPosition.APPEND]
+    for elem in append_elements:
+        final_msg_content += "\n\n" + elem.content
 
     # Now create the final user message object
     final_user_message = {
