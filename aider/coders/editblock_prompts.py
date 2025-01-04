@@ -164,7 +164,8 @@ def echo(msg):
 
 1. **Exact Matching**
    - The SEARCH block must match the latest file content that you see in 
-     <project_context>...</project_context>.
+     <project_context>...</project_context>. This is the current state of all files
+     you can access, and supercedes anything else in the chat.
    - Match every character exactly, including:
      - Whitespace and indentation
      - Comments and docstrings
