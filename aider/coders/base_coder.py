@@ -1113,6 +1113,18 @@ class Coder:
             image_files=image_files,
             platform_info=platform_info,
             task_examples=task_examples,
+            context_location=ElementLocation(
+                placement=PromptElementPlacement.SYSTEM_MESSAGE,
+                position=PromptElementPosition.APPEND
+            ),
+            task_instructions_location=ElementLocation(
+                placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+                position=PromptElementPosition.PREPEND
+            ),
+            task_examples_location=ElementLocation(
+                placement=PromptElementPlacement.SYSTEM_MESSAGE,
+                position=PromptElementPosition.APPEND
+            ),
         )
 
     @observe
