@@ -97,25 +97,7 @@ possible_architect_responses: ChoiceManager = ChoiceManager()
 
 # Define the analysis choices used by the architect coder
 response_section = possible_architect_responses.add_section(
-    f"""Compare the assistant's response to the four response types we gave it:
-
-┌─────────────────┬────────────────────────────┬────────────────────────┐
-│ Response Type   │ When to Use                │ Next Step              │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Ask Questions   │ Request is unclear or      │ Stay in Step 1         │
-│                 │ incomplete                │ Partner clarifies      │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Request Files   │ Need to see more files     │ Stay in Step 1         │
-│                 │ before proposing changes   │ Partner shares files  │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Analyze/Explain │ Share your understanding   │ Stay in Step 1         │
-│                 │ or recommendations        │ Partner responds      │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Propose Changes │ Ready with specific,       │ Move to Step 2 if      │
-│                 │ actionable changes        │ partner approves      │
-└─────────────────┴────────────────────────────┴────────────────────────┘
-
-Choose the single response type that best characterizes the assistant's response.
+    f"""Choose the single response type that best characterizes the assistant's response.
 If the assistant proposed changes, we'll determine separately whether they affect
 plan documents or other project files.
 
