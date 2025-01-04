@@ -383,3 +383,19 @@ def printable_shell_command(cmd_list):
         return subprocess.list2cmdline(cmd_list)
     else:
         return shlex.join(cmd_list)
+
+
+def get_aider_dir(root=None) -> Path:
+    """
+    Return the .aider directory under `root`.
+    If root isn't given, default to the current directory.
+    """
+    if not root:
+        root = Path(".")
+    dir = root / ".aider"
+    dir.mkdir(exist_ok=True)
+    return dir
+
+
+def get_log_file() -> Path:
+    return get_aider_dir() / "aider.log"

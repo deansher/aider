@@ -34,11 +34,6 @@ from .dump import dump  # noqa: F401
 # But we retain "aider" in names of configuration files.
 
 
-# It is tricky to decide when to use the name "brade" versus "aider".
-# For now, we use "brade" to refer to the application its executable script.
-# But we retain "aider" in names of configuration files.
-
-
 def check_config_files_for_yes(config_files):
     found = False
     for config_file in config_files:
@@ -488,6 +483,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         )
 
     io = get_io(args.pretty)
+    report_uncaught_exceptions(io=io)
     try:
         io.rule()
     except UnicodeEncodeError as err:

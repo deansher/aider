@@ -2,15 +2,18 @@ import os
 import platform
 import subprocess
 import sys
-import traceback
 import urllib.parse
 import webbrowser
 
 from aider import __version__
+from aider.io import InputOutput
 from aider.urls import github_issues
+from aider.utils import get_log_file
 from aider.versioncheck import VERSION_CHECK_FNAME
 
 FENCE = "`" * 3
+
+REPORT_IO = None
 
 
 def get_python_info():
@@ -106,25 +109,6 @@ def exception_handler(exc_type, exc_value, exc_traceback):
     except Exception:
         pass  # Swallow any errors
 
-    # Format the traceback
-    tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-
-    # Replace full paths with basenames in the traceback
-    tb_lines_with_basenames = []
-    for line in tb_lines:
-        try:
-            if "File " in line:
-                parts = line.split('"')
-                if len(parts) > 1:
-                    full_path = parts[1]
-                    basename = os.path.basename(full_path)
-                    line = line.replace(full_path, basename)
-        except Exception:
-            pass
-        tb_lines_with_basenames.append(line)
-
-    tb_text = "".join(tb_lines_with_basenames)
-
     # Find the innermost frame
     innermost_tb = exc_traceback
     while innermost_tb.tb_next:
@@ -141,23 +125,48 @@ def exception_handler(exc_type, exc_value, exc_traceback):
     # Get the exception type name
     exception_type = exc_type.__name__
 
-    # Prepare the issue text
-    issue_text = f"An uncaught exception occurred:\n\n{FENCE}\n{tb_text}\n{FENCE}"
-
     # Prepare the title
     title = f"Uncaught {exception_type} in {basename} line {line_number}"
 
-    # Report the issue
-    report_github_issue(issue_text, title=title)
+    # Show a short user-level message:
+    REPORT_IO.tool_error(f"Handled exception: {title}. Details in {get_log_file}")
+
+    # TODO: Re-enable this for brade when appropriate.
+    # # Format the traceback
+    # tb_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+
+    # # Replace full paths with basenames in the traceback
+    # tb_lines_with_basenames = []
+    # for line in tb_lines:
+    #     try:
+    #         if "File " in line:
+    #             parts = line.split('"')
+    #             if len(parts) > 1:
+    #                 full_path = parts[1]
+    #                 basename = os.path.basename(full_path)
+    #                 line = line.replace(full_path, basename)
+    #     except Exception:
+    #         pass
+    #     tb_lines_with_basenames.append(line)
+
+    # tb_text = "".join(tb_lines_with_basenames)
+
+    # # Prepare the issue text
+    # issue_text = f"An uncaught exception occurred:\n\n{FENCE}\n{tb_text}\n{FENCE}"
+
+    # # Report the issue
+    # report_github_issue(issue_text, title=title)
 
     # Call the default exception handler
     sys.__excepthook__(exc_type, exc_value, exc_traceback)
 
 
-def report_uncaught_exceptions():
+def report_uncaught_exceptions(io):
     """
     Set up the global exception handler to report uncaught exceptions.
     """
+    global REPORT_IO
+    REPORT_IO = io
     sys.excepthook = exception_handler
 
 
