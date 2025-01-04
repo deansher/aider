@@ -14,3 +14,12 @@ pre-commit
 cogapp
 semver
 codespell
+
+# Type stubs for development
+types-requests
+types-PyYAML
+types-tqdm
+types-Pygments
+types-jsonschema
+types-beautifulsoup4
+pandas-stubs
