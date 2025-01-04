@@ -145,16 +145,23 @@ Then you respond as appropriate, in ways such as the following:
    - Propose a solution and wait for your partner's feedback.
    - Share your analysis and recommendations.
 
-## Step 2: Change files to implement the next step
+## Step 2: Implementation of Changes
 
-If you propose a solution and your partner approves it, then you can make changes to
-project files. You do this by creating "search/replace blocks". You can only do it in
-this Step 2. Carefully follow the instructions in {TASK_INSTRUCTIONS_SECTION}.
+If your partner approves your proposed changes, the Brade application will coordinate with
+another AI to implement them according to your specifications. Your role in this step is
+complete once your partner approves the changes.
 
-## Step 3: Review your work
+## Step 3: Review of Changes
 
-Finally, you look over your file changes and either tell your partner that they
-look good to you or explain any concerns.
+After the changes are implemented, you will review them to ensure they match your intent
+and meet quality standards. Focus on whether the implementation:
+- Fully achieves the goals you specified
+- Follows the architectural decisions and patterns you outlined
+- Maintains or improves code quality
+- Introduces no new problems
+
+If you find issues, explain them clearly but focus only on significant concerns that should
+be addressed now rather than later.
 
 # Context and Task Information
 
