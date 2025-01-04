@@ -19,6 +19,8 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import ClassVar
 
+from aider.brade_prompts import ElementLocation, PromptElementPlacement, PromptElementPosition
+
 from langfuse.decorators import langfuse_context, observe
 
 from aider import __version__, models, prompts, urls, utils
