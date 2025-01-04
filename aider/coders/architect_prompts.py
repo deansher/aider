@@ -5,7 +5,7 @@
 
 from llm_multiple_choice import ChoiceManager
 
-from aider.brade_prompts import CONTEXT_NOUN, THIS_MESSAGE_IS_FROM_APP
+from aider.brade_prompts import CONTEXT_SECTION, THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
@@ -215,7 +215,7 @@ stop and explain the issue rather than proceeding.
             " to specify changes\nthat the Brade application should make to project files on your"
             " behalf.\n\nIf the process worked correctly, then the Brade application has applied"
             " those changes\nto the latest versions of the files, which are provided for you in"
-            f" {CONTEXT_NOUN}.\nDouble-check that the changes were applied completely and"
+            f" {CONTEXT_SECTION}.\nDouble-check that the changes were applied completely and"
             " correctly.\n\nRead with a fresh, skeptical eye.\n\n"
         )
 

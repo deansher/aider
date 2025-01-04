@@ -119,36 +119,31 @@ from hello import hello
         ),
     ]
 
+
+
     system_reminder = """# Quick Reference: SEARCH/REPLACE Block Format
 
-┌──────────────────┬────────────────────────────────────────┐
-│ Block Component  │ Requirements                           │
-├──────────────────┼────────────────────────────────────────┤
-│ 1. File Path     │ - Full path from project root         │
-│                  │ - No quotes, asterisks, or escaping    │
-├──────────────────┼────────────────────────────────────────┤
-│ 2. Code Fence    │ - {fence[0]}language                   │
-│                  │ - Match file extension                 │
-├──────────────────┼────────────────────────────────────────┤
-│ 3. Search Block  │ - Starts with <<<<<<< SEARCH          │
-│                  │ - Exact match of existing content      │
-├──────────────────┼────────────────────────────────────────┤
-│ 4. Divider       │ - =======                             │
-├──────────────────┼────────────────────────────────────────┤
-│ 5. Replace Block │ - Your new content                     │
-│                  │ - Ends with >>>>>>> REPLACE           │
-└──────────────────┴────────────────────────────────────────┘
+## Required Components
+1. File Path:
+   - Full path from project root
+   - No quotes, asterisks, or escaping
 
-# Example
+2. Code Fence:
+   - {fence[0]}language
+   - Match file extension
 
-utils/echo.py
-{fence[0]}python
-<<<<<<< SEARCH
-def echo(msg):
-    "print a message"
+3. Search Block:
+   - Starts with <<<<<<< SEARCH
+   - Exact match of existing content
 
-    print(msg)
-path relative to the project root is `utils/echo.py`:
+4. Divider:
+   - =======
+
+5. Replace Block:
+   - Your new content
+   - Ends with >>>>>>> REPLACE
+
+## Example
 
 utils/echo.py
 {fence[0]}python
@@ -165,9 +160,11 @@ def echo(msg):
 >>>>>>> REPLACE
 {fence[1]}
 
-# Key Requirements
+## Key Requirements
 
 1. **Exact Matching**
+   - The SEARCH block must match the latest file content that you see in 
+     <project_context>...</project_context>.
    - Match every character exactly, including:
      - Whitespace and indentation
      - Comments and docstrings
