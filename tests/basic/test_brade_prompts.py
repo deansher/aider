@@ -104,16 +104,22 @@ def test_context_and_task_placement() -> None:
     # Check structure of final user message
     final_user_content = final_user_msg["content"]
     sections = [
+        "<static_context>",
+        "You are a helpful AI assistant",
+        "</static_context>",
+        "<project_context>",
         "<repository_map>",
         test_repo_map,
         "</repository_map>",
         "<readonly_files>",
         "<file path='test.py'>",
         "print('test')",
+        "</file>",
         "</readonly_files>",
-        "<platform_info>",
+        "</project_context>",
+        "<environment_context>",
         test_platform,
-        "</platform_info>",
+        "</environment_context>",
         "</context>",
         "<task_instructions>",
         test_instructions,
@@ -617,9 +623,9 @@ def test_platform_info_handling() -> None:
         platform_info=test_platform,
     )
     final_content = messages[-1]["content"]
-    assert "<platform_info>" in final_content
+    assert "<environment_context>" in final_content
     assert test_platform in final_content
-    assert "</platform_info>" in final_content
+    assert "</environment_context>" in final_content
 
     # Test without platform info
     messages = format_brade_messages(
