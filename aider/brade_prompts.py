@@ -167,12 +167,12 @@ be addressed now rather than later.
 
 The Brade Applicatiom provides you with the following information, which is not seen by the user:
 
-- {CONTEXT_SECTION} Contains the repo map, file contents, platform info, etc.
+- {CONTEXT_NOUN} Contains the repo map, file contents, platform info, etc.
   This is the latest information at this point in the chat. In particular, file contents shown in the <context> section 
   (in <readonly_files> or <editable_files>) are the latest project file versions at this point in the chat, superceding
   any other file content shown in chat messages.
-- {TASK_INSTRUCTIONS_SECTION}: Contains the requirements, constraints, and guidance for the current task.
-- {TASK_EXAMPLES_SECTION}: Contains example conversations that demonstrate how to carry out the task.
+- {TASK_INSTRUCTIONS_NOUN}: Contains the requirements, constraints, and guidance for the current task.
+- {TASK_EXAMPLES_NOUN}: Contains example conversations that demonstrate how to carry out the task.
 
 ```
 '''
