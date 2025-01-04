@@ -13,7 +13,39 @@ from .editblock_prompts import EditBlockPrompts
 
 
 class EditBlockCoder(Coder):
-    """A coder that uses search/replace blocks for code modifications."""
+    """A coder that uses search/replace blocks for code modifications.
+
+    This coder specializes in making precise, controlled changes to code files using
+    a search/replace block format. It can operate either as a top-level coder taking
+    requests directly from users, or as a subordinate implementing changes specified
+    by another coder.
+
+    # Architectural Design Decisions
+
+    ## Role Independence
+    EditBlockCoder maintains strict focus on implementation:
+    - Handles direct requests or specified changes
+    - Makes no assumptions about larger processes
+    - Stays focused on precise implementation
+    - Flags issues rather than making decisions
+
+    ## Core Competency
+    Expertise in search/replace block format:
+    - Exact matching of existing code
+    - Precise replacement specification
+    - Careful handling of whitespace and context
+    - Support for file creation and deletion
+
+    ## Implementation Notes
+    - Uses search/replace blocks for all file modifications
+    - Validates changes before applying them
+    - Reports issues without attempting resolution
+    - Maintains consistent format across all changes
+
+    Attributes:
+        edit_format: The edit format identifier for this coder type ("diff")
+        gpt_prompts: The prompts configuration for this coder
+    """
 
     edit_format = "diff"
     gpt_prompts = EditBlockPrompts()
