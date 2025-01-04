@@ -485,28 +485,40 @@ def format_brade_messages(
     # 1. All PREPEND elements
     # 2. User message
     # 3. All APPEND elements
-    final_elements = [elem for elem in elements if elem.location.placement == PromptElementPlacement.FINAL_USER_MESSAGE]
-    
+
+    final_elements = [
+        elem for elem in elements
+        if elem.location.placement == PromptElementPlacement.FINAL_USER_MESSAGE
+    ]
+
     # Phase 1: PREPEND elements
-    prepend_elements = [elem for elem in final_elements if elem.location.position == PromptElementPosition.PREPEND]
+    prepend_elements = [
+        elem for elem in final_elements
+        if elem.location.position == PromptElementPosition.PREPEND
+    ]
     prepend_content = ""
     for elem in prepend_elements:
+        # Each prepend element goes before any user text
         if prepend_content:
             prepend_content += "\n\n"
         prepend_content += elem.content
 
     # Phase 2: User message
+    # We explicitly place the user’s message after all PREPEND content
     final_msg_content = prepend_content
     if prepend_content and final_user_content:
         final_msg_content += "\n\n"
     final_msg_content += final_user_content
 
     # Phase 3: APPEND elements
-    append_elements = [elem for elem in final_elements if elem.location.position == PromptElementPosition.APPEND]
+    append_elements = [
+        elem for elem in final_elements
+        if elem.location.position == PromptElementPosition.APPEND
+    ]
     for elem in append_elements:
         final_msg_content += "\n\n" + elem.content
 
-    # Now create the final user message object
+    # Now create the final user message
     final_user_message = {
         "role": "user",
         "content": final_msg_content,
