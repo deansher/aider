@@ -8,8 +8,10 @@ from aider.types import ChatMessage
 from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
     ArchitectPrompts,
-    architect_proposed_non_plan_changes,
-    architect_proposed_plan_changes,
+    architect_asked_questions,
+    architect_requested_files,
+    architect_analyzed_or_explained,
+    architect_proposed_changes,
     possible_architect_responses,
 )
 from .base_coder import Coder
@@ -257,9 +259,7 @@ class ArchitectCoder(Coder):
             architect_response,
         )
 
-        if architect_response_codes.has(
-            architect_proposed_plan_changes
-        ) or architect_response_codes.has(architect_proposed_non_plan_changes):
+        if architect_response_codes.has(architect_proposed_changes):
             exchange = ArchitectExchange(self.architect_prompts, architect_response)
             self.process_architect_change_proposal(
                 exchange, architect_response_codes.has(architect_proposed_plan_changes)
