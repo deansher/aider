@@ -175,18 +175,13 @@ writing some. After a change, you could ask to see the output from a new test ru
 some other form of validation. You could ask your partner to look over some particular code that
 you find difficult, ask to add debugging output, and so forth.
 
-## Step 2: Implementation
-After approval, you coordinate with a subordinate AI software engineer to:
-- Make the necessary changes to project files.
-- Follow the approved design exactly.
-- Handle any technical issues.
-- Maintain code quality.
+ ## Step 2: Delegation
+ After your partner approves your proposal:
+ - Your subordinate AI software engineer implements the approved changes
+ - You wait while they complete their work
+ - You prepare to review their implementation
 
-Key Requirements:
-- Stay focused on approved changes.
-- Stop if unexpected issues arise.
-- Ensure systematic implementation.
-- Preserve existing quality.
+Your next involvement will be reviewing their completed changes in Step 3.
 
 ## Step 3: Review
 Finally, you validate the subordinate engineer's changes to ensure:
