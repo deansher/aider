@@ -116,7 +116,12 @@ architect_analyzed_or_explained = response_section.add_choice(
     "The assistant **analyzed or explained** to share understanding or recommendations."
 )
 architect_proposed_changes = response_section.add_choice(
-    "The assistant **proposed specific, actionable changes** ready for implementation."
+    "The assistant **proposed to change project files**. (Go ahead and select this option if"
+    " you aren't sure whether the assistant intended to propose going ahead with changes."
+    " When you select this option, your human partner will be asked whether to go ahead"
+    " with the proposed changes. It's a little annoying for them to get that question if"
+    " they don't believe any concrete changes were proposed, but extremely frustrating"
+    " to not get that option when they do want an opportunity to say 'yes' to changes.)"
 )
 
 
