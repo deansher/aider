@@ -6,21 +6,25 @@
 #
 alabaster==1.0.0
     # via sphinx
+attrs==24.3.0
+    # via
+    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   referencing
 babel==2.16.0
     # via sphinx
 build==1.2.2.post1
     # via pip-tools
-certifi==2024.8.30
+certifi==2024.12.14
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   requests
 cfgv==3.4.0
     # via pre-commit
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   requests
-click==8.1.7
+click==8.1.8
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   pip-tools
@@ -47,9 +51,9 @@ filelock==3.16.1
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   virtualenv
-fonttools==4.55.1
+fonttools==4.55.3
     # via matplotlib
-identify==2.6.3
+identify==2.6.5
     # via pre-commit
 idna==3.10
     # via
@@ -61,11 +65,11 @@ imgcat==0.6.0
     # via -r requirements/requirements-dev.in
 iniconfig==2.0.0
     # via pytest
-jinja2==3.1.4
+jinja2==3.1.5
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   sphinx
-kiwisolver==1.4.7
+kiwisolver==1.4.8
     # via matplotlib
 lox==0.12.0
     # via -r requirements/requirements-dev.in
@@ -77,7 +81,7 @@ markupsafe==3.0.2
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   jinja2
-matplotlib==3.9.3
+matplotlib==3.10.0
     # via -r requirements/requirements-dev.in
 mdurl==0.1.2
     # via
@@ -93,6 +97,7 @@ numpy==1.26.4
     #   contourpy
     #   matplotlib
     #   pandas
+    #   pandas-stubs
 packaging==24.2
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
@@ -102,9 +107,11 @@ packaging==24.2
     #   sphinx
 pandas==2.2.3
     # via -r requirements/requirements-dev.in
+pandas-stubs==2.2.3.241126
+    # via -r requirements/requirements-dev.in
 pathos==0.3.3
     # via lox
-pillow==11.0.0
+pillow==11.1.0
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   matplotlib
@@ -127,7 +134,7 @@ pygments==2.18.0
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   rich
     #   sphinx
-pyparsing==3.2.0
+pyparsing==3.2.1
     # via matplotlib
 pyproject-hooks==1.2.0
     # via
@@ -149,6 +156,10 @@ pyyaml==6.0.2
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   pre-commit
+referencing==0.35.1
+    # via
+    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   types-jsonschema
 requests==2.32.3
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
@@ -158,6 +169,10 @@ rich==13.9.4
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   pytest-clarity
     #   typer
+rpds-py==0.22.3
+    # via
+    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   referencing
 semver==3.0.2
     # via -r requirements/requirements-dev.in
 shellingham==1.5.4
@@ -186,7 +201,37 @@ sphinxcontrib-qthelp==2.0.0
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0
     # via sphinx
+tree-sitter==0.21.3
+    # via
+    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   types-tree-sitter-languages
 typer==0.15.1
+    # via -r requirements/requirements-dev.in
+types-beautifulsoup4==4.12.0.20241020
+    # via -r requirements/requirements-dev.in
+types-docutils==0.21.0.20241128
+    # via types-pygments
+types-html5lib==1.1.11.20241018
+    # via types-beautifulsoup4
+types-jsonschema==4.23.0.20241208
+    # via -r requirements/requirements-dev.in
+types-psutil==6.1.0.20241221
+    # via -r requirements/requirements-dev.in
+types-pygments==2.18.0.20240506
+    # via -r requirements/requirements-dev.in
+types-pytz==2024.2.0.20241221
+    # via pandas-stubs
+types-pyyaml==6.0.12.20241230
+    # via -r requirements/requirements-dev.in
+types-requests==2.32.0.20241016
+    # via
+    #   -r requirements/requirements-dev.in
+    #   types-tqdm
+types-setuptools==75.6.0.20241223
+    # via types-pygments
+types-tqdm==4.67.0.20241221
+    # via -r requirements/requirements-dev.in
+types-tree-sitter-languages==1.10.0.20240612
     # via -r requirements/requirements-dev.in
 typing-extensions==4.12.2
     # via
@@ -194,11 +239,12 @@ typing-extensions==4.12.2
     #   typer
 tzdata==2024.2
     # via pandas
-urllib3==2.2.3
+urllib3==2.3.0
     # via
     #   -c /Users/deansher/Documents/pg/brade/requirements.txt
     #   requests
-virtualenv==20.28.0
+    #   types-requests
+virtualenv==20.28.1
     # via pre-commit
 wheel==0.45.1
     # via pip-tools

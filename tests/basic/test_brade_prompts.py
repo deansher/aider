@@ -209,6 +209,7 @@ def test_element_locations() -> None:
     assert "<task_examples>" in system_msg, "Task examples should be in system message"
     assert "Example request" in system_msg, "Example content should be in system message"
 
+
 def test_append_positions() -> None:
     """Tests that elements can be appended to messages.
 

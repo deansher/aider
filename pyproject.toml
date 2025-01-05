@@ -34,15 +34,6 @@ dev = { file = "requirements/requirements-dev.txt" }
 help = { file = "requirements/requirements-help.txt" }
 browser = { file = "requirements/requirements-browser.txt" }
 playwright = { file = "requirements/requirements-playwright.txt" }
-types = [
-    "types-requests",
-    "types-PyYAML", 
-    "types-tqdm",
-    "types-Pygments",
-    "types-jsonschema",
-    "types-beautifulsoup4",
-    "pandas-stubs"
-]
 
 [tool.setuptools.packages.find]
 include = ["aider*", "aider.website", "brade*"]
