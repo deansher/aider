@@ -120,9 +120,12 @@ class ArchitectExchange:
         """Check if the exchange includes an editor response.
 
         Returns:
-            True if the exchange includes an editor response
+            True if the exchange includes an assistant message in the STEP2_IMPLEMENT phase
         """
-        return len(self.messages) >= 3  # Architect + editor prompt + editor response
+        return any(
+            phase == ArchitectPhase.STEP2_IMPLEMENT and msg.role == "assistant"
+            for phase, msg in self.messages
+        )
 
 
 class ArchitectCoder(Coder):
