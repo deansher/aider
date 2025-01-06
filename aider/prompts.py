@@ -6,8 +6,8 @@
 from aider.brade_prompts import THIS_MESSAGE_IS_FROM_APP
 
 commit_message_prompt = """Generate a Git commit message for the changes shown in <diffs>...</diffs>.
-Output ONLY the commit message with NO other text. Do not be conversational.
-Do not explain. Do not ask questions.
+Respond with just the commit message, without preface, explanation, or any other text.
+We will use your response as a commit message exactly as you write it.
 
 Requirements:
 - Use imperative mood (\"Add feature\" not \"Added feature\")
