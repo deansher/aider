@@ -138,6 +138,8 @@ from hello import hello
 2. Code Fence:
    - {fence[0]}language
    - Match file extension
+   - Must exactly match the format shown in these instructions
+   - Using a different fence format will cause the edit to fail
 
 3. Search Block:
    - Starts with <<<<<<< SEARCH
