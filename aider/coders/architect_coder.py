@@ -353,11 +353,16 @@ class ArchitectCoder(Coder):
         exchange.append_reviewer_response(reviewer_coder.partial_response_content)
 
     def record_exchange(self, exchange: ArchitectExchange) -> None:
-        """Record the complete conversation history.
+        """Record just the architect's proposal and a confirmation message.
+        
+        To maintain proper encapsulation, we only retain the architect's high-level
+        proposal. We don't retain the implementation details or review, which would
+        expose those implementation details to future architect interactions.
 
         Args:
             exchange: The completed exchange containing all responses
         """
-        self.cur_messages = self.cur_messages + exchange.get_messages()
+        # Keep only the architect's original proposal
+        self.cur_messages = self.cur_messages + [exchange.get_messages()[0]]
         self.move_back_cur_messages(self.architect_prompts.changes_committed_message)
         self.partial_response_content = ""  # Clear to prevent redundant message
