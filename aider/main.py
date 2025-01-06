@@ -762,6 +762,20 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             coder.run(with_message=args.message)
         except SwitchCoder:
             pass
+        except litellm.exceptions.InternalServerError as e:
+            logger.exception("Recoverable error in aider main()")
+            io.tool_error("\nBrade encountered a temporary error.")
+            io.tool_error(f"Error details: {str(e)}")
+            io.tool_output("Please try your request again.")
+            return None
+        except Exception as e:
+            logger.exception("Unhandled exception in aider main()")
+            io.tool_error("\nBrade encountered an error and must exit.")
+            io.tool_error(f"Error type: {type(e).__name__}")
+            io.tool_error(f"Error details: {str(e)}")
+            io.tool_output("\nThe full error has been logged to ~/.aider/aider.log")
+            io.tool_output("Please check the log file for details if you need to report this issue.")
+            return 1
         return
 
     if args.message_file:
@@ -774,6 +788,20 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             return 1
         except IOError as e:
             io.tool_error(f"Error reading message file: {e}")
+            return 1
+        except litellm.exceptions.InternalServerError as e:
+            logger.exception("Recoverable error in aider main()")
+            io.tool_error("\nBrade encountered a temporary error.")
+            io.tool_error(f"Error details: {str(e)}")
+            io.tool_output("Please try your request again.")
+            return None
+        except Exception as e:
+            logger.exception("Unhandled exception in aider main()")
+            io.tool_error("\nBrade encountered an error and must exit.")
+            io.tool_error(f"Error type: {type(e).__name__}")
+            io.tool_error(f"Error details: {str(e)}")
+            io.tool_output("\nThe full error has been logged to ~/.aider/aider.log")
+            io.tool_output("Please check the log file for details if you need to report this issue.")
             return 1
         return
 
@@ -794,6 +822,20 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
             if switch.kwargs.get("show_announcements") is not False:
                 coder.show_announcements()
+        except litellm.exceptions.InternalServerError as e:
+            logger.exception("Recoverable error in aider main()")
+            io.tool_error("\nBrade encountered a temporary error.")
+            io.tool_error(f"Error details: {str(e)}")
+            io.tool_output("Please try your request again.")
+            continue
+        except Exception as e:
+            logger.exception("Unhandled exception in aider main()")
+            io.tool_error("\nBrade encountered an error and must exit.")
+            io.tool_error(f"Error type: {type(e).__name__}")
+            io.tool_error(f"Error details: {str(e)}")
+            io.tool_output("\nThe full error has been logged to ~/.aider/aider.log")
+            io.tool_output("Please check the log file for details if you need to report this issue.")
+            return 1
 
 
 def check_and_load_imports(io, verbose=False):

@@ -35,28 +35,9 @@ logger = logging.getLogger(__name__)  # This picks up the new file-based logging
 
 
 def main():
-    from aider.llm import litellm
-    from aider.io import InputOutput
-
-    io = InputOutput()
     logger.debug("Executing brade's main entry point.")
     logger.debug(f"Using aider module from: {aider.__file__}")
-    try:
-        return aider_main()
-    except litellm.exceptions.InternalServerError as e:
-        logger.exception("Recoverable error in brade main()")
-        io.tool_error("\nBrade encountered a temporary error.")
-        io.tool_error(f"Error details: {str(e)}")
-        io.tool_output("Please try your request again.")
-        return None
-    except Exception as e:
-        logger.exception("Unhandled exception in brade main()")
-        io.tool_error("\nBrade encountered an error and must exit.")
-        io.tool_error(f"Error type: {type(e).__name__}")
-        io.tool_error(f"Error details: {str(e)}")
-        io.tool_output("\nThe full error has been logged to ~/.aider/aider.log")
-        io.tool_output("Please check the log file for details if you need to report this issue.")
-        return 1
+    return aider_main()
 
 
 if __name__ == "__main__":
