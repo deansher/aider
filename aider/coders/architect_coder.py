@@ -398,9 +398,13 @@ class ArchitectCoder(Coder):
         Args:
             exchange: The completed exchange containing all responses
         """
-        # Keep Step 1 (proposal) and Step 3 (review) messages
+        # Keep Step 1 (proposal) and Step 3 (review) messages, with transition markers
         step1_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
         step3_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
-        self.cur_messages = self.cur_messages + step1_messages + step3_messages
+        transition_messages = [
+            ChatMessage(role="user", content="[Step 2: Implementation phase completed]"),
+            ChatMessage(role="assistant", content="[Step 3: Review phase begins]"),
+        ]
+        self.cur_messages = self.cur_messages + step1_messages + transition_messages + step3_messages
         self.move_back_cur_messages(self.architect_prompts.changes_committed_message)
         self.partial_response_content = ""  # Clear to prevent redundant message
