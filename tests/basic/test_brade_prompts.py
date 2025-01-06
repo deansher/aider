@@ -774,7 +774,7 @@ def test_file_section_formatting() -> None:
     final_content = messages[-1]["content"]
     assert "<brade:readonly_files>" in final_content
     assert "<brade:file path='test.py'>" in final_content
-    assert "<file path='data.txt'>" in final_content
+    assert "<brade:file path='data.txt'>" in final_content
     assert "def test():" in final_content
     assert "Sample data" in final_content
 
