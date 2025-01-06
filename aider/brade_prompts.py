@@ -395,6 +395,12 @@ def format_brade_messages(
         task_examples: Optional list of ChatMessages containing example conversations.
             These messages will be transformed into XML format showing example interactions.
             Messages should be in pairs (user, assistant) demonstrating desired behavior.
+        task_instructions_reminder: Optional reminder text to be included in the prompt.
+            This is typically used for system-level reminders about task requirements
+            or constraints that should be kept separate from the main task instructions.
+        task_instructions_reminder_location: Optional ElementLocation specifying where
+            to place the reminder in the message sequence. Follows the same placement
+            rules as other elements.
 
     Returns:
         The formatted sequence of messages ready for the LLM
