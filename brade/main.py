@@ -39,13 +39,19 @@ def main():
     logger.debug(f"Using aider module from: {aider.__file__}")
     try:
         return aider_main()
+    except litellm.exceptions.InternalServerError as e:
+        logger.exception("Recoverable error in brade main()")
+        io.tool_error("\nBrade encountered a temporary error.")
+        io.tool_error(f"Error details: {str(e)}")
+        io.tool_output("Please try your request again.")
+        return None
     except Exception as e:
         logger.exception("Unhandled exception in brade main()")
-        print("\nBrade encountered an error and must exit.")
-        print(f"Error type: {type(e).__name__}")
-        print(f"Error details: {str(e)}")
-        print("\nThe full error has been logged to ~/.aider/aider.log")
-        print("Please check the log file for details if you need to report this issue.")
+        io.tool_error("\nBrade encountered an error and must exit.")
+        io.tool_error(f"Error type: {type(e).__name__}")
+        io.tool_error(f"Error details: {str(e)}")
+        io.tool_output("\nThe full error has been logged to ~/.aider/aider.log")
+        io.tool_output("Please check the log file for details if you need to report this issue.")
         return 1
 
 
