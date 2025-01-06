@@ -41,6 +41,11 @@ def main():
         return aider_main()
     except Exception as e:
         logger.exception("Unhandled exception in brade main()")
+        print("\nBrade encountered an error and must exit.")
+        print(f"Error type: {type(e).__name__}")
+        print(f"Error details: {str(e)}")
+        print("\nThe full error has been logged to ~/.aider/aider.log")
+        print("Please check the log file for details if you need to report this issue.")
         return 1
 
 
