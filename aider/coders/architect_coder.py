@@ -152,22 +152,54 @@ class ArchitectCoder(Coder):
 
     # Architectural Design Decisions
 
+    ## Three-Step Process and Message Isolation
+
+    The architect leads a three-step process for each change:
+
+    1. Step 1: Design and Proposal
+       - Architect analyzes requirements and context
+       - Architect proposes specific, actionable changes
+       - Architect gets approval before proceeding
+       - Messages from this step ARE retained in chat history
+
+    2. Step 2: Implementation via EditBlockCoder
+       - EditBlockCoder implements the approved changes
+       - Implementation details are deliberately hidden from architect
+       - Messages from this step are NOT retained in chat history
+       - This isolation prevents the architect from:
+         * Trying to do implementation work itself
+         * Micro-managing the implementation details
+         * Getting distracted from its high-level role
+
+    3. Step 3: Review and Validation
+       - Architect reviews the implemented changes
+       - Architect validates against requirements
+       - Messages from this step ARE retained in chat history
+       - Transition messages explain the flow to readers
+
     ## Separation of Concerns
     The architect's role is strictly separated from implementation details:
     - Architect SPECIFIES changes but does not MAKE them
     - Implementation details are encapsulated in EditBlockCoder
     - Small code snippets allowed only to clarify proposals
 
-    ## Message Stream Isolation
+    ## Message Stream Management
     EditBlockCoder's output is deliberately hidden from ArchitectCoder to:
     1. Maintain role separation (avoid architect trying to do implementation)
     2. Keep proposals concise and high-level
     3. Avoid micro-managing the implementation step
 
+    This isolation is achieved through careful message filtering in record_exchange():
+    - Only Step 1 and Step 3 messages are retained
+    - Transition messages explain the flow
+    - Step 2 implementation details are dropped
+    - This prevents implementation details from influencing future exchanges
+
     ## Implementation Notes
     - ArchitectCoder's prompts explicitly prohibit generating implementation
     - EditBlockCoder handles all actual file modifications
     - This separation supports cleaner architecture and better review flow
+    - Transition messages maintain readability without exposing details
 
     Attributes:
         edit_format: The edit format identifier for this coder type
