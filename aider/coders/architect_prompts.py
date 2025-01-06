@@ -9,7 +9,14 @@ from aider.brade_prompts import CONTEXT_SECTION, THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
-# Messages used to show step transitions in chat history
+# Messages used to show step transitions in chat history.
+#
+# Note: We always communicate truthfully about the AI nature of this collaboration.
+# Any fiction (like saying "engineering team" instead of "subordinate AI") would:
+# 1. Undermine the assistant's understanding of the actual process
+# 2. Lead to confusing conversations between the assistant and their human partner
+# 3. Make it harder to reason about and debug the system
+
 IMPLEMENTATION_COMPLETE = "Your subordinate AI software engineer has completed the implementation."
 REVIEW_BEGINS = "I will now review their implementation to ensure it meets our requirements."
 
