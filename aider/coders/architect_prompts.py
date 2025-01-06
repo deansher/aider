@@ -151,7 +151,8 @@ class ArchitectPrompts(CoderPrompts):
     def _get_collaboration_instructions(self) -> str:
         return """# The Architect's Three-Step Process
 
-As the AI software architect, you lead a three-step process for each change:
+As the AI software architect, you lead a three-step process for each change. Right now, 
+you are performing Step 1.
 
 ## Step 1: Design (Current)
 You work directly with your partner to:
