@@ -11,6 +11,8 @@ from aider.brade_prompts import (
     PromptElementPosition,
     FileContent,
     format_brade_messages,
+    format_task_examples,
+    wrap_brade_xml,
 )
 from aider.types import ChatMessage
 
@@ -337,7 +339,7 @@ def test_task_instructions_reminder_placement() -> None:
 
     # Verify reminder appears in final user message
     final_msg = messages[-1]["content"]
-    assert "<task_instructions_reminder>" in final_msg
+    assert "<brade:task_instructions_reminder>" in final_msg
     assert task_instructions_reminder in final_msg
 
     # Test with None reminder
@@ -601,10 +603,10 @@ def test_format_task_examples() -> None:
 
     # Check message transformation
     assert (
-        "<message role='user'>Example request</message>" in result
+        "<brade:message role='user'>Example request</brade:message>" in result
     ), f"Expected user message in:\n{result}"
     assert (
-        "<message role='assistant'>Example response</message>" in result
+        "<brade:message role='assistant'>Example response</brade:message>" in result
     ), f"Expected assistant message in:\n{result}"
 
     # Test invalid message pairs
