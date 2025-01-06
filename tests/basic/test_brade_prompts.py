@@ -66,10 +66,11 @@ def test_context_and_task_placement() -> None:
     """Tests that <context>, <task_instructions>, and <task_examples> are properly placed.
 
     Validates:
-    - All sections appear in system message
+    - All sections appear in system message when placed there
     - Sections appear in correct order
-    - User messages remain pure without any sections
+    - User messages remain pure without any sections when not placed there
     - Content of each section is preserved correctly
+    - None locations result in no placement
     """
     system_prompt = "You are a helpful AI assistant"
 
@@ -82,6 +83,7 @@ def test_context_and_task_placement() -> None:
         {"role": "assistant", "content": "Example response"},
     ]
 
+    # Test with explicit system message placement
     messages = format_brade_messages(
         system_prompt=system_prompt,
         task_instructions=test_instructions,
@@ -92,18 +94,28 @@ def test_context_and_task_placement() -> None:
         readonly_text_files=[test_file],
         editable_text_files=[],
         platform_info=test_platform,
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+        task_instructions_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+        task_examples_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
     )
 
     system_msg = messages[0]
     assert system_msg["role"] == "system"
-    assert system_msg["content"] == system_prompt
-
-    final_user_msg = messages[-1]
-    assert final_user_msg["role"] == "user"
-
-    # Check structure of final user message
-    final_user_content = final_user_msg["content"]
+    
+    # Check structure of system message
+    system_content = system_msg["content"]
     sections = [
+        system_prompt,
+        "<context>",
         "<static_context>",
         "You are a helpful AI assistant",
         "</static_context>",
@@ -128,18 +140,43 @@ def test_context_and_task_placement() -> None:
         "Example request",
         "Example response",
         "</task_examples>",
-        "Test message",
     ]
-    # Start with the last instance of <context> to skip over any mentions of the sections
-    # in preface material.
-    last_pos = final_user_content.rindex("<context>")
+    
+    last_pos = 0
     for section in sections:
-        pos = final_user_content.find(section, last_pos)
-        assert pos != -1, f"Missing section {section!r} after <context> in:\n{final_user_content}"
-        assert (
-            pos > last_pos
-        ), f"Section {section!r} out of order after <context> in:\n{final_user_content}"
+        pos = system_content.find(section, last_pos)
+        assert pos != -1, f"Missing section {section!r} in system message:\n{system_content}"
+        assert pos >= last_pos, f"Section {section!r} out of order in system message:\n{system_content}"
         last_pos = pos
+
+    # Verify user message is clean
+    final_user_msg = messages[-1]
+    assert final_user_msg["role"] == "user"
+    assert final_user_msg["content"] == "Test message"
+
+    # Test with None locations - sections should not appear
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=test_instructions,
+        task_examples=test_examples,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test message"}],
+        repo_map=test_repo_map,
+        readonly_text_files=[test_file],
+        editable_text_files=[],
+        platform_info=test_platform,
+        context_location=None,
+        task_instructions_location=None,
+        task_examples_location=None,
+    )
+
+    system_msg = messages[0]
+    assert system_msg["role"] == "system"
+    assert system_msg["content"] == system_prompt
+
+    final_user_msg = messages[-1]
+    assert final_user_msg["role"] == "user"
+    assert final_user_msg["content"] == "Test message"
 
 
 def test_unsupported_context_placement() -> None:
@@ -164,8 +201,8 @@ def test_element_locations() -> None:
 
     Validates:
     - Elements can be placed independently in different messages
-    - New location parameters override old ones when both are present
     - Content appears correctly in specified locations
+    - None locations result in no placement
     - Task instructions reminder is handled correctly
     """
     system_prompt = "Test system prompt"
@@ -186,7 +223,7 @@ def test_element_locations() -> None:
         cur_messages=[{"role": "user", "content": "Test message"}],
         repo_map=repo_map,
         platform_info=platform_info,
-        # Use new location parameters
+        # Place elements in system message
         context_location=ElementLocation(
             placement=PromptElementPlacement.SYSTEM_MESSAGE,
             position=PromptElementPosition.PREPEND,
@@ -195,20 +232,46 @@ def test_element_locations() -> None:
             placement=PromptElementPlacement.SYSTEM_MESSAGE,
             position=PromptElementPosition.PREPEND,
         ),
-        # Keep task instructions in final user message
         task_instructions_location=ElementLocation(
-            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
             position=PromptElementPosition.PREPEND,
         ),
     )
 
-    # Verify system message contains context and examples
+    # Verify system message contains all elements
     system_msg = messages[0]["content"]
     assert "<context>" in system_msg, "Context should be in system message"
     assert repo_map in system_msg, "Repo map should be in system message"
     assert platform_info in system_msg, "Platform info should be in system message"
     assert "<task_examples>" in system_msg, "Task examples should be in system message"
     assert "Example request" in system_msg, "Example content should be in system message"
+    assert "<task_instructions>" in system_msg, "Task instructions should be in system message"
+
+    # Verify user message is clean
+    final_msg = messages[-1]["content"]
+    assert final_msg == "Test message", "User message should be clean"
+
+    # Test with None locations - elements should not appear
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=task_instructions,
+        task_examples=task_examples,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test message"}],
+        repo_map=repo_map,
+        platform_info=platform_info,
+        context_location=None,
+        task_examples_location=None,
+        task_instructions_location=None,
+    )
+
+    # Verify system message is clean
+    system_msg = messages[0]["content"]
+    assert system_msg == system_prompt, "System message should be clean"
+
+    # Verify user message is clean
+    final_msg = messages[-1]["content"]
+    assert final_msg == "Test message", "User message should be clean"
 
 
 def test_task_instructions_reminder_placement() -> None:
@@ -219,6 +282,7 @@ def test_task_instructions_reminder_placement() -> None:
     - Reminder appears in correct position
     - Reminder is wrapped in correct XML tags
     - Empty/None reminder is handled correctly
+    - None location results in no placement
     """
     system_prompt = "Test system prompt"
     task_instructions = "Test task instructions"
@@ -232,6 +296,14 @@ def test_task_instructions_reminder_placement() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         task_instructions_reminder_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+        task_instructions_location=ElementLocation(
             placement=PromptElementPlacement.SYSTEM_MESSAGE,
             position=PromptElementPosition.APPEND,
         ),
@@ -253,6 +325,14 @@ def test_task_instructions_reminder_placement() -> None:
             placement=PromptElementPlacement.FINAL_USER_MESSAGE,
             position=PromptElementPosition.PREPEND,
         ),
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
+        task_instructions_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
     )
 
     # Verify reminder appears in final user message
@@ -271,11 +351,43 @@ def test_task_instructions_reminder_placement() -> None:
             placement=PromptElementPlacement.SYSTEM_MESSAGE,
             position=PromptElementPosition.APPEND,
         ),
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+        task_instructions_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
     )
 
     # Verify no reminder tags appear
     system_msg = messages[0]["content"]
     assert "<task_instructions_reminder>" not in system_msg
+
+    # Test with None location - reminder should not appear
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=task_instructions,
+        task_instructions_reminder=task_instructions_reminder,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test"}],
+        task_instructions_reminder_location=None,
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+        task_instructions_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+    )
+
+    # Verify reminder does not appear in any message
+    system_msg = messages[0]["content"]
+    assert "<task_instructions_reminder>" not in system_msg
+    final_msg = messages[-1]["content"]
+    assert "<task_instructions_reminder>" not in final_msg
 
 
 def test_append_positions() -> None:
