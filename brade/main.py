@@ -35,6 +35,10 @@ logger = logging.getLogger(__name__)  # This picks up the new file-based logging
 
 
 def main():
+    from aider.llm import litellm
+    from aider.io import InputOutput
+
+    io = InputOutput()
     logger.debug("Executing brade's main entry point.")
     logger.debug(f"Using aider module from: {aider.__file__}")
     try:
