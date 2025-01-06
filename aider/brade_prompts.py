@@ -346,22 +346,10 @@ def format_brade_messages(
     platform_info: str | None = None,
     task_examples: list[dict[str, str]] | None = None,
     task_instructions_reminder: str | None = None,
-    context_location: ElementLocation | None = ElementLocation(
-        placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-        position=PromptElementPosition.PREPEND
-    ),
-    task_instructions_location: ElementLocation | None = ElementLocation(
-        placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-        position=PromptElementPosition.PREPEND
-    ),
-    task_examples_location: ElementLocation | None = ElementLocation(
-        placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-        position=PromptElementPosition.PREPEND
-    ),
-    task_instructions_reminder_location: ElementLocation | None = ElementLocation(
-        placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-        position=PromptElementPosition.PREPEND
-    ),
+    context_location: ElementLocation | None = None,
+    task_instructions_location: ElementLocation | None = None,
+    task_examples_location: ElementLocation | None = None,
+    task_instructions_reminder_location: ElementLocation | None = None,
 ) -> list[dict[str, str]]:
     """Formats chat messages according to Brade's prompt structure.
 
