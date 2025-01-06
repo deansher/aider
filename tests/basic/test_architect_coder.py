@@ -250,25 +250,96 @@ class TestArchitectCoder(unittest.TestCase):
             self.assertEqual(self.coder.total_cost, 0.001)
 
     def test_record_exchange(self):
-        """Test recording a completed exchange."""
+        """Test recording a completed exchange.
+        
+        This test verifies that:
+        1. Only Step 1 (proposal) and Step 3 (review) messages are retained
+        2. Step 2 (implementation) messages are properly excluded
+        3. Transition messages are inserted to explain the flow
+        4. Implementation details don't leak into future exchanges
+        """
+        # Create an exchange with all three steps
         exchange = ArchitectExchange(self.coder.architect_prompts, "Here's my proposal...")
         exchange.append_editor_prompt(is_plan_change=False)
         exchange.append_editor_response("Changes implemented...")
         exchange.append_reviewer_prompt()
         exchange.append_reviewer_response("Changes look good...")
 
+        # Record the exchange
         self.coder.record_exchange(exchange)
 
-        # Verify messages were moved to done_messages
-        # The done_messages will include:
-        # - The exchange messages
-        # - The commit message
-        # - The "Understood" response
-        self.assertEqual(len(self.coder.done_messages), len(exchange.messages) + 2)
+        # Get the recorded messages
+        recorded_messages = self.coder.done_messages
+
+        # Verify Step 1 messages were retained
+        step1_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
+        for msg in step1_messages:
+            self.assertIn(msg, recorded_messages)
+
+        # Verify Step 2 messages were excluded
+        step2_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)
+        for msg in step2_messages:
+            self.assertNotIn(msg, recorded_messages)
+
+        # Verify Step 3 messages were retained
+        step3_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
+        for msg in step3_messages:
+            self.assertIn(msg, recorded_messages)
+
+        # Verify transition messages were inserted
+        transition_messages = [
+            {"role": "user", "content": self.coder.architect_prompts.IMPLEMENTATION_COMPLETE},
+            {"role": "assistant", "content": self.coder.architect_prompts.REVIEW_BEGINS},
+        ]
+        for msg in transition_messages:
+            self.assertIn(msg, recorded_messages)
+
+        # Verify commit message was added
+        self.assertIn(
+            {"role": "user", "content": self.coder.architect_prompts.changes_committed_message},
+            recorded_messages
+        )
 
         # Verify cur_messages was cleared after move_back_cur_messages
         self.assertEqual(len(self.coder.cur_messages), 0)
         self.assertEqual(self.coder.partial_response_content, "")
+
+    def test_message_isolation_in_new_exchange(self):
+        """Test that implementation details don't leak into future exchanges.
+        
+        This test verifies that when we complete one exchange and start another,
+        the implementation details from the first exchange are properly isolated
+        and don't influence the second exchange.
+        """
+        # Complete first exchange
+        exchange1 = ArchitectExchange(self.coder.architect_prompts, "First proposal...")
+        exchange1.append_editor_prompt(is_plan_change=False)
+        exchange1.append_editor_response("First implementation...")
+        exchange1.append_reviewer_prompt()
+        exchange1.append_reviewer_response("First review...")
+        self.coder.record_exchange(exchange1)
+
+        # Start second exchange
+        exchange2 = ArchitectExchange(self.coder.architect_prompts, "Second proposal...")
+        
+        # Verify no implementation details from first exchange are visible
+        step2_messages = exchange1.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)
+        for msg in step2_messages:
+            self.assertNotIn(msg, self.coder.cur_messages)
+            self.assertNotIn(msg, exchange2.messages)
+
+        # Verify only appropriate messages from first exchange are visible
+        visible_messages = self.coder.cur_messages
+        
+        # Should see Step 1 messages
+        step1_messages = exchange1.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
+        for msg in step1_messages:
+            self.assertIn(msg, visible_messages)
+            
+        # Should see Step 3 messages
+        step3_messages = exchange1.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
+        for msg in step3_messages:
+            self.assertIn(msg, visible_messages)
 
 
 if __name__ == "__main__":
