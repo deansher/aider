@@ -1085,13 +1085,14 @@ class Coder:
         # Get platform info
         platform_info = self.get_platform_info()
 
-        # Get task instructions from prompts
+        # Get task instructions and reminder from prompts
         task_instructions = ""
+        task_instructions_reminder = None
         prompts = getattr(self, "gpt_prompts", None)
         if prompts and prompts.task_instructions:
             task_instructions = prompts.task_instructions
         if prompts and prompts.system_reminder:
-            task_instructions += "\n\n" + self.fmt_system_prompt(prompts.system_reminder)
+            task_instructions_reminder = self.fmt_system_prompt(prompts.system_reminder)
 
         # Get task examples from prompts
         task_examples = None
@@ -1115,6 +1116,7 @@ class Coder:
             image_files=image_files,
             platform_info=platform_info,
             task_examples=task_examples,
+            task_instructions_reminder=task_instructions_reminder,
             context_location=ElementLocation(
                 placement=PromptElementPlacement.SYSTEM_MESSAGE,
                 position=PromptElementPosition.APPEND
@@ -1124,6 +1126,10 @@ class Coder:
                 position=PromptElementPosition.APPEND
             ),
             task_examples_location=ElementLocation(
+                placement=PromptElementPlacement.SYSTEM_MESSAGE,
+                position=PromptElementPosition.APPEND
+            ),
+            task_instructions_reminder_location=ElementLocation(
                 placement=PromptElementPlacement.SYSTEM_MESSAGE,
                 position=PromptElementPosition.APPEND
             ),

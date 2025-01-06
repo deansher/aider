@@ -345,6 +345,7 @@ def format_brade_messages(
     image_files: list[FileContent] | None = None,
     platform_info: str | None = None,
     task_examples: list[dict[str, str]] | None = None,
+    task_instructions_reminder: str | None = None,
     context_location: ElementLocation | None = ElementLocation(
         placement=PromptElementPlacement.FINAL_USER_MESSAGE,
         position=PromptElementPosition.PREPEND
@@ -354,6 +355,10 @@ def format_brade_messages(
         position=PromptElementPosition.PREPEND
     ),
     task_examples_location: ElementLocation | None = ElementLocation(
+        placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+        position=PromptElementPosition.PREPEND
+    ),
+    task_instructions_reminder_location: ElementLocation | None = ElementLocation(
         placement=PromptElementPlacement.FINAL_USER_MESSAGE,
         position=PromptElementPosition.PREPEND
     ),
@@ -405,6 +410,7 @@ def format_brade_messages(
         ("context_location", context_location),
         ("task_instructions_location", task_instructions_location),
         ("task_examples_location", task_examples_location),
+        ("task_instructions_reminder_location", task_instructions_reminder_location),
     ]:
         if loc is not None:
             if loc.placement == PromptElementPlacement.INITIAL_USER_MESSAGE:
@@ -480,6 +486,9 @@ superceding any other file content shown in chat messages."""
         elements.append(MessageElement(instructions_str, task_instructions_location))
     if task_examples_location:
         elements.append(MessageElement(task_examples_section, task_examples_location))
+    if task_instructions_reminder_location and task_instructions_reminder:
+        reminder_str = wrap_xml("task_instructions_reminder", task_instructions_reminder)
+        elements.append(MessageElement(reminder_str, task_instructions_reminder_location))
 
     # messages array always starts with the system message
     messages = [{"role": "system", "content": system_prompt}]

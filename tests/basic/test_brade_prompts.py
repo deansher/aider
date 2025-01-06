@@ -166,6 +166,7 @@ def test_element_locations() -> None:
     - Elements can be placed independently in different messages
     - New location parameters override old ones when both are present
     - Content appears correctly in specified locations
+    - Task instructions reminder is handled correctly
     """
     system_prompt = "Test system prompt"
     task_instructions = "Test task instructions"
@@ -208,6 +209,73 @@ def test_element_locations() -> None:
     assert platform_info in system_msg, "Platform info should be in system message"
     assert "<task_examples>" in system_msg, "Task examples should be in system message"
     assert "Example request" in system_msg, "Example content should be in system message"
+
+
+def test_task_instructions_reminder_placement() -> None:
+    """Tests that task instructions reminder is properly placed.
+
+    Validates:
+    - Reminder appears in specified message
+    - Reminder appears in correct position
+    - Reminder is wrapped in correct XML tags
+    - Empty/None reminder is handled correctly
+    """
+    system_prompt = "Test system prompt"
+    task_instructions = "Test task instructions"
+    task_instructions_reminder = "Test reminder"
+
+    # Test with reminder in system message
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=task_instructions,
+        task_instructions_reminder=task_instructions_reminder,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test"}],
+        task_instructions_reminder_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+    )
+
+    # Verify reminder appears in system message
+    system_msg = messages[0]["content"]
+    assert "<task_instructions_reminder>" in system_msg
+    assert task_instructions_reminder in system_msg
+
+    # Test with reminder in final user message
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=task_instructions,
+        task_instructions_reminder=task_instructions_reminder,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test"}],
+        task_instructions_reminder_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
+    )
+
+    # Verify reminder appears in final user message
+    final_msg = messages[-1]["content"]
+    assert "<task_instructions_reminder>" in final_msg
+    assert task_instructions_reminder in final_msg
+
+    # Test with None reminder
+    messages = format_brade_messages(
+        system_prompt=system_prompt,
+        task_instructions=task_instructions,
+        task_instructions_reminder=None,
+        done_messages=[],
+        cur_messages=[{"role": "user", "content": "Test"}],
+        task_instructions_reminder_location=ElementLocation(
+            placement=PromptElementPlacement.SYSTEM_MESSAGE,
+            position=PromptElementPosition.APPEND,
+        ),
+    )
+
+    # Verify no reminder tags appear
+    system_msg = messages[0]["content"]
+    assert "<task_instructions_reminder>" not in system_msg
 
 
 def test_append_positions() -> None:
@@ -302,6 +370,10 @@ def test_append_positions() -> None:
         task_examples_location=ElementLocation(
             placement=PromptElementPlacement.FINAL_USER_MESSAGE,
             position=PromptElementPosition.APPEND,
+        ),
+        task_instructions_reminder_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
         ),
     )
 
