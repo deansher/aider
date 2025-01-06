@@ -67,13 +67,13 @@ class PromptElementPosition(Enum):
     APPEND = "append"
 
 
-CONTEXT_SECTION = "<context>...</context>"
+CONTEXT_SECTION = "<brade:context>...</brade:context>"
 
-PROJECT_CONTEXT_SECTION = "<project_context>...</project_context>"
+PROJECT_CONTEXT_SECTION = "<brade:project_context>...</brade:project_context>"
 
-TASK_INSTRUCTIONS_SECTION = "<task_instructions>...</task_instructions>"
+TASK_INSTRUCTIONS_SECTION = "<brade:task_instructions>...</brade:task_instructions>"
 
-TASK_EXAMPLES_SECTION = "<task_examples>...</task_examples>"
+TASK_EXAMPLES_SECTION = "<brade:task_examples>...</brade:task_examples>"
 
 BRADE_PERSONA_PROMPT = f'''You are Brade, a highly skilled and experienced AI software engineer.
 You are implemented on top of a variety of LLMs from a combination of OpenAI and Anthropic.

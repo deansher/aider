@@ -897,10 +897,10 @@ def test_empty_content_handling() -> None:
         editable_text_files=[],
     )
     final_content = messages[-1]["content"]
-    assert "<repository_map>" not in final_content
-    assert "<platform_info>" not in final_content
-    assert "<readonly_files>" not in final_content
-    assert "<editable_files>" not in final_content
+    assert "<brade:repository_map>" not in final_content
+    assert "<brade:environment_context>" not in final_content
+    assert "<brade:readonly_files>" not in final_content
+    assert "<brade:editable_files>" not in final_content
 
 
 def test_malformed_input_errors() -> None:
