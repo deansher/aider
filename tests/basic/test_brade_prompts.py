@@ -459,7 +459,7 @@ def test_append_positions() -> None:
     # Verify final user message has context appended
     final_msg = messages[-1]["content"]
     assert final_msg.startswith("Test message"), "User message should come first"
-    assert "<context>" in final_msg, "Context should be in final message"
+    assert "<brade:context>" in final_msg, "Context should be in final message"
     assert repo_map in final_msg, "Repo map should be in final message"
     assert platform_info in final_msg, "Platform info should be in final message"
 
@@ -494,7 +494,7 @@ def test_append_positions() -> None:
     # Verify system message
     system_msg = messages[0]["content"]
     assert system_msg.startswith(system_prompt), "System prompt should come first"
-    assert "<context>" in system_msg, "Context should be in system message"
+    assert "<brade:context>" in system_msg, "Context should be in system message"
 
     # Verify final user message
     final_msg = messages[-1]["content"]
