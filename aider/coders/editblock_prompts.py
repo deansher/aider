@@ -124,9 +124,9 @@ from hello import hello
     system_reminder = """# Implementation Requirements
 
 ## Stay Focused
-- Implement ONLY the specified changes
-- Avoid starting new analysis, proposing new changes, or expanding scope
-- If you encounter issues, then explain them, stop, and wait for your partner's feedback
+- Implement ONLY the specified changes.
+- Avoid starting new analysis, proposing new changes, or expanding scope.
+- If you encounter issues, then explain them, stop, and wait for your partner's feedback.
 
 ## SEARCH/REPLACE Block Format Reference
 
@@ -136,10 +136,10 @@ from hello import hello
    - No quotes, asterisks, or escaping
 
 2. Code Fence:
-   - {fence[0]}language
-   - Match file extension
-   - Must exactly match the format shown in these instructions
-   - Using a different fence format will cause the edit to fail
+   - Format is: {fence[0]}language.
+   - Infer language from file extension.
+   - Must exactly match the format shown in these instructions.
+   - Using a different fence format will cause the edit to fail.
 
 3. Search Block:
    - Starts with <<<<<<< SEARCH
@@ -173,7 +173,7 @@ def echo(msg):
 
 1. **Exact Matching**
    - The SEARCH block must match the latest file content that you see in
-     <project_context>...</project_context>. This is the current state of all files
+     <brade:project_context>...</brade:project_context>. This is the current state of all files.
      you can access, and supercedes anything else in the chat.
    - Match every character exactly, including:
      - Whitespace and indentation
@@ -181,16 +181,17 @@ def echo(msg):
      - Container syntax (quotes, XML, etc.)
 
 2. **Context Selection**
-   - Primary goal: Ensure unique matches
-   - Secondary goal: Start at logical boundaries
-   - Maximum: ~10 lines of unchanged context
-   - Use multiple blocks for multiple changes
+  - Primary goal: Ensure unique matches.
+  - Secondary goal: Smallest scope of the SEARCH block that gets the job done.
+  - Tertiary goal: Start at logical boundaries.
+  - Maximum: ~10 lines of unchanged context surrounding your changes
+  - Use multiple blocks for multiple changes.
 
 3. **Common Mistakes to Avoid**
-   - Don't accidentally delete comments
-   - Don't accidentally change indentation
-   - Don't accidentally remove blank lines
-   - Don't forget to copy unchanged context exactly
+  - Don't accidentally delete comments.
+  - Don't accidentally change indentation.
+  - Don't accidentally remove blank lines.
+  - Don't forget to copy unchanged context exactly.
 
 # Special Cases
 
