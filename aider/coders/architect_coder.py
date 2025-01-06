@@ -71,7 +71,7 @@ class ArchitectExchange:
         """
         return self.messages
 
-    def append_editor_prompt(self, is_plan_change: bool) -> str:
+    def append_editor_prompt(self, is_plan_change: bool) -> str | None:
         """Append the appropriate editor prompt based on whether this is a plan change.
 
         Args:
@@ -90,7 +90,7 @@ class ArchitectExchange:
         )
         return prompt
 
-    def append_editor_response(self, response: str) -> None:
+    def append_editor_response(self, response: str | None) -> None:
         """Append the editor's response implementing changes.
 
         Args:
@@ -100,7 +100,7 @@ class ArchitectExchange:
             (ArchitectPhase.STEP2_IMPLEMENT, {"role": "assistant", "content": response})
         )
 
-    def append_reviewer_prompt(self) -> str:
+    def append_reviewer_prompt(self) -> str | None:
         """Append and return the reviewer prompt."""
         prompt = self.architect_prompts.get_review_changes_prompt()
         self._phase_messages.append(
@@ -108,7 +108,7 @@ class ArchitectExchange:
         )
         return prompt
 
-    def append_reviewer_response(self, response: str) -> None:
+    def append_reviewer_response(self, response: str | None) -> None:
         """Append the reviewer's response validating changes.
 
         Args:
@@ -363,6 +363,11 @@ class ArchitectCoder(Coder):
         Args:
             exchange: The exchange containing the architect's proposed changes
             is_plan_change: Whether these changes affect plan documents
+
+        The method handles potential failures in the editor coder:
+        - If editor_prompt fails, the exchange will not include an editor prompt
+        - If editor execution fails, the exchange will include a prompt but no response
+        - Cost and commit tracking are only updated on successful execution
         """
         editor_model = self.main_model.editor_model or self.main_model
         editor_coder = self.create_coder(
@@ -375,32 +380,48 @@ class ArchitectCoder(Coder):
         if self.verbose:
             editor_coder.show_announcements()
 
-        editor_prompt = exchange.append_editor_prompt(is_plan_change)
-        editor_coder.run(with_message=editor_prompt, preproc=False)
-        self.total_cost += editor_coder.total_cost
-        self.aider_commit_hashes = editor_coder.aider_commit_hashes
+        try:
+            editor_prompt = exchange.append_editor_prompt(is_plan_change)
+            if editor_prompt is not None:
+                editor_coder.run(with_message=editor_prompt, preproc=False)
+                self.total_cost += editor_coder.total_cost
+                self.aider_commit_hashes = editor_coder.aider_commit_hashes
 
-        # Copy the subordinate coder's newly known files back to the architect coder
-        # I don't understand the mypy error that # type: ignore is suppressing here.
-        self.abs_fnames.update(editor_coder.abs_fnames)  # type: ignore
-        self.abs_read_only_fnames.update(editor_coder.abs_read_only_fnames)  # type: ignore
+                # Copy the subordinate coder's newly known files back to the architect coder
+                # I don't understand the mypy error that # type: ignore is suppressing here.
+                self.abs_fnames.update(editor_coder.abs_fnames)  # type: ignore
+                self.abs_read_only_fnames.update(editor_coder.abs_read_only_fnames)  # type: ignore
 
-        exchange.append_editor_response(editor_coder.partial_response_content)
+                exchange.append_editor_response(editor_coder.partial_response_content)
+        except Exception as e:
+            self.io.tool_error(f"Editor coder failed: {str(e)}")
+            exchange.append_editor_response(None)
 
     def review_changes(self, exchange: ArchitectExchange) -> None:
         """Run the reviewer coder to validate changes.
 
         Args:
             exchange: The exchange containing the architect and editor responses
+
+        The method handles potential failures in the reviewer coder:
+        - If reviewer_prompt fails, the exchange will not include a reviewer prompt
+        - If reviewer execution fails, the exchange will include a prompt but no response
+        - Cost tracking is only updated on successful execution
         """
         self.io.tool_output("\nLooking over my changes ...")
         reviewer_coder = self.create_coder("ask")
         # Instead of mutating cur_messages, create new extended copy
         reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_messages()
-        reviewer_prompt = exchange.append_reviewer_prompt()
-        reviewer_coder.run(with_message=reviewer_prompt, preproc=False)
-        self.total_cost += reviewer_coder.total_cost
-        exchange.append_reviewer_response(reviewer_coder.partial_response_content)
+        
+        try:
+            reviewer_prompt = exchange.append_reviewer_prompt()
+            if reviewer_prompt is not None:
+                reviewer_coder.run(with_message=reviewer_prompt, preproc=False)
+                self.total_cost += reviewer_coder.total_cost
+                exchange.append_reviewer_response(reviewer_coder.partial_response_content)
+        except Exception as e:
+            self.io.tool_error(f"Reviewer coder failed: {str(e)}")
+            exchange.append_reviewer_response(None)
 
     def record_exchange(self, exchange: ArchitectExchange) -> None:
         """Record the architect's proposal, review, and a confirmation message.
