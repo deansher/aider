@@ -5,14 +5,30 @@
 
 from aider.brade_prompts import THIS_MESSAGE_IS_FROM_APP
 
-commit_message_prompt = """You are an expert software engineer. Write a concise,
-one-line git commit message for the file changes shown below in <diffs>...</diffs>. 
-Respond with nothing but the one-line commit message, without any additional text, 
-explanations, or line breaks.
+commit_message_prompt = """Generate a Git commit message for the changes shown in <diffs>...</diffs>.
+Output ONLY the commit message with NO other text. Do not be conversational.
+Do not explain. Do not ask questions.
 
-Ensure the commit message:
-- Is in the imperative mood (e.g., \"Add feature\" not \"Added feature\" or \"Adding feature\").
-- Does not exceed 72 characters.
+Requirements:
+- Use imperative mood (\"Add feature\" not \"Added feature\")
+- Max 50 chars for first line
+- Optional details after blank line
+- Focus on what changed and why
+
+Example good messages:
+    Add XML namespace to test assertions
+    
+    Update test to use brade: namespace prefix for consistency.
+
+    Fix factorial implementation
+    
+    Replace recursive implementation with math.factorial
+    for better performance and reliability.
+
+Example bad messages:
+    \"I updated the tests to use proper XML namespaces\"  # conversational
+    \"Adding XML namespaces to tests\"  # wrong mood
+    \"This commit adds XML namespaces\"  # too wordy
 """
 
 # COMMANDS
