@@ -8,6 +8,8 @@ from aider.types import ChatMessage
 
 from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
+    IMPLEMENTATION_COMPLETE,
+    REVIEW_BEGINS,
     ArchitectPrompts,
     architect_proposed_changes,
     possible_architect_responses,
@@ -117,7 +119,6 @@ class ArchitectExchange:
         self._phase_messages.append(
             (ArchitectPhase.STEP3_REVIEW, {"role": "assistant", "content": response})
         )
-
 
     def get_messages_by_phase(self, phase: ArchitectPhase) -> list[dict]:
         """Get messages from a specific phase.
@@ -473,8 +474,8 @@ class ArchitectCoder(Coder):
         step1_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
         step3_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
         transition_messages = [
-            ChatMessage(role="user", content=self.architect_prompts.IMPLEMENTATION_COMPLETE),
-            ChatMessage(role="assistant", content=self.architect_prompts.REVIEW_BEGINS),
+            ChatMessage(role="user", content=IMPLEMENTATION_COMPLETE),
+            ChatMessage(role="assistant", content=REVIEW_BEGINS),
         ]
         self.cur_messages = self.cur_messages + step1_messages + transition_messages + step3_messages
         self.move_back_cur_messages(self.architect_prompts.changes_committed_message)
