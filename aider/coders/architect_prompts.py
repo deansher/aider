@@ -9,6 +9,10 @@ from aider.brade_prompts import CONTEXT_SECTION, THIS_MESSAGE_IS_FROM_APP
 
 from .base_prompts import CoderPrompts
 
+# Messages used to show step transitions in chat history
+IMPLEMENTATION_COMPLETE = "Your subordinate AI software engineer has completed the implementation."
+REVIEW_BEGINS = "I will now review their implementation to ensure it meets our requirements."
+
 _task_instructions_overview = """
 Your current step is shown at the top of your task instructions.
 

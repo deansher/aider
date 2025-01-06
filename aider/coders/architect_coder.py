@@ -436,12 +436,13 @@ class ArchitectCoder(Coder):
         Args:
             exchange: The completed exchange containing all responses
         """
-        # Keep Step 1 (proposal) and Step 3 (review) messages, with transition markers
+        # Keep Step 1 (proposal) and Step 3 (review) messages, with transition markers that
+        # help readers understand the flow of the conversation while hiding implementation details
         step1_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
         step3_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
         transition_messages = [
-            ChatMessage(role="user", content="[Step 2: Implementation phase completed]"),
-            ChatMessage(role="assistant", content="[Step 3: Review phase begins]"),
+            ChatMessage(role="user", content=self.architect_prompts.IMPLEMENTATION_COMPLETE),
+            ChatMessage(role="assistant", content=self.architect_prompts.REVIEW_BEGINS),
         ]
         self.cur_messages = self.cur_messages + step1_messages + transition_messages + step3_messages
         self.move_back_cur_messages(self.architect_prompts.changes_committed_message)
