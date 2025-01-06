@@ -378,6 +378,30 @@ def sanity_check_repo(repo, io):
 
 
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
+    """Main entry point for the brade application.
+
+    Error handling is delegated to aider/main.py to maintain consistent error
+    handling behavior across the entire application. See aider/main.py for the
+    full error handling strategy documentation.
+    """
+    """Main entry point for the aider application with robust error handling.
+
+    Error Handling Strategy:
+    1. Recoverable Errors (e.g. API timeouts, rate limits):
+       - Log the error details
+       - Report user-friendly message via io
+       - Allow retry or continue running
+       - Example: InternalServerError from API calls
+
+    2. Unrecoverable Errors (e.g. corrupt files, invalid config):
+       - Log the full error details
+       - Report error type and details to user via io
+       - Point user to log file for debugging
+       - Exit with status code 1
+
+    All error reporting uses the io object to ensure consistent styling and
+    proper handling of terminal capabilities.
+    """
     if argv is None:
         argv = sys.argv[1:]
 
