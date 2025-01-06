@@ -46,8 +46,8 @@ class ArchitectExchange:
             architect_response: The architect's response proposing changes
         """
         self.architect_prompts = architect_prompts
-        self._messages: list[tuple[ArchitectPhase, ChatMessage]] = [
-            (ArchitectPhase.STEP1_PROPOSE, ChatMessage(role="assistant", content=architect_response))
+        self._phase_messages: list[tuple[ArchitectPhase, ChatMessage]] = [
+            (ArchitectPhase.STEP1_PROPOSE, {"role": "assistant", "content": architect_response})
         ]
 
     @property
@@ -57,7 +57,7 @@ class ArchitectExchange:
         Returns:
             List of message dicts with 'role' and 'content' keys
         """
-        return [{"role": msg.role, "content": msg.content} for _, msg in self._messages]
+        return [msg for _, msg in self._phase_messages]
 
     def append_editor_prompt(self, is_plan_change: bool) -> str:
         """Append the appropriate editor prompt based on whether this is a plan change.
@@ -73,8 +73,8 @@ class ArchitectExchange:
             if is_plan_change
             else self.architect_prompts.get_approved_non_plan_changes_prompt()
         )
-        self._messages.append(
-            (ArchitectPhase.STEP2_IMPLEMENT, ChatMessage(role="user", content=prompt))
+        self._phase_messages.append(
+            (ArchitectPhase.STEP2_IMPLEMENT, {"role": "user", "content": prompt})
         )
         return prompt
 
@@ -84,15 +84,15 @@ class ArchitectExchange:
         Args:
             response: The editor's response after implementing changes
         """
-        self._messages.append(
-            (ArchitectPhase.STEP2_IMPLEMENT, ChatMessage(role="assistant", content=response))
+        self._phase_messages.append(
+            (ArchitectPhase.STEP2_IMPLEMENT, {"role": "assistant", "content": response})
         )
 
     def append_reviewer_prompt(self) -> str:
         """Append and return the reviewer prompt."""
         prompt = self.architect_prompts.get_review_changes_prompt()
-        self._messages.append(
-            (ArchitectPhase.STEP3_REVIEW, ChatMessage(role="user", content=prompt))
+        self._phase_messages.append(
+            (ArchitectPhase.STEP3_REVIEW, {"role": "user", "content": prompt})
         )
         return prompt
 
@@ -102,19 +102,19 @@ class ArchitectExchange:
         Args:
             response: The reviewer's response after validating changes
         """
-        self._messages.append(
-            (ArchitectPhase.STEP3_REVIEW, ChatMessage(role="assistant", content=response))
+        self._phase_messages.append(
+            (ArchitectPhase.STEP3_REVIEW, {"role": "assistant", "content": response})
         )
 
-    def get_messages(self) -> list[ChatMessage]:
+    def get_messages(self) -> list[dict]:
         """Get all messages in the exchange.
 
         Returns:
             List of all messages that have occurred
         """
-        return [msg for _, msg in self._messages]
+        return [msg for _, msg in self._phase_messages]
 
-    def get_messages_by_phase(self, phase: ArchitectPhase) -> list[ChatMessage]:
+    def get_messages_by_phase(self, phase: ArchitectPhase) -> list[dict]:
         """Get messages from a specific phase.
 
         Args:
@@ -123,7 +123,7 @@ class ArchitectExchange:
         Returns:
             List of messages from the specified phase
         """
-        return [msg for p, msg in self._messages if p == phase]
+        return [msg for p, msg in self._phase_messages if p == phase]
 
     def has_editor_response(self) -> bool:
         """Check if the exchange includes an editor response.
@@ -132,8 +132,8 @@ class ArchitectExchange:
             True if the exchange includes an assistant message in the STEP2_IMPLEMENT phase
         """
         return any(
-            phase == ArchitectPhase.STEP2_IMPLEMENT and msg.role == "assistant"
-            for phase, msg in self._messages
+            phase == ArchitectPhase.STEP2_IMPLEMENT and msg["role"] == "assistant"
+            for phase, msg in self._phase_messages
         )
 
 
