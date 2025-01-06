@@ -54,10 +54,22 @@ class ArchitectExchange:
     def messages(self) -> list[dict]:
         """Get all messages in dict format for compatibility with tests.
 
+        The ArchitectExchange internally tracks messages with their phases using tuples,
+        but external code expects to work with just the message dicts. This property
+        provides that clean external interface.
+
         Returns:
             List of message dicts with 'role' and 'content' keys
         """
         return [msg for _, msg in self._phase_messages]
+
+    def get_messages(self) -> list[dict]:
+        """Get all messages in the exchange.
+
+        Returns:
+            List of all messages that have occurred
+        """
+        return self.messages
 
     def append_editor_prompt(self, is_plan_change: bool) -> str:
         """Append the appropriate editor prompt based on whether this is a plan change.
@@ -106,13 +118,6 @@ class ArchitectExchange:
             (ArchitectPhase.STEP3_REVIEW, {"role": "assistant", "content": response})
         )
 
-    def get_messages(self) -> list[dict]:
-        """Get all messages in the exchange.
-
-        Returns:
-            List of all messages that have occurred
-        """
-        return [msg for _, msg in self._phase_messages]
 
     def get_messages_by_phase(self, phase: ArchitectPhase) -> list[dict]:
         """Get messages from a specific phase.
@@ -131,10 +136,10 @@ class ArchitectExchange:
         Returns:
             True if the exchange includes an assistant message in the STEP2_IMPLEMENT phase
         """
-        return any(
-            phase == ArchitectPhase.STEP2_IMPLEMENT and msg["role"] == "assistant"
-            for phase, msg in self._phase_messages
-        )
+        for phase, msg in self._phase_messages:
+            if phase == ArchitectPhase.STEP2_IMPLEMENT and msg["role"] == "assistant":
+                return True
+        return False
 
 
 class ArchitectCoder(Coder):
