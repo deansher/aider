@@ -46,9 +46,18 @@ class ArchitectExchange:
             architect_response: The architect's response proposing changes
         """
         self.architect_prompts = architect_prompts
-        self.messages: list[tuple[ArchitectPhase, ChatMessage]] = [
+        self._messages: list[tuple[ArchitectPhase, ChatMessage]] = [
             (ArchitectPhase.STEP1_PROPOSE, ChatMessage(role="assistant", content=architect_response))
         ]
+
+    @property
+    def messages(self) -> list[dict]:
+        """Get all messages in dict format for compatibility with tests.
+
+        Returns:
+            List of message dicts with 'role' and 'content' keys
+        """
+        return [{"role": msg.role, "content": msg.content} for _, msg in self._messages]
 
     def append_editor_prompt(self, is_plan_change: bool) -> str:
         """Append the appropriate editor prompt based on whether this is a plan change.
@@ -64,7 +73,7 @@ class ArchitectExchange:
             if is_plan_change
             else self.architect_prompts.get_approved_non_plan_changes_prompt()
         )
-        self.messages.append(
+        self._messages.append(
             (ArchitectPhase.STEP2_IMPLEMENT, ChatMessage(role="user", content=prompt))
         )
         return prompt
@@ -75,14 +84,14 @@ class ArchitectExchange:
         Args:
             response: The editor's response after implementing changes
         """
-        self.messages.append(
+        self._messages.append(
             (ArchitectPhase.STEP2_IMPLEMENT, ChatMessage(role="assistant", content=response))
         )
 
     def append_reviewer_prompt(self) -> str:
         """Append and return the reviewer prompt."""
         prompt = self.architect_prompts.get_review_changes_prompt()
-        self.messages.append(
+        self._messages.append(
             (ArchitectPhase.STEP3_REVIEW, ChatMessage(role="user", content=prompt))
         )
         return prompt
@@ -93,7 +102,7 @@ class ArchitectExchange:
         Args:
             response: The reviewer's response after validating changes
         """
-        self.messages.append(
+        self._messages.append(
             (ArchitectPhase.STEP3_REVIEW, ChatMessage(role="assistant", content=response))
         )
 
@@ -103,7 +112,7 @@ class ArchitectExchange:
         Returns:
             List of all messages that have occurred
         """
-        return [msg for _, msg in self.messages]
+        return [msg for _, msg in self._messages]
 
     def get_messages_by_phase(self, phase: ArchitectPhase) -> list[ChatMessage]:
         """Get messages from a specific phase.
@@ -114,7 +123,7 @@ class ArchitectExchange:
         Returns:
             List of messages from the specified phase
         """
-        return [msg for p, msg in self.messages if p == phase]
+        return [msg for p, msg in self._messages if p == phase]
 
     def has_editor_response(self) -> bool:
         """Check if the exchange includes an editor response.
@@ -124,7 +133,7 @@ class ArchitectExchange:
         """
         return any(
             phase == ArchitectPhase.STEP2_IMPLEMENT and msg.role == "assistant"
-            for phase, msg in self.messages
+            for phase, msg in self._messages
         )
 
 
