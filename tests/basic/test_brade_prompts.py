@@ -621,8 +621,8 @@ def test_format_task_examples() -> None:
         format_task_examples(odd_examples)
 
 
-def test_wrap_xml() -> None:
-    """Tests that wrap_xml correctly handles empty, whitespace, and non-empty content.
+def test_wrap_brade_xml() -> None:
+    """Tests that wrap_brade_xml correctly handles empty, whitespace, and non-empty content.
 
     Validates:
     - Empty string content results in no trailing newline
@@ -630,38 +630,39 @@ def test_wrap_xml() -> None:
     - Whitespace-only content results in no trailing newline
     - Non-empty content gets exactly one trailing newline
     - Opening/closing tags and their newlines are consistent
+    - Tags use the 'brade' namespace
     """
-    from aider.brade_prompts import wrap_xml
+    from aider.brade_prompts import wrap_brade_xml
 
     # Test empty string
-    result = wrap_xml("test", "")
-    assert result == "<test>\n</test>\n"
+    result = wrap_brade_xml("test", "")
+    assert result == "<brade:test>\n</brade:test>\n"
 
     # Test None
-    result = wrap_xml("test", None)
-    assert result == "<test>\n</test>\n"
+    result = wrap_brade_xml("test", None)
+    assert result == "<brade:test>\n</brade:test>\n"
 
     # Test whitespace-only strings
-    result = wrap_xml("test", "   ")
-    assert result == "<test>\n</test>\n"
-    result = wrap_xml("test", "\n")
-    assert result == "<test>\n</test>\n"
-    result = wrap_xml("test", "\t  \n  ")
-    assert result == "<test>\n</test>\n"
+    result = wrap_brade_xml("test", "   ")
+    assert result == "<brade:test>\n</brade:test>\n"
+    result = wrap_brade_xml("test", "\n")
+    assert result == "<brade:test>\n</brade:test>\n"
+    result = wrap_brade_xml("test", "\t  \n  ")
+    assert result == "<brade:test>\n</brade:test>\n"
 
     # Test non-empty content
-    result = wrap_xml("test", "content")
-    assert result == "<test>\ncontent\n</test>\n", f"Unexpected result: {result}"
-    result = wrap_xml("test", "line1\nline2")
-    assert result == "<test>\nline1\nline2\n</test>\n", f"Unexpected result: {result}"
+    result = wrap_brade_xml("test", "content")
+    assert result == "<brade:test>\ncontent\n</brade:test>\n", f"Unexpected result: {result}"
+    result = wrap_brade_xml("test", "line1\nline2")
+    assert result == "<brade:test>\nline1\nline2\n</brade:test>\n", f"Unexpected result: {result}"
 
     # Test mixed content and whitespace
-    result = wrap_xml("test", "content  \n  ")
-    assert result == "<test>\ncontent  \n  \n</test>\n", f"Unexpected result: {result}"
-    result = wrap_xml("test", "  \ncontent\n  ")
-    assert result == "<test>\n  \ncontent\n  \n</test>\n", f"Unexpected result: {result}"
-    result = wrap_xml("test", "\n  content  \n")
-    assert result == "<test>\n\n  content  \n</test>\n", f"Unexpected result: {result}"
+    result = wrap_brade_xml("test", "content  \n  ")
+    assert result == "<brade:test>\ncontent  \n  \n</brade:test>\n", f"Unexpected result: {result}"
+    result = wrap_brade_xml("test", "  \ncontent\n  ")
+    assert result == "<brade:test>\n  \ncontent\n  \n</brade:test>\n", f"Unexpected result: {result}"
+    result = wrap_brade_xml("test", "\n  content  \n")
+    assert result == "<brade:test>\n\n  content  \n</brade:test>\n", f"Unexpected result: {result}"
 
 
 def test_message_combination() -> None:

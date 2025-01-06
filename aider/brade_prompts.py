@@ -239,17 +239,17 @@ def format_task_examples(task_examples: list[dict[str, str]] | None) -> str:
             raise ValueError("task_examples must alternate between user and assistant messages")
 
         examples_xml += (
-            "<example>\n"
-            f"<message role='user'>{user_msg['content']}</message>\n"
-            f"<message role='assistant'>{asst_msg['content']}</message>\n"
-            "</example>\n"
+            "<brade:example>\n"
+            f"<brade:message role='user'>{user_msg['content']}</brade:message>\n"
+            f"<brade:message role='assistant'>{asst_msg['content']}</brade:message>\n"
+            "</brade:example>\n"
         )
 
-    return wrap_xml("task_examples", examples_xml)
+    return wrap_brade_xml("task_examples", examples_xml)
 
 
-def wrap_xml(tag: str, content: str | None) -> str:
-    """Wraps content in XML tags, always including tags even for empty content.
+def wrap_brade_xml(tag: str, content: str | None) -> str:
+    """Wraps content in XML tags with the 'brade' namespace, always including tags even for empty content.
 
     The function ensures consistent newline handling:
     - A newline after the opening tag
@@ -259,21 +259,21 @@ def wrap_xml(tag: str, content: str | None) -> str:
     - A newline after the closing tag
 
     Args:
-        tag: The XML tag name to use
+        tag: The XML tag name to use (will be prefixed with 'brade:')
         content: The content to wrap, can be None/empty
 
     Returns:
-        The wrapped content with tags, containing empty string if content is None/empty
+        The wrapped content with namespaced tags, containing empty string if content is None/empty
     """
     if not content:
         content = ""
 
     # Handle whitespace-only content
     if not content.strip():
-        return f"<{tag}>\n</{tag}>\n"
+        return f"<brade:{tag}>\n</brade:{tag}>\n"
 
     stripped_content = content.rstrip("\n")
-    return f"<{tag}>\n{stripped_content}\n</{tag}>\n"
+    return f"<brade:{tag}>\n{stripped_content}\n</brade:{tag}>\n"
 
 
 def format_file_section(files: list[FileContent] | None) -> str:
@@ -306,7 +306,7 @@ def format_file_section(files: list[FileContent] | None) -> str:
         if not isinstance(fname, str) or not isinstance(content, str):
             raise ValueError("Filename and content must both be strings")
 
-        result += f"<file path='{fname}'>\n{content}\n</file>\n"
+        result += f"<brade:file path='{fname}'>\n{content}\n</brade:file>\n"
     return result
 
 
