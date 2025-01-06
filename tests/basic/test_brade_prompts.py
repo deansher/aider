@@ -743,6 +743,10 @@ def test_file_section_formatting() -> None:
         cur_messages=[{"role": "user", "content": "Test"}],
         readonly_text_files=[],
         editable_text_files=[],
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
     )
     final_content = messages[-1]["content"]
     assert "<readonly_files>" not in final_content
@@ -759,6 +763,10 @@ def test_file_section_formatting() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         readonly_text_files=test_files,
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
     )
     final_content = messages[-1]["content"]
     assert "<readonly_files>" in final_content
@@ -814,6 +822,10 @@ def test_platform_info_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         platform_info=test_platform,
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
     )
     final_content = messages[-1]["content"]
     assert "<environment_context>" in final_content
@@ -827,6 +839,10 @@ def test_platform_info_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         platform_info=None,
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
     )
     final_content = messages[-1]["content"]
     assert "<platform_info>" not in final_content
@@ -838,6 +854,10 @@ def test_platform_info_handling() -> None:
         done_messages=[],
         cur_messages=[{"role": "user", "content": "Test"}],
         platform_info="",
+        context_location=ElementLocation(
+            placement=PromptElementPlacement.FINAL_USER_MESSAGE,
+            position=PromptElementPosition.PREPEND,
+        ),
     )
     final_content = messages[-1]["content"]
     assert "<platform_info>" not in final_content
