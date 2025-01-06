@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from aider.coders.architect_coder import ArchitectCoder, ArchitectExchange
+from aider.coders.architect_coder import ArchitectCoder, ArchitectExchange, ArchitectPhase
 from aider.coders.architect_prompts import ArchitectPrompts
 from aider.io import InputOutput
 from aider.models import Model
