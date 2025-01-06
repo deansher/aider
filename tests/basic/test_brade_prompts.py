@@ -510,7 +510,7 @@ def test_append_positions() -> None:
     user_msg_pos = final_msg.find("Test message")
     assert user_msg_pos != -1, "Could not find user message in:\n" + final_msg
 
-    task_ex_match = re.search(r'^\s*<task_examples>\s*$', final_msg, re.MULTILINE)
+    task_ex_match = re.search(r'^\s*<brade:task_examples>\s*$', final_msg, re.MULTILINE)
     assert task_ex_match is not None, "Could not find <task_examples> tag in:\n" + final_msg
     task_ex_pos = task_ex_match.start()
 
