@@ -1,6 +1,7 @@
 # This file uses the Brade coding style: full modern type hints and strong documentation.
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 
+from enum import Enum
 from typing import Any
 
 from aider.types import ChatMessage
@@ -14,15 +15,28 @@ from .architect_prompts import (
 from .base_coder import Coder
 
 
+class ArchitectPhase(Enum):
+    """Identifies the phase of the architect workflow that produced a message.
+
+    Values:
+        STEP1_PROPOSE: The architect's initial proposal
+        STEP2_IMPLEMENT: The implementation phase messages
+        STEP3_REVIEW: The architect's review of changes
+    """
+    STEP1_PROPOSE = "step1_propose"
+    STEP2_IMPLEMENT = "step2_implement"
+    STEP3_REVIEW = "step3_review"
+
+
 class ArchitectExchange:
     """Encapsulates a complete architect-editor-reviewer exchange.
 
     This class maintains the sequence of messages that occur during an exchange between:
-    - The architect proposing changes
-    - The editor implementing changes
-    - The reviewer validating changes
+    - The architect proposing changes (Step 1)
+    - The editor implementing changes (Step 2)
+    - The reviewer validating changes (Step 3)
 
-    Messages are appended to self.messages as they occur.
+    Messages are tagged with their phase as they are appended.
     """
 
     def __init__(self, architect_prompts: ArchitectPrompts, architect_response: str):
@@ -32,8 +46,8 @@ class ArchitectExchange:
             architect_response: The architect's response proposing changes
         """
         self.architect_prompts = architect_prompts
-        self.messages: list[ChatMessage] = [
-            ChatMessage(role="assistant", content=architect_response)
+        self.messages: list[tuple[ArchitectPhase, ChatMessage]] = [
+            (ArchitectPhase.STEP1_PROPOSE, ChatMessage(role="assistant", content=architect_response))
         ]
 
     def append_editor_prompt(self, is_plan_change: bool) -> str:
@@ -50,7 +64,9 @@ class ArchitectExchange:
             if is_plan_change
             else self.architect_prompts.get_approved_non_plan_changes_prompt()
         )
-        self.messages.append(ChatMessage(role="user", content=prompt))
+        self.messages.append(
+            (ArchitectPhase.STEP2_IMPLEMENT, ChatMessage(role="user", content=prompt))
+        )
         return prompt
 
     def append_editor_response(self, response: str) -> None:
@@ -59,12 +75,16 @@ class ArchitectExchange:
         Args:
             response: The editor's response after implementing changes
         """
-        self.messages.append(ChatMessage(role="assistant", content=response))
+        self.messages.append(
+            (ArchitectPhase.STEP2_IMPLEMENT, ChatMessage(role="assistant", content=response))
+        )
 
     def append_reviewer_prompt(self) -> str:
         """Append and return the reviewer prompt."""
         prompt = self.architect_prompts.get_review_changes_prompt()
-        self.messages.append(ChatMessage(role="user", content=prompt))
+        self.messages.append(
+            (ArchitectPhase.STEP3_REVIEW, ChatMessage(role="user", content=prompt))
+        )
         return prompt
 
     def append_reviewer_response(self, response: str) -> None:
@@ -73,7 +93,9 @@ class ArchitectExchange:
         Args:
             response: The reviewer's response after validating changes
         """
-        self.messages.append(ChatMessage(role="assistant", content=response))
+        self.messages.append(
+            (ArchitectPhase.STEP3_REVIEW, ChatMessage(role="assistant", content=response))
+        )
 
     def get_messages(self) -> list[ChatMessage]:
         """Get all messages in the exchange.
@@ -81,7 +103,18 @@ class ArchitectExchange:
         Returns:
             List of all messages that have occurred
         """
-        return self.messages
+        return [msg for _, msg in self.messages]
+
+    def get_messages_by_phase(self, phase: ArchitectPhase) -> list[ChatMessage]:
+        """Get messages from a specific phase.
+
+        Args:
+            phase: The phase to filter by
+
+        Returns:
+            List of messages from the specified phase
+        """
+        return [msg for p, msg in self.messages if p == phase]
 
     def has_editor_response(self) -> bool:
         """Check if the exchange includes an editor response.
@@ -353,16 +386,21 @@ class ArchitectCoder(Coder):
         exchange.append_reviewer_response(reviewer_coder.partial_response_content)
 
     def record_exchange(self, exchange: ArchitectExchange) -> None:
-        """Record just the architect's proposal and a confirmation message.
+        """Record the architect's proposal, review, and a confirmation message.
         
-        To maintain proper encapsulation, we only retain the architect's high-level
-        proposal. We don't retain the implementation details or review, which would
-        expose those implementation details to future architect interactions.
+        To maintain proper encapsulation, we retain:
+        1. The architect's high-level proposal (Step 1)
+        2. The architect's review of changes (Step 3)
+        3. A confirmation message
+        
+        We drop implementation details (Step 2) to avoid exposing them in future interactions.
 
         Args:
             exchange: The completed exchange containing all responses
         """
-        # Keep only the architect's original proposal
-        self.cur_messages = self.cur_messages + [exchange.get_messages()[0]]
+        # Keep Step 1 (proposal) and Step 3 (review) messages
+        step1_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
+        step3_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
+        self.cur_messages = self.cur_messages + step1_messages + step3_messages
         self.move_back_cur_messages(self.architect_prompts.changes_committed_message)
         self.partial_response_content = ""  # Clear to prevent redundant message
