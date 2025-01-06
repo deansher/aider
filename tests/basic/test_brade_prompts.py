@@ -875,13 +875,13 @@ def test_empty_content_handling() -> None:
     from aider.brade_prompts import format_brade_messages, wrap_xml
 
     # Test empty string handling
-    assert wrap_xml("test", "") == "<test>\n</test>\n"
-    assert wrap_xml("test", None) == "<test>\n</test>\n"
+    assert wrap_brade_xml("test", "") == "<brade:test>\n</brade:test>\n"
+    assert wrap_brade_xml("test", None) == "<brade:test>\n</brade:test>\n"
 
     # Test whitespace-only strings
-    assert wrap_xml("test", "   ") == "<test>\n</test>\n"
-    assert wrap_xml("test", "\n") == "<test>\n</test>\n"
-    assert wrap_xml("test", "\t  \n  ") == "<test>\n</test>\n"
+    assert wrap_brade_xml("test", "   ") == "<brade:test>\n</brade:test>\n"
+    assert wrap_brade_xml("test", "\n") == "<brade:test>\n</brade:test>\n"
+    assert wrap_brade_xml("test", "\t  \n  ") == "<brade:test>\n</brade:test>\n"
 
     # Test empty content in format_brade_messages
     messages = format_brade_messages(
