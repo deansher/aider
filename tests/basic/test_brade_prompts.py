@@ -240,12 +240,12 @@ def test_element_locations() -> None:
 
     # Verify system message contains all elements
     system_msg = messages[0]["content"]
-    assert "<context>" in system_msg, "Context should be in system message"
+    assert "<brade:context>" in system_msg, "Context should be in system message"
     assert repo_map in system_msg, "Repo map should be in system message"
     assert platform_info in system_msg, "Platform info should be in system message"
-    assert "<task_examples>" in system_msg, "Task examples should be in system message"
+    assert "<brade:task_examples>" in system_msg, "Task examples should be in system message"
     assert "Example request" in system_msg, "Example content should be in system message"
-    assert "<task_instructions>" in system_msg, "Task instructions should be in system message"
+    assert "<brade:task_instructions>" in system_msg, "Task instructions should be in system message"
 
     # Verify user message is clean
     final_msg = messages[-1]["content"]
@@ -311,7 +311,7 @@ def test_task_instructions_reminder_placement() -> None:
 
     # Verify reminder appears in system message
     system_msg = messages[0]["content"]
-    assert "<task_instructions_reminder>" in system_msg
+    assert "<brade:task_instructions_reminder>" in system_msg
     assert task_instructions_reminder in system_msg
 
     # Test with reminder in final user message
@@ -426,7 +426,7 @@ def test_append_positions() -> None:
     # Verify system message has context appended
     system_msg = messages[0]["content"]
     assert system_msg.startswith(system_prompt), "System prompt should come first"
-    assert "<context>" in system_msg, "Context should be in system message"
+    assert "<brade:context>" in system_msg, "Context should be in system message"
     assert repo_map in system_msg, "Repo map should be in system message"
     assert platform_info in system_msg, "Platform info should be in system message"
 
@@ -594,10 +594,10 @@ def test_format_task_examples() -> None:
     result = format_task_examples(examples)
 
     # Check XML structure
-    assert "<task_examples>" in result, f"Expected task_examples tag in:\n{result}"
-    assert "</task_examples>" in result, f"Expected closing task_examples tag in:\n{result}"
-    assert "<example>" in result, f"Expected example tag in:\n{result}"
-    assert "</example>" in result, f"Expected closing example tag in:\n{result}"
+    assert "<brade:task_examples>" in result, f"Expected task_examples tag in:\n{result}"
+    assert "</brade:task_examples>" in result, f"Expected closing task_examples tag in:\n{result}"
+    assert "<brade:example>" in result, f"Expected example tag in:\n{result}"
+    assert "</brade:example>" in result, f"Expected closing example tag in:\n{result}"
 
     # Check message transformation
     assert (
@@ -750,8 +750,8 @@ def test_file_section_formatting() -> None:
         ),
     )
     final_content = messages[-1]["content"]
-    assert "<readonly_files>" not in final_content
-    assert "<editable_files>" not in final_content
+    assert "<brade:readonly_files>" not in final_content
+    assert "<brade:editable_files>" not in final_content
 
     # Test valid file content
     test_files = [
@@ -770,8 +770,8 @@ def test_file_section_formatting() -> None:
         ),
     )
     final_content = messages[-1]["content"]
-    assert "<readonly_files>" in final_content
-    assert "<file path='test.py'>" in final_content
+    assert "<brade:readonly_files>" in final_content
+    assert "<brade:file path='test.py'>" in final_content
     assert "<file path='data.txt'>" in final_content
     assert "def test():" in final_content
     assert "Sample data" in final_content
@@ -829,9 +829,9 @@ def test_platform_info_handling() -> None:
         ),
     )
     final_content = messages[-1]["content"]
-    assert "<environment_context>" in final_content
+    assert "<brade:environment_context>" in final_content
     assert test_platform in final_content
-    assert "</environment_context>" in final_content
+    assert "</brade:environment_context>" in final_content
 
     # Test without platform info
     messages = format_brade_messages(
@@ -872,7 +872,7 @@ def test_empty_content_handling() -> None:
     - Whitespace-only strings are handled properly
     - None values are handled properly
     """
-    from aider.brade_prompts import format_brade_messages, wrap_xml
+    from aider.brade_prompts import format_brade_messages, wrap_brade_xml
 
     # Test empty string handling
     assert wrap_brade_xml("test", "") == "<brade:test>\n</brade:test>\n"
