@@ -384,7 +384,7 @@ stop and explain the issue rather than proceeding.
     files_no_full_files_with_repo_map: str = ""
     files_no_full_files_with_repo_map_reply: str = ""
     repo_content_prefix: str = ""
-    system_reminder: str = ""
+    system_reminder: str = "You are carrying out Step 1 of the architect's three-step process."
     editor_response_placeholder: str = (
         THIS_MESSAGE_IS_FROM_APP
         + """An editor AI persona has followed your instructions to make changes to the project
