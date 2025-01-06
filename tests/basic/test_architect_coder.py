@@ -96,6 +96,61 @@ class TestArchitectExchange(unittest.TestCase):
         self.exchange.append_editor_response("Changes made")
         self.assertTrue(self.exchange.has_editor_response())
 
+    def test_get_messages_by_phase(self):
+        """Test filtering messages by phase."""
+        # Initial state has just the architect proposal
+        step1_msgs = self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
+        self.assertEqual(len(step1_msgs), 1)
+        self.assertEqual(step1_msgs[0]["content"], self.architect_response)
+
+        # Add implementation phase messages
+        self.exchange.append_editor_prompt(is_plan_change=False)
+        self.exchange.append_editor_response("Changes made")
+        step2_msgs = self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)
+        self.assertEqual(len(step2_msgs), 2)
+        self.assertEqual(step2_msgs[1]["content"], "Changes made")
+
+        # Add review phase messages
+        self.exchange.append_reviewer_prompt()
+        self.exchange.append_reviewer_response("Review complete")
+        step3_msgs = self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
+        self.assertEqual(len(step3_msgs), 2)
+        self.assertEqual(step3_msgs[1]["content"], "Review complete")
+
+    def test_phase_transitions(self):
+        """Test that messages are tagged with correct phases through a complete exchange."""
+        # Start with proposal phase
+        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1)
+        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 0)
+        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 0)
+
+        # Transition to implementation phase
+        self.exchange.append_editor_prompt(is_plan_change=False)
+        self.exchange.append_editor_response("Changes made")
+        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1)
+        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 2)
+        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 0)
+
+        # Transition to review phase
+        self.exchange.append_reviewer_prompt()
+        self.exchange.append_reviewer_response("Review complete")
+        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1)
+        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 2)
+        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 2)
+
+    def test_empty_exchange(self):
+        """Test behavior with minimal messages in the exchange."""
+        # Create exchange with just the initial proposal
+        minimal_exchange = ArchitectExchange(self.architect_prompts, "Minimal proposal")
+        
+        # Verify phase counts
+        self.assertEqual(len(minimal_exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1)
+        self.assertEqual(len(minimal_exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 0)
+        self.assertEqual(len(minimal_exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 0)
+
+        # Verify message content
+        self.assertEqual(minimal_exchange.get_messages()[0]["content"], "Minimal proposal")
+
 
 class TestArchitectCoder(unittest.TestCase):
     """Test the ArchitectCoder class that coordinates architecture decisions."""
