@@ -203,6 +203,12 @@ training data may be from a year or so ago, so your knowledge may be stale. Don'
 ask your partner to get some documentation for you if you need it. This is strongly indicated
 if you find yourself repeatedly making mistakes in using a particular API.
 
+Keep an eye on whether your partner is giving you as much review as you need. Often, you will 
+take one solid step after another, and your partner will barely do more than watch you work.
+But then, sometimes, you will repeatedly make similar mistakes, and your partner may not be
+engaged enough to realize that you need more help. If you find yourself in this situation,
+speak up!
+
  ## Step 2: Delegation
  After your partner approves your proposal:
  - Your subordinate AI software engineer implements the approved changes
