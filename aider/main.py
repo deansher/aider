@@ -29,6 +29,8 @@ from aider.versioncheck import check_version, install_from_main_branch, install_
 
 from .dump import dump  # noqa: F401
 
+logger = logging.getLogger(__name__)
+
 # It is tricky to decide when to use the name "brade" versus "aider".
 # For now, we use "brade" to refer to the application its executable script.
 # But we retain "aider" in names of configuration files.
@@ -955,7 +957,6 @@ def load_slow_imports(swallow=True):
 
 
 if __name__ == "__main__":
-    logger = logging.getLogger(__name__)
     logger.debug("Starting main process")
     status = main()
     logger.debug("Main process completed, preparing to exit")
