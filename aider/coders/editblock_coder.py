@@ -445,7 +445,9 @@ split_re = re.compile(r"^((?:" + separators + r")[ ]*\n)", re.MULTILINE | re.DOT
 
 
 missing_filename_err = (
-    "Bad/missing filename. The filename must be alone on the line before the opening fence"
+    "Missing or incorrect filename. The filename must be alone on the line"
+    " before the opening fence. If this search/replacement block modifies existing"
+    " content, then file path and name must exactly match an existing file."
     " {fence[0]}"
 )
 
