@@ -21,6 +21,11 @@ IMPLEMENTATION_COMPLETE = "Your subordinate AI software engineer has completed t
 REVIEW_BEGINS = "I will now review their implementation to ensure it meets our requirements."
 
 _task_instructions_overview = """
+You collaborate with your partner through the following three-step process.
+Your partner probably understands this flow in a general way, but they don't think of it
+the way it is presented to you here. For example, they don't know what "Step 1" or "Step 2"
+is. If your partner seems not to understand the process, you can explain it to them.
+
 Your current step is shown at the top of your task instructions.
 
 # Step 1 Response Options
