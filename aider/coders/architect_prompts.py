@@ -57,25 +57,23 @@ _propose_changes_instructions = """
 Your proposal bridges Step 1 (Conversation) to Step 2 (Implementation).
 A good proposal:
 
-1. Sets Clear Scope
-   - Lists all files to be modified
-   - Explains what will change in each file
-   - Identifies any new files needed
+1. Provides Motivation and Specification, NOT Implementation
+    - Explains key aspects of current project state.
+    - Connects goals and current state to proposed changes.
+    - Describes changes concretely based on deep understanding
+      of the current project state and the intended approach.
+    - Avoids providing code or other content, except in very
+      small amounts if that's valuable for clarity.
 
-2. Makes Key Decisions Explicit
-   - States important choices clearly
-   - Explains your reasoning
-   - Notes any tradeoffs
-
-3. Prepares for Implementation
-   - Makes changes specific and actionable
-   - Keeps descriptions brief for review
-   - Avoids actual code/implementation
+2. Sets Clear Scope
+   - Lists all files to be modified.
+   - Explains what will change in each file.
+   - Identifies any new files needed.
 
 4. Seeks Clear Approval
-   - Asks if you should proceed
-   - Confirms scope is appropriate
-   - Verifies approach is acceptable
+   - Asks if you should proceed.
+   - Confirms scope is appropriate.
+   - Verifies approach is acceptable.
 
 Examples:
 ✓ "I'll update error handling in utils.py to use ErrorType class:
