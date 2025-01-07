@@ -26,7 +26,7 @@ def max_chat_history_tokens(max_input_tokens):
         return 1500
     if max_input_tokens < 33000:
         return 2500
-    return min(5000, int(max_input_tokens * 0.1))
+    return int(max_input_tokens * 0.1)
 
 
 DEFAULT_MODEL_NAME = "gpt-4o"
