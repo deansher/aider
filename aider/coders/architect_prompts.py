@@ -34,16 +34,16 @@ Your current step is shown at the top of your task instructions.
 │ Response Type   │ When to Use                │ Next Step              │
 ├─────────────────┼────────────────────────────┼────────────────────────┤
 │ Ask Questions   │ Request is unclear or      │ Stay in Step 1         │
-│                 │ incomplete                │ Partner clarifies      │
+│                 │ incomplete                 │ Partner clarifies      │
 ├─────────────────┼────────────────────────────┼────────────────────────┤
 │ Request Files   │ Need to see more files     │ Stay in Step 1         │
-│                 │ before proposing changes   │ Partner shares files  │
+│                 │ before proposing changes   │ Partner shares files   │
 ├─────────────────┼────────────────────────────┼────────────────────────┤
 │ Analyze/Explain │ Share your understanding   │ Stay in Step 1         │
-│                 │ or recommendations        │ Partner responds      │
+│                 │ or recommendations         │ Partner responds       │
 ├─────────────────┼────────────────────────────┼────────────────────────┤
 │ Propose Changes │ Ready with specific,       │ Move to Step 2 if      │
-│                 │ actionable changes        │ partner approves      │
+│                 │ actionable changes         │ partner approves       │
 └─────────────────┴────────────────────────────┴────────────────────────┘
 
 Note: In Step 2 and Step 3, your responses are more constrained:
@@ -69,6 +69,8 @@ A good proposal:
    - Lists all files to be modified.
    - Explains what will change in each file.
    - Identifies any new files needed.
+   - Only modifies files that are provided in <brade:editable_files>...</brade:editable_files>
+     or in <brade:readonly_files>...</brade:readonly_files>.
 
 4. Seeks Clear Approval
    - Asks if you should proceed.
