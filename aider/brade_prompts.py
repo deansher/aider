@@ -74,12 +74,14 @@ REPO_MAP_SECTION = "<brade:repository_map>...</brade:repository_map>"
 EDITABLE_FILES_SECTION = "<brade:editable_files>...</brade:editable_files>"
 READONLY_FILES_SECTION = "<brade:readonly_files>...</brade:readonly_files>"
 
-ENVIRONMENT_CONTEXT_SECTION = "<brade:environment_context>...</brade:environment_context>"
+ENVIRONMENT_CONTEXT_SECTION = (
+    "<brade:environment_context>...</brade:environment_context>"
+)
 
 TASK_INSTRUCTIONS_SECTION = "<brade:task_instructions>...</brade:task_instructions>"
 TASK_EXAMPLES_SECTION = "<brade:task_examples>...</brade:task_examples>"
 
-BRADE_PERSONA_PROMPT = f'''You are Brade, a highly skilled and experienced AI software engineer.
+BRADE_PERSONA_PROMPT = f"""You are Brade, a highly skilled and experienced AI software engineer.
 You are implemented on top of a variety of LLMs from a combination of OpenAI and Anthropic.
 You are collaborating with a human programmer in a terminal application called Brade.
 
@@ -192,21 +194,17 @@ The Brade Applicatiom provides you with the following information, which is not 
 - {TASK_EXAMPLES_SECTION}: Contains example conversations that demonstrate how to carry out the task.
 
 ```
-'''
+"""
 
-THIS_MESSAGE_IS_FROM_APP = (
-    """This message is from the Brade application, rather than from your partner.
+THIS_MESSAGE_IS_FROM_APP = """This message is from the Brade application, rather than from your partner.
 Your partner does not see this message.
 
 """
-)
 
-REST_OF_MESSAGE_IS_FROM_APP = (
-    """(The rest of this message is from the Brade application, rather than from your partner.
+REST_OF_MESSAGE_IS_FROM_APP = """(The rest of this message is from the Brade application, rather than from your partner.
 Your partner does not see this portion of the message.)
 
 """
-)
 
 
 def format_task_examples(task_examples: list[dict[str, str]] | None) -> str:
@@ -242,7 +240,9 @@ def format_task_examples(task_examples: list[dict[str, str]] | None) -> str:
         asst_msg = task_examples[i + 1]
 
         if user_msg["role"] != "user" or asst_msg["role"] != "assistant":
-            raise ValueError("task_examples must alternate between user and assistant messages")
+            raise ValueError(
+                "task_examples must alternate between user and assistant messages"
+            )
 
         examples_xml += (
             "<brade:example>\n"
@@ -319,11 +319,12 @@ def format_file_section(files: list[FileContent] | None) -> str:
 @dataclass(frozen=True)
 class ElementLocation:
     """Specifies where to place a prompt element in the message sequence.
-    
+
     Attributes:
         placement: Which message receives the element
         position: Where in the message the element appears
     """
+
     placement: PromptElementPlacement
     position: PromptElementPosition
 
@@ -331,11 +332,12 @@ class ElementLocation:
 @dataclass
 class MessageElement:
     """A message element to be placed in a specific location.
-    
+
     Attributes:
         content: The element's content as a string
         location: Where to place the element in the message sequence
     """
+
     content: str
     location: ElementLocation
 
@@ -414,7 +416,9 @@ def format_brade_messages(
     ]:
         if loc is not None:
             if loc.placement == PromptElementPlacement.INITIAL_USER_MESSAGE:
-                raise ValueError("Only FINAL_USER_MESSAGE or SYSTEM_MESSAGE are supported at this time")
+                raise ValueError(
+                    "Only FINAL_USER_MESSAGE or SYSTEM_MESSAGE are supported at this time"
+                )
 
     # Build the context sections
 
@@ -428,10 +432,14 @@ def format_brade_messages(
     if editable_text_files:
         files_xml = format_file_section(editable_text_files)
         project_parts.append(wrap_brade_xml("editable_files", files_xml))
-    project_context = wrap_brade_xml("project_context", "".join(project_parts) if project_parts else "\n")
+    project_context = wrap_brade_xml(
+        "project_context", "".join(project_parts) if project_parts else "\n"
+    )
 
     # Build environment context
-    environment_context = wrap_brade_xml("environment_context", platform_info if platform_info else "\n")
+    environment_context = wrap_brade_xml(
+        "environment_context", platform_info if platform_info else "\n"
+    )
 
     # Add guidance about using context
     context_preface = f"""<!--
@@ -459,8 +467,7 @@ superceding any other file content shown in chat messages.
 
     # Combine all context sections
     context_str = wrap_brade_xml(
-        "context",
-        f"{context_preface}{project_context}{environment_context}"
+        "context", f"{context_preface}{project_context}{environment_context}"
     )
 
     # Format task examples if provided
@@ -477,7 +484,9 @@ superceding any other file content shown in chat messages.
         " is not seen by the user. -->\n"
         f"Examples of how to carry out this task are provided in {TASK_EXAMPLES_SECTION}.\n\n"
     )
-    instructions_str = wrap_brade_xml("task_instructions", f"{instructions_preface}{task_instructions}")
+    instructions_str = wrap_brade_xml(
+        "task_instructions", f"{instructions_preface}{task_instructions}"
+    )
 
     # Create message elements with their locations
     elements: list[MessageElement] = []
@@ -491,11 +500,12 @@ superceding any other file content shown in chat messages.
     if task_instructions_reminder_location and task_instructions_reminder:
         reminder_str = wrap_brade_xml(
             "task_instructions_reminder",
-            "<!-- This material is generated by the Brade Application and is not" +
-            " seen by the user. -->\n" +
-            task_instructions_reminder
+            "<!-- The Brade application always automatically inserts this reminder. -->\n"
+            + task_instructions_reminder,
         )
-        elements.append(MessageElement(reminder_str, task_instructions_reminder_location))
+        elements.append(
+            MessageElement(reminder_str, task_instructions_reminder_location)
+        )
 
     # messages array always starts with the system message
     messages = [{"role": "system", "content": system_prompt}]
@@ -504,7 +514,11 @@ superceding any other file content shown in chat messages.
         messages.extend(done_messages)
 
     # Add elements to system message if requested
-    system_elements = [elem for elem in elements if elem.location.placement == PromptElementPlacement.SYSTEM_MESSAGE]
+    system_elements = [
+        elem
+        for elem in elements
+        if elem.location.placement == PromptElementPlacement.SYSTEM_MESSAGE
+    ]
     for elem in system_elements:
         if elem.location.position == PromptElementPosition.PREPEND:
             messages[0]["content"] = elem.content + messages[0]["content"]
@@ -524,13 +538,15 @@ superceding any other file content shown in chat messages.
     # 3. All APPEND elements
 
     final_elements = [
-        elem for elem in elements
+        elem
+        for elem in elements
         if elem.location.placement == PromptElementPlacement.FINAL_USER_MESSAGE
     ]
 
     # Phase 1: PREPEND elements
     prepend_elements = [
-        elem for elem in final_elements
+        elem
+        for elem in final_elements
         if elem.location.position == PromptElementPosition.PREPEND
     ]
     prepend_content = ""
@@ -549,7 +565,8 @@ superceding any other file content shown in chat messages.
 
     # Phase 3: APPEND elements
     append_elements = [
-        elem for elem in final_elements
+        elem
+        for elem in final_elements
         if elem.location.position == PromptElementPosition.APPEND
     ]
     for elem in append_elements:
