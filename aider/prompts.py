@@ -7,44 +7,51 @@ from aider.brade_prompts import THIS_MESSAGE_IS_FROM_APP
 
 commit_message_prompt = """Generate a Git commit message for the changes shown in <diffs>...</diffs>.
 Respond with just the commit message, without preface, explanation, or any other text.
-We will use your response as a commit message exactly as you write it. You can write a multi-line 
-commit message if you feel this changes warrants it.
+We will use your response as a commit message exactly as you write it. 
+Use your judgment as a senior software engineer to write a great commit message.
+
+Start your response with the first line of the commit message:
+- Provides a concise summmary of the changes (max 50 chars)
+- Use imperative mood (\"Add feature\" not \"Added feature\")
+
+You can then add a few more lines to provide more detail if needed.
 
 ## Requirements
 
-- Use imperative mood (\"Add feature\" not \"Added feature\")
-- Max 50 chars for first line
-- Optional details after blank line
-- Focus on what changed and why
-
-
-## Example Good Messages
-
-### Good Example 1
+## Good Example
 Add XML namespace to test assertions
 
-### Good Example 2
+## Good Example
 Update test to use brade: namespace prefix for consistency.
 
-### Good Example 3: Usefully Multi-line
+## Good Example: Usefully Multi-line
 Add test for system message cache control
 
 in AnthropicChatModelProvider.test.ts, verify that system messages with cache control are 
 properly handled in _chatHistoryToAnthropic.
 
-## Example Bad Messages
-
-### Bad Example 1: Conversational
+## Bad Example: Conversational
 I updated the tests to use proper XML namespaces
 
-### Bad Example 2: Wrong Mood
+## Bad Example: Wrong Mood
 Adding XML namespaces to tests
 
-### Bad Example 3: Has Preface Instead of Bare Commit Message
+## Bad Example: Has Preface that Should be Omitted
 **Commit Message**
 Add XML namespace to test assertions
 
-### Bad Example 4: Too Long
+## Bad Example: Has Preface that Should be Omitted
+Here is the commit message for the changes:
+
+Add type guard for WireMessage.content
+
+In AnthropicChatModelProvider.ts, update the _formatWireMessage function to handle
+both string and array cases for the WireMessage.content property.
+
+This fixes a TypeScript error where we were trying to use flatMap on a string, which
+is not a valid operation.
+
+## Bad Example: Too Long
 Fix system message cache control in _chatHistoryToAnthropic
 
 The key changes are:
