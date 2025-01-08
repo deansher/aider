@@ -136,7 +136,8 @@ from hello import hello
    - No quotes, asterisks, or escaping
 
 2. Code Fence:
-   - Format is: {fence[0]}language.
+   - Format is: {fence[0]}language, like ```python or <source>python
+   - The fence marker varies from request to request, to make you you use {fence[0]} right now.
    - Infer language from file extension.
    - Must exactly match the format shown in these instructions.
    - Using a different fence format will cause the edit to fail.
@@ -172,26 +173,34 @@ def echo(msg):
 ## Key Requirements
 
 1. **Exact Matching**
-   - The SEARCH block must match the latest file content that you see in
-     <brade:project_context>...</brade:project_context>. This is the current state of all files.
-     you can access, and supercedes anything else in the chat.
+   - The SEARCH block must exactly match the latest file content that you see in
+     <brade:editable_files>...</brade:editable_files> 
+     or <brade:readonly_files>...</brade:readonly_files>.
+     By placing files in <brade:editable_files />, your partner is suggesting that you
+     will more likely need to edit these, but you can freely edit files in
+     <brade:readonly_files /> if necessary to get the job done.
    - Match every character exactly, including:
      - Whitespace and indentation
      - Comments and docstrings
      - Container syntax (quotes, XML, etc.)
 
-2. **Context Selection**
-  - Primary goal: Ensure unique matches.
-  - Secondary goal: Smallest scope of the SEARCH block that gets the job done.
-  - Tertiary goal: Start at logical boundaries.
-  - Maximum: ~10 lines of unchanged context surrounding your changes
-  - Use multiple blocks for multiple changes.
+2. **Choosing Scope of a SEARCH block**
+  - Use multiple SEARCH/REPLACE blocks as need. Keep each one small and focused.
+  - For a top-level declaration smaller than about 30 lines (and for that size of 
+    "almost top-level" declarations like method declarations) use one SEARCH/REPLACE block
+    to rewrite each declaration that you change.
+  - For declarations larger than about 30 lines, include about 5-10 lines of context above
+    and below each change. It's nicer if you can start the change at a logical boundary,
+    such as a major `if` statement, but most importantly keep each SEARCH/REPLACE block
+    focused and not too large.
+  - When editing a document, follow the same rules but for sections or other logical chunks
+    instead of declarations.
 
 3. **Common Mistakes to Avoid**
-  - Don't accidentally delete comments.
-  - Don't accidentally change indentation.
-  - Don't accidentally remove blank lines.
-  - Don't forget to copy unchanged context exactly.
+  - Avoid deleting comments.
+  - Avoid changing indentation.
+  - Avoid removing blank lines.
+  - Copy unchanged context exactly.
 
 # Special Cases
 
