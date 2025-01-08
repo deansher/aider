@@ -16,8 +16,6 @@ Start your response with the first line of the commit message:
 
 You can then add a few more lines to provide more detail if needed.
 
-## Requirements
-
 ## Good Example
 Add XML namespace to test assertions
 
@@ -72,6 +70,9 @@ it('should handle system message cache control', () => {
       cacheControl: EPHEMERAL_CACHE_CONTROL
     }
   ];
+
+## Important Reminder
+Respond with just the commit message, without preface, explanation, or any other text.
 """
 
 # COMMANDS
