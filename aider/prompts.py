@@ -16,29 +16,33 @@ Start your response with the first line of the commit message:
 
 You can then add a few more lines to provide more detail if needed.
 
-## Good Example
+## Examples of Good Commit Messages
+
+### Good
 Add XML namespace to test assertions
 
-## Good Example
+### Good
 Update test to use brade: namespace prefix for consistency.
 
-## Good Example: Usefully Multi-line
+### Good: Usefully Multi-line
 Add test for system message cache control
 
 in AnthropicChatModelProvider.test.ts, verify that system messages with cache control are 
 properly handled in _chatHistoryToAnthropic.
 
-## Bad Example: Conversational
+## Examples of Bad Commit Messages
+
+### Bad: Conversational
 I updated the tests to use proper XML namespaces
 
-## Bad Example: Wrong Mood
+### Bad: Wrong Mood
 Adding XML namespaces to tests
 
-## Bad Example: Has Preface that Should be Omitted
+### Bad: Has Preface that Should be Omitted
 **Commit Message**
 Add XML namespace to test assertions
 
-## Bad Example: Has Preface that Should be Omitted
+### Bad: Has Preface that Should be Omitted
 Here is the commit message for the changes:
 
 Add type guard for WireMessage.content
@@ -49,7 +53,7 @@ both string and array cases for the WireMessage.content property.
 This fixes a TypeScript error where we were trying to use flatMap on a string, which
 is not a valid operation.
 
-## Bad Example: Too Long
+### Bad: Too Long
 Fix system message cache control in _chatHistoryToAnthropic
 
 The key changes are:
@@ -70,6 +74,8 @@ it('should handle system message cache control', () => {
       cacheControl: EPHEMERAL_CACHE_CONTROL
     }
   ];
+
+## Your Next Step
 
 Respond now with just the commit message, without preface, explanation, or any other text.
 """
