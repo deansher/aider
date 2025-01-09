@@ -179,8 +179,10 @@ class GitRepo:
                 role="user",
                 content=(
                     "<brade:editing_context>\n"
+                    + "<!-- Provides context for recent file changes. -->\n"
                     + (context + "\n" if context else "")
                     + "</brade:editing_context>\n"
+                    + "<!-- We will commit these changes. -->\n"
                     + "<brade:diffs>\n"
                     + diffs
                     + "</brade:diffs>\n"

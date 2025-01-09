@@ -5,10 +5,7 @@
 
 from aider.brade_prompts import THIS_MESSAGE_IS_FROM_APP
 
-commit_message_prompt = """Generate a Git commit message for the changes shown in <diffs>...</diffs>.
-Respond with just the commit message, without preface, explanation, or any other text.
-We will use your response as a commit message exactly as you write it. 
-Use your judgment as a senior software engineer to write a great commit message.
+commit_message_prompt = """<brade:commit_message_guidelines>
 
 Start your response with the first line of the commit message:
 - Provides a concise summmary of the changes (max 50 chars)
@@ -74,10 +71,12 @@ it('should handle system message cache control', () => {
       cacheControl: EPHEMERAL_CACHE_CONTROL
     }
   ];
+</brade:commit_message_guidelines>
 
-## Your Next Step
-
-Respond now with just the commit message, without preface, explanation, or any other text.
+Generate a Git commit message for the changes shown in <diffs>...</diffs>.
+Respond with just the commit message, without preface, explanation, or any other text.
+We will use your response as a commit message exactly as you write it. 
+Use your judgment as a senior software engineer to write a great commit message.
 """
 
 # COMMANDS
