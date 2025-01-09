@@ -74,6 +74,11 @@ it('should handle system message cache control', () => {
 </brade:commit_message_guidelines>
 
 Generate a Git commit message for the changes shown in <diffs>...</diffs>.
+
+Pay careful attention to whether these changes implement new features, revise or improve
+our planning document(s), or revise or improve other documents. Frame your commit message
+so it is clear what we did. 
+
 Respond with just the commit message, without preface, explanation, or any other text.
 We will use your response as a commit message exactly as you write it. 
 Use your judgment as a senior software engineer to write a great commit message.
