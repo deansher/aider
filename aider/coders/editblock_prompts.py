@@ -186,10 +186,14 @@ def echo(msg):
 
 2. **Choosing Scope of a SEARCH block**
   - Use multiple SEARCH/REPLACE blocks as need. Keep each one small and focused.
-  - For a top-level declaration smaller than about 30 lines (and for that size of 
-    "almost top-level" declarations like method declarations) use one SEARCH/REPLACE block
-    to rewrite each declaration that you change.
-  - For declarations larger than about 30 lines, include about 5-10 lines of context above
+  - Let's use the term "high-level declaration" to mean either a top-level declarartion
+    such as a constant or function declaration, or the next level down when it is still
+    a high-level unit such as a method of a class, or a nested `describe` or `it` of a
+    test suite.
+  - For a high-level declaration smaller than about 30 lines, use one SEARCH/REPLACE block
+    to rewrite each declaration that you change. The SEARCH block should cover the entire
+    high-level declaration and nothing else.
+  - For high-level declarations larger than about 30 lines, include about 5-10 lines of context above
     and below each change. It's nicer if you can start the change at a logical boundary,
     such as a major `if` statement, but most importantly keep each SEARCH/REPLACE block
     focused and not too large.

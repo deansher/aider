@@ -178,7 +178,7 @@ class GitRepo:
             dict(
                 role="user",
                 content=(
-                    + "<brade:editing_context>\n"
+                    "<brade:editing_context>\n"
                     + (context + "\n" if context else "")
                     + "</brade:editing_context>\n"
                     + "<brade:diffs>\n"

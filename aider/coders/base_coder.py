@@ -23,7 +23,7 @@ from aider.brade_prompts import ElementLocation, PromptElementPlacement, PromptE
 
 from langfuse.decorators import langfuse_context, observe
 
-from aider import __version__, models, prompts, urls, utils
+from aider import __version__, models, urls, utils
 from aider.brade_prompts import format_brade_messages
 from aider.coders.base_prompts import CoderPrompts
 from aider.commands import Commands
