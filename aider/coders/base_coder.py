@@ -2027,7 +2027,12 @@ class Coder:
     def get_context_from_history(self, history):
         context = ""
         if history:
-            for msg in history:
+            # Optimize for the ArchitectCoder case. Aim to get the following messages:
+            # - the architect message proposing the change
+            # - the placeholder request to the editor
+            # - the placeholder for the editor's response
+            # - the architect message reviewing the change
+            for msg in history[-4:]:
                 context += "\n" + msg["role"].upper() + ": " + msg["content"] + "\n"
 
         return context
@@ -2037,7 +2042,8 @@ class Coder:
 
         This method handles the git workflow after successful edits:
         1. Skips if repo/auto-commits not configured
-        2. Uses chat context to generate commit message
+        2. Uses chat context to generate commit message. If not provided,
+           then recent chat messages are used as the context.
         3. Commits the changes
         4. Updates conversation history
         5. Reports results to user

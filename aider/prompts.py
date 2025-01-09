@@ -71,8 +71,7 @@ it('should handle system message cache control', () => {
     }
   ];
 
-## Important Reminder
-Respond with just the commit message, without preface, explanation, or any other text.
+Respond now with just the commit message, without preface, explanation, or any other text.
 """
 
 # COMMANDS
