@@ -76,8 +76,8 @@ it('should handle system message cache control', () => {
 Generate a Git commit message for the changes shown in <diffs>...</diffs>.
 
 Pay careful attention to whether these changes implement new features, revise or improve
-our planning document(s), or revise or improve other documents. Frame your commit message
-so it is clear what we did. 
+our planning document(s), or revise or improve other documents. Write your commit message
+in a way that makes this clear. 
 
 Respond with just the commit message, without preface, explanation, or any other text.
 We will use your response as a commit message exactly as you write it. 
