@@ -735,7 +735,7 @@ def test_file_section_formatting() -> None:
     """
     from aider.brade_prompts import format_brade_messages
 
-    # Test empty file lists
+    # Test empty file lists - should include empty sections
     messages = format_brade_messages(
         system_prompt="Test prompt",
         task_instructions="Test instructions",
@@ -749,8 +749,8 @@ def test_file_section_formatting() -> None:
         ),
     )
     final_content = messages[-1]["content"]
-    assert "<brade:readonly_files>" not in final_content
-    assert "<brade:editable_files>" not in final_content
+    assert "<brade:readonly_files>\n</brade:readonly_files>" in final_content
+    assert "<brade:editable_files>\n</brade:editable_files>" in final_content
 
     # Test valid file content
     test_files = [

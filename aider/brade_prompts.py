@@ -285,23 +285,32 @@ def wrap_brade_xml(tag: str, content: str | None) -> str:
 def format_file_section(files: list[FileContent] | None) -> str:
     """Formats a list of files and their contents into an XML section.
 
+    Always returns a properly formatted XML section, even when files is None or empty.
+    This maintains consistent structure and makes it clear when a section exists but
+    is empty.
+
     Args:
         files: List of FileContent tuples, each containing:
             - filename (str): The path/name of the file
             - content (str): The file's content
+            Can be None to indicate no files.
 
     Returns:
-        XML formatted string containing the files and their contents
+        XML formatted string containing the files and their contents, or an empty
+        section if no files are provided.
 
     Raises:
         TypeError: If files is not None and not a list of FileContent tuples
         ValueError: If any tuple in files doesn't have exactly 2 string elements
     """
-    if not files:
-        return ""
+    if files is None:
+        return "\n"  # Empty but valid section content
 
     if not isinstance(files, list):
         raise TypeError("files must be None or a list of (filename, content) tuples")
+
+    if not files:
+        return "\n"  # Empty but valid section content
 
     result = ""
     for item in files:
@@ -421,14 +430,13 @@ def format_brade_messages(
     project_parts = []
     if repo_map and repo_map.strip():
         project_parts.append(wrap_brade_xml("repository_map", repo_map))
-    if readonly_text_files:
-        files_xml = format_file_section(readonly_text_files)
-        project_parts.append(wrap_brade_xml("readonly_files", files_xml))
-    if editable_text_files:
-        files_xml = format_file_section(editable_text_files)
-        project_parts.append(wrap_brade_xml("editable_files", files_xml))
+    # Always include file sections, even when empty
+    files_xml = format_file_section(readonly_text_files)
+    project_parts.append(wrap_brade_xml("readonly_files", files_xml))
+    files_xml = format_file_section(editable_text_files)
+    project_parts.append(wrap_brade_xml("editable_files", files_xml))
     project_context = wrap_brade_xml(
-        "project_context", "".join(project_parts) if project_parts else "\n"
+        "project_context", "".join(project_parts)
     )
 
     # Build environment context
