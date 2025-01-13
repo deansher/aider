@@ -472,8 +472,8 @@ class ArchitectCoder(Coder):
         step1_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
         step3_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
         transition_messages = [
-            ChatMessage(role="user", content=IMPLEMENTATION_COMPLETE),
-            ChatMessage(role="assistant", content=REVIEW_BEGINS),
+            ChatMessage(role="user", content=self.architect_prompts.IMPLEMENTATION_COMPLETE),
+            ChatMessage(role="assistant", content=self.architect_prompts.REVIEW_BEGINS),
         ]
         self.cur_messages = self.cur_messages + step1_messages + transition_messages + step3_messages
         self.move_back_cur_messages(self.architect_prompts.changes_committed_message)
