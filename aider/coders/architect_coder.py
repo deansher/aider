@@ -8,8 +8,6 @@ from aider.types import ChatMessage
 
 from ..sendchat import analyze_assistant_response
 from .architect_prompts import (
-    IMPLEMENTATION_COMPLETE,
-    REVIEW_BEGINS,
     ArchitectPrompts,
     architect_proposed_changes,
     possible_architect_responses,
