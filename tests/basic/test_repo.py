@@ -168,8 +168,8 @@ class TestRepo(unittest.TestCase):
         self.assertEqual(result, "Custom commit message")
         mock_send.assert_called_once()
         args, _ = mock_send.call_args
-        # Verify that the custom prompt appears at the start of the message content
-        self.assertTrue(args[1][0]["content"].startswith(custom_prompt))
+        # Verify that the custom prompt appears at the end of the message content
+        self.assertTrue(args[1][0]["content"].endswith(custom_prompt))
         # Verify that the diffs and context are included
         self.assertIn("dummy context", args[1][0]["content"])
         self.assertIn("dummy diff", args[1][0]["content"])
