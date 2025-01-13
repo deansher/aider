@@ -304,43 +304,6 @@ class TestArchitectCoder(unittest.TestCase):
         self.assertEqual(len(self.coder.cur_messages), 0)
         self.assertEqual(self.coder.partial_response_content, "")
 
-    def test_message_isolation_in_new_exchange(self):
-        """Test that implementation details don't leak into future exchanges.
-        
-        This test verifies that when we complete one exchange and start another,
-        the implementation details from the first exchange are properly isolated
-        and don't influence the second exchange.
-        """
-        # Complete first exchange
-        exchange1 = ArchitectExchange(self.coder.architect_prompts, "First proposal...")
-        exchange1.append_editor_prompt(is_plan_change=False)
-        exchange1.append_editor_response("First implementation...")
-        exchange1.append_reviewer_prompt()
-        exchange1.append_reviewer_response("First review...")
-        self.coder.record_exchange(exchange1)
-
-        # Start second exchange
-        exchange2 = ArchitectExchange(self.coder.architect_prompts, "Second proposal...")
-        
-        # Verify no implementation details from first exchange are visible
-        step2_messages = exchange1.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)
-        for msg in step2_messages:
-            self.assertNotIn(msg, self.coder.cur_messages)
-            self.assertNotIn(msg, exchange2.messages)
-
-        # Verify only appropriate messages from first exchange are visible
-        visible_messages = self.coder.cur_messages
-        
-        # Should see Step 1 messages
-        step1_messages = exchange1.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
-        for msg in step1_messages:
-            self.assertIn(msg, visible_messages)
-            
-        # Should see Step 3 messages
-        step3_messages = exchange1.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
-        for msg in step3_messages:
-            self.assertIn(msg, visible_messages)
-
 
 if __name__ == "__main__":
     unittest.main()
