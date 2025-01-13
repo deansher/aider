@@ -118,9 +118,6 @@ def test_context_and_task_placement() -> None:
     sections = [
         system_prompt,
         "<brade:context>",
-        "<brade:static_context>",
-        "You are a helpful AI assistant",
-        "</brade:static_context>",
         "<brade:project_context>",
         "<brade:repository_map>",
         test_repo_map,

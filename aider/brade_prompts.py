@@ -364,11 +364,6 @@ def format_brade_messages(
     This function implements Brade's approach to structuring prompts for LLM interactions.
     It organizes context into distinct sections to support clear decision-making:
 
-    Static Context:
-    - Core system message defining role and capabilities
-    - Unchanging guidance about how to work
-    - Reference in responses using <static_context>
-
     Project Context:
     - Repository structure and content
     - File contents and permissions
