@@ -8,6 +8,10 @@ I intend to stay very close to the upstream project, but I want to make some cha
 This project and the programming assistant that it implements are named after a young, smart, angry, 
 female villain in a young adult science fiction book series called Skyward, which are among my favorite books.
 
+## Corporate Deployment
+
+Brade supports secure corporate deployments with enforced settings. Organizations can build their own Docker images based on our published images, with specific API endpoints, model selections, and other settings enforced while still allowing user customization. See [docker/README.md](docker/README.md) for details.
+
 # Aider is AI pair programming in your terminal
 
 Aider lets you pair program with LLMs,

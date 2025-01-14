@@ -2,6 +2,10 @@
 # Corporate Brade Configuration Template
 # Customize this file for your corporate environment
 ##########################################################
+#
+# This file uses the same format as .aider.conf.yml
+# For all available options, see:
+# https://aider.chat/docs/config/options.html
 
 # Model and API Settings
 # These are typically enforced via command line args
@@ -23,3 +27,6 @@ pretty: true
 stream: true
 
 # Add any other settings from .aider.conf.yml that you want to enforce
+# The settings in this file will be enforced via command-line arguments,
+# while still allowing users to customize other settings via their own
+# .aider.conf.yml or .env files.

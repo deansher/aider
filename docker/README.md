@@ -23,6 +23,8 @@ docker run -it --rm \
 
 - `latest`: Latest stable release
 - `brade-vX.Y.Z`: Specific version releases
+- `full`: Full image with all features
+- `core`: Minimal image with core functionality
 
 ## Configuration
 
@@ -53,6 +55,51 @@ docker run -it --rm \
   deansher/brade:latest
 ```
 
+## Corporate Deployment
+
+Organizations can build custom Docker images that enforce specific settings while still allowing user customization.
+
+### Building a Corporate Image
+
+1. Copy the templates:
+   ```bash
+   mkdir -p corporate-brade
+   cp docker/corporate/Dockerfile.template corporate-brade/Dockerfile
+   cp docker/corporate/corporate-config.yml.template corporate-brade/corporate-config.yml
+   cp docker/corporate/build.py corporate-brade/build.py
+   chmod +x corporate-brade/build.py
+   ```
+
+2. Edit `corporate-config.yml`:
+   - Set required API endpoints
+   - Configure model selection
+   - Set security policies
+   - Add other enforced settings
+   
+   The configuration file uses the same format as `.aider.conf.yml`. See [Configuration Options](https://aider.chat/docs/config/options.html) for all available settings.
+
+3. Build the corporate image:
+   ```bash
+   cd corporate-brade
+   ./build.py --config corporate-config.yml --tag your-registry/brade:corporate
+   ```
+
+### Configuration Hierarchy
+
+1. Command-line arguments from corporate Dockerfile (highest priority, enforced)
+2. User's .aider.conf.yml in current directory
+3. User's .aider.conf.yml in git root
+4. User's .aider.conf.yml in home directory
+5. User's .env file (similar precedence)
+6. Environment variables
+
+### Security Considerations
+
+- Store API keys and secrets in your corporate secrets management system
+- Use your corporate container registry
+- Consider network isolation requirements
+- Review and enforce security-related settings
+
 ## Features
 
 - Edit multiple files at once
@@ -68,6 +115,7 @@ Full documentation of the upstream project available here:
 - [Installation](https://aider.chat/docs/install.html)
 - [Usage](https://aider.chat/docs/usage.html)
 - [LLM Support](https://aider.chat/docs/llms.html)
+- [Configuration Options](https://aider.chat/docs/config/options.html)
 
 ## Support
 
