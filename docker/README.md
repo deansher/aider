@@ -9,7 +9,7 @@ Brade works best with Claude 3.5 Sonnet and is only tested with that model.
 The Docker-based deployment approach offers significant advantages, especially in corporate environments:
 
 - **Zero Dependency Issues**: Since the image is built from our tested base image, you completely avoid:
-  - Corporate PyPI access requirements
+  - Corporate PyPI gaps or version inconsistencies (but make sure you are in compliance!)
   - System package installation
   - Binary compatibility problems
   - Python dependency conflicts
@@ -18,17 +18,15 @@ The Docker-based deployment approach offers significant advantages, especially i
 
 ## Quick Start
 
-```bash
-# Run brade with your current directory mounted
-docker run -it --rm \
-  -v "$PWD:/app" \
-  deansher/brade:latest
+Run brade with your current directory mounted:
 
-# Or specify your OpenAI API key directly
-docker run -it --rm \
-  -v "$PWD:/app" \
-  -e OPENAI_API_KEY=your-key-here \
-  deansher/brade:latest
+```bash
+docker run -it --rm -v "$PWD:/app" deansher/brade:latest
+```
+
+Optionally, specify your OpenAI API key or other environment variables directly:
+```
+docker run -it --rm -v "$PWD:/app" -e OPENAI_API_KEY=your-key-here deansher/brade:latest
 ```
 
 ## Available Tags
