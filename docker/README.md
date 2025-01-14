@@ -44,6 +44,16 @@ docker run -it --rm -v "$PWD:/app" -e OPENAI_API_KEY=your-key-here docker.io/dea
 - `ANTHROPIC_API_KEY`: Your Anthropic API key
 - Other API keys as documented at [aider.chat/docs/llms.html](https://aider.chat/docs/llms.html)
 
+### Command Line Arguments
+
+Pass command line arguments directly after the image name:
+
+```bash
+docker run -it --rm -v "$PWD:/app" docker.io/deansher/brade:full --dark-mode
+```
+
+This example enables dark mode for better visibility in dark terminals. Any command line argument documented in the [Configuration Options](https://aider.chat/docs/config/options.html) can be used this way.
+
 ### Volume Mounts
 
 Mount your working directory to `/app` in the container:
