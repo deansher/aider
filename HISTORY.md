@@ -1,6 +1,11 @@
 
 # Release history
 
+### brade-v1.0.0
+
+- Refined prompts and architect flow into a solid, useful assistant.
+- First untested rough cut at a corporate-environment docker customization process.
+
 ### brade-v0.60.6
 
 Add o1 model.
