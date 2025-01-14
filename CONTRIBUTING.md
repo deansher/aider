@@ -133,7 +133,7 @@ Note: Due to Docker security requirements, you should use fully qualified image 
 To build either target:
 
 ```bash
-# Build the full image
+# Build the full image. This is what we ship as deansher/brade.
 docker build -t docker.io/deansher/brade:full --target brade-full -f docker/Dockerfile .
 
 # Build the core image 
