@@ -21,12 +21,12 @@ The Docker-based deployment approach offers significant advantages, especially i
 Run brade with your current directory mounted:
 
 ```bash
-docker run -it --rm -v "$PWD:/app" deansher/brade:latest
+docker run -it --rm -v "$PWD:/app" docker.io/deansher/brade:full
 ```
 
 Optionally, specify your OpenAI API key or other environment variables directly:
 ```bash
-docker run -it --rm -v "$PWD:/app" -e OPENAI_API_KEY=your-key-here deansher/brade:latest
+docker run -it --rm -v "$PWD:/app" -e OPENAI_API_KEY=your-key-here docker.io/deansher/brade:full
 ```
 
 ## Available Tags
