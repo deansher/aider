@@ -4,6 +4,18 @@ Brade is a fork of Aider that lets you pair program with LLMs, editing code in y
 Start a new project or work with an existing git repo.
 Brade works best with Claude 3.5 Sonnet and is only tested with that model.
 
+## Advantages of Docker Deployment
+
+The Docker-based deployment approach offers significant advantages, especially in corporate environments:
+
+- **Zero Dependency Issues**: Since the image is built from our tested base image, you completely avoid:
+  - Corporate PyPI access requirements
+  - System package installation
+  - Binary compatibility problems
+  - Python dependency conflicts
+
+- **Consistent Environment**: Every deployment runs in the same container environment, eliminating "works on my machine" issues.
+
 ## Quick Start
 
 ```bash
@@ -83,6 +95,8 @@ Organizations can build custom Docker images that enforce specific settings whil
    cd corporate-brade
    ./build.py --config corporate-config.yml --tag your-registry/brade:corporate
    ```
+
+The corporate build process is dependency-free because it uses our published Docker image as a base. You only need to add configuration - all runtime dependencies are already included and tested in the base image. This makes corporate deployment much simpler than direct installation, which would require managing system packages, Python dependencies, and binary compatibility.
 
 ### Configuration Hierarchy
 
