@@ -56,12 +56,10 @@ This example enables dark mode for better visibility in dark terminals. Any comm
 
 ### Volume Mounts
 
-Mount your working directory to `/app` in the container:
+The following command mounts your working directory to `/app` in the container. This is the recommended minimum for running Brade, but you can add other mount points in the same way.
 
 ```bash
-docker run -it --rm \
-  -v "$PWD:/app" \
-  deansher/brade:latest
+docker run -it --rm -v "$PWD:/app" deansher/brade:latest
 ```
 
 ### User Permissions
@@ -69,10 +67,7 @@ docker run -it --rm \
 If necessary to avoid file permission issues, run as your own user:
 
 ```bash
-docker run -it --rm \
-  --user $(id -u):$(id -g) \
-  -v "$PWD:/app" \
-  deansher/brade:latest
+docker run -it --rm --user $(id -u):$(id -g) -v "$PWD:/app" deansher/brade:latest
 ```
 
 ## Corporate Deployment
