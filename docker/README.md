@@ -25,7 +25,7 @@ docker run -it --rm -v "$PWD:/app" deansher/brade:latest
 ```
 
 Optionally, specify your OpenAI API key or other environment variables directly:
-```
+```bash
 docker run -it --rm -v "$PWD:/app" -e OPENAI_API_KEY=your-key-here deansher/brade:latest
 ```
 
