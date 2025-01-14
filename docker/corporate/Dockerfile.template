@@ -1,0 +1,12 @@
+# Corporate Brade Image
+# Build from our published image to enforce corporate settings
+
+ARG BRADE_BASE_IMAGE=docker.io/deansher/brade:full
+FROM ${BRADE_BASE_IMAGE}
+
+# Copy corporate configuration
+COPY corporate-config.yml /etc/brade/corporate-config.yml
+
+# Override entrypoint to enforce corporate settings
+# The build.py script will replace these placeholder args with actual corporate settings
+ENTRYPOINT ["/venv/bin/brade", "--config", "/etc/brade/corporate-config.yml", "CORPORATE_ARGS_PLACEHOLDER"]

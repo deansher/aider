@@ -123,7 +123,11 @@ Just run `pytest`.
 
 ### Building and Testing the Docker Image
 
-The project includes a `Dockerfile` for building Docker images. There are two build targets:
+The project includes Docker support for both individual and corporate use:
+
+#### Standard Docker Images
+
+There are two standard build targets:
 
 - `brade-full`: Includes all dependencies including help documentation
 - `brade-core`: Minimal image with core functionality only
@@ -140,9 +144,42 @@ docker build -t docker.io/deansher/brade:full --target brade-full -f docker/Dock
 docker build -t docker.io/deansher/brade:core --target brade-core -f docker/Dockerfile .
 ```
 
-#### Testing the Docker Image
+#### Corporate Docker Builds
 
-To test the Docker image locally, you'll need to:
+For corporate deployments, we provide tooling to build customized images that enforce corporate policies while still allowing user customization. The corporate build process uses our published images as a base.
+
+##### Setup Corporate Build
+
+1. Copy the templates:
+   ```bash
+   mkdir -p corporate-brade
+   cp docker/corporate/Dockerfile.template corporate-brade/Dockerfile
+   cp docker/corporate/corporate-config.yml.template corporate-brade/corporate-config.yml
+   cp docker/corporate/build.py corporate-brade/build.py
+   chmod +x corporate-brade/build.py
+   ```
+
+2. Edit `corporate-config.yml` to set your corporate policies:
+   - Set required API endpoints
+   - Configure model selection
+   - Set security policies
+   - Add other enforced settings
+
+3. Build the corporate image:
+   ```bash
+   cd corporate-brade
+   ./build.py --config corporate-config.yml --tag your-registry/brade:corporate
+   ```
+
+The build script will:
+- Validate your configuration
+- Generate appropriate command-line arguments
+- Build a Docker image that enforces corporate settings
+- Allow users to still customize non-enforced settings
+
+#### Testing Docker Images
+
+To test any Docker image locally, you'll need to:
 1. Build the image (as shown above)
 2. Run a container with appropriate permissions and volume mounts
 
@@ -153,7 +190,7 @@ leave out the `--user ...` line.
 docker run --rm -it \
   --user $(id -u):$(id -g) \
   -v "$PWD:/app" \
-  docker.io/deansher/brade:full
+  your-image-name
 ```
 
 Key options explained:
@@ -162,7 +199,11 @@ Key options explained:
 - `--rm`: Automatically removes container when it exits
 - `-it`: Provides interactive terminal for input/output
 
-You can also run the core image by replacing `docker.io/deansher/brade:full` with `docker.io/deansher/brade:core`.
+For the standard images, use:
+- Full image: `docker.io/deansher/brade:full`
+- Core image: `docker.io/deansher/brade:core`
+
+For corporate images, use your corporate registry and tag.
 
 ### Building the Documentation
 
