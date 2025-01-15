@@ -1,4 +1,4 @@
-from abc import ABC, abstractproperty
+from abc import ABC, abstractmethod, abstractproperty
 
 from aider.brade_prompts import BRADE_PERSONA_PROMPT, THIS_MESSAGE_IS_FROM_APP
 
@@ -16,7 +16,8 @@ class CoderPrompts(ABC):
         """
         return BRADE_PERSONA_PROMPT
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def task_instructions(self) -> str:
         """Task-specific instructions for the LLM.
 
@@ -28,18 +29,6 @@ class CoderPrompts(ABC):
             The task instructions text
         """
         pass
-
-    @property
-    def main_system(self) -> str:
-        """Combined system message including both role and task instructions.
-
-        This property maintains compatibility with aider's ChatChunks by combining
-        the core system message with task-specific instructions.
-
-        Returns:
-            The complete system message
-        """
-        return f"{self.main_system_core}\n\n{self.task_instructions}"
 
     system_reminder = ""
 
