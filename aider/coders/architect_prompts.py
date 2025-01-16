@@ -142,6 +142,25 @@ architect_proposed_changes = response_section.add_choice(
 
 Select this option if the assistant's response seems to follow the instructions
 given in "# How to Propose Changes". If in doubt, go ahead and select this option.
+
+In particular, keep in mind that the assistant may use different language than you'd
+expect from reading its instructions. For example, here's a case where the assistant
+used different language, but where this **Propose Changes** option is still the right 
+one to select. The key is that the assistant is proposing to update project files in 
+some way:
+
+> I propose to document our analysis findings in the plan. The analysis will cover:
+> 
+> • Current reference lifecycle implementation
+> • State management and transitions
+> • Error handling approaches
+> • Project isolation mechanisms
+> • UI feedback system
+>
+> May I proceed with adding these findings to the "Analyze Current Implementation" section of our plan?
+
+In this case, "our plan" is a project file. Again, if you aren't sure, do select this option.
+If you are wrong, it's easy for the user to answer "No" to the assistant's (not quite) proposal.
 """
 )
 
