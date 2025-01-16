@@ -188,6 +188,8 @@ class ArchitectPrompts(CoderPrompts):
 
     @property
     def main_system_core(self) -> str:
+        # This is the architect's system message. Steps 2 and 3 of the process are 
+        # handled by subordinate Coder instances, so this message is only used for Step 1.
         return (
             BRADE_PERSONA_PROMPT
             + """
