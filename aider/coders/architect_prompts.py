@@ -317,12 +317,8 @@ stop and explain the issue rather than proceeding.
 
     def get_approved_plan_changes_prompt(self) -> str:
         """Get the prompt for approved plan changes."""
-        return (
-            "Please make the plan changes as you propose. When you are done making changes, stop "
-            "and wait for input. After the Brade application has applied your changes to the "
-            "plan, you will be prompted to review them. Then give your partner a chance to review "
-            "our revised plan before you change any other files."
-        )
+        # Right now, we don't make a distinction between plan and non-plan changes.
+        return self.get_approved_non_plan_changes_prompt()
 
     def get_review_changes_prompt(self) -> str:
         # Build the prompt with inline conditionals and string concatenation,
