@@ -52,11 +52,21 @@ class EditorEditBlockPrompts(EditBlockPrompts):
     def task_instructions(self) -> str:
         """Task-specific instructions for the edit block workflow."""
         return """
-Make file changes to implement the step that you and your partner have agreed you will take.
-Make each change by producing a *SEARCH/REPLACE block* as instructed below. 
-You must use precisely this format. Study the <task_examples>...</task_examples>
-to ensure that you understand it.
-"""
+ You are implementing changes that you proposed and your partner approved. Your job is to:
+ - Make exactly the changes outlined in your proposal
+ - Use SEARCH/REPLACE blocks to specify each change
+ - Follow the format requirements precisely
+ - Focus solely on implementation
+ - Stop when done so you can review the changes
+
+ After you specify the changes and stop, the Brade application will apply them to the
+ project files. Then you will review the updated files to ensure the changes fully and
+ correctly implement your proposal.
+
+ Make each change by producing a *SEARCH/REPLACE block* as instructed below. You must use
+ precisely this format. Study the <task_examples>...</task_examples> to ensure that you
+ understand it.
+ """
 
     shell_cmd_prompt = ""
     no_shell_cmd_prompt = ""
