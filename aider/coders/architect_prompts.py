@@ -108,8 +108,10 @@ Examples:
 
 """
 
-_quoted_step1_ways_to_respond = (
-    "> " + "\n> ".join(_step1_ways_to_respond.split("\n")) + "\n"
+_quoted_response_options = (
+    "> " + "\n> ".join(
+        (_step1_ways_to_respond + _propose_changes_instructions).split("\n")
+    ) + "\n"
 )
 
 # Define the choice manager for analyzing architect responses
@@ -123,7 +125,7 @@ plan documents or other project files.
 
 Here are the choices we gave the assistant for how it could respond:
 
-${_quoted_step1_ways_to_respond}
+${_quoted_response_options}
 """
 )
 architect_asked_questions = response_section.add_choice(
@@ -138,17 +140,8 @@ architect_analyzed_or_explained = response_section.add_choice(
 architect_proposed_changes = response_section.add_choice(
     """The assistant chose to **Propose Changes**. 
 
-Go ahead and select this option if you think the assistant's response *might* be
-an actionable change proposal, even if you aren't sure. Here's why:
-
-- When you select this option, your human partner will be asked whether to go ahead 
-  with the proposed changes. If the assistant's response doesn't come across as an
-  actionable proposal to your partner, and yet you DO give them a choice by
-  selecting this option, that's a minor mistake: they can just say No.
-  
-- But if the assistant's response comes across to your partner as an actionable proposal
-  and you DON'T give them a choice by selecting this option, that's a frustrating mistake:
-  your partner wants to say Yes, but you've given them no way to do so.
+Select this option if the assistant's response seems to follow the instructions
+given in "# How to Propose Changes". If in doubt, go ahead and select this option.
 """
 )
 
@@ -297,22 +290,11 @@ You are currently performing Step 1 of the three-step process.
     def get_approved_non_plan_changes_prompt(self) -> str:
         """Get the prompt for approved non-plan changes."""
         return """
-Yes, please make the changes proposed above. When you are done making changes, stop and
-wait for input. After the Brade application has applied your changes to the project
-files, you will be prompted to review them.
-
-Right now, you are in 
-[Step 2: Change files to implement the next step](#step-2-change-files-to-implement-the-next-step)
-of your [Three-Step Collaboration Flow](#three-step-collaboration-flow).
-
-The AI that carried out Step 1 has already made the high-level decisions. Here is your job:
-- Adhere to the decisions made in the step 1 proposal.
-- Write clean, maintainable code or other content.
-- Make all changes outlined in the step 1 proposal.
-- Make supporting changes as needed.
-
-If you encounter an issue that seems to require deviating from or expanding the proposal, 
-stop and explain the issue rather than proceeding.
+Yes, please implement your approved proposal. Make the changes exactly as outlined,
+using SEARCH/REPLACE blocks to specify each change. When you are done, stop and wait,
+without saying anything more to your partner. The Brade application will automatically
+apply your changes to the project files, and then prompt you to review them. If you
+have additional comments or questions for your partner, you can share them at that time.
 """
 
     def get_approved_plan_changes_prompt(self) -> str:
