@@ -1,6 +1,10 @@
 
 # Release history
 
+### brade-v1.0.1
+
+- Further refined prompts and architect flow.
+
 ### brade-v1.0.0
 
 - Refined prompts and architect flow into a solid, useful assistant.
