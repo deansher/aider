@@ -1,6 +1,10 @@
 
 # Release history
 
+### brade-v1.0.2
+
+- Fixed broken unit test. (Oops!)
+
 ### brade-v1.0.1
 
 - Further refined prompts and architect flow.
