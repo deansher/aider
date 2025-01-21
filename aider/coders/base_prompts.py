@@ -17,6 +17,18 @@ class CoderPrompts(ABC):
         return BRADE_PERSONA_PROMPT
 
     @property
+    def main_system(self) -> str:
+        """Main system message for the LLM.
+
+        This property should contain the main system message for the LLM. It should
+        include the core system message defined in main_system_core.
+
+        Returns:
+            The main system message text
+        """
+        return self.main_system_core
+
+    @property
     @abstractmethod
     def task_instructions(self) -> str:
         """Task-specific instructions for the LLM.
