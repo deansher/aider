@@ -179,6 +179,7 @@ def echo(msg):
     - The SEARCH block should cover just the content that will be changed plus a small amount of
       context above and below.
     - Use multiple SEARCH/REPLACE blocks as need.
+    - Motivation: narrow scope helps avoid errors and makes it easier to review changes.
 
   b. For Source Code
 
