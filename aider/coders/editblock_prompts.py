@@ -172,7 +172,47 @@ def echo(msg):
 
 ## Key Requirements
 
-1. **Exact Matching**
+1. **Choosing Scope of a SEARCH block**
+
+  a. General Guidance
+    - Each SEARCH/REPLACE block should cover one small portion of the target file.
+    - The SEARCH block should cover just the content that will be changed plus a small amount of
+      context above and below.
+    - Use multiple SEARCH/REPLACE blocks as need.
+
+  b. For Source Code
+
+    It is useful, but not required, to have each SEARCH/REPLACE block cover a high-level
+    declaration or a small group of closely related lines:    
+
+    - Let's use the term "high-level declaration" to mean either a top-level declarartion
+      such as a constant or function declaration, or the next level down when it is still
+      a high-level unit such as a method of a class, or a nested `describe` or `it` of a
+      test suite.
+
+    - For a high-level declaration smaller than about 30 lines, use one SEARCH/REPLACE block
+      to rewrite each declaration that you change. The SEARCH block should cover the entire
+      high-level declaration and nothing else.
+
+    - For high-level declarations larger than about 30 lines, The SEARCH block should just cover
+      the code that you are changing plus 5-10 lines of context above and below it. 
+
+    - It's nicer if you can start the change at a logical boundary, such as a major `if` 
+      statement. But this is less important than keeping each SEARCH/REPLACE block focused 
+      and not too large.
+
+  c. For Documents
+
+    - Generally, each SEARCH/REPLACE block should cover changes to 1-3 paragraphs.
+
+    - If an inner subsection being changed is around 3 paragraphs or shorter, it is great
+      for the SEARCH block to cover the entire subsection.
+
+    - For content where paragraph boundaries are unclear or paragraphs are very long, 
+      use your judgement to keep each SEARCH/REPLACE block focused and not too large.
+      Try to only provide 5-10 lines of context above and below the changed content.
+
+2. **Exact Matching**
    - The SEARCH block must exactly match the latest file content that you see in
      <brade:editable_files>...</brade:editable_files> 
      or <brade:readonly_files>...</brade:readonly_files>.
@@ -184,32 +224,7 @@ def echo(msg):
      - Comments and docstrings
      - Container syntax (quotes, XML, etc.)
 
-2. **Choosing Scope of a SEARCH block**
-  - Use multiple SEARCH/REPLACE blocks as need. Keep each one small and focused.
-
-  a. For Source Code
-
-    - Let's use the term "high-level declaration" to mean either a top-level declarartion
-      such as a constant or function declaration, or the next level down when it is still
-      a high-level unit such as a method of a class, or a nested `describe` or `it` of a
-      test suite.
-    - For a high-level declaration smaller than about 30 lines, use one SEARCH/REPLACE block
-      to rewrite each declaration that you change. The SEARCH block should cover the entire
-      high-level declaration and nothing else.
-    - For high-level declarations larger than about 30 lines, include about 5-10 lines of context above
-      and below each change. It's nicer if you can start the change at a logical boundary,
-      such as a major `if` statement, but most importantly keep each SEARCH/REPLACE block
-      focused and not too large.
-
-  b. For Documents
-
-    - It is especially important to make document changes in small focused chunks, because
-      it is difficult to precisely match existing content in the SEARCH block.
-
-    - Choose the narrowest inner scope that will receive each change. One paragraph, one
-      bullet point, or one small inner section are ideal.
-
-3. **Common Mistakes to Avoid**
+3. **Common Mistakes to Avoid in your REPLACE Block**
   - Avoid deleting comments.
   - Avoid changing indentation.
   - Avoid removing blank lines.
