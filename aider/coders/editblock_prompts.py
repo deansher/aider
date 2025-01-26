@@ -188,19 +188,16 @@ def echo(msg):
 
     - Let's use the term "high-level declaration" to mean either a top-level declarartion
       such as a constant or function declaration, or the next level down when it is still
-      a high-level unit such as a method of a class, or a nested `describe` or `it` of a
-      test suite.
+      a high-level unit such as a method of a class.
 
-    - For a high-level declaration smaller than about 30 lines, use one SEARCH/REPLACE block
-      to rewrite each declaration that you change. The SEARCH block should cover the entire
-      high-level declaration and nothing else.
+    - For tests, a "high-level declaration" is an individual unit test 
+      (such as `it("should do something")` in a test suite).
 
-    - For high-level declarations larger than about 30 lines, The SEARCH block should just cover
-      the code that you are changing plus 5-10 lines of context above and below it. 
+    - Each SEARCH/REPLACE block should only make changes to one high-level declaration.
 
-    - It's nicer if you can start the change at a logical boundary, such as a major `if` 
-      statement. But this is less important than keeping each SEARCH/REPLACE block focused 
-      and not too large.
+    - If a high-level declaration is larger than about 50 lines, then unless you are completely
+      rewriting it, each SEARCH/REPLACE block should just cover your changes to one portion of
+      it with 5-10 lines of context above and below.
 
   c. For Documents
 
