@@ -183,8 +183,7 @@ def echo(msg):
 
   b. For Source Code
 
-    It is useful, but not required, to have each SEARCH/REPLACE block cover a high-level
-    declaration or a small group of closely related lines:    
+    Each SEARCH/REPLACE block should cover changes to one high-level declaration:   
 
     - Let's use the term "high-level declaration" to mean either a top-level declarartion
       such as a constant or function declaration, or the next level down when it is still
