@@ -1,6 +1,10 @@
 
 # Release history
 
+### brade-v1.0.3
+
+- Prompt improvements aimed at narrower SEARCH/REPLACE blocks.
+
 ### brade-v1.0.2
 
 - Fixed broken unit test. (Oops!)
