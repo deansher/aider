@@ -119,14 +119,14 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
   - (✔︎) Test order preservation
   - (✔︎) Test mixed message types
 
-### ( ) Configure Default Model Selection
+### (✔︎) Configure Default Model Selection
 
 #### Requirements
 
 1. Set o3-mini as the primary default model:
    - Use for all roles in ArchitectCoder (primary, editor, reviewer)
    - Use as default for all other use cases
-   - Only when both OPENAI_API_KEY and ANTHROPIC_API_KEY are present
+   - Use whenever OPENAI_API_KEY is present
 
 2. Implement fallback logic:
    - Use latest Claude 3.5 Sonnet when only ANTHROPIC_API_KEY exists
@@ -139,11 +139,11 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 
 #### Implementation Steps
 
-- ( ) Update default model selection in main.py
-  - ( ) Add clear comments explaining the default model strategy
-  - ( ) Implement API key availability checks
-  - ( ) Set o3-mini as primary default
-  - ( ) Configure Claude 3.5 Sonnet fallback
+- (✔︎) Update default model selection in main.py
+  - (✔︎) Add clear comments explaining the default model strategy
+  - (✔︎) Implement API key availability checks
+  - (✔︎) Set o3-mini as primary default
+  - (✔︎) Configure Claude 3.5 Sonnet fallback
 
 - ( ) Verify model settings in models.py
   - ( ) Confirm o3-mini is properly configured for all roles
