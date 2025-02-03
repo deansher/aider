@@ -88,7 +88,7 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
   - (✔︎) Test model settings
   - (✔︎) Test default configurations
 
-### ( ) Implement Message Transformation
+### (✔︎) Implement Message Transformation
 
 #### Requirements
 
@@ -109,15 +109,15 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 
 #### Implementation Steps
 
-- ( ) Add message transformation function
-  - ( ) Create transform_messages_for_o3 in sendchat.py
-  - ( ) Implement simple system-to-user conversion
-  - ( ) Preserve message order
+- (✔︎) Add message transformation function
+  - (✔︎) Create transform_messages_for_o3 in sendchat.py
+  - (✔︎) Implement simple system-to-user conversion
+  - (✔︎) Preserve message order
 
-- ( ) Add focused test cases
-  - ( ) Test basic system-to-user conversion
-  - ( ) Test order preservation
-  - ( ) Test mixed message types
+- (✔︎) Add focused test cases
+  - (✔︎) Test basic system-to-user conversion
+  - (✔︎) Test order preservation
+  - (✔︎) Test mixed message types
 
 ### ( ) Validate Changes
 
