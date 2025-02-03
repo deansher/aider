@@ -612,8 +612,19 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     register_models(git_root, args.model_settings_file, io, verbose=args.verbose)
     register_litellm_models(git_root, args.model_metadata_file, io, verbose=args.verbose)
 
+    # Select default model based on available API keys:
+    # - Use o3-mini when both OpenAI and Anthropic keys are present
+    # - Fall back to Claude 3.5 Sonnet when only Anthropic key is present
+    # - Keep existing default when only OpenAI key is present
     if not args.model:
-        args.model = "o3-mini"
+        has_openai = bool(os.environ.get("OPENAI_API_KEY"))
+        has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
+        if has_openai and has_anthropic:
+            args.model = "o3-mini"
+        elif has_anthropic:
+            args.model = "claude-3-5-sonnet-20241022"
+        else:
+            args.model = "gpt-4o"
 
     main_model = models.Model(
         args.model,
