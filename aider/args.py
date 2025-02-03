@@ -47,8 +47,10 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--model",
         metavar="MODEL",
-        default="claude-3-5-sonnet-20241022",
-        help="Specify the model to use for the main chat",
+        help="Specify the model to use for the main chat. If not specified, defaults to:"
+             " o3-mini when both OpenAI and Anthropic keys are present,"
+             " claude-3-5-sonnet-20241022 when only Anthropic key is present,"
+             " gpt-4o otherwise",
     )
     opus_model = "claude-3-opus-20240229"
     group.add_argument(
@@ -217,8 +219,7 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--editor-model",
         metavar="EDITOR_MODEL",
-        default="claude-3-5-sonnet-20241022",
-        help="Specify the model to use for editor tasks (default: claude-3-5-sonnet-20241022)",
+        help="Specify the model to use for editor tasks (defaults to same as main model)",
     )
     group.add_argument(
         "--editor-edit-format",
