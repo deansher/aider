@@ -604,6 +604,9 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
+        extra_params={
+            "max_tokens": 100000,
+        },
     ),
     ModelSettings(
         "openai/o3-mini",
@@ -617,6 +620,9 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
+        extra_params={
+            "max_tokens": 100000,
+        },
     ),
     ModelSettings(
         "azure/o3-mini",
@@ -630,6 +636,9 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
+        extra_params={
+            "max_tokens": 100000,
+        },
     ),
     ModelSettings(
         "o1",

@@ -29,7 +29,7 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.info["max_input_tokens"], 8 * 1024)
 
         model = Model("o3-mini")
-        self.assertEqual(model.info["max_input_tokens"], 16385)
+        self.assertEqual(model.info["max_input_tokens"], 200000)
 
     @patch("os.environ")
     def test_sanity_check_model_all_set(self, mock_environ):
