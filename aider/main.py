@@ -619,7 +619,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     if not args.model:
         has_openai = bool(os.environ.get("OPENAI_API_KEY"))
         has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
-        if has_openai and has_anthropic:
+        if has_openai:
             args.model = "o3-mini"
         elif has_anthropic:
             args.model = "claude-3-5-sonnet-20241022"
