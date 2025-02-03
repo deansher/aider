@@ -595,8 +595,8 @@ MODEL_SETTINGS = [
     ModelSettings(
         "o3-mini",
         "whole",
-        weak_model_name="gpt-4o-mini",
-        editor_model_name="gpt-4o",
+        weak_model_name="gpt-4o",
+        editor_model_name="o3-mini",
         editor_edit_format="editor-diff",
         use_repo_map=True,
         reminder="user",
@@ -608,8 +608,8 @@ MODEL_SETTINGS = [
     ModelSettings(
         "openai/o3-mini",
         "whole",
-        weak_model_name="openai/gpt-4o-mini",
-        editor_model_name="openai/gpt-4o",
+        weak_model_name="openai/gpt-4o",
+        editor_model_name="openai/o3-mini",
         editor_edit_format="editor-diff",
         use_repo_map=True,
         reminder="user",
@@ -621,8 +621,8 @@ MODEL_SETTINGS = [
     ModelSettings(
         "azure/o3-mini",
         "whole",
-        weak_model_name="azure/gpt-4o-mini",
-        editor_model_name="azure/gpt-4o",
+        weak_model_name="azure/gpt-4o",
+        editor_model_name="azure/o3-mini",
         editor_edit_format="editor-diff",
         use_repo_map=True,
         reminder="user",
