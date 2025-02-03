@@ -59,3 +59,62 @@ We will still support "system" messages in all of our code above a certain lowes
 We won't change our own coding abstractions yet. Before doing that, we'll see what direction litellm's API goes with this.
 
 ## Tasks
+
+### ( ) Add o3-mini Model Support
+
+#### Requirements
+
+1. Add o3-mini model configuration to models.py
+2. Configure o3-mini as a reasoning model
+3. Set appropriate defaults for the model
+4. Ensure proper test coverage
+
+#### Implementation Steps
+
+- ( ) Add o3-mini model settings
+  - ( ) Configure as reasoning model
+  - ( ) Set appropriate edit format
+  - ( ) Configure default models for weak/editor roles
+  - ( ) Set other model-specific parameters
+
+- ( ) Add tests for o3-mini configuration
+  - ( ) Test model settings
+  - ( ) Test reasoning model behavior
+  - ( ) Test default configurations
+
+### ( ) Implement Message Transformation
+
+#### Requirements
+
+1. Add support for converting system messages to developer messages
+2. Handle this conversion at the lowest possible level
+3. Maintain compatibility with existing code
+4. Ensure proper test coverage
+
+#### Implementation Steps
+
+- ( ) Add message transformation function
+  - ( ) Create transform_messages_for_o3 in sendchat.py
+  - ( ) Follow pattern of transform_messages_for_anthropic
+  - ( ) Handle system to developer message conversion
+
+- ( ) Add tests for message transformation
+  - ( ) Test basic message conversion
+  - ( ) Test edge cases and error handling
+  - ( ) Test integration with existing code
+
+### ( ) Validate Changes
+
+#### Requirements
+
+1. Ensure all tests pass
+2. Verify changes work with o3-mini model
+3. Confirm compatibility with existing models
+4. Document any known limitations
+
+#### Implementation Steps
+
+- ( ) Run existing test suite
+- ( ) Add integration tests
+- ( ) Test with live o3-mini model
+- ( ) Document findings and limitations
