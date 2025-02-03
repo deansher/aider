@@ -45,3 +45,15 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 OpenAI has released a new model, o3-mini. We need to add support for this model to the Brade application. We will add support for the o3-mini model in a way that is consistent with our existing support for other models.
 
 As our MVP, we'll use o3-mini by default for all steps of `ArchitectCoder`.
+
+OpenAI's documentation states:
+
+> Developer messages are the new system messages: Starting with o1-2024-12-17, reasoning models support developer messages rather than system messages, to align with the chain of command behavior described in the model spec.
+
+From some web research (February 3, 2025), this switch to "developer" messages is a challenge:
+* litellm does not yet support "developer" messages.
+* o3-mini no longer supports "system" messages.
+
+For now, we'll just use "user" and "assistant" messages. Instead of a "system" message to establish Brade's persona and the context at the beginning of the chat, we'll place that content in a "user" message. To retain the strict "user" / "assistant" alternation required by Anthropic, we'll follow this opening "user" message with an "assistant" message that just says "Understood.".
+
+We won't change our own coding abstractions yet. Our interfaces will read as though we still use system messages. Under the hood, we'll make that a ("user", "assistant") message pair. Before making any other changes, we'll see what direction litellm's API goes with this.
