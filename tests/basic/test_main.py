@@ -657,7 +657,16 @@ class TestMain(TestCase):
             with patch.dict('os.environ', {
                 'OPENAI_API_KEY': 'test_key',
                 'ANTHROPIC_API_KEY': 'test_key'
-            }):
+            }), patch('logging.getLogger') as mock_logger:
+                mock_debug = MagicMock()
+                mock_logger.return_value.debug = mock_debug
+
+                # First verify args.model starts as None
+                from aider.main import get_parser
+                parser = get_parser([], None)
+                args = parser.parse_args([])
+                self.assertIsNone(args.model)
+
                 coder = main(
                     ["--exit", "--yes", "--no-show-model-warnings"],
                     input=DummyInput(),
@@ -665,6 +674,10 @@ class TestMain(TestCase):
                     return_coder=True,
                 )
                 self.assertEqual(coder.main_model.name, "o3-mini")
+                
+                # Verify the debug logs show our selection logic executed
+                mock_debug.assert_any_call("API keys present - OpenAI: True, Anthropic: True")
+                mock_debug.assert_any_call("Both API keys present, selecting o3-mini as default model")
 
     def test_default_model_selection_anthropic_only(self):
         """Test that Claude 3.5 Sonnet is selected when only Anthropic key is present."""
