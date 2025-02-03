@@ -32,6 +32,14 @@ class TestModels(unittest.TestCase):
         model = Model("o3-mini")
         self.assertEqual(model.info["max_input_tokens"], 200000)
 
+        # Test o3-mini model settings
+        model = Model("o3-mini")
+        self.assertTrue(model.is_reasoning_model)
+        self.assertEqual(model.edit_format, "whole")
+        self.assertEqual(model.weak_model_name, "gpt-4o")
+        self.assertEqual(model.editor_model_name, "o3-mini")
+        self.assertEqual(model.editor_edit_format, "editor-diff")
+
     @patch("os.environ")
     def test_sanity_check_model_all_set(self, mock_environ):
         mock_environ.get.return_value = "dummy_value"
