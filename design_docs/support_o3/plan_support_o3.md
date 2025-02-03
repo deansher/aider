@@ -40,6 +40,16 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 - ( ) Another subtask
 ```
 
+## Critical Constraints
+
+1. litellm does not yet support "developer" messages
+2. o3-mini no longer supports "system" messages
+3. We must handle this conflict by:
+   - Continuing to use "system" messages in our own code
+   - Converting them to "user" messages at the lowest level, in sendchat.py
+   - Following the pattern we use for Anthropic message conversion
+4. We will revisit this design after litellm adds support for "developer" messages
+
 ## Requirements
 
 OpenAI has released a new model, o3-mini. We need to add support for this model to the Brade application. We will add support for the o3-mini model in a way that is consistent with our existing support for other models.
@@ -50,11 +60,7 @@ OpenAI's documentation states:
 
 > Developer messages are the new system messages: Starting with o1-2024-12-17, reasoning models support developer messages rather than system messages, to align with the chain of command behavior described in the model spec.
 
-From some web research (February 3, 2025), this switch to "developer" messages is a challenge:
-* litellm does not yet support "developer" messages.
-* o3-mini no longer supports "system" messages.
-
-We will still support "system" messages in all of our code above a certain lowest level. At that low-level point, we will convert them as needed for the target model. We already do a conversion for Anthropic messages in `transform_messages_for_anthropic` in sendchat.py. We will add an analogous conversion for o3-mini messages.
+Due to the Critical Constraints above, we will still support "system" messages in all of our code above a certain lowest level. At that low-level point, we will convert them as needed for the target model. We already do a conversion for Anthropic messages in `transform_messages_for_anthropic` in sendchat.py. We will add an analogous conversion for o3-mini messages.
 
 We won't change our own coding abstractions yet. Before doing that, we'll see what direction litellm's API goes with this.
 
