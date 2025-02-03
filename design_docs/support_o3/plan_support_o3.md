@@ -145,10 +145,10 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
   - (✔︎) Set o3-mini as primary default
   - (✔︎) Configure Claude 3.5 Sonnet fallback
 
-- ( ) Verify model settings in models.py
-  - ( ) Confirm o3-mini is properly configured for all roles
-  - ( ) Validate edit formats for each role
-  - ( ) Test model settings
+- (✔︎) Verify model settings in models.py
+  - (✔︎) Confirm o3-mini is properly configured for all roles
+  - (✔︎) Validate edit formats for each role
+  - (✔︎) Test model settings
 
 - ( ) Test with different API key combinations
   - ( ) Test with both keys present
