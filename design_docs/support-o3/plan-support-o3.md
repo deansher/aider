@@ -54,6 +54,8 @@ From some web research (February 3, 2025), this switch to "developer" messages i
 * litellm does not yet support "developer" messages.
 * o3-mini no longer supports "system" messages.
 
-For now, we'll just use "user" and "assistant" messages. Instead of a "system" message to establish Brade's persona and the context at the beginning of the chat, we'll place that content in a "user" message. To retain the strict "user" / "assistant" alternation required by Anthropic, we'll follow this opening "user" message with an "assistant" message that just says "Understood.".
+We'll handle this by using "system" messages in all of our code above a certain lowest level that will convert them as needed. We want to do this conversion as close to our LLM call as reasonably feasible. Eventually, the conversion may end up model-specific unless litellm adds its own conversion support.
 
-We won't change our own coding abstractions yet. Our interfaces will read as though we still use system messages. Under the hood, we'll make that a ("user", "assistant") message pair. Before making any other changes, we'll see what direction litellm's API goes with this.
+For now, we'll convert each "system" message to a ("user", "assistant") pair. The "user" message will contain the content of the "system" message. The "assistant" message will contain "Understood.".
+
+We won't change our own coding abstractions yet. Before doing that, we'll see what direction litellm's API goes with this.
