@@ -28,6 +28,9 @@ class TestModels(unittest.TestCase):
         model = Model("gpt-4-0613")
         self.assertEqual(model.info["max_input_tokens"], 8 * 1024)
 
+        model = Model("o3-mini")
+        self.assertEqual(model.info["max_input_tokens"], 16385)
+
     @patch("os.environ")
     def test_sanity_check_model_all_set(self, mock_environ):
         mock_environ.get.return_value = "dummy_value"
@@ -74,6 +77,18 @@ class TestModels(unittest.TestCase):
         )  # Should return True because there's a problem with the editor model
         mock_io.tool_warning.assert_called_with(ANY)  # Ensure a warning was issued
         self.assertGreaterEqual(mock_io.tool_warning.call_count, 1)  # Expect at least one warning
+        warning_messages = [call.args[0] for call in mock_io.tool_warning.call_args_list]
+        self.assertTrue(
+            any("bogus-model" in msg for msg in warning_messages)
+        )  # Check that one of the warnings mentions the bogus model
+
+        # Test o3-mini with bogus editor
+        main_model = Model("o3-mini")
+        main_model.editor_model = Model("bogus-model")
+
+        result = sanity_check_models(mock_io, main_model)
+
+        self.assertTrue(result)  # Should return True because there's a problem with the editor model
         warning_messages = [call.args[0] for call in mock_io.tool_warning.call_args_list]
         self.assertTrue(
             any("bogus-model" in msg for msg in warning_messages)
