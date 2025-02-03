@@ -46,8 +46,9 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 2. o3-mini no longer supports "system" messages
 3. We must handle this conflict by:
    - Continuing to use "system" messages in our own code
-   - Converting them to "user" messages at the lowest level, in sendchat.py
-   - Following the pattern we use for Anthropic message conversion
+   - Converting them to simple "user" messages at the lowest level, in sendchat.py
+   - Similar to but simpler than our Anthropic message conversion
+   - No need for message pairs or "Understood" responses
 4. We will revisit this design after litellm adds support for "developer" messages
 
 ## Requirements
