@@ -651,6 +651,36 @@ class TestMain(TestCase):
 
             self.assertTrue(coder.add_cache_headers)
 
+    def test_default_model_selection_both_keys(self):
+        """Test that o3-mini is selected when both API keys are present."""
+        with GitTemporaryDirectory():
+            with patch.dict('os.environ', {
+                'OPENAI_API_KEY': 'test_key',
+                'ANTHROPIC_API_KEY': 'test_key'
+            }):
+                coder = main(
+                    ["--exit", "--yes", "--no-show-model-warnings"],
+                    input=DummyInput(),
+                    output=DummyOutput(),
+                    return_coder=True,
+                )
+                self.assertEqual(coder.main_model.name, "o3-mini")
+
+    def test_default_model_selection_anthropic_only(self):
+        """Test that Claude 3.5 Sonnet is selected when only Anthropic key is present."""
+        with GitTemporaryDirectory():
+            with patch.dict('os.environ', {
+                'OPENAI_API_KEY': '',
+                'ANTHROPIC_API_KEY': 'test_key'
+            }):
+                coder = main(
+                    ["--exit", "--yes", "--no-show-model-warnings"],
+                    input=DummyInput(),
+                    output=DummyOutput(),
+                    return_coder=True,
+                )
+                self.assertEqual(coder.main_model.name, "claude-3-5-sonnet-20241022")
+
     def test_4o_and_cache_options(self):
         with GitTemporaryDirectory():
             coder = main(

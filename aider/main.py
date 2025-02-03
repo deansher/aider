@@ -617,14 +617,22 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # - Fall back to Claude 3.5 Sonnet when only Anthropic key is present
     # - Keep existing default when only OpenAI key is present
     if not args.model:
+        # Select default model based on available API keys:
+        # - Use o3-mini when both OpenAI and Anthropic keys are present
+        # - Fall back to Claude 3.5 Sonnet when only Anthropic key is present
+        # - Keep existing default when only OpenAI key is present
         has_openai = bool(os.environ.get("OPENAI_API_KEY"))
         has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
-        if has_openai:
+        logger.debug(f"API keys present - OpenAI: {has_openai}, Anthropic: {has_anthropic}")
+        if has_openai and has_anthropic:
             args.model = "o3-mini"
+            logger.debug("Both API keys present, selecting o3-mini as default model")
         elif has_anthropic:
             args.model = "claude-3-5-sonnet-20241022"
+            logger.debug("Only Anthropic API key present, selecting Claude 3.5 Sonnet as default model")
         else:
             args.model = "gpt-4o"
+            logger.debug("Using gpt-4o as default model")
 
     main_model = models.Model(
         args.model,
