@@ -60,7 +60,7 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 
 ## Tasks
 
-### ( ) Add o3-mini Model Support
+### (✔︎) Add o3-mini Model Support
 
 #### Requirements
 
