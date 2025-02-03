@@ -130,7 +130,7 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 
 #### Implementation Steps
 
-- ( ) Run existing test suite
+- (✔︎) Run existing test suite
 - ( ) Add integration tests
 - ( ) Test with live o3-mini model
 - ( ) Document findings and limitations
