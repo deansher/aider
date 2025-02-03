@@ -119,21 +119,6 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
   - (✔︎) Test order preservation
   - (✔︎) Test mixed message types
 
-### ( ) Validate Changes
-
-#### Requirements
-
-1. Ensure all tests pass
-2. Verify changes work with o3-mini model
-3. Confirm compatibility with existing models
-4. Document any known limitations
-
-#### Implementation Steps
-
-- (✔︎) Run existing test suite
-- ( ) Add integration tests
-- ( ) Test with live o3-mini model
-- ( ) Document findings and limitations
 ### ( ) Configure Default Model Selection
 
 #### Requirements
@@ -169,3 +154,19 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
   - ( ) Test with both keys present
   - ( ) Test with only ANTHROPIC_API_KEY
   - ( ) Document behavior
+
+### ( ) Validate Changes
+
+#### Requirements
+
+1. Ensure all tests pass
+2. Verify changes work with o3-mini model
+3. Confirm compatibility with existing models
+4. Document any known limitations
+
+#### Implementation Steps
+
+- (✔︎) Run existing test suite
+- ( ) Add integration tests
+- ( ) Test with live o3-mini model
+- ( ) Document findings and limitations
