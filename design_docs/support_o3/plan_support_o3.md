@@ -85,9 +85,9 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 
 #### Requirements
 
-1. Add support for converting system messages to developer messages
-2. Handle this conversion at the lowest possible level
-3. Maintain compatibility with existing code
+1. Add support for converting system messages to user/assistant message pairs
+2. Follow the pattern used already for Anthropic messages
+3. Maintain compatibility with existing code above the layer in which the conversion is done
 4. Ensure proper test coverage
 
 #### Implementation Steps
