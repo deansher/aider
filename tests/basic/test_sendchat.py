@@ -182,6 +182,42 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.assertEqual(context.exception.status_code, 400)
         self.assertIn("Bad Request", str(context.exception))
 
+    def test_transform_messages_for_o3(self):
+        """Test basic system-to-user message conversion for o3 models."""
+        # Test single system message
+        messages = [{"role": "system", "content": "You are a helpful assistant"}]
+        transformed = transform_messages_for_o3(messages)
+        self.assertEqual(len(transformed), 1)
+        self.assertEqual(transformed[0]["role"], "user")
+        self.assertEqual(transformed[0]["content"], messages[0]["content"])
+
+        # Test multiple system messages
+        messages = [
+            {"role": "system", "content": "System message 1"},
+            {"role": "system", "content": "System message 2"},
+        ]
+        transformed = transform_messages_for_o3(messages)
+        self.assertEqual(len(transformed), 2)
+        self.assertTrue(all(msg["role"] == "user" for msg in transformed))
+        self.assertEqual([msg["content"] for msg in transformed], 
+                        [msg["content"] for msg in messages])
+
+        # Test order preservation with mixed message types
+        messages = [
+            {"role": "system", "content": "System message"},
+            {"role": "user", "content": "User message"},
+            {"role": "system", "content": "Another system message"},
+            {"role": "assistant", "content": "Assistant message"},
+        ]
+        transformed = transform_messages_for_o3(messages)
+        self.assertEqual(len(transformed), 4)
+        self.assertEqual(transformed[0]["role"], "user")  # was system
+        self.assertEqual(transformed[1]["role"], "user")  # was user
+        self.assertEqual(transformed[2]["role"], "user")  # was system
+        self.assertEqual(transformed[3]["role"], "assistant")  # unchanged
+        self.assertEqual([msg["content"] for msg in transformed],
+                        [msg["content"] for msg in messages])
+
     @patch("litellm.completion")
     @patch("builtins.print")
     def test_send_completion_missing_choices(self, mock_print, mock_completion):
