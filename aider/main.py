@@ -614,7 +614,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Model selection must happen before loading any model-specific configuration
     # to ensure our selection isn't overridden.
-    if not args.model:
+    if args.model is None:  # Explicitly check for None to handle empty string case
         has_openai = bool(os.environ.get("OPENAI_API_KEY"))
         has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
         logger.debug(f"API keys present - OpenAI: {has_openai}, Anthropic: {has_anthropic}")
