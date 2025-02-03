@@ -55,7 +55,9 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 
 OpenAI has released a new model, o3-mini. We need to add support for this model to the Brade application. We will add support for the o3-mini model in a way that is consistent with our existing support for other models.
 
-As our MVP, we'll use o3-mini by default for all steps of `ArchitectCoder`.
+As our MVP, we'll use o3-mini as the default model in all cases except when only ANTHROPIC_API_KEY exists. This means:
+- o3-mini is the default model, even when no API keys are present (supporting use with OpenAI proxies)
+- Claude 3.5 Sonnet is only used when ANTHROPIC_API_KEY exists but OPENAI_API_KEY does not
 
 OpenAI's documentation states:
 
