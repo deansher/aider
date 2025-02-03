@@ -92,22 +92,32 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 
 #### Requirements
 
-1. Add support for converting system messages to user/assistant message pairs
-2. Follow the pattern used already for Anthropic messages
-3. Maintain compatibility with existing code above the layer in which the conversion is done
-4. Ensure proper test coverage
+1. Add support for converting system messages to user messages
+   - Simple one-to-one conversion of each system message to a user message
+   - Preserve the original order of messages
+   - No special handling or message combining needed
+
+2. Keep implementation simple and focused
+   - Convert system messages to user messages at the lowest level
+   - Maintain compatibility with existing code above that layer
+   - No need to follow the more complex Anthropic pattern
+
+3. Ensure proper test coverage with focused test cases
+   - Test one-to-one conversion of system messages
+   - Verify message order is preserved
+   - No need to test message combining or special cases
 
 #### Implementation Steps
 
 - ( ) Add message transformation function
   - ( ) Create transform_messages_for_o3 in sendchat.py
-  - ( ) Follow pattern of transform_messages_for_anthropic
-  - ( ) Handle system to developer message conversion
+  - ( ) Implement simple system-to-user conversion
+  - ( ) Preserve message order
 
-- ( ) Add tests for message transformation
-  - ( ) Test basic message conversion
-  - ( ) Test edge cases and error handling
-  - ( ) Test integration with existing code
+- ( ) Add focused test cases
+  - ( ) Test basic system-to-user conversion
+  - ( ) Test order preservation
+  - ( ) Test mixed message types
 
 ### ( ) Validate Changes
 
