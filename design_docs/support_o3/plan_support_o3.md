@@ -77,10 +77,9 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
   - (✔︎) Configure default models for weak/editor roles
   - (✔︎) Set other model-specific parameters
 
-- ( ) Add tests for o3-mini configuration
-  - ( ) Test model settings
-  - ( ) Test reasoning model behavior
-  - ( ) Test default configurations
+- (✔︎) Add tests for o3-mini configuration
+  - (✔︎) Test model settings
+  - (✔︎) Test default configurations
 
 ### ( ) Implement Message Transformation
 
