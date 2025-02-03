@@ -28,6 +28,7 @@ class TestModels(unittest.TestCase):
         model = Model("gpt-4-0613")
         self.assertEqual(model.info["max_input_tokens"], 8 * 1024)
 
+        # o3-mini and o1 share the same 200k token context window
         model = Model("o3-mini")
         self.assertEqual(model.info["max_input_tokens"], 200000)
 
