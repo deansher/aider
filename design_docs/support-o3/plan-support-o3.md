@@ -54,8 +54,6 @@ From some web research (February 3, 2025), this switch to "developer" messages i
 * litellm does not yet support "developer" messages.
 * o3-mini no longer supports "system" messages.
 
-We'll handle this by using "system" messages in all of our code above a certain lowest level that will convert them as needed. We want to do this conversion as close to our LLM call as reasonably feasible. Eventually, the conversion may end up model-specific unless litellm adds its own conversion support.
-
-For now, we'll convert each "system" message to a ("user", "assistant") pair. The "user" message will contain the content of the "system" message. The "assistant" message will contain "Understood.".
+We will still support "system" messages in all of our code above a certain lowest level. At that low-level point, we will convert them as needed for the target model. We already do a conversion for Anthropic messages in `transform_messages_for_anthropic` in sendchat.py. We will add an analogous conversion for o3-mini messages.
 
 We won't change our own coding abstractions yet. Before doing that, we'll see what direction litellm's API goes with this.
