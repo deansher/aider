@@ -48,9 +48,8 @@ def get_parser(default_config_files, git_root):
         "--model",
         metavar="MODEL",
         help="Specify the model to use for the main chat. If not specified, defaults to:"
-             " o3-mini when both OpenAI and Anthropic keys are present,"
              " claude-3-5-sonnet-20241022 when only Anthropic key is present,"
-             " gpt-4o otherwise",
+             " o3-mini otherwise",
     )
     opus_model = "claude-3-opus-20240229"
     group.add_argument(
