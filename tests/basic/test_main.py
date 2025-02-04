@@ -684,11 +684,12 @@ class TestMain(TestCase):
         with GitTemporaryDirectory():
             # Configure logging to show debug messages
             logging.basicConfig(level=logging.DEBUG)
-            
-            with patch.dict('os.environ', {
-                'OPENAI_API_KEY': '',
-                'ANTHROPIC_API_KEY': 'test_key'
-            }, clear=True):
+
+            with patch('pathlib.Path.home', return_value=Path(self.homedir_obj.name)), \
+                 patch.dict('os.environ', {
+                    'OPENAI_API_KEY': '',
+                    'ANTHROPIC_API_KEY': 'test_key'
+                }, clear=True):
                 coder = main(
                     ["--exit", "--yes", "--no-show-model-warnings"],
                     input=DummyInput(),
