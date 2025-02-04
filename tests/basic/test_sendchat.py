@@ -262,3 +262,24 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             send_completion(self.test_model, ["message"], None, False)
 
         self.assertIn("empty choices list", str(context.exception))
+
+    @patch("litellm.completion")
+    def test_send_completion_no_temperature(self, mock_completion):
+        # Create a model that doesn't support temperature
+        model = Model("o3-mini")
+        self.assertFalse(model.use_temperature)
+
+        # Set up mock response
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = "test response"
+        mock_completion.return_value = mock_response
+
+        # Call send_completion with a temperature
+        send_completion(model, ["message"], None, False, temperature=0.7)
+
+        # Verify temperature was not passed to litellm
+        mock_completion.assert_called_once()
+        kwargs = mock_completion.call_args.kwargs
+        self.assertNotIn("temperature", kwargs)
