@@ -374,7 +374,7 @@ def _send_completion_to_litellm(
         messages=messages,
         stream=stream,
     )
-    if temperature is not None:
+    if temperature is not None and model.use_temperature:
         kwargs["temperature"] = temperature
 
     if functions is not None:
