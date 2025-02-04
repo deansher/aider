@@ -629,12 +629,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
         logger.debug(f"API keys present - OpenAI: {has_openai}, Anthropic: {has_anthropic}")
 
-        if has_openai or not has_anthropic:
-            logger.debug("Both API keys present, selecting o3-mini as default model")
-            args.model = "o3-mini"
-        else:
+        if has_anthropic and not has_openai:
             logger.debug("Only Anthropic API key present, selecting Claude 3.5 Sonnet as default model")
             args.model = "claude-3-5-sonnet-20241022"
+        else:
+            logger.debug("Using o3-mini as default model")
+            args.model = "o3-mini"
 
     main_model = models.Model(
         args.model,
