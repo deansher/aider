@@ -303,28 +303,79 @@ partner follow your thought process.
         We adapt these instructions for reasoning versus non-reasoning models based on 
         self.main_model.is_reasoning_model.
         """
-        instructions = """# Step 1 Instructions
+        instructions = """# Step 1: Analysis & Proposal
 
-You are currently performing Step 1 of the three-step process.
+You are currently performing Step 1 of the three-step process. In this step, you must choose
+one of these four ways to respond:
+
+┌─────────────────┬────────────────────────────┬────────────────────────┐
+│ Response Type   │ When to Use                │ Next Step              │
+├─────────────────┼────────────────────────────┼────────────────────────┤
+│ Ask Questions   │ Request is unclear or      │ Stay in Step 1         │
+│                 │ incomplete                 │ Partner clarifies      │
+├─────────────────┼────────────────────────────┼────────────────────────┤
+│ Request Files   │ Need to see more files     │ Stay in Step 1         │
+│                 │ before proposing changes   │ Partner shares files   │
+├─────────────────┼────────────────────────────┼────────────────────────┤
+│ Analyze/Explain │ Share your understanding   │ Stay in Step 1         │
+│                 │ or recommendations         │ Partner responds       │
+├─────────────────┼────────────────────────────┼────────────────────────┤
+│ Propose Changes │ Ready with specific,       │ Move to Step 2 if      │
+│                 │ actionable changes         │ partner approves       │
+└─────────────────┴────────────────────────────┴────────────────────────┘
 
 """
 
         if not self.main_model.is_reasoning_model:
             instructions += self._get_thinking_instructions() + "\n"
 
-        instructions += _step1_ways_to_respond + "\n"
-        instructions += _propose_changes_instructions + "\n"
+        instructions += """# How to Propose Changes
+
+When you are ready to propose changes, you must provide a high-level blueprint that:
+
+1. Lists which files you intend to modify
+2. Summarizes the intended changes in each file using bullet points
+3. Explains your reasoning for each change
+4. Ends with exactly this question: "May I proceed with these proposed changes?"
+
+Your blueprint serves as a specification for the subordinate engineer who will implement
+the changes. Therefore:
+
+- DO NOT include complete code or fully revised documents
+- DO NOT write search/replace blocks
+- DO focus on clear, actionable descriptions
+- DO explain your reasoning
+
+For example:
+
+✓ "I'll update error handling in utils.py to use the ErrorType class:
+   - Add import for ErrorType
+   - Replace custom error checks with ErrorType methods
+   - Update error messages to match ErrorType format
+   May I proceed with these proposed changes?"
+
+✗ "I'll improve the error handling" (too vague)
+✗ ```python def handle_error(): ...``` (includes implementation)
+
+"""
 
         return instructions
 
     def get_approved_non_plan_changes_prompt(self) -> str:
         """Get the prompt for approved non-plan changes."""
-        return """
-Yes, please implement your approved proposal. Make the changes exactly as outlined,
-using SEARCH/REPLACE blocks to specify each change. When you are done, stop and wait,
-without saying anything more to your partner. The Brade application will automatically
-apply your changes to the project files, and then prompt you to review them. If you
-have additional comments or questions for your partner, you can share them at that time.
+        return """# Step 2: Implementation
+
+Your task is to implement the approved changes using SEARCH/REPLACE blocks:
+- Follow the approved proposal exactly
+- Use SEARCH/REPLACE blocks for all changes
+- Make no additional modifications
+- Add no commentary or analysis
+
+When you are done:
+- Stop immediately
+- Wait for the changes to be applied
+- Do not say anything to your partner yet
+- Save any comments for the review phase
 """
 
     def get_approved_plan_changes_prompt(self) -> str:
@@ -338,20 +389,17 @@ have additional comments or questions for your partner, you can share them at th
         prompt = ""
 
         prompt += f"{THIS_MESSAGE_IS_FROM_APP}\n"
-        prompt += (
-            """Review your intended changes and the latest versions of the affected project files.
+        prompt += """# Step 3: Review & Validation
 
-You can see your intended changes in SEARCH/REPLACE blocks in the chat above. You use this 
-special syntax, which looks like diffs or git conflict markers, to specify changes that the 
-Brade application should make to project files on your behalf.
+Review the latest versions of the affected project files to ensure that:
+1. The changes were applied completely and correctly
+2. The implementation achieves the goals we discussed
+3. No new problems were introduced
+4. No serious existing problems were left unaddressed
 
-If the process worked correctly, then the Brade application has applied those changes to the 
-latest versions of the files, which are provided for you in """ + CONTEXT_SECTION + """.
-Double-check that the changes were applied completely and correctly.
-
+The latest versions of the files are provided for you in """ + CONTEXT_SECTION + """.
 Read with a fresh, skeptical eye.
 """
-        )
 
         # Add # Reasoning heading if we are *not* dealing with a "reasoning" model
         if not self.main_model.is_reasoning_model:
@@ -360,12 +408,13 @@ Read with a fresh, skeptical eye.
                 " step by step, as you review the affected portions of the modified files.\n\n"
             )
 
-        prompt += (
-            """Think about whether the updates fully and correctly achieve the goals for this 
-    work. Think about whether any new problems were introduced, and whether any serious 
-    existing problems in the affected content were left unaddressed.
-    """
-        )
+        prompt += """Focus Areas:
+1. Completeness: Were all proposed changes implemented?
+2. Correctness: Do the changes work as intended?
+3. Side Effects: Were any unintended changes introduced?
+4. Quality: Does the implementation maintain good practices?
+
+"""
 
         # Add # Conclusions heading if we are *not* dealing with a "reasoning" model
         if not self.main_model.is_reasoning_model:
@@ -375,25 +424,25 @@ conclusions with a "# Conclusions" markdown header. Then, concisely explain what
 believe about the changes.
 """
 
-        prompt += """Use this ONLY as an opportunity to find and point out problems that 
-are significant enough -- at this stage of your work with your partner -- to take time 
-together to address them. If you believe you already did an excellent job with your 
-partner's request, just say you are fully satisfied with your changes and stop there. 
-If you see opportunities to improve but believe they are good enough for now, give an 
-extremely concise summary of opportunities to improve (in a sentence or two), but also 
-say you believe this could be fine for now.
+        prompt += """Response Guidelines:
 
-If you see substantial problems in the changes you made, explain what you see in some 
-detail.
+1. If you are fully satisfied:
+   - Say so briefly and stop
+   - No need to explain what works well
 
-Don't point out other problems in these files unless they are immediately concerning. 
-Take into account the overall state of development of the code, and the cost of 
-interrupting the process that you and your partner are following together. Your 
-partner may clear the chat -- they may choose to do this frequently -- so one cost 
-of pointing out problems in other areas of the code is that you may do so repeatedly 
-without knowing it. All that said, if you see an immediately concerning problem in 
-parts of the code that you didn't just change, and if you believe it is appropriate 
-to say so to your partner, trust your judgment and do so.
+2. If you see minor opportunities to improve:
+   - Give a 1-2 sentence summary
+   - Note that it's good enough for now
+   - Save details for later
+
+3. If you see substantial problems:
+   - Explain the issues in detail
+   - Focus on problems in changed content
+   - Only mention other issues if immediately concerning
+
+Remember: Your partner may clear the chat frequently, so avoid repeatedly flagging 
+the same non-critical issues. Trust your judgment about when to raise concerns 
+versus letting them wait.
 """
         return prompt
 
