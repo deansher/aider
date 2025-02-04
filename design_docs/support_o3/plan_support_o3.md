@@ -1,44 +1,67 @@
-# Enhance Repomap
+# Enhance Repomap – Updated Plan for o3-mini Support and Message Transformation
 
-Brade and Dean are using this document to support their collaborative process. Brade is an AI software engineer collaborating with Dean through the Brade application. We are working together to enhance the Brade application's code. This is an interesting recursive situation where Brade is helping improve her own implementation.
+This document outlines our progress and remaining work toward enhancing Brade to support the o3-mini model and its associated message conversion.
 
-We want to work efficiently in an organized way. For the portions of the code that we must change to meet our functionality goals, we want to move toward beautiful, idiomatic Python code. We also want to move toward more testable code with simple unit tests that cover the most important paths.
+## Critical Constraints (unchanged)
 
-This document contains three kinds of material:
+1. litellm does not yet support "developer" messages  
+2. o3-mini no longer supports "system" messages  
+3. We must handle this conflict by:
+   - Continuing to use "system" messages in our own code  
+   - Converting them to simple "user" messages at the lowest level in sendchat.py  
+   - (This conversion is simpler than the Anthropic conversion)  
+   - No need for message pairs or "Understood" responses  
+4. We will revisit this design after litellm adds support for "developer" messages  
 
-- requirements
-- specific plans for meeting those requirements
-- our findings as we analyze our code along the way
+## Requirements & Progress
 
-For major step of the work, (each top-level bullet of each "### ( ) task" section) we will follow this process:
+### 1. Add o3-mini Model Support  
+- [✔︎] Add o3-mini model configuration to models.py  
+  - [✔︎] Configure as a reasoning model  
+  - [✔︎] Set appropriate edit format  
+  - [✔︎] Configure default models for weak/editor roles  
+  - [✔︎] Set other model-specific parameters  
 
-- Make sure our plan is current.
-- Make sure we have the information we need for our next step.
-  - Writing down any new findings in this document.
-  - Correct anything we previously misunderstood.
-- Make sure existing unit tests pass.
-- Consider whether to add unit tests or do manual testing before making the code changes.
-- Make the code changes.
-- Run the unit tests.
-- Manually validate the change.
+- [✔︎] Add tests for o3-mini configuration  
+  - [✔︎] Test model settings  
+  - [✔︎] Test default configurations  
 
-We only intend for this plan to cover straightforward next steps to our next demonstrable milestone. We'll extend it as we go.
+### 2. Implement Message Transformation  
+- [✔︎] Add message transformation function  
+  - [✔︎] Create transform_messages_for_o3 in sendchat.py  
+  - [✔︎] Implement simple system-to-user conversion  
+  - [✔︎] Preserve message order  
 
-We write down our findings as we go, to build up context for later tasks. When a task requires analysis, we use the section header as the task and write down our findings as that section's content.
+- [✔︎] Add focused test cases  
+  - [✔︎] Test basic system-to-user conversion  
+  - [✔︎] Test order preservation  
+  - [✔︎] Test mixed message types  
 
-For relatively complex tasks that benefit from a prose description of our approach, we use the section header as the task and write down our approach as that section's content. We nest these sections as appropriate.
+### 3. Configure Default Model Selection  
+- [✔︎] Set o3-mini as the primary default model  
+  - [✔︎] Use for all roles in ArchitectCoder (primary, editor, reviewer)  
+  - [✔︎] Use as default for all other use cases  
+  - [✔︎] Use whenever OPENAI_API_KEY is present  
+- [✔︎] Implement fallback logic  
+  - [✔︎] Use latest Claude 3.5 Sonnet when only ANTHROPIC_API_KEY exists  
+  - [✔︎] Document the fallback behavior clearly in code comments  
+- [ ] **[Future Work] Add systematic integration tests for API key combinations**  
+  - [ ] Verify behavior with both OPENAI_API_KEY and ANTHROPIC_API_KEY present, ensuring o3-mini is selected.  
+  - [ ] Verify fallback behavior with only ANTHROPIC_API_KEY set, ensuring Claude 3.5 Sonnet is used.  
+  - [ ] Document observed behavior and reconcile any discrepancies.  
 
-For simpler tasks that can be naturally specified in a single sentence, we move to bullet points.
+### 4. Validate Changes  
+- [✔︎] Run existing test suite  
+- [ ] **(Essential; Pending)** Ensure all unit tests pass under various configurations (run the full test suite on o3-mini)  
+- [ ] **(Essential; Future Work)** Add integration tests that exercise live interaction with the o3-mini model  
+- [ ] **(Essential; Future Work)** Manually test the changes with the live o3-mini model and document any known limitations  
+- [ ] **(Optional)** Explore further refining debug and diagnostic output, and address any remaining gaps in context handling for o3-mini  
 
-We use simple, textual checkboxes at each level of task, both for tasks represented by section headers and for tasks represented by bullets. Like this:
-
-```
-### ( ) Complex Task.
-
-- (✔︎) Subtask
-  - (✔︎) Subsubtask
-- ( ) Another subtask
-```
+## Summary  
+- The core tasks for adding o3-mini support and the simpler message transformation have been completed.  
+- The default model selection logic now sets o3-mini as the primary default if OPENAI_API_KEY is present and uses Claude when only ANTHROPIC_API_KEY exists.  
+- Integration testing of API key combinations along with live model testing remain as essential items for further validation.  
+- Additional refined integration tests and live validations will be moved to a future work section.
 
 ## Critical Constraints
 
