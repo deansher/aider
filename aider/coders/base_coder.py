@@ -1119,15 +1119,15 @@ class Coder:
             task_instructions_reminder=task_instructions_reminder,
             context_location=ElementLocation(
                 placement=PromptElementPlacement.SYSTEM_MESSAGE,
-                position=PromptElementPosition.APPEND
+                position=PromptElementPosition.PREPEND
             ),
             task_instructions_location=ElementLocation(
                 placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-                position=PromptElementPosition.APPEND
+                position=PromptElementPosition.PREPEND
             ),
             task_examples_location=ElementLocation(
                 placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-                position=PromptElementPosition.APPEND
+                position=PromptElementPosition.PREPEND
             ),
             task_instructions_reminder_location=ElementLocation(
                 placement=PromptElementPlacement.FINAL_USER_MESSAGE,
