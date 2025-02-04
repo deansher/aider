@@ -7,6 +7,7 @@ from llm_multiple_choice import ChoiceManager
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
+from aider.models import Model
 from aider.sendchat import (
     analyze_assistant_response,
     send_completion,
@@ -25,6 +26,9 @@ class PrintCalled(Exception):
 
 
 class TestSendChat(unittest.TestCase):
+    def setUp(self):
+        self.test_model = Model("gpt-4")
+
     @patch("litellm.completion")
     @patch("builtins.print")
     def test_simple_send_with_retries_rate_limit_error(self, mock_print, mock_completion):
