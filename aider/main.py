@@ -807,7 +807,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             io.tool_error("\nBrade encountered an error and must exit.")
             io.tool_error(f"Error type: {type(e).__name__}")
             io.tool_error(f"Error details: {str(e)}")
-            io.tool_output("\nThe full error has been logged to ~/.aider/aider.log")
+            io.tool_output("\nThe full error has been logged to .aider/aider.log")
             io.tool_output("Please check the log file for details if you need to report this issue.")
             return 1
         return
@@ -834,7 +834,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             io.tool_error("\nBrade encountered an error and must exit.")
             io.tool_error(f"Error type: {type(e).__name__}")
             io.tool_error(f"Error details: {str(e)}")
-            io.tool_output("\nThe full error has been logged to ~/.aider/aider.log")
+            io.tool_output("\nThe full error has been logged to .aider/aider.log")
             io.tool_output("Please check the log file for details if you need to report this issue.")
             return 1
         return
@@ -867,7 +867,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             io.tool_error("\nBrade encountered an error and must exit.")
             io.tool_error(f"Error type: {type(e).__name__}")
             io.tool_error(f"Error details: {str(e)}")
-            io.tool_output("\nThe full error has been logged to ~/.aider/aider.log")
+            io.tool_output("\nThe full error has been logged to .aider/aider.log")
             io.tool_output("Please check the log file for details if you need to report this issue.")
             return 1
 
