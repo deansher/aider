@@ -20,6 +20,11 @@ def default_env_file(git_root):
     return os.path.join(git_root, ".env") if git_root else ".env"
 
 
+DEFAULT_MODEL_HELP = (
+    "claude-3-5-sonnet-20241022 when only Anthropic key is present, "
+    "o3-mini otherwise"
+)
+
 def get_parser(default_config_files, git_root):
     parser = configargparse.ArgumentParser(
         description="aider is AI pair programming in your terminal",
