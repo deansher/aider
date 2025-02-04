@@ -585,6 +585,17 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         if args.gitignore:
             check_gitignore(git_root, io)
 
+    if args.model is None:  # Explicitly check for None to handle empty string case
+        has_openai = bool(os.environ.get("OPENAI_API_KEY"))
+        has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
+        logger.debug(f"API keys present - OpenAI: {has_openai}, Anthropic: {has_anthropic}")
+        if has_anthropic and not has_openai:
+            args.model = "claude-3-5-sonnet-20241022"
+            logger.debug("Only Anthropic API key present, selecting Claude 3.5 Sonnet as default model")
+        else:
+            args.model = "o3-mini"
+            logger.debug("Using o3-mini as default model")
+
     if args.verbose:
         show = format_settings(parser, args)
         io.tool_output(show)
@@ -614,16 +625,6 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
 
     # Model selection must happen before loading any model-specific configuration
     # to ensure our selection isn't overridden.
-    if args.model is None:  # Explicitly check for None to handle empty string case
-        has_openai = bool(os.environ.get("OPENAI_API_KEY"))
-        has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
-        logger.debug(f"API keys present - OpenAI: {has_openai}, Anthropic: {has_anthropic}")
-        if has_anthropic and not has_openai:
-            args.model = "claude-3-5-sonnet-20241022"
-            logger.debug("Only Anthropic API key present, selecting Claude 3.5 Sonnet as default model")
-        else:
-            args.model = "o3-mini"
-            logger.debug("Using o3-mini as default model")
 
     main_model = models.Model(
         args.model,
