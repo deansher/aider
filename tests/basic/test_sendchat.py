@@ -182,7 +182,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Call send_completion and verify it raises SendCompletionError
         with self.assertRaises(SendCompletionError) as context:
-            send_completion("model", ["message"], None, False)
+            send_completion(self.test_model, ["message"], None, False)
 
         self.assertEqual(context.exception.status_code, 400)
         self.assertIn("Bad Request", str(context.exception))
@@ -240,7 +240,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Call send_completion and verify it raises InvalidResponseError
         with self.assertRaises(InvalidResponseError) as context:
-            send_completion("model", ["message"], None, False)
+            send_completion(self.test_model, ["message"], None, False)
 
         self.assertIn("has no choices attribute", str(context.exception))
 
@@ -259,6 +259,6 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Call send_completion and verify it raises InvalidResponseError
         with self.assertRaises(InvalidResponseError) as context:
-            send_completion("model", ["message"], None, False)
+            send_completion(self.test_model, ["message"], None, False)
 
         self.assertIn("empty choices list", str(context.exception))
