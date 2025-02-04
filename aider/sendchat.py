@@ -509,7 +509,7 @@ def analyze_assistant_response(
 
         chat_messages = [{"role": "user", "content": prompt}]
         _hash, response = send_completion(
-            model_name=model.name,
+            model,
             messages=chat_messages,
             functions=None,
             stream=False,
