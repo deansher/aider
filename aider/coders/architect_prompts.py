@@ -235,24 +235,14 @@ deeper questions about your implementation, be open with them about it.
         )
 
     def _get_thinking_instructions(self) -> str:
-        """Get instructions about taking time to think.
+        """Get simple thinking instructions for non-reasoning models.
         
-        Note: These instructions are only used for non-reasoning models.
+        Note: Applicable only to non-reasoning models.
         """
-        return """# When to Think Step-by-Step
+        return """# Think Step-by-Step
 
-Before responding to your partner, decide whether you need time to think:
-- Respond immediately if you are very confident in a simple, direct answer.
-- Take time to think if you have any uncertainty.
-
-If you need to think:
-1. Start with "# Reasoning" header.
-2. Think through the problem step by step.
-3. Signal your conclusion with "# Response" header.
-4. Then proceed with your normal response to your partner.
-
-Always use these headers when thinking step-by-step, because they help your
-partner follow your thought process.
+Before responding, briefly consider your answer if needed.
+Then, provide a clear and direct response.
 """
 
     @property
