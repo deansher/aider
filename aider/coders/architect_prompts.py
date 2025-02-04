@@ -55,68 +55,30 @@ speak up!
 
 _propose_changes_instructions = """# How to Propose Changes
 
-If you decide to propose changes, you must follow these instructions. 
+When you decide to propose changes, you must provide a high-level blueprint that:
 
-Your proposal bridges Step 1 (Conversation) to Step 2 (Editing Project Files). A good proposal:
+1. Lists which files you intend to modify
+2. Summarizes the intended changes in each file using bullet points
+3. Explains your reasoning for each change
+4. Ends with exactly this question: "May I proceed with these proposed changes?"
 
-1. Advocates a Small, Coherent Set of Changes
-    - Easy for you and your partner to understand and validate.
-    - Make the project better without introducing new breakage or loose ends. For example, a small enhancement 
-      plus its documentation and an associated unit test.
+Your blueprint serves as a specification for implementation. Therefore:
 
-2. Provides Motivation and Specification
-    - Explains key aspects of current project state.
-    - Connects goals and current state to proposed changes.
-    - Describes changes concretely based on deep understanding
-      of the current project state and the intended approach.
-    - Gives your human partner enough information for them to decide whether to 
-      approve your proposal, without burying them in propposed content.
-
-3. Provides Clear But High-Level Direction for Step 2
-    - Gives the subordinate AI software engineer solid context and clear direction.
-    - Delegates writing the new content (code, documentation, plans) to the subordinate engineer.
-    - Essentially, you should be a good leader of the process and not micromanage.
-
-4. Sets Clear Scope
-   - Lists all files to be modified.
-   - Explains what will change in each file.
-   - Identifies any new files needed.
-   - Only modifies files that are provided in <brade:editable_files>...</brade:editable_files>
-     or in <brade:readonly_files>...</brade:readonly_files>.
-
-5. Ends By Asking for Approval
-   - Only asks one question, at the very end: May I proceed with these proposed changes?
-   - This is not an opportunity to ask more questions. Instead, you can mention issues
-     that occur to you, so you and your partner remember to follow up later.
-
-     For example:
-
-     I propose to ...
-     ... 
-     Let's discuss later how to handle the case where the input file is missing. 
-     ...
-     May I proceed with these proposed changes?"
-     
-6. Handles Updates to Plan Documents Just Like Any Other Content
-   One common case that can be confusing is when you are proposing changes to a plan document.
-   You and your partner may be discussing it as "our plan", or "the plan", in which case it
-   should be a file in <brade:editable_files>...</brade:editable_files> or in
-    <brade:readonly_files>...</brade:readonly_files>. If not, you should ask for it.
-
-   When you propose making changes to a plan document, you should still keep your proposal
-   high level and delegate writing the actual content to the subordinate AI software engineer.
-   Points 1 through 5, above, apply just as much to plan documents as to any other content.
+- DO NOT include complete code or fully revised documents
+- DO NOT write search/replace blocks
+- DO focus on clear, actionable descriptions
+- DO explain your reasoning
 
 Examples:
 
 ✓ "I'll update error handling in utils.py to use the ErrorType class:
-   1. Add import for ErrorType
-   2. Replace custom error checks with ErrorType methods
-   3. Update error messages to match ErrorType format"
+   - Add import for ErrorType
+   - Replace custom error checks with ErrorType methods
+   - Update error messages to match ErrorType format
+   May I proceed with these proposed changes?"
 
 ✗ "I'll improve the error handling" (too vague)
 ✗ ```python def handle_error(): ...``` (includes implementation)
-
 """
 
 _quoted_response_options = (
@@ -305,59 +267,15 @@ partner follow your thought process.
         """
         instructions = """# Step 1: Analysis & Proposal
 
-You are currently performing Step 1 of the three-step process. In this step, you must choose
-one of these four ways to respond:
-
-┌─────────────────┬────────────────────────────┬────────────────────────┐
-│ Response Type   │ When to Use                │ Next Step              │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Ask Questions   │ Request is unclear or      │ Stay in Step 1         │
-│                 │ incomplete                 │ Partner clarifies      │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Request Files   │ Need to see more files     │ Stay in Step 1         │
-│                 │ before proposing changes   │ Partner shares files   │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Analyze/Explain │ Share your understanding   │ Stay in Step 1         │
-│                 │ or recommendations         │ Partner responds       │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Propose Changes │ Ready with specific,       │ Move to Step 2 if      │
-│                 │ actionable changes         │ partner approves       │
-└─────────────────┴────────────────────────────┴────────────────────────┘
+You are currently performing Step 1 of the three-step process.
 
 """
+        instructions += _step1_ways_to_respond
 
         if not self.main_model.is_reasoning_model:
             instructions += self._get_thinking_instructions() + "\n"
 
-        instructions += """# How to Propose Changes
-
-When you are ready to propose changes, you must provide a high-level blueprint that:
-
-1. Lists which files you intend to modify
-2. Summarizes the intended changes in each file using bullet points
-3. Explains your reasoning for each change
-4. Ends with exactly this question: "May I proceed with these proposed changes?"
-
-Your blueprint serves as a specification for the subordinate engineer who will implement
-the changes. Therefore:
-
-- DO NOT include complete code or fully revised documents
-- DO NOT write search/replace blocks
-- DO focus on clear, actionable descriptions
-- DO explain your reasoning
-
-For example:
-
-✓ "I'll update error handling in utils.py to use the ErrorType class:
-   - Add import for ErrorType
-   - Replace custom error checks with ErrorType methods
-   - Update error messages to match ErrorType format
-   May I proceed with these proposed changes?"
-
-✗ "I'll improve the error handling" (too vague)
-✗ ```python def handle_error(): ...``` (includes implementation)
-
-"""
+        instructions += _propose_changes_instructions
 
         return instructions
 
