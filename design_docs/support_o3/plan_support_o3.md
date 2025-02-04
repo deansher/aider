@@ -152,10 +152,10 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
   - (✔︎) Validate edit formats for each role
   - (✔︎) Test model settings
 
-- ( ) Test with different API key combinations
-  - ( ) Test with both keys present
-  - ( ) Test with only ANTHROPIC_API_KEY
-  - ( ) Document behavior
+- ( ) Add systematic integration tests for API key combinations:
+  - ( ) Verify behavior with both OPENAI_API_KEY and ANTHROPIC_API_KEY present, ensuring o3-mini is selected.
+  - ( ) Verify fallback behavior with only ANTHROPIC_API_KEY set, ensuring Claude 3.5 Sonnet is used.
+  - ( ) Document observed behavior and any discrepancies.
 
 ### ( ) Validate Changes
 
