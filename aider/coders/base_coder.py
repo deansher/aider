@@ -220,6 +220,17 @@ class Coder:
         new_coder.ignore_mentions = self.ignore_mentions
         return new_coder
 
+    def compute_effective_reasoning_effort(self, request_adjustment: int = 0) -> int:
+        return self.reasoning_effort_modifier + request_adjustment
+
+    def map_reasoning_effort(self, effort: int) -> str:
+        if effort < 0:
+            return "low"
+        elif effort > 0:
+            return "high"
+        else:
+            return "default"
+
     def get_announcements(self):
         lines = []
         lines.append(f"Brade v{__version__}")
@@ -370,6 +381,7 @@ class Coder:
             self.done_messages = []
 
         self.io = io
+        self.reasoning_effort_modifier = 0
         self.stream = stream
 
         self.shell_commands = []
@@ -1494,13 +1506,17 @@ class Coder:
                 logger.error(f"Invalid model type: {type(model)}, expected Model")
                 raise TypeError(f"Expected Model instance, got {type(model)}")
 
+            extra = model.extra_params.copy() if model.extra_params else {}
+            if model.info.get("is_reasoning_model"):
+                effective = self.compute_effective_reasoning_effort()
+                extra["reasoning_effort"] = self.map_reasoning_effort(effective)
             hash_object, completion = send_completion(
                 model,
                 messages,
                 functions,
                 self.stream,
                 temp,
-                extra_params=model.extra_params,
+                extra_params=extra,
                 purpose=purpose,
             )
             self.chat_completion_call_hashes.append(hash_object.hexdigest())
