@@ -204,7 +204,7 @@ def lazy_litellm_retry_decorator(func):
 
 
 def send_completion(
-    model_name,
+    model: Model,
     messages,
     functions,
     stream,
@@ -220,7 +220,7 @@ def send_completion(
     is enabled or not.
 
     Args:
-        model_name (str): The name of the language model to use.
+        model (Model): The Model instance to use.
         messages (list): A list of message dictionaries to send to the model.
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
@@ -258,17 +258,15 @@ def send_completion(
     """
 
     # Transform messages for Anthropic models
-    if is_anthropic_model(model_name):
+    if is_anthropic_model(model.name):
         messages = transform_messages_for_anthropic(messages)
 
     kwargs = dict(
-        model=model_name,
+        model=model.name,
         messages=messages,
         stream=stream,
     )
 
-    # Get model settings to check parameter support
-    model = Model(model_name)
     if temperature is not None and model.use_temperature:
         kwargs["temperature"] = temperature
 
@@ -293,7 +291,7 @@ def send_completion(
 
     # Call the actual LLM function
     res = _send_completion_to_litellm(
-        model_name=model_name,
+        model=model,
         messages=messages,
         functions=functions,
         stream=stream,
@@ -310,7 +308,7 @@ def send_completion(
 
 @observe(as_type="generation", capture_output=False)
 def _send_completion_to_litellm(
-    model_name,
+    model: Model,
     messages,
     functions,
     stream,
@@ -325,7 +323,7 @@ def _send_completion_to_litellm(
     It supports both streaming and non-streaming responses.
 
     Args:
-        model_name (str): The name of the language model to use.
+        model (Model): The Model instance to use.
         messages (list): A list of message dictionaries to send to the model.
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
@@ -368,10 +366,10 @@ def _send_completion_to_litellm(
         - Usage information is captured in Langfuse for both streaming and non-streaming responses.
     """
     # Use the provided purpose as the name in Langfuse trace
-    langfuse_context.update_current_observation(name=purpose, model=model_name, input=messages)
+    langfuse_context.update_current_observation(name=purpose, model=model.name, input=messages)
 
     kwargs = dict(
-        model=model_name,
+        model=model.name,
         messages=messages,
         stream=stream,
     )
@@ -399,13 +397,13 @@ def _send_completion_to_litellm(
 
     # Handle None response
     if res is None:
-        error_message = f"Received None response from {model_name}"
+        error_message = f"Received None response from {model.name}"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
 
     # Check for non-200 status code first
     if hasattr(res, "status_code") and res.status_code != 200:
-        error_message = f"Error sending completion to {model_name}: {res.status_code} - {res.text}"
+        error_message = f"Error sending completion to {model.name}: {res.status_code} - {res.text}"
         raise SendCompletionError(error_message, status_code=res.status_code)
 
     usage = None
@@ -428,13 +426,13 @@ def _send_completion_to_litellm(
     else:
         # Handle case where response has text but no choices
         if not hasattr(res, "choices"):
-            error_message = f"Response from {model_name} has no choices attribute"
+            error_message = f"Response from {model.name} has no choices attribute"
             logger.error(error_message + "\nResponse: " + str(res))
             raise InvalidResponseError(error_message)
 
         # Handle empty choices list
         if len(res.choices) == 0:
-            error_message = f"Received empty choices list from {model_name}"
+            error_message = f"Received empty choices list from {model.name}"
             logger.error(error_message + "\nResponse: " + str(res))
             raise InvalidResponseError(error_message)
 
@@ -455,7 +453,7 @@ def _send_completion_to_litellm(
             name=purpose,
             input=str(messages),  # Convert messages to string for logging
             output=output if output else None,
-            model=model_name,
+            model=model.name,
             usage=usage if usage else None,
         )
 
@@ -531,7 +529,7 @@ def analyze_assistant_response(
 
 
 @lazy_litellm_retry_decorator
-def simple_send_with_retries(model_name, messages, extra_params=None, purpose="send with retries"):
+def simple_send_with_retries(model: Model, messages, extra_params=None, purpose="send with retries"):
     """
     Send a completion request with retries on various error conditions.
 
@@ -539,7 +537,7 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
     It will retry on connection errors, rate limit errors, and invalid responses.
 
     Args:
-        model_name (str): The name of the language model to use
+        model (Model): The Model instance to use
         messages (list): A list of message dictionaries to send to the model
         extra_params (dict, optional): Additional parameters to pass to the model
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing
@@ -552,7 +550,7 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
         InvalidResponseError: If the response is missing required fields or empty
     """
     kwargs = {
-        "model_name": model_name,
+        "model": model,
         "messages": messages,
         "functions": None,
         "stream": False,
@@ -566,6 +564,6 @@ def simple_send_with_retries(model_name, messages, extra_params=None, purpose="s
     if hasattr(response, "choices") and response.choices:
         return response.choices[0].message.content
     else:
-        error_message = f"Invalid response from {model_name}: missing choices"
+        error_message = f"Invalid response from {model.name}: missing choices"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
