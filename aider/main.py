@@ -628,6 +628,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         has_openai = bool(os.environ.get("OPENAI_API_KEY"))
         has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
         logger.debug(f"API keys present - OpenAI: {has_openai}, Anthropic: {has_anthropic}")
+        logger.debug(f"Raw environment values - OpenAI: '{os.environ.get('OPENAI_API_KEY')}', Anthropic: '{os.environ.get('ANTHROPIC_API_KEY')}'")
 
         if has_anthropic and not has_openai:
             logger.debug("Only Anthropic API key present, selecting Claude 3.5 Sonnet as default model")

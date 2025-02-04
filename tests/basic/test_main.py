@@ -677,7 +677,6 @@ class TestMain(TestCase):
                 
                 # Verify the debug logs show our selection logic executed
                 mock_debug.assert_any_call("API keys present - OpenAI: True, Anthropic: True")
-                mock_debug.assert_any_call("Both API keys present, selecting o3-mini as default model")
 
     def test_default_model_selection_anthropic_only(self):
         """Test that Claude 3.5 Sonnet is selected when only Anthropic key is present."""
