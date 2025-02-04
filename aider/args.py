@@ -12,6 +12,7 @@ from aider.args_formatter import (
     MarkdownHelpFormatter,
     YamlHelpFormatter,
 )
+from aider.main import DEFAULT_MODEL_HELP
 
 from .dump import dump  # noqa: F401
 
@@ -48,9 +49,8 @@ def get_parser(default_config_files, git_root):
         "--model",
         metavar="MODEL",
         default=None,
-        help="Specify the model to use for the main chat. If not specified, defaults to:"
-             " claude-3-5-sonnet-20241022 when only Anthropic key is present,"
-             " o3-mini otherwise",
+        help="Specify the model to use for the main chat. If not specified, defaults to: "
+             + DEFAULT_MODEL_HELP,
     )
     opus_model = "claude-3-opus-20240229"
     group.add_argument(

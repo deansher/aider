@@ -585,6 +585,12 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         if args.gitignore:
             check_gitignore(git_root, io)
 
+    # Help text for this logic is in DEFAULT_MODEL_HELP
+    DEFAULT_MODEL_HELP = (
+        "claude-3-5-sonnet-20241022 when only Anthropic key is present, "
+        "o3-mini otherwise"
+    )
+
     if args.model is None:  # Explicitly check for None to handle empty string case
         has_openai = bool(os.environ.get("OPENAI_API_KEY"))
         has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
