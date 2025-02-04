@@ -61,6 +61,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.messages = [{"role": "user", "content": "test message"}]
         self.model_name = "test-model"
         self.introduction = "Test introduction"
+        self.test_model = Model("gpt-4")
 
     @patch("aider.sendchat.send_completion")
     def test_analyze_assistant_response_retry_success(self, mock_send):
@@ -228,6 +229,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         invalid_response.status_code = 200
         # Remove choices attribute
         del invalid_response.choices
+        self.test_model = Model("gpt-4")
 
         # Set up the mock to return invalid response
         mock_completion.return_value = invalid_response
@@ -246,6 +248,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         invalid_response.status_code = 200
         invalid_response.choices = []
         invalid_response.text = ""
+        self.test_model = Model("gpt-4")
 
         # Set up the mock to return invalid response
         mock_completion.return_value = invalid_response
