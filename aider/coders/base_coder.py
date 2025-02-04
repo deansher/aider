@@ -224,12 +224,13 @@ class Coder:
         return self.reasoning_effort_modifier + request_adjustment
 
     def map_reasoning_effort(self, effort: int) -> str:
-        if effort < 0:
-            return "low"
-        elif effort > 0:
+        effort_int = int(round(effort))
+        if effort_int >= 0:
             return "high"
+        elif effort_int == -1:
+            return "medium"
         else:
-            return "default"
+            return "low"
 
     def get_announcements(self):
         lines = []
