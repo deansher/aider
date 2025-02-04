@@ -2,6 +2,7 @@
 # Expect to resolve merges manually. See CONTRIBUTING.md.
 
 from enum import Enum
+import logging
 from typing import Any
 
 from aider.types import ChatMessage
@@ -400,6 +401,7 @@ class ArchitectCoder(Coder):
         - If editor execution fails, the exchange will include a prompt but no response
         - Cost and commit tracking are only updated on successful execution
         """
+        logger = logging.getLogger(__name__)
         editor_model = self.main_model.editor_model or self.main_model
         editor_coder = self.create_coder(
             edit_format=self.main_model.editor_edit_format,
@@ -425,6 +427,7 @@ class ArchitectCoder(Coder):
 
                 exchange.append_editor_response(editor_coder.partial_response_content)
         except Exception as e:
+            logger.exception("Editor coder failed")
             self.io.tool_error(f"Editor coder failed: {str(e)}")
             exchange.append_editor_response(None)
 
