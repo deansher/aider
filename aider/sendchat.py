@@ -256,7 +256,13 @@ def send_completion(
         litellm.exceptions.APIConnectionError: For network connectivity issues
         litellm.exceptions.ServiceUnavailableError: If the service is unavailable
         litellm.exceptions.InternalServerError: For server-side errors
+        TypeError: If model is not a Model instance
     """
+    logger = logging.getLogger(__name__)
+    if not isinstance(model, Model):
+        error_msg = f"Expected Model instance, got {type(model)}"
+        logger.error(error_msg)
+        raise TypeError(error_msg)
 
     # Transform messages for Anthropic models
     if is_anthropic_model(model.name):
@@ -360,12 +366,18 @@ def _send_completion_to_litellm(
         litellm.exceptions.APIConnectionError: For network connectivity issues
         litellm.exceptions.ServiceUnavailableError: If the service is unavailable
         litellm.exceptions.InternalServerError: For server-side errors
+        TypeError: If model is not a Model instance
 
     Notes:
         - This function uses Langfuse for tracing and monitoring.
         - The `@observe` decorator captures input and output for Langfuse.
         - Usage information is captured in Langfuse for both streaming and non-streaming responses.
     """
+    logger = logging.getLogger(__name__)
+    if not isinstance(model, Model):
+        error_msg = f"Expected Model instance, got {type(model)}"
+        logger.error(error_msg)
+        raise TypeError(error_msg)
     # Use the provided purpose as the name in Langfuse trace
     langfuse_context.update_current_observation(name=purpose, model=model.name, input=messages)
 
