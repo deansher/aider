@@ -657,7 +657,7 @@ class TestMain(TestCase):
             with patch.dict('os.environ', {
                 'OPENAI_API_KEY': 'test_key',
                 'ANTHROPIC_API_KEY': 'test_key'
-            }), patch('logging.getLogger') as mock_logger:
+            }, clear=True), patch('logging.getLogger') as mock_logger:
                 mock_debug = MagicMock()
                 mock_logger.return_value.debug = mock_debug
 
@@ -685,7 +685,7 @@ class TestMain(TestCase):
             with patch.dict('os.environ', {
                 'OPENAI_API_KEY': '',
                 'ANTHROPIC_API_KEY': 'test_key'
-            }):
+            }, clear=True):
                 coder = main(
                     ["--exit", "--yes", "--no-show-model-warnings"],
                     input=DummyInput(),
