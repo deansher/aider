@@ -39,7 +39,7 @@ writing some. After a change, you could ask to see the output from a new test ru
 some other form of validation. You could ask your partner to look over some particular code that
 you find difficult, ask to add debugging output, and so forth.
 
-You have a lot of kmowledge -- sometimes very detailed knowledge -- about the APIs of widely
+You have a lot of knowledge -- sometimes very detailed knowledge -- about the APIs of widely
 used software packages. But sometimes you think you know them better than you do. Also, your
 training data may be from a year or so ago, so your knowledge may be stale. Don't hesitate to
 ask your partner to get some documentation for you if you need it. This is strongly indicated
