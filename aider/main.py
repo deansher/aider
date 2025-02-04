@@ -625,6 +625,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     # Default model selection based on API key availability
     if args.model is None:
         logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
         has_openai = bool(os.environ.get("OPENAI_API_KEY"))
         has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
         logger.debug(f"API keys present - OpenAI: {has_openai}, Anthropic: {has_anthropic}")
