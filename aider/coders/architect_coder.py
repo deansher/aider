@@ -461,7 +461,23 @@ class ArchitectCoder(Coder):
                 reviewer_coder.run(with_message=reviewer_prompt, preproc=False)
                 self.total_cost += reviewer_coder.total_cost
                 exchange.append_reviewer_response(reviewer_coder.partial_response_content)
+        except litellm.BadRequestError as e:
+            logger.error(
+                "Review step failed with BadRequestError",
+                extra={
+                    "error": str(e),
+                    "message_count": len(reviewer_coder.cur_messages),
+                    "message_roles": [msg["role"] for msg in reviewer_coder.cur_messages],
+                    "null_content_messages": [
+                        i for i, msg in enumerate(reviewer_coder.cur_messages)
+                        if msg.get("content") is None
+                    ],
+                }
+            )
+            self.io.tool_error(f"Reviewer failed with API error: {str(e)}")
+            exchange.append_reviewer_response(None)
         except Exception as e:
+            logger.exception("Review step failed")
             self.io.tool_error(f"Reviewer coder failed: {str(e)}")
             exchange.append_reviewer_response(None)
 
