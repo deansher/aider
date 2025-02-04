@@ -12,7 +12,6 @@ from aider.args_formatter import (
     MarkdownHelpFormatter,
     YamlHelpFormatter,
 )
-from aider.main import DEFAULT_MODEL_HELP
 
 from .dump import dump  # noqa: F401
 

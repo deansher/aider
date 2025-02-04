@@ -379,6 +379,12 @@ def sanity_check_repo(repo, io):
     return False
 
 
+# Help text for this logic is in DEFAULT_MODEL_HELP
+DEFAULT_MODEL_HELP = (
+    "claude-3-5-sonnet-20241022 when only Anthropic key is present, "
+    "o3-mini otherwise"
+)
+
 def main(argv=None, input=None, output=None, force_git_root=None, return_coder=False):
     """Main entry point for the brade application.
 
