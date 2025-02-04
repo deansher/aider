@@ -363,7 +363,7 @@ For example:
 
     def get_approved_non_plan_changes_prompt(self) -> str:
         """Get the prompt for approved non-plan changes."""
-        return """# Step 2: Implementation
+        return """# Implementation
 
 Your task is to implement the approved changes using SEARCH/REPLACE blocks:
 - Follow the approved proposal exactly
@@ -389,7 +389,7 @@ When you are done:
         prompt = ""
 
         prompt += f"{THIS_MESSAGE_IS_FROM_APP}\n"
-        prompt += """# Step 3: Review & Validation
+        prompt += """# Review
 
 Review the latest versions of the affected project files to ensure that:
 1. The changes were applied completely and correctly
