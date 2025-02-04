@@ -224,7 +224,8 @@ def send_completion(
         messages (list): A list of message dictionaries to send to the model.
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
-        temperature (float, optional): The sampling temperature to use. Defaults to 0.
+        temperature (float, optional): The sampling temperature to use. Only used if the model
+            supports temperature. Defaults to 0.
         extra_params (dict, optional): Additional parameters to pass to the model. Defaults to None.
 
     Returns:
@@ -255,6 +256,7 @@ def send_completion(
         litellm.exceptions.ServiceUnavailableError: If the service is unavailable
         litellm.exceptions.InternalServerError: For server-side errors
     """
+
     # Transform messages for Anthropic models
     if is_anthropic_model(model_name):
         messages = transform_messages_for_anthropic(messages)
@@ -264,7 +266,10 @@ def send_completion(
         messages=messages,
         stream=stream,
     )
-    if temperature is not None:
+
+    # Get model settings to check parameter support
+    model = Model(model_name)
+    if temperature is not None and model.use_temperature:
         kwargs["temperature"] = temperature
 
     if functions is not None:
