@@ -47,6 +47,7 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--model",
         metavar="MODEL",
+        default=None,
         help="Specify the model to use for the main chat. If not specified, defaults to:"
              " claude-3-5-sonnet-20241022 when only Anthropic key is present,"
              " o3-mini otherwise",
