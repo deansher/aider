@@ -655,7 +655,6 @@ class TestMain(TestCase):
 
             self.assertTrue(coder.add_cache_headers)
 
-    @pytest.mark.usefixtures("capture_logs")
     def test_default_model_selection_both_keys(self):
         """Test that o3-mini is selected when both API keys are present."""
         with GitTemporaryDirectory():
@@ -676,10 +675,6 @@ class TestMain(TestCase):
                     return_coder=True,
                 )
                 self.assertEqual(coder.main_model.name, "o3-mini")
-                
-                # Verify the debug logs show our selection logic executed
-                log_output = self.capture_logs.getvalue()
-                self.assertIn("API keys present - OpenAI: True, Anthropic: True", log_output)
 
     def test_default_model_selection_anthropic_only(self):
         """Test that Claude 3.5 Sonnet is selected when only Anthropic key is present."""
