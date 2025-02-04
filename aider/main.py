@@ -434,15 +434,28 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     default_config_files = list(map(str, default_config_files))
 
     # Configure logging with timestamps and other formatting
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s %(levelname)s %(name)s: %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-        handlers=[
-            logging.FileHandler('.aider/aider.log'),
-            logging.StreamHandler()
-        ]
-    )
+    # Ensure .aider directory exists
+    try:
+        Path('.aider').mkdir(exist_ok=True)
+    except OSError as e:
+        print(f"Warning: Could not create .aider directory: {e}")
+        print("Continuing without file logging")
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[logging.StreamHandler()]
+        )
+    else:
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            handlers=[
+                logging.FileHandler('.aider/aider.log'),
+                logging.StreamHandler()
+            ]
+        )
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
