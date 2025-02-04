@@ -47,7 +47,6 @@ def get_parser(default_config_files, git_root):
     group.add_argument(
         "--model",
         metavar="MODEL",
-        default=None,
         help="Specify the model to use for the main chat. If not specified, defaults to: "
              + DEFAULT_MODEL_HELP,
     )
