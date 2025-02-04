@@ -1490,7 +1490,7 @@ class Coder:
         completion = None
         try:
             hash_object, completion = send_completion(
-                model.name,
+                model,
                 messages,
                 functions,
                 self.stream,
