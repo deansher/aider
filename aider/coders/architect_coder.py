@@ -427,8 +427,16 @@ class ArchitectCoder(Coder):
 
                 exchange.append_editor_response(editor_coder.partial_response_content)
         except Exception as e:
-            logger.exception("Editor coder failed")
-            self.io.tool_error(f"Editor coder failed: {str(e)}")
+            logger.exception(
+                "Editor coder failed",
+                extra={
+                    "editor_model": editor_model.name,
+                    "edit_format": self.main_model.editor_edit_format,
+                }
+            )
+            self.io.tool_error(
+                f"Editor coder failed ({editor_model.name}, {self.main_model.editor_edit_format}): {str(e)}"
+            )
             exchange.append_editor_response(None)
 
     def review_changes(self, exchange: ArchitectExchange) -> None:
