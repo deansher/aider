@@ -339,6 +339,7 @@ class Coder:
         chat_language=None,
     ):
         self.chat_language = chat_language
+        self.reasoning_effort_modifier = 0
         self.commit_before_message = []
         self.aider_commit_hashes = set()
         self.rejected_urls = set()
