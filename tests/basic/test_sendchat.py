@@ -46,7 +46,7 @@ class TestSendChat(unittest.TestCase):
         ]
 
         # Call the simple_send_with_retries method
-        result = simple_send_with_retries("model", [{"role": "user", "content": "message"}])
+        result = simple_send_with_retries(self.test_model, [{"role": "user", "content": "message"}])
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
@@ -115,7 +115,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         ]
 
         # Call the simple_send_with_retries method
-        result = simple_send_with_retries("model", [{"role": "user", "content": "message"}])
+        result = simple_send_with_retries(self.test_model, [{"role": "user", "content": "message"}])
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
@@ -140,7 +140,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         ]
 
         # Call the simple_send_with_retries method
-        result = simple_send_with_retries("model", ["message"])
+        result = simple_send_with_retries(self.test_model, ["message"])
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
@@ -160,7 +160,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         ]
 
         # Call the simple_send_with_retries method
-        result = simple_send_with_retries("model", ["message"])
+        result = simple_send_with_retries(self.test_model, ["message"])
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
