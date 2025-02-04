@@ -1130,8 +1130,8 @@ class Coder:
                 position=PromptElementPosition.PREPEND
             ),
             task_instructions_reminder_location=ElementLocation(
-                placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-                position=PromptElementPosition.APPEND
+                placement=PromptElementPlacement.SYSTEM_MESSAGE,
+                position=PromptElementPosition.PREPEND
             ),
         )
 
