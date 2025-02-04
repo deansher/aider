@@ -433,6 +433,19 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     default_config_files.append(Path.home() / conf_fname)  # homedir
     default_config_files = list(map(str, default_config_files))
 
+    # Configure logging with timestamps and other formatting
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=[
+            logging.FileHandler('.aider/aider.log'),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
     parser = get_parser(default_config_files, git_root)
     try:
         args, unknown = parser.parse_known_args(argv)
@@ -443,10 +456,10 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
         raise e
 
     if args.verbose:
-        print("Config files search order, if no --config:")
+        logger.debug("Config files search order, if no --config:")
         for file in default_config_files:
             exists = "(exists)" if Path(file).exists() else ""
-            print(f"  - {file} {exists}")
+            logger.debug(f"  - {file} {exists}")
 
     default_config_files.reverse()
 

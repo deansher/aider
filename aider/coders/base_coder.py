@@ -1474,6 +1474,7 @@ class Coder:
                 self.ignore_mentions.add(rel_fname)
 
     def send(self, messages, model=None, functions=None, purpose="send"):
+        logger = logging.getLogger(__name__)
         if not model:
             model = self.main_model
 
@@ -1489,6 +1490,10 @@ class Coder:
 
         completion = None
         try:
+            if not isinstance(model, models.Model):
+                logger.error(f"Invalid model type: {type(model)}, expected Model")
+                raise TypeError(f"Expected Model instance, got {type(model)}")
+
             hash_object, completion = send_completion(
                 model,
                 messages,
@@ -1507,6 +1512,9 @@ class Coder:
         except KeyboardInterrupt as kbi:
             self.keyboard_interrupt()
             raise kbi
+        except Exception as e:
+            logger.exception("Error in send()")
+            raise
         finally:
             self.io.log_llm_history(
                 "LLM RESPONSE",
