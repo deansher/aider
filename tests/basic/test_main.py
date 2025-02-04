@@ -681,6 +681,9 @@ class TestMain(TestCase):
     def test_default_model_selection_anthropic_only(self):
         """Test that Claude 3.5 Sonnet is selected when only Anthropic key is present."""
         with GitTemporaryDirectory():
+            # Configure logging to show debug messages
+            logging.basicConfig(level=logging.DEBUG)
+            
             with patch.dict('os.environ', {
                 'OPENAI_API_KEY': '',
                 'ANTHROPIC_API_KEY': 'test_key'
