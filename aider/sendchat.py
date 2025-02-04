@@ -8,6 +8,7 @@ from llm_multiple_choice import DisplayFormat, InvalidChoicesResponseError
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
+from aider.models import Model
 
 logger = logging.getLogger(__name__)
 
