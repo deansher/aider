@@ -50,6 +50,9 @@ This document outlines our progress and remaining work toward enhancing Brade to
   - [ ] Verify fallback behavior with only ANTHROPIC_API_KEY set, ensuring Claude 3.5 Sonnet is used.  
   - [ ] Document observed behavior and reconcile any discrepancies.  
 
+- [ ] **[Future Work] Enhanced system message handling / enriched message roles**
+  - Once litellm supports OpenAI’s enriched message roles (e.g. "developer"), revisit our internal prompt transformation to leverage a richer role-based hierarchy in higher-level code and gracefully downgrade for models that don’t support them natively.
+
 ### 4. Validate Changes  
 - [✔︎] Run existing test suite  
 - [ ] **(Essential; Pending)** Ensure all unit tests pass under various configurations (run the full test suite on o3-mini)  
