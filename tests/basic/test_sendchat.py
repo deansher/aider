@@ -266,7 +266,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
     @patch("litellm.completion")
     def test_send_completion_no_temperature(self, mock_completion):
         # Create a model that doesn't support temperature
-        model = ModelConfig.create("o3-mini")
+        model = get_model_config("o3-mini")
         self.assertFalse(model.use_temperature)
 
         # Set up mock response

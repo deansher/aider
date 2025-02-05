@@ -48,7 +48,7 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.map_reasoning_level(1), {})
 
         # Test OpenAiReasoningConfig returns correct mappings
-        model = ModelConfig.create("o3-mini")
+        model = get_model_config("o3-mini")
         self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "high"})
         self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "medium"})
         self.assertEqual(model.map_reasoning_level(-2), {"reasoning_effort": "low"})
@@ -67,7 +67,7 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.name, "o3-mini")
         
         # Test model with weak model
-        model = ModelConfig.create("gpt-4", weak_model="gpt-3.5-turbo")
+        model = get_model_config("gpt-4", weak_model="gpt-3.5-turbo")
         self.assertIsInstance(model, ModelConfig)
         self.assertEqual(model.weak_model.name, "gpt-3.5-turbo")
 

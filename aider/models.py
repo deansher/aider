@@ -108,30 +108,6 @@ class ModelConfig(ModelSettings):
     to add model-specific behavior. The model_class field in ModelSettings
     can be used to specify a subclass to use for a particular model configuration.
     """
-    @classmethod
-    def create(cls, model, weak_model=None, editor_model=None, editor_edit_format=None):
-        """Factory method to create the appropriate model configuration instance.
-        
-        Args:
-            model: Name of the model to create
-            weak_model: Optional weak model name or False to disable
-            editor_model: Optional editor model name or False to disable  
-            editor_edit_format: Optional editor edit format
-            
-        Returns:
-            ModelConfig: An instance of ModelConfig or appropriate subclass
-        """
-        # Create initial model config to get settings
-        initial = cls(model, weak_model=False, editor_model=False)
-        
-        # If model_class specified, create that type instead
-        if hasattr(initial, 'model_class') and initial.model_class and not isinstance(initial, initial.model_class):
-            return initial.model_class(model, weak_model, editor_model, editor_edit_format)
-            
-        # Otherwise complete initialization of base config
-        initial.get_weak_model(weak_model)
-        initial.get_editor_model(editor_model, editor_edit_format)
-        return initial
 
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
         """Initialize a model configuration instance.
@@ -1014,6 +990,36 @@ def get_model_flexible(model, content):
 
     return dict()
 
+
+def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit_format=None):
+    """Get the appropriate model configuration instance.
+    
+    Args:
+        model: Name of the model to create
+        weak_model: Optional weak model name or False to disable
+        editor_model: Optional editor model name or False to disable  
+        editor_edit_format: Optional editor edit format
+        
+    Returns:
+        ModelConfig: An instance of ModelConfig or appropriate subclass
+    """
+    # Find matching settings
+    for ms in MODEL_SETTINGS:
+        if model == ms.name:
+            # Create instance of model_class if specified, otherwise ModelConfig
+            config_class = ms.model_class or ModelConfig
+            config = config_class(model, weak_model=False, editor_model=False)
+            
+            # Complete initialization
+            config.get_weak_model(weak_model)
+            config.get_editor_model(editor_model, editor_edit_format)
+            return config
+
+    # No specific settings found, use base ModelConfig
+    config = ModelConfig(model, weak_model=False, editor_model=False)
+    config.get_weak_model(weak_model)
+    config.get_editor_model(editor_model, editor_edit_format)
+    return config
 
 def get_model_info(model):
     if not litellm._lazy_module:
