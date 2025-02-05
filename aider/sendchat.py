@@ -270,14 +270,15 @@ def send_completion(
     if model.provider_headers:
         kwargs["extra_headers"] = model.provider_headers
 
-    # Add caller's extra params, filtering out temperature which we handle separately
+    # Add caller's extra params
     if extra_params is not None:
-        filtered_params = {k: v for k, v in extra_params.items() if k != "temperature"}
-        kwargs.update(filtered_params)
+        kwargs.update(extra_params)
 
     # Add temperature only if model supports it
     if temperature is not None and model.use_temperature:
         kwargs["temperature"] = temperature
+    elif "temperature" in kwargs:
+        del kwargs["temperature"]
 
     # Add reasoning model params last to avoid being overwritten
     if model.info.get("is_reasoning_model"):
