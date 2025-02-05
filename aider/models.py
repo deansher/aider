@@ -141,6 +141,9 @@ class Model(ModelSettings):
             editor_model: Optional editor model name or False to disable
             editor_edit_format: Optional editor edit format
         """
+        logger = logging.getLogger(__name__)
+        logger.debug("Model.__init__: model=%s class=%s", model, self.__class__.__dict__)
+
         self.name = model
         self.max_chat_history_tokens = 1024
         self.weak_model = None
@@ -157,6 +160,7 @@ class Model(ModelSettings):
         self.max_chat_history_tokens = max_chat_history_tokens(max_input_tokens)
 
         self.configure_model_settings(model)
+        logger.debug("Model.__init__: model=%s use_temperature=%s", model, self.use_temperature)
 
         if weak_model is False:
             self.weak_model_name = None
