@@ -426,13 +426,13 @@ def _send_completion_to_litellm(
 
     # Handle None response
     if res is None:
-        error_message = f"Received None response from {model.name}"
+        error_message = f"Received None response from {model_config.name}"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
 
     # Check for non-200 status code first
     if hasattr(res, "status_code") and res.status_code != 200:
-        error_message = f"Error sending completion to {model.name}: {res.status_code} - {res.text}"
+        error_message = f"Error sending completion to {model_config.name}: {res.status_code} - {res.text}"
         raise SendCompletionError(error_message, status_code=res.status_code)
 
     usage = None
@@ -455,13 +455,13 @@ def _send_completion_to_litellm(
     else:
         # Handle case where response has text but no choices
         if not hasattr(res, "choices"):
-            error_message = f"Response from {model.name} has no choices attribute"
+            error_message = f"Response from {model_config.name} has no choices attribute"
             logger.error(error_message + "\nResponse: " + str(res))
             raise InvalidResponseError(error_message)
 
         # Handle empty choices list
         if len(res.choices) == 0:
-            error_message = f"Received empty choices list from {model.name}"
+            error_message = f"Received empty choices list from {model_config.name}"
             logger.error(error_message + "\nResponse: " + str(res))
             raise InvalidResponseError(error_message)
 
@@ -482,7 +482,7 @@ def _send_completion_to_litellm(
             name=purpose,
             input=str(messages),  # Convert messages to string for logging
             output=output if output else None,
-            model=model.name,
+            model=model_config.name,
             usage=usage if usage else None,
         )
 
