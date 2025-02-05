@@ -276,16 +276,16 @@ You are currently performing Step 1 of the architect's three-step process.
 Your human partner has approved the changes that you proposed in your last message.
 Your current task is to implement that proposal by using SEARCH/REPLACE blocks
 to create or revise project files:
-- Use SEARCH/REPLACE blocks for all changes
-- Follow the approved proposal exactly
-- Make no additional modifications
-- Add no commentary or analysis
+- Use SEARCH/REPLACE blocks for all changes.
+- Adhere closely to the spirit of your proposal.
+- However, your mission now is to produce high-quality code or other content.
+  Apply your own expertise to notice any mistakes or poor choices in the details
+  of the proposal and improve upon them.
 
 When you are done:
-- Stop immediately
-- Wait for the changes to be applied
-- Do not say anything to your partner yet
-- Save any comments for the review phase
+- Stop immediately, without further comment to your human partner.
+- (You will have a chance to explain your thinking later.)
+- Wait for the changes to be applied.
 """
 
     def get_approved_plan_changes_prompt(self) -> str:
