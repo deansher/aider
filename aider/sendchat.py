@@ -311,7 +311,7 @@ def _send_completion_to_litellm(
         messages (list): A list of message dictionaries to send to the model.
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
-        temperature (float, optional): The sampling temperature to use. Defaults to 0.
+        temperature (float, optional): The sampling temperature to use. Defaults to None.
         extra_params (dict, optional): Additional parameters to pass to the model. Defaults to None.
                                      This includes any provider-specific parameters like reasoning_effort
                                      that were mapped by the model class.
