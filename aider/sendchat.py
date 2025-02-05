@@ -274,21 +274,23 @@ def send_completion(
     logger = logging.getLogger(__name__)
     logger.debug("send_completion: model=%s use_temperature=%s", model.name, model.use_temperature)
 
-    # Start with base OpenAI params
+    # Start with all input parameters
     kwargs = dict(
         model=model.name,
         messages=messages,
         stream=stream,
+        temperature=temperature,
+        extra_params=extra_params,
+        functions=functions,
+        purpose=purpose
     )
     logger.debug("send_completion: initial kwargs=%s", kwargs)
 
-    # Handle temperature first, before other params can override it
-    if temperature is not None and model.use_temperature:
-        kwargs["temperature"] = temperature
-        logger.debug("send_completion: adding temperature=%s", temperature)
-    elif "temperature" in kwargs:
-        logger.debug("send_completion: removing temperature")
-        del kwargs["temperature"]
+    # Handle temperature based on model support
+    if not model.use_temperature:
+        kwargs.pop('temperature', None)
+    elif temperature is not None:
+        kwargs['temperature'] = temperature
     logger.debug("send_completion: kwargs after temperature handling=%s", kwargs)
 
     # Add optional OpenAI params
