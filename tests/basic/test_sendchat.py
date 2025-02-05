@@ -283,3 +283,37 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
         self.assertNotIn("temperature", kwargs)
+
+    @patch("litellm.completion")
+    def test_send_completion_reasoning_level(self, mock_completion):
+        # Create a successful mock response
+        success_response = MagicMock()
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success response"
+        success_response.status_code = 200
+        mock_completion.return_value = success_response
+
+        # Test with a reasoning model
+        model = Model("o3-mini")
+        self.assertTrue(model.is_reasoning_model)
+
+        # Call send_completion with reasoning_level
+        send_completion(model, ["message"], None, False, reasoning_level=1)
+
+        # Verify reasoning_effort was passed to litellm
+        mock_completion.assert_called_once()
+        kwargs = mock_completion.call_args.kwargs
+        self.assertEqual(kwargs.get("reasoning_effort"), "high")
+
+        # Test with a non-reasoning model
+        mock_completion.reset_mock()
+        model = Model("gpt-4")
+        self.assertFalse(model.is_reasoning_model)
+
+        # Call send_completion with reasoning_level
+        send_completion(model, ["message"], None, False, reasoning_level=1)
+
+        # Verify no reasoning parameters were passed
+        mock_completion.assert_called_once()
+        kwargs = mock_completion.call_args.kwargs
+        self.assertNotIn("reasoning_effort", kwargs)
