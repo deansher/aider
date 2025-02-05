@@ -187,6 +187,7 @@ def retry_exceptions():
         litellm.exceptions.InternalServerError,
         InvalidResponseError,
     )
+    langfuse_context.update_current_observation(name=purpose, model=model.name, input=messages, metadata={"llm_params": kwargs})
 
 
 def lazy_litellm_retry_decorator(func):
@@ -389,8 +390,6 @@ def _send_completion_to_litellm(
         "functions": functions,
         "purpose": purpose
     }
-    langfuse_context.update_current_observation(name=purpose, model=model.name, input=messages, metadata={"llm_params": kwargs})
-
     kwargs = dict(
         model=model.name,
         messages=messages,
