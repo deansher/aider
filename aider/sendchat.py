@@ -275,12 +275,14 @@ def send_completion(
     if is_anthropic_model(model.name):
         messages = transform_messages_for_anthropic(messages)
 
+    # Start with base OpenAI params
     kwargs = dict(
         model=model.name,
         messages=messages,
         stream=stream,
     )
 
+    # Add optional OpenAI params
     if temperature is not None and model.use_temperature:
         kwargs["temperature"] = temperature
 
@@ -292,11 +294,24 @@ def send_completion(
             "function": {"name": function["name"]},
         }
 
+    # Add model's OpenAI-compatible params
+    if model.extra_params:
+        kwargs.update(model.extra_params)
+
+    # Add model's provider-specific params
+    if model.provider_params:
+        kwargs.update(model.provider_params)
+
+    # Add model's provider-specific headers
+    if model.provider_headers:
+        kwargs["extra_headers"] = model.provider_headers
+
+    # Add caller's extra params
     if extra_params is not None:
         kwargs.update(extra_params)
 
+    # Add reasoning model params
     if model.info.get("is_reasoning_model"):
-        # Map reasoning_level to model-specific parameters
         kwargs.update(model.map_reasoning_level(reasoning_level))
 
     key = json.dumps(kwargs, sort_keys=True).encode()
