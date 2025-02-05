@@ -95,6 +95,7 @@ class ModelSettings:
     editor_model_name: Optional[str] = None
     editor_edit_format: Optional[str] = None
     is_reasoning_model: bool = False
+    model_class: Optional[type] = None
 
 
 # https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
@@ -566,7 +567,7 @@ MODEL_SETTINGS = [
         reminder="sys",
         editor_edit_format="editor-diff",
     ),
-    OpenAiReasoningModel(
+    ModelSettings(
         "openai/o1",
         "diff",
         weak_model_name="openai/gpt-4o-mini",
@@ -578,8 +579,9 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
+        model_class=OpenAiReasoningModel,
     ),
-    OpenAiReasoningModel(
+    ModelSettings(
         "azure/o1",
         "diff",
         weak_model_name="azure/gpt-4o-mini",
@@ -591,8 +593,9 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
+        model_class=OpenAiReasoningModel,
     ),
-    OpenAiReasoningModel(
+    ModelSettings(
         "o3-mini",
         "whole",
         weak_model_name="gpt-4o",
@@ -604,8 +607,9 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
+        model_class=OpenAiReasoningModel,
     ),
-    OpenAiReasoningModel(
+    ModelSettings(
         "openai/o3-mini",
         "whole",
         weak_model_name="openai/gpt-4o",
@@ -617,8 +621,9 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
+        model_class=OpenAiReasoningModel,
     ),
-    OpenAiReasoningModel(
+    ModelSettings(
         "azure/o3-mini",
         "whole",
         weak_model_name="azure/gpt-4o",
@@ -630,8 +635,9 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
+        model_class=OpenAiReasoningModel,
     ),
-    OpenAiReasoningModel(
+    ModelSettings(
         "o1",
         "architect",
         weak_model_name="gpt-4o",
@@ -643,6 +649,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
+        model_class=OpenAiReasoningModel,
     ),
     ModelSettings(
         "openrouter/openai/o1-mini",
@@ -746,7 +753,12 @@ def get_model_info(model):
 
 
 class Model(ModelSettings):
-    """Base class for all language models."""
+    """Base class for all language models.
+    
+    This class provides the core model functionality and can be subclassed
+    to add model-specific behavior. The model_class field in ModelSettings
+    can be used to specify a subclass to use for a particular model configuration.
+    """
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
         self.name = model
         self.max_chat_history_tokens = 1024
@@ -764,6 +776,11 @@ class Model(ModelSettings):
         self.max_chat_history_tokens = max_chat_history_tokens(max_input_tokens)
 
         self.configure_model_settings(model)
+        
+        # If model_class is specified and it's not this class, create an instance
+        if hasattr(self, 'model_class') and self.model_class and not isinstance(self, self.model_class):
+            return self.model_class(model, weak_model, editor_model, editor_edit_format)
+            
         if weak_model is False:
             self.weak_model_name = None
         else:
