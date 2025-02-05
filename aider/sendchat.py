@@ -275,6 +275,28 @@ def send_completion(
     if is_anthropic_model(model.name):
         messages = transform_messages_for_anthropic(messages)
 
+    # Parameter handling in Brade follows a layered architecture that matches litellm's API design:
+    #
+    # 1. Base OpenAI Parameters:
+    #    - Core parameters like model, messages, stream that every call needs
+    #    - These form the foundation of every API call
+    #
+    # 2. Model-specific Parameters (in order of precedence, lowest to highest):
+    #    - model.extra_params: OpenAI-compatible parameters (e.g. max_tokens)
+    #    - model.provider_params: Provider-specific parameters
+    #    - model.provider_headers: Provider-specific headers
+    #    - model.map_reasoning_level(): Provider-specific reasoning parameters
+    #
+    # 3. Caller's Parameters:
+    #    - extra_params passed by the caller
+    #    - These have highest precedence and can override any other settings
+    #
+    # This layered approach:
+    # - Maintains compatibility with litellm's API
+    # - Provides sensible defaults via model settings
+    # - Allows fine-grained control when needed
+    # - Cleanly handles provider-specific features like reasoning levels
+    
     # Start with base OpenAI params
     kwargs = dict(
         model=model.name,
