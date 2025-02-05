@@ -413,35 +413,30 @@ def _send_completion_to_litellm(
         functions=functions,
         purpose=purpose
     )
-    # Extract standard OpenAI parameters for Langfuse predefined fields
+    # Prepare Langfuse parameters
     langfuse_params = {
         "name": purpose,
         "model": model.name,
         "input": messages,
+        "metadata": {
+            "parameters": {
+                k: v for k, v in kwargs.items()
+                if k in {"temperature", "max_tokens", "top_p", "tools", "tool_choice"}
+            },
+            "other_params": {
+                k: v for k, v in kwargs.items()
+                if k not in {"temperature", "max_tokens", "top_p", "tools", "tool_choice"}
+            }
+        }
     }
-    if "temperature" in kwargs:
-        langfuse_params["temperature"] = kwargs["temperature"]
-    if "max_tokens" in kwargs:
-        langfuse_params["max_tokens"] = kwargs["max_tokens"]
-    if "top_p" in kwargs:
-        langfuse_params["top_p"] = kwargs["top_p"]
-    if "tools" in kwargs:
-        langfuse_params["tools"] = kwargs["tools"]
-    if "tool_choice" in kwargs:
-        langfuse_params["tool_choice"] = kwargs["tool_choice"]
 
-    # Organize other parameters in metadata
-    metadata = {}
+    # Add provider-specific metadata
     if model.provider_params:
-        metadata["provider_params"] = model.provider_params
+        langfuse_params["metadata"]["provider_params"] = model.provider_params
     if model.provider_headers:
-        metadata["provider_headers"] = model.provider_headers
+        langfuse_params["metadata"]["provider_headers"] = model.provider_headers
     if model.info.get("is_reasoning_model"):
-        metadata["reasoning"] = model.map_reasoning_level(reasoning_level)
-    metadata["other_params"] = {k: v for k, v in kwargs.items() 
-                              if k not in {"temperature", "max_tokens", "top_p", "tools", "tool_choice"}}
-
-    langfuse_params["metadata"] = metadata
+        langfuse_params["metadata"]["reasoning"] = model.map_reasoning_level(reasoning_level)
     langfuse_context.update_current_observation(**langfuse_params)
     if temperature is not None and model.use_temperature:
         kwargs["temperature"] = temperature
