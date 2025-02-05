@@ -190,7 +190,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
     def test_transform_messages_for_o3(self):
         """Test basic system-to-user message conversion for o3 models."""
         from aider.sendchat import transform_messages_for_o3
-        """Test basic system-to-user message conversion for o3 models."""
+
         # Test single system message
         messages = [{"role": "system", "content": "You are a helpful assistant"}]
         transformed = transform_messages_for_o3(messages)
