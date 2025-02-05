@@ -227,18 +227,13 @@ def send_completion(
         model=model_config.name,  # Use name for API call
         messages=messages,
         stream=stream,
-        temperature=temperature,
         extra_params=extra_params,
         functions=functions,
         purpose=purpose
     )
 
-    # Handle temperature based on model support
-    if not model_config.use_temperature:
-        kwargs.pop('temperature', None)
-    elif temperature is not None:
+    if model_config.use_temperature:
         kwargs['temperature'] = temperature
-    logger.debug("send_completion: kwargs after temperature handling=%s", kwargs)
 
     # Add optional OpenAI params
     if functions is not None:
@@ -248,27 +243,22 @@ def send_completion(
             "type": "function",
             "function": {"name": function["name"]},
         }
-    logger.debug("send_completion: kwargs after OpenAI params=%s", kwargs)
 
     # Add model's OpenAI-compatible params
     if model_config.extra_params:
         kwargs.update(model_config.extra_params)
-    logger.debug("send_completion: kwargs after model extra_params=%s", kwargs)
 
     # Add model's provider-specific params
     if model_config.provider_params:
         kwargs.update(model_config.provider_params)
-    logger.debug("send_completion: kwargs after provider_params=%s", kwargs)
 
     # Add model's provider-specific headers
     if model_config.provider_headers:
         kwargs["extra_headers"] = model_config.provider_headers
-    logger.debug("send_completion: kwargs after provider_headers=%s", kwargs)
 
     # Add caller's extra params
     if extra_params is not None:
         kwargs.update(extra_params)
-    logger.debug("send_completion: kwargs after caller extra_params=%s", kwargs)
 
     # Add reasoning model params last to avoid being overwritten
     if model_config.info.get("is_reasoning_model"):
@@ -276,7 +266,6 @@ def send_completion(
         if reasoning_params:
             logger.debug("send_completion: adding reasoning_params=%s", reasoning_params)
             kwargs.update(reasoning_params)
-    logger.debug("send_completion: kwargs after reasoning_params=%s", kwargs)
 
     # Create cache key from final kwargs
     key = json.dumps(kwargs, sort_keys=True).encode()
@@ -293,7 +282,6 @@ def send_completion(
     del litellm_kwargs['model']
 
     # Call the actual LLM function
-    logger.debug("send_completion: final kwargs=%s", litellm_kwargs)
     res = _send_completion_to_litellm(**litellm_kwargs)
 
     if not stream and CACHE is not None:
@@ -308,7 +296,7 @@ def _send_completion_to_litellm(
     messages,
     functions,
     stream,
-    temperature=0,
+    temperature=None,
     extra_params=None,
     purpose="(unlabeled)",
 ):

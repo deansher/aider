@@ -7,7 +7,7 @@ from llm_multiple_choice import ChoiceManager
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
-from aider.models import _ModelConfigImpl
+from aider.models import _ModelConfigImpl, get_model_config
 from aider.sendchat import (
     analyze_assistant_response,
     send_completion,
@@ -206,8 +206,8 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         transformed = transform_messages_for_o3(messages)
         self.assertEqual(len(transformed), 2)
         self.assertTrue(all(msg["role"] == "user" for msg in transformed))
-        self.assertEqual([msg["content"] for msg in transformed], 
-                        [msg["content"] for msg in messages])
+        self.assertEqual([msg["content"] for msg in transformed],
+                         [msg["content"] for msg in messages])
 
         # Test order preservation with mixed message types
         messages = [
@@ -223,7 +223,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.assertEqual(transformed[2]["role"], "user")  # was system
         self.assertEqual(transformed[3]["role"], "assistant")  # unchanged
         self.assertEqual([msg["content"] for msg in transformed],
-                        [msg["content"] for msg in messages])
+                         [msg["content"] for msg in messages])
 
     @patch("litellm.completion")
     @patch("builtins.print")
