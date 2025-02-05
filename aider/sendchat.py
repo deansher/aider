@@ -288,9 +288,8 @@ def send_completion(
     if extra_params is not None:
         kwargs.update(extra_params)
     if model.info.get("is_reasoning_model") and "reasoning_effort" not in kwargs:
-        effective = 0  # Default reasoning effort adjustment when no UI override is provided
-        # The mapping function would return "high" for effort >= 0 (default behavior)
-        kwargs["reasoning_effort"] = "high"
+        effective = model.compute_effective_reasoning_effort()  # Default is 0 if no adjustment provided
+        kwargs["reasoning_effort"] = model.map_reasoning_effort(effective)
 
     key = json.dumps(kwargs, sort_keys=True).encode()
 
