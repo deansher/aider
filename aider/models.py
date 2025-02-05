@@ -209,7 +209,27 @@ class _ModelConfigImpl(ModelConfig):
         logger = logging.getLogger(__name__)
         logger.debug("ModelConfig.__init__: model=%s class=%s", model, self.__class__.__dict__)
 
+        # Initialize with default values
         self.name = model
+        self.edit_format = "whole"
+        self.weak_model_name = None
+        self.use_repo_map = False
+        self.send_undo_reply = False
+        self.accepts_images = False
+        self.lazy = False
+        self.reminder = "user"
+        self.examples_as_sys_msg = False
+        self.extra_params = None
+        self.provider_params = None
+        self.provider_headers = None
+        self.cache_control = False
+        self.caches_by_default = False
+        self.use_system_prompt = True
+        self.use_temperature = True
+        self.streaming = True
+        self.editor_model_name = None
+        self.editor_edit_format = None
+        self.is_reasoning_model = False
         self.max_chat_history_tokens = 1024
         self.weak_model = None
         self.editor_model = None
@@ -315,7 +335,7 @@ class _ModelConfigImpl(ModelConfig):
             self.weak_model = self
             return
 
-        self.weak_model = ModelConfig(
+        self.weak_model = _ModelConfigImpl(
             self.weak_model_name,
             weak_model=False,
         )

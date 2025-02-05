@@ -1,7 +1,15 @@
 import unittest
 from unittest.mock import ANY, MagicMock, patch
 
-from aider.models import ModelConfig, _ModelConfigImpl, OpenAiReasoningConfig, get_model_info, sanity_check_model, sanity_check_models
+from aider.models import (
+    ModelConfig,
+    _ModelConfigImpl,
+    OpenAiReasoningConfig,
+    get_model_config,
+    get_model_info,
+    sanity_check_model,
+    sanity_check_models,
+)
 
 
 class TestModels(unittest.TestCase):
