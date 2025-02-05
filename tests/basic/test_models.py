@@ -48,12 +48,28 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.map_reasoning_level(1), {})
 
         # Test OpenAiReasoningModel returns correct mappings
-        model = Model("o3-mini")
+        model = Model.create("o3-mini")
         self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "high"})
         self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "medium"})
         self.assertEqual(model.map_reasoning_level(-2), {"reasoning_effort": "low"})
         self.assertEqual(model.map_reasoning_level(-3), {"reasoning_effort": "low"})
         self.assertEqual(model.map_reasoning_level(1), {"reasoning_effort": "high"})
+
+    def test_model_creation(self):
+        # Test base model creation
+        model = Model.create("gpt-4")
+        self.assertIsInstance(model, Model)
+        self.assertEqual(model.name, "gpt-4")
+        
+        # Test OpenAiReasoningModel creation
+        model = Model.create("o3-mini")
+        self.assertIsInstance(model, OpenAiReasoningModel)
+        self.assertEqual(model.name, "o3-mini")
+        
+        # Test model with weak model
+        model = Model.create("gpt-4", weak_model="gpt-3.5-turbo")
+        self.assertIsInstance(model, Model)
+        self.assertEqual(model.weak_model.name, "gpt-3.5-turbo")
 
     @patch("os.environ")
     def test_sanity_check_model_all_set(self, mock_environ):

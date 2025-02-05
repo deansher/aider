@@ -670,7 +670,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             logger.debug("Using o3-mini as default model")
             args.model = "o3-mini"
 
-    main_model = models.Model(
+    main_model = models.Model.create(
         args.model,
         weak_model=args.weak_model,
         editor_model=args.editor_model,

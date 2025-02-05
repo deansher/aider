@@ -107,7 +107,40 @@ class Model(ModelSettings):
     to add model-specific behavior. The model_class field in ModelSettings
     can be used to specify a subclass to use for a particular model configuration.
     """
+    @classmethod
+    def create(cls, model, weak_model=None, editor_model=None, editor_edit_format=None):
+        """Factory method to create the appropriate model instance.
+        
+        Args:
+            model: Name of the model to create
+            weak_model: Optional weak model name or False to disable
+            editor_model: Optional editor model name or False to disable  
+            editor_edit_format: Optional editor edit format
+            
+        Returns:
+            Model: An instance of Model or appropriate subclass
+        """
+        # Create initial model to get settings
+        initial = cls(model, weak_model=False, editor_model=False)
+        
+        # If model_class specified, create that type instead
+        if hasattr(initial, 'model_class') and initial.model_class and not isinstance(initial, initial.model_class):
+            return initial.model_class(model, weak_model, editor_model, editor_edit_format)
+            
+        # Otherwise complete initialization of base model
+        initial.get_weak_model(weak_model)
+        initial.get_editor_model(editor_model, editor_edit_format)
+        return initial
+
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
+        """Initialize a model instance.
+        
+        Args:
+            model: Name of the model
+            weak_model: Optional weak model name or False to disable
+            editor_model: Optional editor model name or False to disable
+            editor_edit_format: Optional editor edit format
+        """
         self.name = model
         self.max_chat_history_tokens = 1024
         self.weak_model = None
@@ -124,10 +157,6 @@ class Model(ModelSettings):
         self.max_chat_history_tokens = max_chat_history_tokens(max_input_tokens)
 
         self.configure_model_settings(model)
-
-        # If model_class is specified and it's not this class, create an instance
-        if hasattr(self, 'model_class') and self.model_class and not isinstance(self, self.model_class):
-            return self.model_class(model, weak_model, editor_model, editor_edit_format)
 
         if weak_model is False:
             self.weak_model_name = None
