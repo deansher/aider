@@ -473,7 +473,7 @@ class _ModelConfigImpl(ModelConfig):
         return res
 
 
-class OpenAiReasoningConfig(_ModelConfigImpl):
+class _OpenAiReasoningConfigImpl(_ModelConfigImpl):
     """A ModelConfig implementation specifically for OpenAI reasoning models like o3-mini and o1.
     
     This class extends _ModelConfigImpl to provide specialized behavior for OpenAI's
@@ -983,7 +983,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningConfig,
+        model_class=_OpenAiReasoningConfigImpl,
     ),
     ModelSettings(
         "azure/o1",
