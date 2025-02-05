@@ -270,9 +270,10 @@ def send_completion(
     if model.provider_headers:
         kwargs["extra_headers"] = model.provider_headers
 
-    # Add caller's extra params
+    # Add caller's extra params, filtering out temperature which we handle separately
     if extra_params is not None:
-        kwargs.update(extra_params)
+        filtered_params = {k: v for k, v in extra_params.items() if k != "temperature"}
+        kwargs.update(filtered_params)
 
     # Add temperature only if model supports it
     if temperature is not None and model.use_temperature:
