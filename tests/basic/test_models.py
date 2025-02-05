@@ -4,7 +4,6 @@ from unittest.mock import ANY, MagicMock, patch
 from aider.models import (
     ModelConfig,
     _ModelConfigImpl,
-    OpenAiReasoningConfig,
     get_model_config,
     get_model_info,
     sanity_check_model,
