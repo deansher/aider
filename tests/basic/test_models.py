@@ -10,30 +10,30 @@ class TestModels(unittest.TestCase):
         self.assertEqual(info, {})
 
     def test_max_context_tokens(self):
-        model = ModelConfig("gpt-3.5-turbo")
+        model = _ModelConfigImpl("gpt-3.5-turbo")
         self.assertEqual(model.info["max_input_tokens"], 16385)
 
-        model = ModelConfig("gpt-3.5-turbo-16k")
+        model = _ModelConfigImpl("gpt-3.5-turbo-16k")
         self.assertEqual(model.info["max_input_tokens"], 16385)
 
-        model = ModelConfig("gpt-3.5-turbo-1106")
+        model = _ModelConfigImpl("gpt-3.5-turbo-1106")
         self.assertEqual(model.info["max_input_tokens"], 16385)
 
-        model = ModelConfig("gpt-4")
+        model = _ModelConfigImpl("gpt-4")
         self.assertEqual(model.info["max_input_tokens"], 8 * 1024)
 
-        model = ModelConfig("gpt-4-32k")
+        model = _ModelConfigImpl("gpt-4-32k")
         self.assertEqual(model.info["max_input_tokens"], 32 * 1024)
 
-        model = ModelConfig("gpt-4-0613")
+        model = _ModelConfigImpl("gpt-4-0613")
         self.assertEqual(model.info["max_input_tokens"], 8 * 1024)
 
         # o3-mini and o1 share the same 200k token context window
-        model = ModelConfig("o3-mini")
+        model = _ModelConfigImpl("o3-mini")
         self.assertEqual(model.info["max_input_tokens"], 200000)
 
         # Test o3-mini model settings
-        model = ModelConfig("o3-mini")
+        model = _ModelConfigImpl("o3-mini")
         self.assertTrue(model.is_reasoning_model)
         self.assertEqual(model.edit_format, "whole")
         self.assertEqual(model.weak_model_name, "gpt-4o")
@@ -42,7 +42,7 @@ class TestModels(unittest.TestCase):
 
     def test_map_reasoning_level(self):
         # Test base ModelConfig class returns empty dict
-        model = ModelConfig("gpt-4")
+        model = _ModelConfigImpl("gpt-4")
         self.assertEqual(model.map_reasoning_level(0), {})
         self.assertEqual(model.map_reasoning_level(-1), {})
         self.assertEqual(model.map_reasoning_level(1), {})
@@ -107,8 +107,8 @@ class TestModels(unittest.TestCase):
 
     def test_sanity_check_models_bogus_editor(self):
         mock_io = MagicMock()
-        main_model = ModelConfig("gpt-4")
-        main_model.editor_model = ModelConfig("bogus-model")
+        main_model = _ModelConfigImpl("gpt-4")
+        main_model.editor_model = _ModelConfigImpl("bogus-model")
 
         result = sanity_check_models(mock_io, main_model)
 
@@ -123,8 +123,8 @@ class TestModels(unittest.TestCase):
         )  # Check that one of the warnings mentions the bogus model
 
         # Test o3-mini with bogus editor
-        main_model = ModelConfig("o3-mini")
-        main_model.editor_model = ModelConfig("bogus-model")
+        main_model = _ModelConfigImpl("o3-mini")
+        main_model.editor_model = _ModelConfigImpl("bogus-model")
 
         result = sanity_check_models(mock_io, main_model)
 
