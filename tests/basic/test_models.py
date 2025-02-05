@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import ANY, MagicMock, patch
 
-from aider.models import Model, OpenAiReasoningModel, get_model_info, sanity_check_model, sanity_check_models
+from aider.models import ModelConfig, OpenAiReasoningConfig, get_model_info, sanity_check_model, sanity_check_models
 
 
 class TestModels(unittest.TestCase):
@@ -10,30 +10,30 @@ class TestModels(unittest.TestCase):
         self.assertEqual(info, {})
 
     def test_max_context_tokens(self):
-        model = Model("gpt-3.5-turbo")
+        model = ModelConfig("gpt-3.5-turbo")
         self.assertEqual(model.info["max_input_tokens"], 16385)
 
-        model = Model("gpt-3.5-turbo-16k")
+        model = ModelConfig("gpt-3.5-turbo-16k")
         self.assertEqual(model.info["max_input_tokens"], 16385)
 
-        model = Model("gpt-3.5-turbo-1106")
+        model = ModelConfig("gpt-3.5-turbo-1106")
         self.assertEqual(model.info["max_input_tokens"], 16385)
 
-        model = Model("gpt-4")
+        model = ModelConfig("gpt-4")
         self.assertEqual(model.info["max_input_tokens"], 8 * 1024)
 
-        model = Model("gpt-4-32k")
+        model = ModelConfig("gpt-4-32k")
         self.assertEqual(model.info["max_input_tokens"], 32 * 1024)
 
-        model = Model("gpt-4-0613")
+        model = ModelConfig("gpt-4-0613")
         self.assertEqual(model.info["max_input_tokens"], 8 * 1024)
 
         # o3-mini and o1 share the same 200k token context window
-        model = Model("o3-mini")
+        model = ModelConfig("o3-mini")
         self.assertEqual(model.info["max_input_tokens"], 200000)
 
         # Test o3-mini model settings
-        model = Model("o3-mini")
+        model = ModelConfig("o3-mini")
         self.assertTrue(model.is_reasoning_model)
         self.assertEqual(model.edit_format, "whole")
         self.assertEqual(model.weak_model_name, "gpt-4o")
@@ -42,7 +42,7 @@ class TestModels(unittest.TestCase):
 
     def test_map_reasoning_level(self):
         # Test base Model class returns empty dict
-        model = Model("gpt-4")
+        model = ModelConfig("gpt-4")
         self.assertEqual(model.map_reasoning_level(0), {})
         self.assertEqual(model.map_reasoning_level(-1), {})
         self.assertEqual(model.map_reasoning_level(1), {})
@@ -57,18 +57,18 @@ class TestModels(unittest.TestCase):
 
     def test_model_creation(self):
         # Test base model creation
-        model = Model.create("gpt-4")
-        self.assertIsInstance(model, Model)
+        model = ModelConfig.create("gpt-4")
+        self.assertIsInstance(model, ModelConfig)
         self.assertEqual(model.name, "gpt-4")
         
         # Test OpenAiReasoningModel creation
-        model = Model.create("o3-mini")
-        self.assertIsInstance(model, OpenAiReasoningModel)
+        model = ModelConfig.create("o3-mini")
+        self.assertIsInstance(model, OpenAiReasoningConfig)
         self.assertEqual(model.name, "o3-mini")
         
         # Test model with weak model
-        model = Model.create("gpt-4", weak_model="gpt-3.5-turbo")
-        self.assertIsInstance(model, Model)
+        model = ModelConfig.create("gpt-4", weak_model="gpt-3.5-turbo")
+        self.assertIsInstance(model, ModelConfig)
         self.assertEqual(model.weak_model.name, "gpt-3.5-turbo")
 
     @patch("os.environ")

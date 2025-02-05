@@ -8,7 +8,7 @@ from llm_multiple_choice import DisplayFormat, InvalidChoicesResponseError
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
-from aider.models import Model
+from aider.models import ModelConfig
 
 logger = logging.getLogger(__name__)
 
@@ -150,7 +150,7 @@ def lazy_litellm_retry_decorator(func):
 
 
 def send_completion(
-    model_config: Model,
+    model_config: ModelConfig,
     messages,
     functions,
     stream,
@@ -211,7 +211,7 @@ def send_completion(
         TypeError: If model_config is not a Model instance
     """
     logger = logging.getLogger(__name__)
-    if not isinstance(model_config, Model):
+    if not isinstance(model_config, ModelConfig):
         error_msg = f"Expected Model instance, got {type(model_config)}"
         logger.error(error_msg)
         raise TypeError(error_msg)

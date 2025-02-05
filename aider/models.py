@@ -98,19 +98,19 @@ class ModelSettings:
     editor_model_name: Optional[str] = None
     editor_edit_format: Optional[str] = None
     is_reasoning_model: bool = False
-    model_class: Optional[type] = None
+    model_class: Optional[type] = None  # Type of ModelConfig to instantiate
 
 
-class Model(ModelSettings):
-    """Base class for all language models.
+class ModelConfig(ModelSettings):
+    """Base class for all language model configurations.
     
-    This class provides the core model functionality and can be subclassed
+    This class provides the core model configuration functionality and can be subclassed
     to add model-specific behavior. The model_class field in ModelSettings
     can be used to specify a subclass to use for a particular model configuration.
     """
     @classmethod
     def create(cls, model, weak_model=None, editor_model=None, editor_edit_format=None):
-        """Factory method to create the appropriate model instance.
+        """Factory method to create the appropriate model configuration instance.
         
         Args:
             model: Name of the model to create
@@ -119,22 +119,22 @@ class Model(ModelSettings):
             editor_edit_format: Optional editor edit format
             
         Returns:
-            Model: An instance of Model or appropriate subclass
+            ModelConfig: An instance of ModelConfig or appropriate subclass
         """
-        # Create initial model to get settings
+        # Create initial model config to get settings
         initial = cls(model, weak_model=False, editor_model=False)
         
         # If model_class specified, create that type instead
         if hasattr(initial, 'model_class') and initial.model_class and not isinstance(initial, initial.model_class):
             return initial.model_class(model, weak_model, editor_model, editor_edit_format)
             
-        # Otherwise complete initialization of base model
+        # Otherwise complete initialization of base config
         initial.get_weak_model(weak_model)
         initial.get_editor_model(editor_model, editor_edit_format)
         return initial
 
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
-        """Initialize a model instance.
+        """Initialize a model configuration instance.
         
         Args:
             model: Name of the model
@@ -389,8 +389,8 @@ class Model(ModelSettings):
         return res
 
 
-class OpenAiReasoningModel(Model):
-    """A Model subclass specifically for OpenAI reasoning models like o3-mini and o1."""
+class OpenAiReasoningConfig(ModelConfig):
+    """A ModelConfig subclass specifically for OpenAI reasoning models like o3-mini and o1."""
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
         # Call parent class init first to set up base configuration
         super().__init__(model, weak_model, editor_model, editor_edit_format)

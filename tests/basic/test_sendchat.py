@@ -7,7 +7,7 @@ from llm_multiple_choice import ChoiceManager
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
-from aider.models import Model
+from aider.models import ModelConfig
 from aider.sendchat import (
     analyze_assistant_response,
     send_completion,
@@ -27,7 +27,7 @@ class PrintCalled(Exception):
 
 class TestSendChat(unittest.TestCase):
     def setUp(self):
-        self.test_model = Model("gpt-4")
+        self.test_model = ModelConfig("gpt-4")
 
     @patch("litellm.completion")
     @patch("builtins.print")
@@ -266,7 +266,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
     @patch("litellm.completion")
     def test_send_completion_no_temperature(self, mock_completion):
         # Create a model that doesn't support temperature
-        model = Model.create("o3-mini")
+        model = ModelConfig.create("o3-mini")
         self.assertFalse(model.use_temperature)
 
         # Set up mock response
@@ -307,7 +307,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Test with a non-reasoning model
         mock_completion.reset_mock()
-        model = Model("gpt-4")
+        model = ModelConfig("gpt-4")
         self.assertFalse(model.is_reasoning_model)
 
         # Call send_completion with reasoning_level
