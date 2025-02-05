@@ -997,7 +997,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningConfig,
+        model_class=_OpenAiReasoningConfigImpl,
     ),
     ModelSettings(
         "o3-mini",
