@@ -274,9 +274,21 @@ def send_completion(
     logger = logging.getLogger(__name__)
     logger.debug("send_completion: model=%s use_temperature=%s", model.name, model.use_temperature)
 
-    # Start with all input parameters
+    # Create cache key with model name
+    cache_kwargs = dict(
+        model=model.name,  # Use name for cache key
+        messages=messages,
+        stream=stream,
+        temperature=temperature,
+        extra_params=extra_params,
+        functions=functions,
+        purpose=purpose
+    )
+    key = json.dumps(cache_kwargs, sort_keys=True).encode()
+
+    # Create kwargs with Model instance for _send_completion_to_litellm
     kwargs = dict(
-        model=model,
+        model=model,  # Use Model instance
         messages=messages,
         stream=stream,
         temperature=temperature,
