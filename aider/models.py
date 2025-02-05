@@ -811,6 +811,65 @@ class Model(ModelSettings):
 
     def configure_model_settings(self, model):
         for ms in MODEL_SETTINGS:
+
+
+class OpenAiReasoningModel(Model):
+    """A Model subclass specifically for OpenAI reasoning models like o3-mini and o1."""
+    def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
+        self.name = model
+        self.max_chat_history_tokens = 1024
+        self.weak_model = None
+        self.editor_model = None
+
+        self.info = self.get_model_info(model)
+
+        # Are all needed keys/params available?
+        res = self.validate_environment()
+        self.missing_keys = res.get("missing_keys")
+        self.keys_in_environment = res.get("keys_in_environment")
+
+        max_input_tokens = self.info.get("max_input_tokens") or 0
+        self.max_chat_history_tokens = max_chat_history_tokens(max_input_tokens)
+
+        self.configure_model_settings(model)
+        if weak_model is False:
+            self.weak_model_name = None
+        else:
+            self.get_weak_model(weak_model)
+
+        if editor_model is False:
+            self.editor_model_name = None
+        else:
+            self.get_editor_model(editor_model, editor_edit_format)
+
+    def map_reasoning_level(self, level: int) -> dict:
+        """Map an integer reasoning level to OpenAI's reasoning_effort parameter.
+        
+        Args:
+            level: Integer reasoning level where:
+                   - 0 means default level (maps to "high")
+                   - Negative values reduce level (-1 -> "medium", <= -2 -> "low")
+                   - Positive values increase level (all map to "high")
+                   Note: Float values will be truncated to integers.
+        
+        Returns:
+            A dict mapping "reasoning_effort" to "low", "medium", or "high"
+        """
+        level_int = int(level)
+        if level_int <= -2:
+            effort = "low"
+        elif level_int == -1:
+            effort = "medium" 
+        else:  # level_int >= 0
+            effort = "high"
+        return {"reasoning_effort": effort}
+
+
+    def get_model_info(self, model):
+        return get_model_info(model)
+
+    def configure_model_settings(self, model):
+        for ms in MODEL_SETTINGS:
             # direct match, or match "provider/<model>"
             if model == ms.name:
                 for field in fields(ModelSettings):
