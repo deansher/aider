@@ -257,7 +257,7 @@ Then, provide a clear and direct response.
         """
         instructions = """# Step 1: Analysis & Proposal
 
-You are currently performing Step 1 of the three-step process.
+You are currently performing Step 1 of the architect's three-step process.
 
 """
         instructions += _step1_ways_to_respond
@@ -273,9 +273,11 @@ You are currently performing Step 1 of the three-step process.
         """Get the prompt for approved non-plan changes."""
         return """# Implementation
 
-Your task is to implement the approved changes using SEARCH/REPLACE blocks:
-- Follow the approved proposal exactly
+Your human partner has approved the project improvement that you just proposed.
+Your current task is to implement that proposal by using SEARCH/REPLACE blocks
+to create or revise project files.
 - Use SEARCH/REPLACE blocks for all changes
+- Follow the approved proposal exactly
 - Make no additional modifications
 - Add no commentary or analysis
 
@@ -375,11 +377,14 @@ versus letting them wait.
     files_no_full_files_with_repo_map: str = ""
     files_no_full_files_with_repo_map_reply: str = ""
     repo_content_prefix: str = ""
-    system_reminder: str = "You are carrying out Step 1 of the architect's three-step process."
+    system_reminder: str = (
+        "You are currently performing Step 1 of the architect's three-step process. "
+        "Follow the instructions provided in [Step 1: Analysis & Proposal](#step-1-analysis--proposal)."
+    )
     editor_response_placeholder: str = (
         THIS_MESSAGE_IS_FROM_APP
-        + """An editor AI persona has followed your instructions to make changes to the project
-        files. They probably made changes, but they may have responded in some other way.
+        + """Your subordinate AI software engineer has followed your instructions to make changes to 
+        the project files. They probably made changes, but they may have responded in some other way.
         Your partner saw the editor's output, including any file changes, in the Brade application
         as it was generated. Any changes have been saved to the project files and committed
         into our git repo. You can see the updated project information in the <context> provided 
