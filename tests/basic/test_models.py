@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import ANY, MagicMock, patch
 
 from aider.models import (
+    _OpenAiReasoningConfigImpl,
     ModelConfig,
     _ModelConfigImpl,
     get_model_config,
@@ -54,7 +55,7 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.map_reasoning_level(-1), {})
         self.assertEqual(model.map_reasoning_level(1), {})
 
-        # Test OpenAiReasoningConfig returns correct mappings
+        # Test _OpenAiReasoningConfigImpl returns correct mappings
         model = get_model_config("o3-mini")
         self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "high"})
         self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "medium"})
@@ -68,9 +69,9 @@ class TestModels(unittest.TestCase):
         self.assertIsInstance(model, ModelConfig)
         self.assertEqual(model.name, "gpt-4")
         
-        # Test OpenAiReasoningConfig creation
+        # Test _OpenAiReasoningConfigImpl creation
         model = get_model_config("o3-mini")
-        self.assertIsInstance(model, OpenAiReasoningConfig)
+        self.assertIsInstance(model, _OpenAiReasoningConfigImpl)
         self.assertEqual(model.name, "o3-mini")
         
         # Test model with weak model
