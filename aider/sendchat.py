@@ -167,7 +167,7 @@ def send_completion(
     is enabled or not.
 
     Args:
-        model_config (Model): The Model instance to use.
+        model_config (ModelConfig): The model configuration instance to use.
         messages (list): A list of message dictionaries to send to the model.
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
@@ -208,11 +208,11 @@ def send_completion(
         litellm.exceptions.APIConnectionError: For network connectivity issues
         litellm.exceptions.ServiceUnavailableError: If the service is unavailable
         litellm.exceptions.InternalServerError: For server-side errors
-        TypeError: If model_config is not a Model instance
+        TypeError: If model_config is not a ModelConfig instance
     """
     logger = logging.getLogger(__name__)
     if not isinstance(model_config, ModelConfig):
-        error_msg = f"Expected Model instance, got {type(model_config)}"
+        error_msg = f"Expected ModelConfig instance, got {type(model_config)}"
         logger.error(error_msg)
         raise TypeError(error_msg)
 
@@ -314,7 +314,7 @@ def _send_completion_to_litellm(
     It supports both streaming and non-streaming responses.
 
     Args:
-        model_config (Model): The Model instance to use.
+        model_config (ModelConfig): The model configuration instance to use.
         messages (list): A list of message dictionaries to send to the model.
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
@@ -352,7 +352,7 @@ def _send_completion_to_litellm(
         litellm.exceptions.APIConnectionError: For network connectivity issues
         litellm.exceptions.ServiceUnavailableError: If the service is unavailable
         litellm.exceptions.InternalServerError: For server-side errors
-        TypeError: If model_config is not a Model instance
+        TypeError: If model_config is not a ModelConfig instance
 
     Notes:
         - This function uses Langfuse for tracing and monitoring.
