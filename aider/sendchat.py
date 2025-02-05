@@ -383,6 +383,8 @@ def _send_completion_to_litellm(
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Defaults to 0.
         extra_params (dict, optional): Additional parameters to pass to the model. Defaults to None.
+                                     This includes any provider-specific parameters like reasoning_effort
+                                     that were mapped by the model class.
         purpose (str, optional): The purpose of this completion, used as the name in Langfuse.
                                Defaults to "llm-completion".
 
@@ -475,6 +477,8 @@ def _send_completion_to_litellm(
         kwargs.update(extra_params)
 
     try:
+        if extra_params:
+            kwargs.update(extra_params)
         res = litellm.completion(**kwargs)
     except (litellm.exceptions.RateLimitError, litellm.exceptions.APIError) as e:
         # Log the error before re-raising for retry
