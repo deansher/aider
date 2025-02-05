@@ -86,7 +86,9 @@ class ModelSettings:
     lazy: bool = False
     reminder: str = "user"
     examples_as_sys_msg: bool = False
-    extra_params: Optional[dict] = None
+    extra_params: Optional[dict] = None  # OpenAI-compatible parameters
+    provider_params: Optional[dict] = None  # Provider-specific parameters
+    provider_headers: Optional[dict] = None  # Provider-specific headers
     cache_control: bool = False
     caches_by_default: bool = False
     use_system_prompt: bool = True
@@ -282,10 +284,10 @@ MODEL_SETTINGS = [
         examples_as_sys_msg=True,
         accepts_images=True,
         extra_params={
-            "extra_headers": {
-                "anthropic-beta": ANTHROPIC_BETA_HEADER,
-            },
             "max_tokens": 8192,
+        },
+        provider_headers={
+            "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
         reminder="user",
