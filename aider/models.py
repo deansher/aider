@@ -351,10 +351,8 @@ MODEL_SETTINGS = [
         "whole",
         weak_model_name="anthropic/claude-3-haiku-20240307",
         examples_as_sys_msg=True,
-        extra_params={
-            "extra_headers": {
-                "anthropic-beta": ANTHROPIC_BETA_HEADER,
-            },
+        provider_headers={
+            "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
     ),
