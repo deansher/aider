@@ -287,9 +287,14 @@ def send_completion(
     if not stream and CACHE is not None and key in CACHE:
         return hash_object, CACHE[key]
 
+    # Create new kwargs for _send_completion_to_litellm, replacing 'model' with 'model_config'
+    litellm_kwargs = dict(kwargs)
+    litellm_kwargs['model_config'] = model_config
+    del litellm_kwargs['model']
+
     # Call the actual LLM function
-    logger.debug("send_completion: final kwargs=%s", kwargs)
-    res = _send_completion_to_litellm(**kwargs)
+    logger.debug("send_completion: final kwargs=%s", litellm_kwargs)
+    res = _send_completion_to_litellm(**litellm_kwargs)
 
     if not stream and CACHE is not None:
         CACHE[key] = res
@@ -297,6 +302,7 @@ def send_completion(
     return hash_object, res
 
 
+@observe(as_type="generation", capture_output=False)
 @observe(as_type="generation", capture_output=False)
 def _send_completion_to_litellm(
     model_config: ModelConfig,
