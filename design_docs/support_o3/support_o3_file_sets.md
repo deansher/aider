@@ -48,3 +48,25 @@ tests/basic/test_sendchat.py
 design_docs/support_o3/plan_support_o3.md
 ```
 
+# Reasoning Effort
+
+Editable:
+```
+CONTRIBUTING.md
+aider/coders/base_coder.py
+aider/commands.py
+aider/main.py
+aider/models.py
+aider/sendchat.py
+aider/types.py
+design_docs/support_o3/plan_support_o3.md
+pyproject.toml
+tests/basic/test_sendchat.py
+```
+
+Read-Only:
+```
+design_docs/external_docs/openai/openai_reasoning_models/openai_model_spec.md
+design_docs/external_docs/openai/openai_reasoning_models/openai_reasoning_models.md
+```
+
