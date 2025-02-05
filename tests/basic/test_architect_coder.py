@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from aider.coders.architect_coder import ArchitectCoder, ArchitectExchange, ArchitectPhase
 from aider.coders.architect_prompts import ArchitectPrompts
 from aider.io import InputOutput
-from aider.models import Model
+from aider.models import ModelConfig
 
 
 class TestArchitectExchange(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestArchitectExchange(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures before each test method."""
-        self.model = Model("gpt-3.5-turbo")
+        self.model = ModelConfig("gpt-3.5-turbo")
         self.architect_prompts = ArchitectPrompts(
             main_model=self.model,
             editor_model=self.model.editor_model,
@@ -157,7 +157,7 @@ class TestArchitectCoder(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures before each test method."""
-        self.model = Model("gpt-3.5-turbo")
+        self.model = ModelConfig("gpt-3.5-turbo")
         self.io = InputOutput()
         self.coder = ArchitectCoder.create(self.model, "architect", io=self.io)
 

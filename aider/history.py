@@ -16,18 +16,18 @@ class ChatSummary:
     messages when possible.
 
     Attributes:
-        models: List of Model instances to use for summarization, tried in order
+        models: List of ModelConfig instances to use for summarization, tried in order
         max_tokens: Maximum number of tokens allowed in resuling history
         token_count: Function from first model used to count tokens in messages
     """
 
     def __init__(
-        self, models: Optional[models.Model | list[models.Model]] = None, max_tokens: int = 1024
+        self, models: Optional[models.ModelConfig | list[models.ModelConfig]] = None, max_tokens: int = 1024
     ) -> None:
         """Initialize a ChatSummary instance.
 
         Args:
-            models: One or more Model instances to use for summarization.
+            models: One or more ModelConfig instances to use for summarization.
                    Models are tried in order if earlier ones fail.
             max_tokens: Maximum number of tokens allowed in summarized history.
                        Default is 1024.

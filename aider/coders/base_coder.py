@@ -155,7 +155,7 @@ class Coder:
             if from_coder:
                 main_model = from_coder.main_model
             else:
-                main_model = models.Model(models.DEFAULT_MODEL_NAME)
+                main_model = models.ModelConfig(models.DEFAULT_MODEL_NAME)
 
         if edit_format == "code":
             edit_format = None
@@ -236,14 +236,14 @@ class Coder:
         lines = []
         lines.append(f"Brade v{__version__}")
 
-        # Model
+        # ModelConfig
         main_model = self.main_model
         weak_model = main_model.weak_model
 
         if weak_model is not main_model:
             prefix = "Main model"
         else:
-            prefix = "Model"
+            prefix = "ModelConfig"
 
         output = f"{prefix}: {main_model.name} with {self.edit_format} edit format"
         if self.add_cache_headers or main_model.caches_by_default:
@@ -1378,7 +1378,7 @@ class Coder:
             tot_err = " -- possibly exhausted context window!"
 
         res = ["", ""]
-        res.append(f"Model {self.main_model.name} has hit a token limit!")
+        res.append(f"ModelConfig {self.main_model.name} has hit a token limit!")
         res.append("Token counts below are approximate.")
         res.append("")
         res.append(f"Input tokens: ~{input_tokens:,} of {max_input_tokens:,}{inp_err}")
@@ -1504,9 +1504,9 @@ class Coder:
 
         completion = None
         try:
-            if not isinstance(model, models.Model):
-                logger.error(f"Invalid model type: {type(model)}, expected Model")
-                raise TypeError(f"Expected Model instance, got {type(model)}")
+            if not isinstance(model, models.ModelConfig):
+                logger.error(f"Invalid model type: {type(model)}, expected ModelConfig")
+                raise TypeError(f"Expected ModelConfig instance, got {type(model)}")
 
             extra = model.extra_params.copy() if model.extra_params else {}
             if model.info.get("is_reasoning_model"):

@@ -41,14 +41,14 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.editor_edit_format, "editor-diff")
 
     def test_map_reasoning_level(self):
-        # Test base Model class returns empty dict
+        # Test base ModelConfig class returns empty dict
         model = ModelConfig("gpt-4")
         self.assertEqual(model.map_reasoning_level(0), {})
         self.assertEqual(model.map_reasoning_level(-1), {})
         self.assertEqual(model.map_reasoning_level(1), {})
 
         # Test OpenAiReasoningModel returns correct mappings
-        model = Model.create("o3-mini")
+        model = ModelConfig.create("o3-mini")
         self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "high"})
         self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "medium"})
         self.assertEqual(model.map_reasoning_level(-2), {"reasoning_effort": "low"})
@@ -107,8 +107,8 @@ class TestModels(unittest.TestCase):
 
     def test_sanity_check_models_bogus_editor(self):
         mock_io = MagicMock()
-        main_model = Model("gpt-4")
-        main_model.editor_model = Model("bogus-model")
+        main_model = ModelConfig("gpt-4")
+        main_model.editor_model = ModelConfig("bogus-model")
 
         result = sanity_check_models(mock_io, main_model)
 
@@ -123,8 +123,8 @@ class TestModels(unittest.TestCase):
         )  # Check that one of the warnings mentions the bogus model
 
         # Test o3-mini with bogus editor
-        main_model = Model("o3-mini")
-        main_model.editor_model = Model("bogus-model")
+        main_model = ModelConfig("o3-mini")
+        main_model.editor_model = ModelConfig("bogus-model")
 
         result = sanity_check_models(mock_io, main_model)
 

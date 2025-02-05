@@ -360,8 +360,8 @@ def _send_completion_to_litellm(
         - Usage information is captured in Langfuse for both streaming and non-streaming responses.
     """
     logger = logging.getLogger(__name__)
-    if not isinstance(model_config, Model):
-        error_msg = f"Expected Model instance, got {type(model_config)}"
+    if not isinstance(model_config, ModelConfig):
+        error_msg = f"Expected ModelConfig instance, got {type(model_config)}"
         logger.error(error_msg)
         raise TypeError(error_msg)
 
@@ -558,7 +558,7 @@ def analyze_assistant_response(
 
 
 @lazy_litellm_retry_decorator
-def simple_send_with_retries(model_config: Model, messages, extra_params=None, purpose="send with retries"):
+def simple_send_with_retries(model_config: ModelConfig, messages, extra_params=None, purpose="send with retries"):
     """
     Send a completion request with retries on various error conditions.
 
@@ -566,7 +566,7 @@ def simple_send_with_retries(model_config: Model, messages, extra_params=None, p
     It will retry on connection errors, rate limit errors, and invalid responses.
 
     Args:
-        model (Model): The Model instance to use
+        model (ModelConfig): The ModelConfig instance to use
         messages (list): A list of message dictionaries to send to the model
         extra_params (dict, optional): Additional parameters to pass to the model
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing

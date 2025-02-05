@@ -260,7 +260,7 @@ class ArchitectCoder(Coder):
         2. Initializes gpt_prompts with both main_model and editor_model
 
         Args:
-            main_model: The Model instance for the architect role
+            main_model: The ModelConfig instance for the architect role
             io: The InputOutput instance for user interaction
             **kwargs: Additional arguments passed through to Coder.__init__()
         """

@@ -9,12 +9,12 @@ from aider.coders import Coder
 from aider.coders import editblock_coder as eb
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
-from aider.models import Model
+from aider.models import ModelConfig
 
 
 class TestUtils(unittest.TestCase):
     def setUp(self):
-        self.GPT35 = Model("gpt-3.5-turbo")
+        self.GPT35 = ModelConfig("gpt-3.5-turbo")
 
     def test_strip_filename(self):
         # Test basic cases

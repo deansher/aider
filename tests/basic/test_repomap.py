@@ -9,14 +9,14 @@ import git
 
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
-from aider.models import Model
+from aider.models import ModelConfig
 from aider.repomap import RepoMap
 from aider.utils import GitTemporaryDirectory, IgnorantTemporaryDirectory
 
 
 class TestRepoMap(unittest.TestCase):
     def setUp(self):
-        self.GPT35 = Model("gpt-3.5-turbo")
+        self.GPT35 = ModelConfig("gpt-3.5-turbo")
 
     def test_get_repo_map(self):
         # Create a temporary directory with sample files for testing
@@ -276,7 +276,7 @@ print(my_function(3, 4))
 
 class TestRepoMapTypescript(unittest.TestCase):
     def setUp(self):
-        self.GPT35 = Model("gpt-3.5-turbo")
+        self.GPT35 = ModelConfig("gpt-3.5-turbo")
 
     def test_get_repo_map_typescript(self):
         # Create a temporary directory with a sample TypeScript file
@@ -369,7 +369,7 @@ export default Greeting;
 
 class TestRepoMapAllLanguages(unittest.TestCase):
     def setUp(self):
-        self.GPT35 = Model("gpt-3.5-turbo")
+        self.GPT35 = ModelConfig("gpt-3.5-turbo")
 
     def test_get_repo_map_all_languages(self):
         language_files = {

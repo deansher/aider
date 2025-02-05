@@ -65,7 +65,7 @@ class Commands:
         "Switch to a new LLM"
 
         model_name = args.strip()
-        model = models.Model(model_name)
+        model = models.ModelConfig(model_name)
         models.sanity_check_models(self.io, model)
         raise SwitchCoder(main_model=model)
 

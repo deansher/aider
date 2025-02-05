@@ -9,14 +9,14 @@ import git
 from aider.coders import Coder
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
-from aider.models import Model
+from aider.models import ModelConfig
 from aider.repo import GitRepo
 from aider.utils import GitTemporaryDirectory
 
 
 class TestCoder(unittest.TestCase):
     def setUp(self):
-        self.GPT35 = Model("gpt-3.5-turbo")
+        self.GPT35 = ModelConfig("gpt-3.5-turbo")
 
     def test_allowed_to_edit(self):
         with GitTemporaryDirectory():

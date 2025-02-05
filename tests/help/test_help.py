@@ -6,7 +6,7 @@ from aider.coders import Coder
 from aider.commands import Commands
 from aider.help import Help, fname_to_url
 from aider.io import InputOutput
-from aider.models import Model
+from aider.models import ModelConfig
 
 
 class TestHelp(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestHelp(unittest.TestCase):
     def setUpClass(cls):
         io = InputOutput(pretty=False, yes=True)
 
-        GPT35 = Model("gpt-3.5-turbo")
+        GPT35 = ModelConfig("gpt-3.5-turbo")
 
         coder = Coder.create(GPT35, None, io)
         commands = Commands(io, coder)

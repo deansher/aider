@@ -14,7 +14,7 @@ from aider.coders import Coder
 from aider.commands import Commands, SwitchCoder
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
-from aider.models import Model
+from aider.models import ModelConfig
 from aider.repo import GitRepo
 from aider.utils import ChdirTemporaryDirectory, GitTemporaryDirectory, make_repo
 
@@ -25,7 +25,7 @@ class TestCommands(TestCase):
         self.tempdir = tempfile.mkdtemp()
         os.chdir(self.tempdir)
 
-        self.GPT35 = Model("gpt-3.5-turbo")
+        self.GPT35 = ModelConfig("gpt-3.5-turbo")
 
     def tearDown(self):
         os.chdir(self.original_cwd)
@@ -501,7 +501,7 @@ class TestCommands(TestCase):
             io = InputOutput(pretty=False, yes=False)
             from aider.coders import Coder
 
-            coder = Coder.create(Model("claude-3-5-sonnet-20240620"), None, io)
+            coder = Coder.create(ModelConfig("claude-3-5-sonnet-20240620"), None, io)
             print(coder.get_announcements())
             commands = Commands(io, coder)
 

@@ -44,7 +44,7 @@ class Garage:
 def main():
     # Create some cars
     car1 = Car("Toyota", "Corolla", 2020)
-    car2 = Car("Tesla", "Model 3", 2022)
+    car2 = Car("Tesla", "ModelConfig 3", 2022)
 
     # Demonstrate car methods
     car1.accelerate(30)

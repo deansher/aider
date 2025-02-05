@@ -77,7 +77,7 @@ ANTHROPIC_MODELS = [ln.strip() for ln in ANTHROPIC_MODELS.splitlines() if ln.str
 
 @dataclass
 class ModelSettings:
-    # Model class needs to have each of these as well
+    # ModelConfig class needs to have each of these as well
     name: str
     edit_format: str = "whole"
     weak_model_name: Optional[str] = None
@@ -143,7 +143,7 @@ class ModelConfig(ModelSettings):
             editor_edit_format: Optional editor edit format
         """
         logger = logging.getLogger(__name__)
-        logger.debug("Model.__init__: model=%s class=%s", model, self.__class__.__dict__)
+        logger.debug("ModelConfig.__init__: model=%s class=%s", model, self.__class__.__dict__)
 
         self.name = model
         self.max_chat_history_tokens = 1024
@@ -161,7 +161,7 @@ class ModelConfig(ModelSettings):
         self.max_chat_history_tokens = max_chat_history_tokens(max_input_tokens)
 
         self.configure_model_settings(model)
-        logger.debug("Model.__init__: model=%s use_temperature=%s", model, self.use_temperature)
+        logger.debug("ModelConfig.__init__: model=%s use_temperature=%s", model, self.use_temperature)
 
         if weak_model is False:
             self.weak_model_name = None
@@ -251,7 +251,7 @@ class ModelConfig(ModelSettings):
             self.weak_model = self
             return
 
-        self.weak_model = Model(
+        self.weak_model = ModelConfig(
             self.weak_model_name,
             weak_model=False,
         )
@@ -270,7 +270,7 @@ class ModelConfig(ModelSettings):
         if not self.editor_model_name or self.editor_model_name == self.name:
             self.editor_model = self
         else:
-            self.editor_model = Model(
+            self.editor_model = ModelConfig(
                 self.editor_model_name,
                 editor_model=False,
             )

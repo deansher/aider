@@ -645,7 +645,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     register_models(git_root, args.model_settings_file, io, verbose=args.verbose)
     register_litellm_models(git_root, args.model_metadata_file, io, verbose=args.verbose)
 
-    # Model selection must happen before loading any model-specific configuration
+    # ModelConfig selection must happen before loading any model-specific configuration
     # to ensure our selection isn't overridden.
 
     # Default model selection based on API key availability
@@ -670,7 +670,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             logger.debug("Using o3-mini as default model")
             args.model = "o3-mini"
 
-    main_model = models.Model.create(
+    main_model = models.ModelConfig.create(
         args.model,
         weak_model=args.weak_model,
         editor_model=args.editor_model,
@@ -678,7 +678,7 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
     )
 
     if args.verbose:
-        io.tool_output("Model info:")
+        io.tool_output("ModelConfig info:")
         io.tool_output(json.dumps(main_model.info, indent=4))
 
     lint_cmds = parse_lint_cmds(args.lint_cmd, io)

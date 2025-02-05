@@ -17,7 +17,7 @@ from aider.coders import Coder
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
 from aider.main import check_gitignore, main, setup_git
-from aider.models import Model
+from aider.models import ModelConfig
 from aider.utils import GitTemporaryDirectory, IgnorantTemporaryDirectory, make_repo
 
 
@@ -35,7 +35,7 @@ class TestMain(TestCase):
         os.environ["HOME"] = self.homedir_obj.name
         self.input_patcher = patch("builtins.input", return_value=None)
         self.mock_input = self.input_patcher.start()
-        self.test_model = Model("gpt-4")
+        self.test_model = ModelConfig("gpt-4")
 
     def tearDown(self):
         os.chdir(self.original_cwd)

@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from aider.coders import Coder
-from aider.models import Model
+from aider.models import ModelConfig
 from aider.utils import GitTemporaryDirectory
 
 
@@ -23,7 +23,7 @@ class TestScriptingAPI(unittest.TestCase):
             fname = Path("greeting.py")
             fname.touch()
             fnames = [str(fname)]
-            model = Model("gpt-4-turbo")
+            model = ModelConfig("gpt-4-turbo")
             coder = Coder.create(main_model=model, fnames=fnames)
 
             result1 = coder.run("make a script that prints hello world")

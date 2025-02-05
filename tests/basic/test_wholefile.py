@@ -9,7 +9,7 @@ from aider.coders import Coder
 from aider.coders.wholefile_coder import WholeFileCoder
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
-from aider.models import Model
+from aider.models import ModelConfig
 
 
 class TestWholeFileCoder(unittest.TestCase):
@@ -18,7 +18,7 @@ class TestWholeFileCoder(unittest.TestCase):
         self.tempdir = tempfile.mkdtemp()
         os.chdir(self.tempdir)
 
-        self.GPT35 = Model("gpt-3.5-turbo")
+        self.GPT35 = ModelConfig("gpt-3.5-turbo")
 
     def tearDown(self):
         os.chdir(self.original_cwd)

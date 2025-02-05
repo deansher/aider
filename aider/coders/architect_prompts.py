@@ -145,8 +145,8 @@ class ArchitectPrompts(CoderPrompts):
     with a human partner.
 
     Attributes:
-        main_model: The Model instance for the architect role
-        editor_model: The Model instance for the editor role
+        main_model: The ModelConfig instance for the architect role
+        editor_model: The ModelConfig instance for the editor role
     """
 
     # Messages used to show step transitions in chat history.
@@ -164,8 +164,8 @@ class ArchitectPrompts(CoderPrompts):
         """Initialize ArchitectPrompts with models for architect and editor roles.
 
         Args:
-            main_model: The Model instance for the architect role
-            editor_model: The Model instance for the editor role
+            main_model: The ModelConfig instance for the architect role
+            editor_model: The ModelConfig instance for the editor role
         """
         super().__init__()
         self.main_model = main_model

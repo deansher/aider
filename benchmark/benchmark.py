@@ -582,7 +582,7 @@ def run_test_real(
     # weak_model_name = model_name
     weak_model_name = None
 
-    main_model = models.Model(
+    main_model = models.ModelConfig(
         model_name,
         weak_model=weak_model_name,
         editor_model=editor_model,
