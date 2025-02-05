@@ -299,7 +299,7 @@ def send_completion(
 
 @observe(as_type="generation", capture_output=False)
 def _send_completion_to_litellm(
-    model_config: Model,
+    model_config: ModelConfig,
     messages,
     functions,
     stream,
