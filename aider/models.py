@@ -566,7 +566,7 @@ MODEL_SETTINGS = [
         reminder="sys",
         editor_edit_format="editor-diff",
     ),
-    ModelSettings(
+    OpenAiReasoningModel(
         "openai/o1",
         "diff",
         weak_model_name="openai/gpt-4o-mini",
@@ -579,7 +579,7 @@ MODEL_SETTINGS = [
         streaming=True,
         is_reasoning_model=True,
     ),
-    ModelSettings(
+    OpenAiReasoningModel(
         "azure/o1",
         "diff",
         weak_model_name="azure/gpt-4o-mini",
@@ -592,7 +592,7 @@ MODEL_SETTINGS = [
         streaming=False,
         is_reasoning_model=True,
     ),
-    ModelSettings(
+    OpenAiReasoningModel(
         "o3-mini",
         "whole",
         weak_model_name="gpt-4o",
@@ -605,7 +605,7 @@ MODEL_SETTINGS = [
         streaming=True,
         is_reasoning_model=True,
     ),
-    ModelSettings(
+    OpenAiReasoningModel(
         "openai/o3-mini",
         "whole",
         weak_model_name="openai/gpt-4o",
@@ -618,7 +618,7 @@ MODEL_SETTINGS = [
         streaming=True,
         is_reasoning_model=True,
     ),
-    ModelSettings(
+    OpenAiReasoningModel(
         "azure/o3-mini",
         "whole",
         weak_model_name="azure/gpt-4o",
@@ -631,7 +631,7 @@ MODEL_SETTINGS = [
         streaming=False,
         is_reasoning_model=True,
     ),
-    ModelSettings(
+    OpenAiReasoningModel(
         "o1",
         "architect",
         weak_model_name="gpt-4o",
@@ -745,6 +745,29 @@ def get_model_info(model):
         return dict()
 
 
+class OpenAiReasoningModel(ModelSettings):
+    """A Model subclass specifically for OpenAI reasoning models like o3-mini and o1."""
+    def map_reasoning_effort(self, effort: int) -> dict:
+        """Map an integer reasoning effort level to OpenAI's reasoning_effort parameter.
+        
+        Args:
+            effort: Integer reasoning effort level where:
+                   - 0 means default effort (maps to "high")
+                   - Negative values reduce effort (-1 -> "medium", <= -2 -> "low")
+                   - Positive values increase effort (all map to "high")
+        
+        Returns:
+            A dict mapping "reasoning_effort" to "low", "medium", or "high"
+        """
+        if effort <= -2:
+            level = "low"
+        elif effort == -1:
+            level = "medium" 
+        else:  # effort >= 0
+            level = "high"
+        return {"reasoning_effort": level}
+
+
 class Model(ModelSettings):
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
         self.name = model
@@ -772,6 +795,21 @@ class Model(ModelSettings):
             self.editor_model_name = None
         else:
             self.get_editor_model(editor_model, editor_edit_format)
+
+    def map_reasoning_effort(self, effort: int) -> dict:
+        """Map an integer reasoning effort level to model-specific parameters.
+        
+        Args:
+            effort: Integer reasoning effort level where:
+                   - 0 means default effort
+                   - Negative values reduce effort
+                   - Positive values increase effort
+        
+        Returns:
+            An empty dict by default. Subclasses may override to return
+            model-specific parameter mappings.
+        """
+        return {}
 
     def get_model_info(self, model):
         return get_model_info(model)
