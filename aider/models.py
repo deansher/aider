@@ -1,3 +1,23 @@
+"""Core model configuration functionality.
+
+The model configuration system has three main components:
+
+1. ModelSettings: Declarative defaults for model configurations
+   - Defined in MODEL_SETTINGS list
+   - Pure data with no behavior
+   - Provides default values for ModelConfig instances
+
+2. ModelConfig: Active configuration entity
+   - Can be customized via parameters
+   - Provides configuration-related behavior
+   - May be subclassed for model-specific configuration needs
+
+3. get_model_config(): Factory function that:
+   - Finds appropriate default settings
+   - Creates appropriate ModelConfig class
+   - Applies customization parameters
+"""
+
 import difflib
 import json
 import logging
