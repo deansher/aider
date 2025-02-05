@@ -229,6 +229,12 @@ def send_completion(
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to 0.
         extra_params (dict, optional): Additional parameters to pass to the model. Defaults to None.
+        purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
+            Defaults to "send-completion".
+        reasoning_level (int, optional): Controls reasoning behavior for reasoning models.
+            0 means default level, negative values reduce reasoning (e.g. -1 for medium, -2 for low),
+            positive values increase reasoning. All positive values map to maximum reasoning.
+            For non-reasoning models, this parameter has no effect. Defaults to 0.
 
     Returns:
         tuple: A tuple containing:
@@ -238,7 +244,7 @@ def send_completion(
                     - choices[0].message.content: The complete response text
                     - choices[0].tool_calls[0].function: Function call details if tools were used
                     - usage.prompt_tokens: Number of input tokens
-                    - usage.completion_tokens: Number of output tokens
+                    - usage.completion_tokens: Number of output tokens (includes internal reasoning tokens)
                     - usage.total_cost: Total cost in USD if available
                     - usage.prompt_cost: Input cost in USD if available
                     - usage.completion_cost: Output cost in USD if available
