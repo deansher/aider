@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from aider.coders import Coder
-from aider.models import ModelConfig
+from aider.models import _ModelConfigImpl
 from aider.utils import GitTemporaryDirectory
 
 

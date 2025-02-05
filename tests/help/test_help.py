@@ -6,7 +6,7 @@ from aider.coders import Coder
 from aider.commands import Commands
 from aider.help import Help, fname_to_url
 from aider.io import InputOutput
-from aider.models import ModelConfig
+from aider.models import _ModelConfigImpl
 
 
 class TestHelp(unittest.TestCase):

@@ -9,7 +9,7 @@ from aider.coders import Coder
 from aider.coders.wholefile_coder import WholeFileCoder
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
-from aider.models import ModelConfig
+from aider.models import _ModelConfigImpl
 
 
 class TestWholeFileCoder(unittest.TestCase):

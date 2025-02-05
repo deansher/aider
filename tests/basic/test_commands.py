@@ -14,7 +14,7 @@ from aider.coders import Coder
 from aider.commands import Commands, SwitchCoder
 from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
-from aider.models import ModelConfig
+from aider.models import _ModelConfigImpl
 from aider.repo import GitRepo
 from aider.utils import ChdirTemporaryDirectory, GitTemporaryDirectory, make_repo
 

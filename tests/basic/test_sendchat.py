@@ -7,7 +7,7 @@ from llm_multiple_choice import ChoiceManager
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
-from aider.models import ModelConfig
+from aider.models import _ModelConfigImpl
 from aider.sendchat import (
     analyze_assistant_response,
     send_completion,

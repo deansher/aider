@@ -9,15 +9,13 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 import git
-import pytest
 from prompt_toolkit.input import DummyInput
 from prompt_toolkit.output import DummyOutput
 
 from aider.coders import Coder
-from aider.dump import dump  # noqa: F401
 from aider.io import InputOutput
 from aider.main import check_gitignore, main, setup_git
-from aider.models import ModelConfig
+from aider.models import _ModelConfigImpl
 from aider.utils import GitTemporaryDirectory, IgnorantTemporaryDirectory, make_repo
 
 
