@@ -250,9 +250,6 @@ def send_completion(
     )
 
     # Add optional OpenAI params
-    if temperature is not None and model.use_temperature:
-        kwargs["temperature"] = temperature
-
     if functions is not None:
         function = functions[0]
         kwargs["tools"] = [dict(type="function", function=function)]
@@ -277,9 +274,14 @@ def send_completion(
     if extra_params is not None:
         kwargs.update(extra_params)
 
-    # Add reasoning model params
+    # Add temperature only if model supports it
+    if temperature is not None and model.use_temperature:
+        kwargs["temperature"] = temperature
+
+    # Add reasoning model params last to avoid being overwritten
     if model.info.get("is_reasoning_model"):
-        kwargs.update(model.map_reasoning_level(reasoning_level))
+        reasoning_params = model.map_reasoning_level(reasoning_level)
+        kwargs.update(reasoning_params)
 
     key = json.dumps(kwargs, sort_keys=True).encode()
 
