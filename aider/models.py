@@ -130,17 +130,71 @@ class ModelSettings:
     model_class: Optional[type] = None  # Type of ModelConfig to instantiate
 
 
-class ModelConfig(ModelSettings):
-    """Active configuration entity that can be customized.
+class ModelConfig:
+    """Public interface for model configuration.
+    
+    This class defines the core interface that all model configurations must provide.
+    It specifies the essential properties and methods needed by the rest of the system,
+    without exposing implementation details.
+    """
+    name: str
+    edit_format: str
+    weak_model_name: str | None
+    use_repo_map: bool
+    send_undo_reply: bool
+    accepts_images: bool
+    lazy: bool
+    reminder: str | None
+    examples_as_sys_msg: bool
+    extra_params: dict | None
+    provider_params: dict | None
+    provider_headers: dict | None
+    cache_control: bool
+    caches_by_default: bool
+    use_system_prompt: bool
+    use_temperature: bool
+    streaming: bool
+    editor_model_name: str | None
+    editor_edit_format: str | None
+    is_reasoning_model: bool
+    max_chat_history_tokens: int
+    weak_model: 'ModelConfig'
+    editor_model: 'ModelConfig'
+    info: dict
+
+    @property
+    def produces_code_edits(self) -> bool:
+        """Return True if this model produces code edits in its responses."""
+        return self.edit_format not in ("whole", None)
+
+    def map_reasoning_level(self, level: int) -> dict:
+        """Map an integer reasoning level to model-specific parameters."""
+        return {}
+
+    def token_count(self, messages) -> int:
+        """Count tokens in messages or text."""
+        raise NotImplementedError
+
+    def token_count_for_image(self, fname: str) -> int:
+        """Calculate token cost for an image."""
+        raise NotImplementedError
+
+    def get_image_size(self, fname: str) -> tuple[int, int]:
+        """Get dimensions of an image."""
+        raise NotImplementedError
+
+    def commit_message_models(self) -> list['ModelConfig']:
+        """Get models to use for commit messages."""
+        raise NotImplementedError
+
+
+class _ModelConfigImpl(ModelConfig):
+    """Internal implementation of model configuration.
     
     This class provides configuration state and behavior for language models.
-    It inherits default values from ModelSettings but can be customized through
-    its parameters. The configuration remains active and mutable after creation,
+    It inherits default values from ModelSettings and implements the ModelConfig
+    interface. The configuration remains active and mutable after creation,
     allowing runtime adjustments when needed.
-    
-    This base class provides core configuration functionality and can be subclassed
-    to add model-specific configuration behavior. The model_class field in ModelSettings
-    can be used to specify a subclass to use for particular models.
     """
 
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
@@ -1048,7 +1102,7 @@ def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit
         if model == ms.name:
             # Create instance of model_class if specified, otherwise ModelConfig
             config_class = ms.model_class or ModelConfig
-            config = config_class(model, weak_model=False, editor_model=False)
+            config = config_class(model, weak_model=weak_model, editor_model=editor_model)
             
             # Complete initialization
             config.get_weak_model(weak_model)
@@ -1056,7 +1110,7 @@ def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit
             return config
 
     # No specific settings found, use base ModelConfig
-    config = ModelConfig(model, weak_model=False, editor_model=False)
+    config = _ModelConfigImpl(model, weak_model=weak_model, editor_model=editor_model)
     config.get_weak_model(weak_model)
     config.get_editor_model(editor_model, editor_edit_format)
     return config
