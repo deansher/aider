@@ -473,8 +473,12 @@ class _ModelConfigImpl(ModelConfig):
         return res
 
 
-class OpenAiReasoningConfig(ModelConfig):
-    """A ModelConfig subclass specifically for OpenAI reasoning models like o3-mini and o1."""
+class OpenAiReasoningConfig(_ModelConfigImpl):
+    """A ModelConfig implementation specifically for OpenAI reasoning models like o3-mini and o1.
+    
+    This class extends _ModelConfigImpl to provide specialized behavior for OpenAI's
+    reasoning models while maintaining compatibility with the ModelConfig interface.
+    """
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
         # Call parent class init first to set up base configuration
         super().__init__(model, weak_model, editor_model, editor_edit_format)
