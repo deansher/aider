@@ -404,10 +404,12 @@ def _send_completion_to_litellm(**kwargs):
         - Usage information is captured in Langfuse for both streaming and non-streaming responses.
     """
     logger = logging.getLogger(__name__)
+    model = kwargs.pop('model')
     if not isinstance(model, Model):
         error_msg = f"Expected Model instance, got {type(model)}"
         logger.error(error_msg)
         raise TypeError(error_msg)
+    kwargs['model'] = model.name
     # Use the provided purpose as the name in Langfuse trace
     kwargs = dict(
         model=model.name,
