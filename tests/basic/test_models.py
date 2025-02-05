@@ -47,7 +47,7 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.map_reasoning_level(-1), {})
         self.assertEqual(model.map_reasoning_level(1), {})
 
-        # Test OpenAiReasoningModel returns correct mappings
+        # Test OpenAiReasoningConfig returns correct mappings
         model = ModelConfig.create("o3-mini")
         self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "high"})
         self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "medium"})
@@ -61,7 +61,7 @@ class TestModels(unittest.TestCase):
         self.assertIsInstance(model, ModelConfig)
         self.assertEqual(model.name, "gpt-4")
         
-        # Test OpenAiReasoningModel creation
+        # Test OpenAiReasoningConfig creation
         model = ModelConfig.create("o3-mini")
         self.assertIsInstance(model, OpenAiReasoningConfig)
         self.assertEqual(model.name, "o3-mini")

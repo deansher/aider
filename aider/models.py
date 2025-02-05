@@ -895,7 +895,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningModel,
+        model_class=OpenAiReasoningConfig,
     ),
     ModelSettings(
         "azure/o1",
@@ -909,7 +909,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningModel,
+        model_class=OpenAiReasoningConfig,
     ),
     ModelSettings(
         "o3-mini",
@@ -923,7 +923,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningModel,
+        model_class=OpenAiReasoningConfig,
     ),
     ModelSettings(
         "openai/o3-mini",
@@ -937,7 +937,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningModel,
+        model_class=OpenAiReasoningConfig,
     ),
     ModelSettings(
         "azure/o3-mini",
@@ -951,7 +951,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningModel,
+        model_class=OpenAiReasoningConfig,
     ),
     ModelSettings(
         "o1",
@@ -965,7 +965,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningModel,
+        model_class=OpenAiReasoningConfig,
     ),
     ModelSettings(
         "openrouter/openai/o1-mini",
