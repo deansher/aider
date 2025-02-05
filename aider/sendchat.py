@@ -341,14 +341,7 @@ def send_completion(
 
     # Call the actual LLM function
     logger.debug("send_completion: final kwargs=%s", kwargs)
-    res = _send_completion_to_litellm(
-        model=model,
-        messages=messages,
-        functions=functions,
-        stream=stream,
-        temperature=temperature,
-        purpose=purpose,
-    )
+    res = _send_completion_to_litellm(**kwargs)
 
     if not stream and CACHE is not None:
         CACHE[key] = res
@@ -357,15 +350,7 @@ def send_completion(
 
 
 @observe(as_type="generation", capture_output=False)
-def _send_completion_to_litellm(
-    model: Model,
-    messages,
-    functions,
-    stream,
-    temperature=0,
-    extra_params=None,
-    purpose="(unlabeled)",
-):
+def _send_completion_to_litellm(**kwargs):
     """
     Sends the completion request to litellm.completion and handles the response.
 
