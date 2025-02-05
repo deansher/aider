@@ -23,7 +23,7 @@ class TestScriptingAPI(unittest.TestCase):
             fname = Path("greeting.py")
             fname.touch()
             fnames = [str(fname)]
-            model = ModelConfig("gpt-4-turbo")
+            model = _ModelConfigImpl("gpt-4-turbo")
             coder = Coder.create(main_model=model, fnames=fnames)
 
             result1 = coder.run("make a script that prints hello world")

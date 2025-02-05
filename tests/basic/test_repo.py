@@ -17,7 +17,7 @@ from aider.utils import GitTemporaryDirectory
 
 class TestRepo(unittest.TestCase):
     def setUp(self):
-        self.GPT35 = ModelConfig("gpt-3.5-turbo")
+        self.GPT35 = _ModelConfigImpl("gpt-3.5-turbo")
 
     def test_diffs_empty_repo(self):
         with GitTemporaryDirectory():
@@ -110,8 +110,8 @@ class TestRepo(unittest.TestCase):
     def test_get_commit_message(self, mock_send):
         mock_send.side_effect = ["", "a good commit message"]
 
-        model1 = ModelConfig("gpt-3.5-turbo")
-        model2 = ModelConfig("gpt-4")
+        model1 = _ModelConfigImpl("gpt-3.5-turbo")
+        model2 = _ModelConfigImpl("gpt-4")
         dump(model1)
         dump(model2)
         repo = GitRepo(InputOutput(), None, None, models=[model1, model2])

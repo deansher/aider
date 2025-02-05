@@ -14,7 +14,7 @@ class TestHelp(unittest.TestCase):
     def setUpClass(cls):
         io = InputOutput(pretty=False, yes=True)
 
-        GPT35 = ModelConfig("gpt-3.5-turbo")
+        GPT35 = _ModelConfigImpl("gpt-3.5-turbo")
 
         coder = Coder.create(GPT35, None, io)
         commands = Commands(io, coder)

@@ -35,7 +35,7 @@ class TestMain(TestCase):
         os.environ["HOME"] = self.homedir_obj.name
         self.input_patcher = patch("builtins.input", return_value=None)
         self.mock_input = self.input_patcher.start()
-        self.test_model = ModelConfig("gpt-4")
+        self.test_model = _ModelConfigImpl("gpt-4")
 
     def tearDown(self):
         os.chdir(self.original_cwd)

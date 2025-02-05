@@ -12,7 +12,7 @@ class TestArchitectExchange(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures before each test method."""
-        self.model = ModelConfig("gpt-3.5-turbo")
+        self.model = _ModelConfigImpl("gpt-3.5-turbo")
         self.architect_prompts = ArchitectPrompts(
             main_model=self.model,
             editor_model=self.model.editor_model,
@@ -157,7 +157,7 @@ class TestArchitectCoder(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures before each test method."""
-        self.model = ModelConfig("gpt-3.5-turbo")
+        self.model = _ModelConfigImpl("gpt-3.5-turbo")
         self.io = InputOutput()
         self.coder = ArchitectCoder.create(self.model, "architect", io=self.io)
 

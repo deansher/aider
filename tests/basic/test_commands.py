@@ -25,7 +25,7 @@ class TestCommands(TestCase):
         self.tempdir = tempfile.mkdtemp()
         os.chdir(self.tempdir)
 
-        self.GPT35 = ModelConfig("gpt-3.5-turbo")
+        self.GPT35 = _ModelConfigImpl("gpt-3.5-turbo")
 
     def tearDown(self):
         os.chdir(self.original_cwd)
@@ -501,7 +501,7 @@ class TestCommands(TestCase):
             io = InputOutput(pretty=False, yes=False)
             from aider.coders import Coder
 
-            coder = Coder.create(ModelConfig("claude-3-5-sonnet-20240620"), None, io)
+            coder = Coder.create(_ModelConfigImpl("claude-3-5-sonnet-20240620"), None, io)
             print(coder.get_announcements())
             commands = Commands(io, coder)
 
