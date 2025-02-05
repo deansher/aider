@@ -150,7 +150,7 @@ def lazy_litellm_retry_decorator(func):
 
 
 def send_completion(
-    model: Model,
+    model_config: Model,
     messages,
     functions,
     stream,
@@ -167,7 +167,7 @@ def send_completion(
     is enabled or not.
 
     Args:
-        model (Model): The Model instance to use.
+        model_config (Model): The Model instance to use.
         messages (list): A list of message dictionaries to send to the model.
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
@@ -208,87 +208,23 @@ def send_completion(
         litellm.exceptions.APIConnectionError: For network connectivity issues
         litellm.exceptions.ServiceUnavailableError: If the service is unavailable
         litellm.exceptions.InternalServerError: For server-side errors
-        TypeError: If model is not a Model instance
-    """
-    """
-    Send a completion request to the language model and handle the response.
-
-    This function manages caching of responses when applicable and delegates the actual LLM
-    call to `_send_completion_to_litellm`. It adapts its behavior based on whether streaming
-    is enabled or not.
-
-    Args:
-        model (Model): The Model instance to use.
-        messages (list): A list of message dictionaries to send to the model.
-        functions (list): A list of function definitions that the model can use.
-        stream (bool): Whether to stream the response or not.
-        temperature (float, optional): The sampling temperature to use. Only used if the model
-            supports temperature. Defaults to 0.
-        extra_params (dict, optional): Additional parameters to pass to the model. Defaults to None.
-        purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
-            Defaults to "send-completion".
-        reasoning_level (int, optional): Controls reasoning behavior for reasoning models.
-            0 means default level, negative values reduce reasoning (e.g. -1 for medium, -2 for low),
-            positive values increase reasoning. All positive values map to maximum reasoning.
-            For non-reasoning models, this parameter has no effect. Defaults to 0.
-
-    Returns:
-        tuple: A tuple containing:
-            - hash_object (hashlib.sha1): A SHA1 hash object of the request parameters
-            - res: The model's response object. The structure depends on stream mode:
-                When stream=False:
-                    - choices[0].message.content: The complete response text
-                    - choices[0].tool_calls[0].function: Function call details if tools were used
-                    - usage.prompt_tokens: Number of input tokens
-                    - usage.completion_tokens: Number of output tokens (includes internal reasoning tokens)
-                    - usage.total_cost: Total cost in USD if available
-                    - usage.prompt_cost: Input cost in USD if available
-                    - usage.completion_cost: Output cost in USD if available
-                When stream=True:
-                    Returns an iterator yielding chunks, where each chunk has:
-                    - choices[0].delta.content: The next piece of response text
-                    - choices[0].delta.tool_calls[0].function: Partial function call details
-                    - usage: Only available in final chunk if stream_options.include_usage=True
-
-    Raises:
-        SendCompletionError: If the API returns a non-200 status code
-        InvalidResponseError: If the response is missing required fields or empty
-        litellm.exceptions.RateLimitError: If rate limit is exceeded
-        litellm.exceptions.APIError: For various API-level errors
-        litellm.exceptions.Timeout: If the request times out
-        litellm.exceptions.APIConnectionError: For network connectivity issues
-        litellm.exceptions.ServiceUnavailableError: If the service is unavailable
-        litellm.exceptions.InternalServerError: For server-side errors
-        TypeError: If model is not a Model instance
+        TypeError: If model_config is not a Model instance
     """
     logger = logging.getLogger(__name__)
-    if not isinstance(model, Model):
-        error_msg = f"Expected Model instance, got {type(model)}"
+    if not isinstance(model_config, Model):
+        error_msg = f"Expected Model instance, got {type(model_config)}"
         logger.error(error_msg)
         raise TypeError(error_msg)
 
     # Transform messages for Anthropic models
-    if is_anthropic_model(model.name):
+    if is_anthropic_model(model_config.name):
         messages = transform_messages_for_anthropic(messages)
 
-    logger = logging.getLogger(__name__)
-    logger.debug("send_completion: model=%s use_temperature=%s", model.name, model.use_temperature)
+    logger.debug("send_completion: model=%s use_temperature=%s", model_config.name, model_config.use_temperature)
 
-    # Create cache key with model name
-    cache_kwargs = dict(
-        model=model.name,  # Use name for cache key
-        messages=messages,
-        stream=stream,
-        temperature=temperature,
-        extra_params=extra_params,
-        functions=functions,
-        purpose=purpose
-    )
-    key = json.dumps(cache_kwargs, sort_keys=True).encode()
-
-    # Create kwargs with Model instance for _send_completion_to_litellm
+    # Build kwargs dict that will be used for both cache key and API call
     kwargs = dict(
-        model=model,  # Use Model instance
+        model=model_config.name,  # Use name for API call
         messages=messages,
         stream=stream,
         temperature=temperature,
@@ -296,10 +232,9 @@ def send_completion(
         functions=functions,
         purpose=purpose
     )
-    logger.debug("send_completion: initial kwargs=%s", kwargs)
 
     # Handle temperature based on model support
-    if not model.use_temperature:
+    if not model_config.use_temperature:
         kwargs.pop('temperature', None)
     elif temperature is not None:
         kwargs['temperature'] = temperature
@@ -316,18 +251,18 @@ def send_completion(
     logger.debug("send_completion: kwargs after OpenAI params=%s", kwargs)
 
     # Add model's OpenAI-compatible params
-    if model.extra_params:
-        kwargs.update(model.extra_params)
+    if model_config.extra_params:
+        kwargs.update(model_config.extra_params)
     logger.debug("send_completion: kwargs after model extra_params=%s", kwargs)
 
     # Add model's provider-specific params
-    if model.provider_params:
-        kwargs.update(model.provider_params)
+    if model_config.provider_params:
+        kwargs.update(model_config.provider_params)
     logger.debug("send_completion: kwargs after provider_params=%s", kwargs)
 
     # Add model's provider-specific headers
-    if model.provider_headers:
-        kwargs["extra_headers"] = model.provider_headers
+    if model_config.provider_headers:
+        kwargs["extra_headers"] = model_config.provider_headers
     logger.debug("send_completion: kwargs after provider_headers=%s", kwargs)
 
     # Add caller's extra params
@@ -336,13 +271,14 @@ def send_completion(
     logger.debug("send_completion: kwargs after caller extra_params=%s", kwargs)
 
     # Add reasoning model params last to avoid being overwritten
-    if model.info.get("is_reasoning_model"):
-        reasoning_params = model.map_reasoning_level(reasoning_level)
+    if model_config.info.get("is_reasoning_model"):
+        reasoning_params = model_config.map_reasoning_level(reasoning_level)
         if reasoning_params:
             logger.debug("send_completion: adding reasoning_params=%s", reasoning_params)
             kwargs.update(reasoning_params)
     logger.debug("send_completion: kwargs after reasoning_params=%s", kwargs)
 
+    # Create cache key from final kwargs
     key = json.dumps(kwargs, sort_keys=True).encode()
 
     # Generate SHA1 hash of kwargs to use as a cache key
@@ -362,7 +298,15 @@ def send_completion(
 
 
 @observe(as_type="generation", capture_output=False)
-def _send_completion_to_litellm(**kwargs):
+def _send_completion_to_litellm(
+    model_config: Model,
+    messages,
+    functions,
+    stream,
+    temperature=0,
+    extra_params=None,
+    purpose="(unlabeled)",
+):
     """
     Sends the completion request to litellm.completion and handles the response.
 
@@ -370,7 +314,7 @@ def _send_completion_to_litellm(**kwargs):
     It supports both streaming and non-streaming responses.
 
     Args:
-        model (Model): The Model instance to use.
+        model_config (Model): The Model instance to use.
         messages (list): A list of message dictionaries to send to the model.
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
@@ -379,7 +323,7 @@ def _send_completion_to_litellm(**kwargs):
                                      This includes any provider-specific parameters like reasoning_effort
                                      that were mapped by the model class.
         purpose (str, optional): The purpose of this completion, used as the name in Langfuse.
-                               Defaults to "llm-completion".
+                               Defaults to "(unlabeled)".
 
     Returns:
         res: The model's response object. The structure depends on stream mode:
@@ -408,7 +352,7 @@ def _send_completion_to_litellm(**kwargs):
         litellm.exceptions.APIConnectionError: For network connectivity issues
         litellm.exceptions.ServiceUnavailableError: If the service is unavailable
         litellm.exceptions.InternalServerError: For server-side errors
-        TypeError: If model is not a Model instance
+        TypeError: If model_config is not a Model instance
 
     Notes:
         - This function uses Langfuse for tracing and monitoring.
@@ -416,26 +360,25 @@ def _send_completion_to_litellm(**kwargs):
         - Usage information is captured in Langfuse for both streaming and non-streaming responses.
     """
     logger = logging.getLogger(__name__)
-    model = kwargs.pop('model')
-    if not isinstance(model, Model):
-        error_msg = f"Expected Model instance, got {type(model)}"
+    if not isinstance(model_config, Model):
+        error_msg = f"Expected Model instance, got {type(model_config)}"
         logger.error(error_msg)
         raise TypeError(error_msg)
-    kwargs['model'] = model.name
-    # Use the provided purpose as the name in Langfuse trace
+
+    # Build kwargs dict for API call
     kwargs = dict(
-        model=model.name,
+        model=model_config.name,
         messages=messages,
         stream=stream,
         temperature=temperature,
         extra_params=extra_params,
         functions=functions,
-        purpose=purpose
     )
+
     # Prepare Langfuse parameters
     langfuse_params = {
         "name": purpose,
-        "model": model.name,
+        "model": model_config.name,
         "input": messages,
         "metadata": {
             "parameters": {
@@ -450,16 +393,17 @@ def _send_completion_to_litellm(**kwargs):
     }
 
     # Add provider-specific metadata
-    if model.provider_params:
-        langfuse_params["metadata"]["provider_params"] = model.provider_params
-    if model.provider_headers:
-        langfuse_params["metadata"]["provider_headers"] = model.provider_headers
-    if model.info.get("is_reasoning_model"):
-        langfuse_params["metadata"]["reasoning"] = model.map_reasoning_level(reasoning_level)
+    if model_config.provider_params:
+        langfuse_params["metadata"]["provider_params"] = model_config.provider_params
+    if model_config.provider_headers:
+        langfuse_params["metadata"]["provider_headers"] = model_config.provider_headers
     langfuse_context.update_current_observation(**langfuse_params)
-    if temperature is not None and model.use_temperature:
+
+    # Handle temperature
+    if temperature is not None and model_config.use_temperature:
         kwargs["temperature"] = temperature
 
+    # Add function calling parameters if needed
     if functions is not None:
         function = functions[0]
         kwargs["tools"] = [dict(type="function", function=function)]
@@ -468,6 +412,7 @@ def _send_completion_to_litellm(**kwargs):
             "function": {"name": function["name"]},
         }
 
+    # Add any extra parameters
     if extra_params is not None:
         kwargs.update(extra_params)
 
@@ -613,7 +558,7 @@ def analyze_assistant_response(
 
 
 @lazy_litellm_retry_decorator
-def simple_send_with_retries(model: Model, messages, extra_params=None, purpose="send with retries"):
+def simple_send_with_retries(model_config: Model, messages, extra_params=None, purpose="send with retries"):
     """
     Send a completion request with retries on various error conditions.
 
@@ -634,7 +579,7 @@ def simple_send_with_retries(model: Model, messages, extra_params=None, purpose=
         InvalidResponseError: If the response is missing required fields or empty
     """
     kwargs = {
-        "model": model,
+        "model_config": model_config,
         "messages": messages,
         "functions": None,
         "stream": False,
