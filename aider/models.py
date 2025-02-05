@@ -77,7 +77,16 @@ ANTHROPIC_MODELS = [ln.strip() for ln in ANTHROPIC_MODELS.splitlines() if ln.str
 
 @dataclass
 class ModelSettings:
-    # ModelConfig class needs to have each of these as well
+    """Declarative defaults for model configurations.
+    
+    This class holds static configuration values that serve as defaults when creating
+    ModelConfig instances. These settings are typically defined in the MODEL_SETTINGS
+    list and used by get_model_config() to initialize configurations.
+    
+    Each field here corresponds to a configuration option that can be customized in
+    an active ModelConfig instance. The values here provide sensible defaults that
+    can be overridden through ModelConfig parameters.
+    """
     name: str
     edit_format: str = "whole"
     weak_model_name: Optional[str] = None
@@ -102,11 +111,16 @@ class ModelSettings:
 
 
 class ModelConfig(ModelSettings):
-    """Base class for all language model configurations.
+    """Active configuration entity that can be customized.
     
-    This class provides the core model configuration functionality and can be subclassed
-    to add model-specific behavior. The model_class field in ModelSettings
-    can be used to specify a subclass to use for a particular model configuration.
+    This class provides configuration state and behavior for language models.
+    It inherits default values from ModelSettings but can be customized through
+    its parameters. The configuration remains active and mutable after creation,
+    allowing runtime adjustments when needed.
+    
+    This base class provides core configuration functionality and can be subclassed
+    to add model-specific configuration behavior. The model_class field in ModelSettings
+    can be used to specify a subclass to use for particular models.
     """
 
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
@@ -992,7 +1006,12 @@ def get_model_flexible(model, content):
 
 
 def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit_format=None):
-    """Get the appropriate model configuration instance.
+    """Get a model configuration instance with optional customization.
+    
+    This factory function bridges between ModelSettings defaults and ModelConfig instances:
+    1. Finds appropriate default settings from MODEL_SETTINGS
+    2. Creates appropriate ModelConfig class (base or specialized)
+    3. Applies any customization parameters
     
     Args:
         model: Name of the model to create
@@ -1001,7 +1020,8 @@ def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit
         editor_edit_format: Optional editor edit format
         
     Returns:
-        ModelConfig: An instance of ModelConfig or appropriate subclass
+        ModelConfig: An instance of ModelConfig or appropriate subclass, configured
+                    with defaults from ModelSettings and any provided customizations
     """
     # Find matching settings
     for ms in MODEL_SETTINGS:
