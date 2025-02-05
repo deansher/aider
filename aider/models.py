@@ -127,7 +127,7 @@ class ModelSettings:
     editor_model_name: Optional[str] = None
     editor_edit_format: Optional[str] = None
     is_reasoning_model: bool = False
-    model_class: Optional[type] = None  # Type of ModelConfig to instantiate
+    model_config_class: Optional[type] = None  # Type of ModelConfig to instantiate
 
 
 class ModelConfig:
@@ -983,7 +983,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
-        model_class=_OpenAiReasoningConfigImpl,
+        model_config_class=_OpenAiReasoningConfigImpl,
     ),
     ModelSettings(
         "azure/o1",
@@ -997,7 +997,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
-        model_class=_OpenAiReasoningConfigImpl,
+        model_config_class=_OpenAiReasoningConfigImpl,
     ),
     ModelSettings(
         "o3-mini",
@@ -1011,7 +1011,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningConfig,
+        model_config_class=_OpenAiReasoningConfigImpl,
     ),
     ModelSettings(
         "openai/o3-mini",
@@ -1025,7 +1025,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=True,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningConfig,
+        model_config_class=_OpenAiReasoningConfigImpl,
     ),
     ModelSettings(
         "azure/o3-mini",
@@ -1039,7 +1039,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningConfig,
+        model_config_class=_OpenAiReasoningConfigImpl,
     ),
     ModelSettings(
         "o1",
@@ -1053,7 +1053,7 @@ MODEL_SETTINGS = [
         use_temperature=False,
         streaming=False,
         is_reasoning_model=True,
-        model_class=OpenAiReasoningConfig,
+        model_config_class=_OpenAiReasoningConfigImpl,
     ),
     ModelSettings(
         "openrouter/openai/o1-mini",
@@ -1124,8 +1124,8 @@ def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit
     # Find matching settings
     for ms in MODEL_SETTINGS:
         if model == ms.name:
-            # Create instance of model_class if specified, otherwise ModelConfig
-            config_class = ms.model_class or ModelConfig
+            # Create instance of model_config_class if specified, otherwise ModelConfig
+            config_class = ms.model_config_class or ModelConfig
             config = config_class(model, weak_model=weak_model, editor_model=editor_model)
             
             # Complete initialization
