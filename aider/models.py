@@ -745,7 +745,7 @@ def get_model_info(model):
         return dict()
 
 
-class OpenAiReasoningModel(ModelSettings):
+class OpenAiReasoningModel(Model):
     """A Model subclass specifically for OpenAI reasoning models like o3-mini and o1."""
     def map_reasoning_effort(self, effort: int) -> dict:
         """Map an integer reasoning effort level to OpenAI's reasoning_effort parameter.
