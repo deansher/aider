@@ -363,10 +363,11 @@ def _send_completion_to_litellm(
         model=model_config.name,
         messages=messages,
         stream=stream,
-        temperature=temperature,
         extra_params=extra_params,
         functions=functions,
     )
+    if temperature is not None:
+        kwargs["temperature"] = temperature
 
     # Prepare Langfuse parameters
     langfuse_params = {
