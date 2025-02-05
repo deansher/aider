@@ -782,6 +782,7 @@ class Model(ModelSettings):
                    - 0 means default effort
                    - Negative values reduce effort
                    - Positive values increase effort
+                   Note: Float values will be truncated to integers.
         
         Returns:
             An empty dict by default. Subclasses may override to return
@@ -827,15 +828,17 @@ class OpenAiReasoningModel(Model):
                    - 0 means default effort (maps to "high")
                    - Negative values reduce effort (-1 -> "medium", <= -2 -> "low")
                    - Positive values increase effort (all map to "high")
+                   Note: Float values will be truncated to integers.
         
         Returns:
             A dict mapping "reasoning_effort" to "low", "medium", or "high"
         """
-        if effort <= -2:
+        effort_int = int(effort)
+        if effort_int <= -2:
             level = "low"
-        elif effort == -1:
+        elif effort_int == -1:
             level = "medium" 
-        else:  # effort >= 0
+        else:  # effort_int >= 0
             level = "high"
         return {"reasoning_effort": level}
 
