@@ -379,7 +379,14 @@ def _send_completion_to_litellm(
         logger.error(error_msg)
         raise TypeError(error_msg)
     # Use the provided purpose as the name in Langfuse trace
-    langfuse_context.update_current_observation(name=purpose, model=model.name, input=messages)
+    llm_params = {
+        "stream": stream,
+        "temperature": temperature,
+        "extra_params": extra_params,
+        "functions": functions,
+        "purpose": purpose
+    }
+    langfuse_context.update_current_observation(name=purpose, model=model.name, input=messages, metadata={"llm_params": llm_params})
 
     kwargs = dict(
         model=model.name,
