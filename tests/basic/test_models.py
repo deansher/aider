@@ -57,12 +57,12 @@ class TestModels(unittest.TestCase):
 
     def test_model_creation(self):
         # Test base model creation
-        model = ModelConfig.create("gpt-4")
+        model = get_model_config("gpt-4")
         self.assertIsInstance(model, ModelConfig)
         self.assertEqual(model.name, "gpt-4")
         
         # Test OpenAiReasoningConfig creation
-        model = ModelConfig.create("o3-mini")
+        model = get_model_config("o3-mini")
         self.assertIsInstance(model, OpenAiReasoningConfig)
         self.assertEqual(model.name, "o3-mini")
         
