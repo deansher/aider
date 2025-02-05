@@ -281,7 +281,8 @@ def send_completion(
     # Add reasoning model params last to avoid being overwritten
     if model.info.get("is_reasoning_model"):
         reasoning_params = model.map_reasoning_level(reasoning_level)
-        kwargs.update(reasoning_params)
+        if reasoning_params:
+            kwargs.update(reasoning_params)
 
     key = json.dumps(kwargs, sort_keys=True).encode()
 
