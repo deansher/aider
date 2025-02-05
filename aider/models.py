@@ -812,8 +812,6 @@ class Model(ModelSettings):
     def configure_model_settings(self, model):
         for ms in MODEL_SETTINGS:
 
-
-class OpenAiReasoningModel(Model):
     """A Model subclass specifically for OpenAI reasoning models like o3-mini and o1."""
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
         self.name = model
