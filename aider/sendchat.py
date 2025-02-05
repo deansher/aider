@@ -274,50 +274,6 @@ def send_completion(
     logger = logging.getLogger(__name__)
     logger.debug("send_completion: model=%s use_temperature=%s", model.name, model.use_temperature)
 
-    # Parameter handling in Brade follows a layered architecture that matches litellm's API design:
-    #
-    # 1. Base OpenAI Parameters:
-    #    - Core parameters like model, messages, stream that every call needs
-    #    - These form the foundation of every API call
-    #
-    # 2. Model-specific Parameters (in order of precedence, lowest to highest):
-    #    - model.extra_params: OpenAI-compatible parameters (e.g. max_tokens)
-    #    - model.provider_params: Provider-specific parameters
-    #    - model.provider_headers: Provider-specific headers
-    #    - model.map_reasoning_level(): Provider-specific reasoning parameters
-    #
-    # 3. Caller's Parameters:
-    #    - extra_params passed by the caller
-    #    - These have highest precedence and can override any other settings
-    #
-    # This layered approach:
-    # - Maintains compatibility with litellm's API
-    # - Provides sensible defaults via model settings
-    # - Allows fine-grained control when needed
-    # - Cleanly handles provider-specific features like reasoning levels
-    
-    # Parameter handling in Brade follows a layered architecture that matches litellm's API design:
-    #
-    # 1. Base OpenAI Parameters:
-    #    - Core parameters like model, messages, stream that every call needs
-    #    - These form the foundation of every API call
-    #
-    # 2. Model-specific Parameters (in order of precedence, lowest to highest):
-    #    - model.extra_params: OpenAI-compatible parameters (e.g. max_tokens)
-    #    - model.provider_params: Provider-specific parameters
-    #    - model.provider_headers: Provider-specific headers
-    #    - model.map_reasoning_level(): Provider-specific reasoning parameters
-    #
-    # 3. Caller's Parameters:
-    #    - extra_params passed by the caller
-    #    - These have highest precedence and can override any other settings
-    #
-    # This layered approach:
-    # - Maintains compatibility with litellm's API
-    # - Provides sensible defaults via model settings
-    # - Allows fine-grained control when needed
-    # - Cleanly handles provider-specific features like reasoning levels
-    
     # Start with base OpenAI params
     kwargs = dict(
         model=model.name,
@@ -325,6 +281,15 @@ def send_completion(
         stream=stream,
     )
     logger.debug("send_completion: initial kwargs=%s", kwargs)
+
+    # Handle temperature first, before other params can override it
+    if temperature is not None and model.use_temperature:
+        kwargs["temperature"] = temperature
+        logger.debug("send_completion: adding temperature=%s", temperature)
+    elif "temperature" in kwargs:
+        logger.debug("send_completion: removing temperature")
+        del kwargs["temperature"]
+    logger.debug("send_completion: kwargs after temperature handling=%s", kwargs)
 
     # Add optional OpenAI params
     if functions is not None:
@@ -350,15 +315,6 @@ def send_completion(
     # Add caller's extra params
     if extra_params is not None:
         kwargs.update(extra_params)
-
-    # Add temperature only if model supports it
-    if temperature is not None and model.use_temperature:
-        kwargs["temperature"] = temperature
-        logger.debug("send_completion: adding temperature=%s", temperature)
-    elif "temperature" in kwargs:
-        logger.debug("send_completion: removing temperature")
-        del kwargs["temperature"]
-    logger.debug("send_completion: kwargs after temperature handling=%s", kwargs)
 
     # Add reasoning model params last to avoid being overwritten
     if model.info.get("is_reasoning_model"):
