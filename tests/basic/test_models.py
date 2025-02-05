@@ -40,20 +40,20 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.editor_model_name, "o3-mini")
         self.assertEqual(model.editor_edit_format, "editor-diff")
 
-    def test_map_reasoning_effort(self):
+    def test_map_reasoning_level(self):
         # Test base Model class returns empty dict
         model = Model("gpt-4")
-        self.assertEqual(model.map_reasoning_effort(0), {})
-        self.assertEqual(model.map_reasoning_effort(-1), {})
-        self.assertEqual(model.map_reasoning_effort(1), {})
+        self.assertEqual(model.map_reasoning_level(0), {})
+        self.assertEqual(model.map_reasoning_level(-1), {})
+        self.assertEqual(model.map_reasoning_level(1), {})
 
         # Test OpenAiReasoningModel returns correct mappings
         model = Model("o3-mini")
-        self.assertEqual(model.map_reasoning_effort(0), {"reasoning_effort": "high"})
-        self.assertEqual(model.map_reasoning_effort(-1), {"reasoning_effort": "medium"})
-        self.assertEqual(model.map_reasoning_effort(-2), {"reasoning_effort": "low"})
-        self.assertEqual(model.map_reasoning_effort(-3), {"reasoning_effort": "low"})
-        self.assertEqual(model.map_reasoning_effort(1), {"reasoning_effort": "high"})
+        self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "high"})
+        self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "medium"})
+        self.assertEqual(model.map_reasoning_level(-2), {"reasoning_effort": "low"})
+        self.assertEqual(model.map_reasoning_level(-3), {"reasoning_effort": "low"})
+        self.assertEqual(model.map_reasoning_level(1), {"reasoning_effort": "high"})
 
     @patch("os.environ")
     def test_sanity_check_model_all_set(self, mock_environ):

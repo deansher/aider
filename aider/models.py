@@ -791,14 +791,14 @@ class Model(ModelSettings):
         else:
             self.get_editor_model(editor_model, editor_edit_format)
 
-    def map_reasoning_effort(self, effort: int) -> dict:
-        """Map an integer reasoning effort level to model-specific parameters.
+    def map_reasoning_level(self, level: int) -> dict:
+        """Map an integer reasoning level to model-specific parameters.
         
         Args:
-            effort: Integer reasoning effort level where:
-                   - 0 means default effort
-                   - Negative values reduce effort
-                   - Positive values increase effort
+            level: Integer reasoning level where:
+                   - 0 means default level
+                   - Negative values reduce level
+                   - Positive values increase level
                    Note: Float values will be truncated to integers.
         
         Returns:
@@ -837,27 +837,27 @@ class OpenAiReasoningModel(Model):
         else:
             self.get_editor_model(editor_model, editor_edit_format)
 
-    def map_reasoning_effort(self, effort: int) -> dict:
-        """Map an integer reasoning effort level to OpenAI's reasoning_effort parameter.
+    def map_reasoning_level(self, level: int) -> dict:
+        """Map an integer reasoning level to OpenAI's reasoning_effort parameter.
         
         Args:
-            effort: Integer reasoning effort level where:
-                   - 0 means default effort (maps to "high")
-                   - Negative values reduce effort (-1 -> "medium", <= -2 -> "low")
-                   - Positive values increase effort (all map to "high")
+            level: Integer reasoning level where:
+                   - 0 means default level (maps to "high")
+                   - Negative values reduce level (-1 -> "medium", <= -2 -> "low")
+                   - Positive values increase level (all map to "high")
                    Note: Float values will be truncated to integers.
         
         Returns:
             A dict mapping "reasoning_effort" to "low", "medium", or "high"
         """
-        effort_int = int(effort)
-        if effort_int <= -2:
-            level = "low"
-        elif effort_int == -1:
-            level = "medium" 
-        else:  # effort_int >= 0
-            level = "high"
-        return {"reasoning_effort": level}
+        level_int = int(level)
+        if level_int <= -2:
+            effort = "low"
+        elif level_int == -1:
+            effort = "medium" 
+        else:  # level_int >= 0
+            effort = "high"
+        return {"reasoning_effort": effort}
 
     def get_model_info(self, model):
         return get_model_info(model)

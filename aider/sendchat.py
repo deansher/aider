@@ -212,6 +212,7 @@ def send_completion(
     temperature=0,
     extra_params=None,
     purpose="send-completion",
+    reasoning_level: int = 0,
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -288,9 +289,9 @@ def send_completion(
     if extra_params is not None:
         kwargs.update(extra_params)
 
-    if model.info.get("is_reasoning_model") and "reasoning_effort" not in kwargs:
-        # Set reasoning_effort to 0 if not provided.
-        kwargs["reasoning_effort"] = model.map_reasoning_effort(0)
+    if model.info.get("is_reasoning_model"):
+        # Map reasoning_level to model-specific parameters
+        kwargs.update(model.map_reasoning_level(reasoning_level))
 
     key = json.dumps(kwargs, sort_keys=True).encode()
 
