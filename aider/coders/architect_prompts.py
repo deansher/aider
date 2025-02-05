@@ -275,7 +275,7 @@ You are currently performing Step 1 of the architect's three-step process.
 
 Your human partner has approved the changes that you proposed in your last message.
 Your current task is to implement that proposal by using SEARCH/REPLACE blocks
-to create or revise project files.
+to create or revise project files:
 - Use SEARCH/REPLACE blocks for all changes
 - Follow the approved proposal exactly
 - Make no additional modifications
