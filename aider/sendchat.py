@@ -299,22 +299,27 @@ def send_completion(
             "type": "function",
             "function": {"name": function["name"]},
         }
+    logger.debug("send_completion: kwargs after OpenAI params=%s", kwargs)
 
     # Add model's OpenAI-compatible params
     if model.extra_params:
         kwargs.update(model.extra_params)
+    logger.debug("send_completion: kwargs after model extra_params=%s", kwargs)
 
     # Add model's provider-specific params
     if model.provider_params:
         kwargs.update(model.provider_params)
+    logger.debug("send_completion: kwargs after provider_params=%s", kwargs)
 
     # Add model's provider-specific headers
     if model.provider_headers:
         kwargs["extra_headers"] = model.provider_headers
+    logger.debug("send_completion: kwargs after provider_headers=%s", kwargs)
 
     # Add caller's extra params
     if extra_params is not None:
         kwargs.update(extra_params)
+    logger.debug("send_completion: kwargs after caller extra_params=%s", kwargs)
 
     # Add reasoning model params last to avoid being overwritten
     if model.info.get("is_reasoning_model"):
@@ -322,6 +327,7 @@ def send_completion(
         if reasoning_params:
             logger.debug("send_completion: adding reasoning_params=%s", reasoning_params)
             kwargs.update(reasoning_params)
+    logger.debug("send_completion: kwargs after reasoning_params=%s", kwargs)
 
     key = json.dumps(kwargs, sort_keys=True).encode()
 
