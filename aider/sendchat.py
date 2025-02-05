@@ -276,7 +276,7 @@ def send_completion(
 
     # Start with all input parameters
     kwargs = dict(
-        model=model.name,
+        model=model,
         messages=messages,
         stream=stream,
         temperature=temperature,
