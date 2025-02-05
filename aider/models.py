@@ -745,7 +745,7 @@ def get_model_info(model):
         return dict()
 
 
-class OpenAiReasoningModel(Model):
+class OpenAiReasoningModel(ModelSettings):
     """A Model subclass specifically for OpenAI reasoning models like o3-mini and o1."""
     def map_reasoning_effort(self, effort: int) -> dict:
         """Map an integer reasoning effort level to OpenAI's reasoning_effort parameter.
@@ -769,6 +769,50 @@ class OpenAiReasoningModel(Model):
 
 
 class Model(ModelSettings):
+    def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
+        self.name = model
+        self.max_chat_history_tokens = 1024
+        self.weak_model = None
+        self.editor_model = None
+
+        self.info = self.get_model_info(model)
+
+        # Are all needed keys/params available?
+        res = self.validate_environment()
+        self.missing_keys = res.get("missing_keys")
+        self.keys_in_environment = res.get("keys_in_environment")
+
+        max_input_tokens = self.info.get("max_input_tokens") or 0
+        self.max_chat_history_tokens = max_chat_history_tokens(max_input_tokens)
+
+        self.configure_model_settings(model)
+        if weak_model is False:
+            self.weak_model_name = None
+        else:
+            self.get_weak_model(weak_model)
+
+        if editor_model is False:
+            self.editor_model_name = None
+        else:
+            self.get_editor_model(editor_model, editor_edit_format)
+
+    def map_reasoning_effort(self, effort: int) -> dict:
+        """Map an integer reasoning effort level to model-specific parameters.
+        
+        Args:
+            effort: Integer reasoning effort level where:
+                   - 0 means default effort
+                   - Negative values reduce effort
+                   - Positive values increase effort
+        
+        Returns:
+            An empty dict by default. Subclasses may override to return
+            model-specific parameter mappings.
+        """
+        return {}
+
+
+class OpenAiReasoningModel(Model):
     def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
         self.name = model
         self.max_chat_history_tokens = 1024
