@@ -336,6 +336,7 @@ def send_completion(
     elif "temperature" in kwargs:
         logger.debug("send_completion: removing temperature")
         del kwargs["temperature"]
+    logger.debug("send_completion: kwargs after temperature handling=%s", kwargs)
 
     # Add reasoning model params last to avoid being overwritten
     if model.info.get("is_reasoning_model"):
