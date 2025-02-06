@@ -455,6 +455,7 @@ def analyze_assistant_response(
             functions=None,
             stream=False,
             temperature=0,
+            reasoning_level=-2,
             purpose=f"analyze assistant response (attempt {attempt + 1})",
         )
         content = response.choices[0].message.content
