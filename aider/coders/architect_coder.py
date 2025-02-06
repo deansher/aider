@@ -402,7 +402,7 @@ class ArchitectCoder(Coder):
         - Cost and commit tracking are only updated on successful execution
         """
         logger = logging.getLogger(__name__)
-        editor_model_config = self.main_model_config.editor_model or self.main_model_config
+        editor_model_config = self.main_model.editor_model or self.main_model
         editor_coder = self.create_coder(
             edit_format=self.main_model_config.editor_edit_format,
             main_model=editor_model_config,
