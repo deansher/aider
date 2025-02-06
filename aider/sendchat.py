@@ -11,7 +11,6 @@ from aider.llm import litellm
 from aider.models import ModelConfig
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 def is_anthropic_model(model_name):
@@ -161,8 +160,8 @@ def send_completion(
     purpose="send-completion",
 ):
     logger.debug("send_completion input messages: %s", messages)
-    logger.debug("send_completion input kwargs: model=%s temperature=%s reasoning_level=%s extra_params=%s", 
-                model_config.name, temperature, reasoning_level, extra_params)
+    logger.debug("send_completion input kwargs: model=%s temperature=%s reasoning_level=%s extra_params=%s",
+                 model_config.name, temperature, reasoning_level, extra_params)
     """
     Send a completion request to the language model and handle the response.
 
@@ -234,8 +233,6 @@ def send_completion(
         messages = transform_messages_for_o3(messages)
         logger.debug("messages after o3 transform: %s", messages)
 
-    logger.debug("send_completion: model=%s use_temperature=%s", model_config.name, model_config.use_temperature)
-
     # Start with base kwargs
     kwargs = dict(
         model=model_config.name,
@@ -281,9 +278,6 @@ def send_completion(
 
     # Call the actual LLM function with the model name and all kwargs
     logger.debug("_send_completion_to_litellm kwargs: %s", kwargs)
-    logger.debug("_send_completion_to_litellm final messages: %s", kwargs.get("messages"))
-    if not kwargs.get("messages"):
-        logger.error("Empty messages array before litellm.completion call!")
     res = _send_completion_to_litellm(
         model_config=model_config,
         **kwargs,
