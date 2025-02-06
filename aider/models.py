@@ -146,7 +146,7 @@ class ModelConfig:
     reminder: str | None
     examples_as_sys_msg: bool
     extra_params: dict | None  # OpenAI-compatible parameters and provider-specific parameters
-    provider_headers: dict | None
+    extra_headers: dict | None
     cache_control: bool
     caches_by_default: bool
     use_system_prompt: bool
