@@ -264,8 +264,8 @@ def send_completion(
             kwargs.update(reasoning_params)
 
     # Add provider-specific headers if any
-    if model_config.provider_headers:
-        kwargs["extra_headers"] = dict(model_config.provider_headers)
+    if model_config.extra_headers:
+        kwargs["extra_headers"] = dict(model_config.extra_headers)
 
     # Create cache key from final kwargs
     key = json.dumps(kwargs, sort_keys=True).encode()

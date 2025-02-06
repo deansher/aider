@@ -117,7 +117,7 @@ class ModelSettings:
     reminder: str = "user"
     examples_as_sys_msg: bool = False
     extra_params: Optional[dict] = None  # OpenAI-compatible parameters and provider-specific parameters
-    provider_headers: Optional[dict] = None  # Provider-specific headers to pass via extra_headers
+    extra_headers: Optional[dict] = None  # Headers to pass to the provider via litellm
     cache_control: bool = False
     caches_by_default: bool = False
     use_system_prompt: bool = True
@@ -218,7 +218,7 @@ class _ModelConfigImpl(ModelConfig):
         self.reminder = "user"
         self.examples_as_sys_msg = False
         self.extra_params = None
-        self.provider_headers = None
+        self.extra_headers = None
         self.cache_control = False
         self.caches_by_default = False
         self.use_system_prompt = True
