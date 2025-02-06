@@ -689,7 +689,7 @@ MODEL_SETTINGS = [
         extra_params={
             "max_tokens": 8192,
         },
-        provider_headers={
+        extra_headers={
             "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
@@ -707,7 +707,7 @@ MODEL_SETTINGS = [
         extra_params={
             "max_tokens": 8192,
         },
-        provider_headers={
+        extra_headers={
             "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
@@ -725,7 +725,7 @@ MODEL_SETTINGS = [
         extra_params={
             "max_tokens": 8192,
         },
-        provider_headers={
+        extra_headers={
             "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
