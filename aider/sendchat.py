@@ -173,13 +173,16 @@ def send_completion(
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to 0.
-        extra_params (dict, optional): Additional parameters to pass to the model. Defaults to None.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "send-completion".
         reasoning_level (int, optional): Controls reasoning behavior for reasoning models.
             0 means default level, negative values reduce reasoning (e.g. -1 for medium, -2 for low),
             positive values increase reasoning. All positive values map to maximum reasoning.
             For non-reasoning models, this parameter has no effect. Defaults to 0.
+        **kwargs: Additional parameters passed directly to litellm.completion(). This includes:
+            - OpenAI-compatible parameters like max_tokens, top_p, etc.
+            - Provider-specific parameters passed through to the provider
+            - extra_headers for provider-specific headers
 
     Returns:
         tuple: A tuple containing:
