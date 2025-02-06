@@ -178,6 +178,7 @@ def send_completion(
             supports temperature. Defaults to 0.
         tools (list, optional): A list of tools the model may use. Currently only functions supported.
         extra_params (dict, optional): Additional parameters to pass to litellm.completion().
+            These parameters override any matching parameters from model_config.extra_params.
             This includes:
             - OpenAI-compatible parameters (like max_tokens, top_p, etc.)
             - Provider-specific parameters passed through to the provider
