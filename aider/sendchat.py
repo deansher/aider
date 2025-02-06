@@ -325,12 +325,9 @@ def _send_completion_to_litellm(
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to None.
-        extra_params (dict, optional): Additional parameters to pass to the model.
-            This includes:
-            - OpenAI-compatible parameters like max_tokens, top_p, etc.
-            - Provider-specific parameters passed through to the provider
-        provider_params (dict, optional): Provider-specific parameters to pass through.
-        extra_headers (dict, optional): Provider-specific headers to pass through.
+        extra_params (dict, optional): Additional parameters to pass to litellm.completion().
+            This includes both OpenAI-compatible parameters and provider-specific parameters.
+            Any non-OpenAI parameters are passed directly to the provider as kwargs.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
 
