@@ -277,7 +277,6 @@ def send_completion(
         return hash_object, CACHE[key]
 
     # Create kwargs for _send_completion_to_litellm
-    # Note: extra_params will be passed through to the actual LLM call
     litellm_kwargs = dict(kwargs)
     litellm_kwargs['model_config'] = model_config
     del litellm_kwargs['model']
