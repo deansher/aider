@@ -340,57 +340,71 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         kwargs = mock_completion.call_args.kwargs
         self.assertNotIn("temperature", kwargs)
 
-    @patch("litellm.completion")
-    def test_send_completion_reasoning_level(self, mock_completion):
-        # Create a successful mock response
-        success_response = MagicMock()
-        success_response.choices = [MagicMock()]
-        success_response.choices[0].message.content = "Success response"
-        success_response.status_code = 200
-        mock_completion.return_value = success_response
+    def test_parameter_layering(self):
+        """Test parameter layering between model config and request params."""
+        # Create model with various parameters
+        model = _ModelConfigImpl("test-model")
+        model.extra_params = {
+            "response_format": {"type": "model_default"},
+            "api_version": "2024-01"
+        }
+        model.extra_headers = {"anthropic-version": "2024-01-beta"}
 
-        # Test with a reasoning model
-        model_config = _OpenAiReasoningConfigImpl("o3-mini")
-        self.assertTrue(model_config.is_reasoning_model)
+        # Call with extra params that should override model params
+        extra_params = {
+            "response_format": {"type": "runtime_override"},
+            "seed": 42
+        }
 
-        # Call send_completion with reasoning_level
         _hash, completion = send_completion(
-            model_config=model_config,
+            model_config=model,
             messages=["message"],
             functions=None,
             stream=False,
             temperature=0,
-            extra_params=None,
+            extra_params=extra_params,
             purpose="test completion",
-            reasoning_level=1
+            reasoning_level=0
         )
 
-        # Verify reasoning_effort was passed to litellm
+        # Verify parameter layering
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
-        self.assertEqual(kwargs.get("reasoning_effort"), "high")
+        
+        # Extra params should override model extra params
+        self.assertEqual(kwargs.get("extra_params", {}).get("response_format"), {"type": "runtime_override"})
+        
+        # Model extra params should be preserved when not overridden
+        self.assertEqual(kwargs.get("extra_params", {}).get("api_version"), "2024-01")
+        
+        # Extra headers should be preserved
+        self.assertEqual(kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"})
 
-        # Test with a non-reasoning model
-        mock_completion.reset_mock()
-        model_config = _ModelConfigImpl("gpt-4")
-        self.assertFalse(model_config.is_reasoning_model)
+    def test_reasoning_parameter_precedence(self):
+        """Test that reasoning_level takes precedence over other reasoning parameters."""
+        # Create reasoning model with extra params
+        model = _OpenAiReasoningConfigImpl("o3-mini")
+        model.extra_params = {"reasoning_effort": "low"}
 
-        # Call send_completion with reasoning_level
+        # Call with extra params that should NOT override reasoning level
+        extra_params = {"reasoning_effort": "medium"}
+        
+        # reasoning_level should take precedence over both model.extra_params and extra_params
         _hash, completion = send_completion(
-            model_config=model_config,
+            model_config=model,
             messages=["message"],
             functions=None,
             stream=False,
             temperature=0,
-            extra_params=None,
+            extra_params=extra_params,
             purpose="test completion",
             reasoning_level=1
         )
 
-        # Verify no reasoning parameters were passed
+        # Verify reasoning_level took precedence
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
-        self.assertNotIn("reasoning_effort", kwargs)
+        self.assertEqual(kwargs.get("extra_params", {}).get("reasoning_effort"), "high")
 
     @patch("litellm.completion")
     def test_parameter_layering(self, mock_completion):
