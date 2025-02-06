@@ -228,7 +228,6 @@ def send_completion(
         model=model_config.name,
         messages=messages,
         stream=stream,
-        functions=functions,
     )
 
     # Add temperature if model supports it
@@ -236,7 +235,8 @@ def send_completion(
         kwargs["temperature"] = temperature
 
     # Add function calling parameters if needed
-    if functions is not None:
+    if functions:
+        kwargs["functions"] = functions
         function = functions[0]
         kwargs["tools"] = [dict(type="function", function=function)]
         kwargs["tool_choice"] = {
@@ -271,13 +271,8 @@ def send_completion(
     if not stream and CACHE is not None and key in CACHE:
         return hash_object, CACHE[key]
 
-    # Adjust kwargs for _send_completion_to_litellm
-    litellm_kwargs = dict(kwargs)
-    litellm_kwargs['model_config'] = model_config
-    del litellm_kwargs['model']
-
-    # Call the actual LLM function
-    res = _send_completion_to_litellm(**litellm_kwargs)
+    # Call the actual LLM function with the model name and all kwargs
+    res = _send_completion_to_litellm(model_config=model_config, **kwargs)
 
     if not stream and CACHE is not None:
         CACHE[key] = res
@@ -289,12 +284,14 @@ def send_completion(
 def _send_completion_to_litellm(
     model_config: ModelConfig,
     messages,
-    functions,
     stream,
     temperature=None,
-    extra_params=None,
+    functions=None,
+    tools=None,
+    tool_choice=None,
     extra_headers=None,
     purpose="(unlabeled)",
+    **kwargs
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -305,17 +302,16 @@ def _send_completion_to_litellm(
     Args:
         model_config (ModelConfig): The model configuration instance to use.
         messages (list): A list of message dictionaries to send to the model.
-        functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to None.
-        extra_params (dict, optional): Additional parameters to pass to litellm.completion().
-            This includes:
-            - OpenAI-compatible parameters (like max_tokens, top_p, etc.)
-            - Provider-specific parameters passed through to the provider
+        functions (list, optional): A list of function definitions that the model can use.
+        tools (list, optional): A list of tools the model may use. Currently only functions supported.
+        tool_choice (dict, optional): Controls which function is called by the model.
         extra_headers (dict, optional): Provider-specific headers to pass through.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
+        **kwargs: Additional parameters passed directly to litellm.completion().
 
     Returns:
         litellm.ModelResponse: The model's response object. The structure depends on stream mode:
@@ -351,37 +347,24 @@ def _send_completion_to_litellm(
         raise TypeError(error_msg)
 
     # Build kwargs dict for litellm.completion()
-    kwargs = dict(
-        model=model_config.name,
-        messages=messages,
-        stream=stream,
-        functions=functions,
-    )
+    completion_kwargs = {
+        "model": model_config.name,
+        "messages": messages,
+        "stream": stream,
+        **kwargs  # Include any additional parameters
+    }
 
-    # Add temperature if model supports it
-    if temperature is not None and model_config.use_temperature:
-        kwargs["temperature"] = temperature
-
-    # Add function calling parameters if needed
-    if functions is not None:
-        function = functions[0]
-        kwargs["tools"] = [dict(type="function", function=function)]
-        kwargs["tool_choice"] = {
-            "type": "function",
-            "function": {"name": function["name"]},
-        }
-
-    # Add any model-configured parameters
-    if model_config.extra_params:
-        kwargs.update(model_config.extra_params)
-
-    # Add any request-specific parameters
-    if extra_params:
-        kwargs.update(extra_params)
-
-    # Add provider-specific headers if any
-    if model_config.provider_headers:
-        kwargs["extra_headers"] = dict(model_config.provider_headers)
+    # Add optional parameters if provided
+    if temperature is not None:
+        completion_kwargs["temperature"] = temperature
+    if functions:
+        completion_kwargs["functions"] = functions
+    if tools:
+        completion_kwargs["tools"] = tools
+    if tool_choice:
+        completion_kwargs["tool_choice"] = tool_choice
+    if extra_headers:
+        completion_kwargs["extra_headers"] = extra_headers
 
     # Prepare Langfuse parameters
     langfuse_params = {
@@ -390,19 +373,19 @@ def _send_completion_to_litellm(
         "input": messages,
         "metadata": {
             "parameters": {
-                k: v for k, v in kwargs.items()
+                k: v for k, v in completion_kwargs.items()
                 if k in {"temperature", "max_tokens", "top_p", "tools", "tool_choice"}
             },
             "other_params": {
-                k: v for k, v in kwargs.items()
-                if k not in {"temperature", "max_tokens", "top_p", "tools", "tool_choice", "extra_headers"}
+                k: v for k, v in completion_kwargs.items()
+                if k not in {"temperature", "max_tokens", "top_p", "tools", "tool_choice", "extra_headers", "model", "messages", "stream"}
             }
         }
     }
     langfuse_context.update_current_observation(**langfuse_params)
 
     try:
-        res = litellm.completion(**kwargs)
+        res = litellm.completion(**completion_kwargs)
     except (litellm.exceptions.RateLimitError, litellm.exceptions.APIError) as e:
         # Log the error before re-raising for retry
         logger.warning(f"LiteLLM error ({type(e).__name__}): {str(e)}")
