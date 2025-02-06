@@ -403,9 +403,11 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Create model with various parameters
         model = _ModelConfigImpl("test-model")
-        model.extra_params = {"response_format": {"type": "model_default"}}
-        model.provider_params = {"api_version": "2024-01"}
-        model.provider_headers = {"anthropic-version": "2024-01-beta"}
+        model.extra_params = {
+            "response_format": {"type": "model_default"},
+            "api_version": "2024-01"
+        }
+        model.extra_headers = {"anthropic-version": "2024-01-beta"}
 
         # Call with extra params that should override model params
         extra_params = {
@@ -431,10 +433,10 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Extra params should override model extra params
         self.assertEqual(kwargs.get("extra_params", {}).get("response_format"), {"type": "runtime_override"})
         
-        # Provider params should be passed separately
-        self.assertEqual(kwargs.get("provider_params", {}).get("api_version"), "2024-01")
+        # Model extra params should be preserved when not overridden
+        self.assertEqual(kwargs.get("extra_params", {}).get("api_version"), "2024-01")
         
-        # Provider headers should be preserved
+        # Extra headers should be preserved
         self.assertEqual(kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"})
 
     @patch("litellm.completion") 
