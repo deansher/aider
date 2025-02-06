@@ -305,13 +305,8 @@ def send_completion(
 def _send_completion_to_litellm(
     model_config: ModelConfig,
     messages,
-    stream,
-    temperature=None,
-    functions=None,
-    tools=None,
-    tool_choice=None,
-    extra_headers=None,
     purpose="(unlabeled)",
+    **kwargs
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -322,41 +317,18 @@ def _send_completion_to_litellm(
     Args:
         model_config (ModelConfig): The model configuration instance to use.
         messages (list): A list of message dictionaries to send to the model.
-        stream (bool): Whether to stream the response or not.
-        temperature (float, optional): The sampling temperature to use. Only used if the model
-            supports temperature. Defaults to None.
-        functions (list, optional): A list of function definitions that the model can use.
-        tools (list, optional): A list of tools the model may use. Currently only functions supported.
-        tool_choice (dict, optional): Controls which function is called by the model.
-        extra_headers (dict, optional): Provider-specific headers to pass through.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
+        **kwargs: Additional arguments passed directly to litellm.completion().
 
     Returns:
-        litellm.ModelResponse: The model's response object. The structure depends on stream mode:
-            When stream=False:
-                - choices[0].message.content: The complete response text
-                - choices[0].tool_calls[0].function: Function call details if tools were used
-                - usage.prompt_tokens: Number of input tokens
-                - usage.completion_tokens: Number of output tokens
-                - usage.total_cost: Total cost in USD if available
-                - usage.prompt_cost: Input cost in USD if available
-                - usage.completion_cost: Output cost in USD if available
-            When stream=True:
-                Returns an iterator yielding chunks, where each chunk has:
-                - choices[0].delta.content: The next piece of response text
-                - choices[0].delta.tool_calls[0].function: Partial function call details
-                - usage: Only available in final chunk if stream_options.include_usage=True
+        litellm.ModelResponse: The model's response object. See litellm.completion() for details.
 
     Raises:
         SendCompletionError: If the API returns a non-200 status code
         InvalidResponseError: If the response is missing required fields or empty
         litellm.exceptions.RateLimitError: If rate limit is exceeded
         litellm.exceptions.APIError: For various API-level errors
-        litellm.exceptions.Timeout: If the request times out
-        litellm.exceptions.APIConnectionError: For network connectivity issues
-        litellm.exceptions.ServiceUnavailableError: If the service is unavailable
-        litellm.exceptions.InternalServerError: For server-side errors
         TypeError: If model_config is not a ModelConfig instance
     """
     logger = logging.getLogger(__name__)
@@ -364,48 +336,6 @@ def _send_completion_to_litellm(
         error_msg = f"Expected ModelConfig instance, got {type(model_config)}"
         logger.error(error_msg)
         raise TypeError(error_msg)
-
-    # Start with base kwargs
-    kwargs = dict(
-        model=model_config.name,
-        messages=messages,
-        stream=stream,
-    )
-
-    # Build extra_params dict starting with model defaults
-    extra = {}
-    if model_config.extra_params:
-        extra.update(model_config.extra_params)
-
-    # Add request-specific parameters, overriding model defaults
-    if extra_params:
-        extra.update(extra_params)
-
-    # Add reasoning parameters with highest precedence
-    if model_config.is_reasoning_model:
-        reasoning_params = model_config.map_reasoning_level(reasoning_level)
-        if reasoning_params:
-            extra.update(reasoning_params)
-
-    # Add function/tool parameters
-    if functions:
-        kwargs["functions"] = functions
-    if tools:
-        kwargs["tools"] = tools
-        if tool_choice:
-            kwargs["tool_choice"] = tool_choice
-
-    # Add temperature if model supports it
-    if temperature is not None and model_config.use_temperature:
-        kwargs["temperature"] = temperature
-
-    # Add provider-specific headers if any
-    if model_config.extra_headers:
-        kwargs["extra_headers"] = dict(model_config.extra_headers)
-
-    # Layer in any remaining parameters from extra
-    if extra:
-        kwargs.update(extra)
 
     # Prepare Langfuse parameters
     langfuse_params = {
@@ -419,7 +349,7 @@ def _send_completion_to_litellm(
     langfuse_context.update_current_observation(**langfuse_params)
 
     try:
-        res = litellm.completion(**kwargs)
+        res = litellm.completion(model=model_config.name, messages=messages, **kwargs)
     except (litellm.exceptions.RateLimitError, litellm.exceptions.APIError) as e:
         # Log the error before re-raising for retry
         logger.warning(f"LiteLLM error ({type(e).__name__}): {str(e)}")
@@ -452,7 +382,7 @@ def _send_completion_to_litellm(
             usage["input_cost"] = res.usage.prompt_cost
             usage["output_cost"] = res.usage.completion_cost
 
-    if stream:
+    if kwargs.get("stream"):
         langfuse_context.update_current_observation(usage=usage, name=purpose)
     else:
         # Handle case where response has text but no choices
