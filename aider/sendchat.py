@@ -230,44 +230,47 @@ def send_completion(
 
     logger.debug("send_completion: model=%s use_temperature=%s", model_config.name, model_config.use_temperature)
 
-    # Build kwargs dict for litellm.completion()
+    # Start with base kwargs
     kwargs = dict(
         model=model_config.name,
         messages=messages,
         stream=stream,
     )
 
-    # Add function calling parameters if needed
+    # Build extra_params dict starting with model defaults
+    extra = {}
+    if model_config.extra_params:
+        extra.update(model_config.extra_params)
+
+    # Add request-specific parameters, overriding model defaults
+    if extra_params:
+        extra.update(extra_params)
+
+    # Add reasoning parameters with highest precedence
+    if model_config.is_reasoning_model:
+        reasoning_params = model_config.map_reasoning_level(reasoning_level)
+        if reasoning_params:
+            extra.update(reasoning_params)
+
+    # Add function/tool parameters
     if functions:
         kwargs["functions"] = functions
-
-    # Add tool calling parameters if needed
     if tools:
         kwargs["tools"] = tools
         if tool_choice:
             kwargs["tool_choice"] = tool_choice
 
-    # Add any model-configured parameters
-    if model_config.extra_params:
-        kwargs.update(model_config.extra_params)
-
-    # Add any request-specific parameters
-    if extra_params:
-        kwargs.update(extra_params)
-
-    # Add or override temperature if model supports it
+    # Add temperature if model supports it
     if temperature is not None and model_config.use_temperature:
         kwargs["temperature"] = temperature
-
-    # Add reasoning parameters if applicable
-    if model_config.is_reasoning_model:
-        reasoning_params = model_config.map_reasoning_level(reasoning_level)
-        if reasoning_params:
-            kwargs.update(reasoning_params)
 
     # Add provider-specific headers if any
     if model_config.extra_headers:
         kwargs["extra_headers"] = dict(model_config.extra_headers)
+
+    # Add the layered extra_params
+    if extra:
+        kwargs["extra_params"] = extra
 
     # Create cache key from final kwargs
     key = json.dumps(kwargs, sort_keys=True).encode()
