@@ -162,15 +162,16 @@ def send_completion(
     """
     Send a completion request to the language model and handle the response.
 
-    This function manages parameter layering, caching, and error handling for LLM requests:
-    1. Combines parameters from multiple sources in this order (later overrides earlier):
-       - Model's configured parameters (model_config.extra_params)
-       - Model's provider-specific parameters (model_config.provider_params)
-       - Request-specific parameters (extra_params)
-       - Reasoning level parameters if applicable
-    2. Manages caching behavior when enabled
-    3. Provides unified error handling and retries
-    4. Tracks costs and token usage
+    This function manages parameter layering, caching, and error handling for LLM requests.
+    It uses litellm.completion() under the hood, which accepts OpenAI-compatible parameters
+    and passes any non-OpenAI parameters directly to the provider as kwargs.
+
+    Parameter layering (later overrides earlier):
+    1. Model's configured parameters (model_config.extra_params)
+    2. Model's provider-specific parameters (model_config.provider_params)
+    3. Model's provider-specific headers (model_config.provider_headers)
+    4. Request-specific parameters (extra_params)
+    5. Reasoning level parameters if applicable
 
     Args:
         model_config (ModelConfig): The model configuration instance to use.
@@ -191,7 +192,7 @@ def send_completion(
     Returns:
         tuple: A tuple containing:
             - hash_object (hashlib.sha1): A SHA1 hash object of the request parameters
-            - res: The model's response object. The structure depends on stream mode:
+            - res (litellm.ModelResponse): The model's response object. The structure depends on stream mode:
                 When stream=False:
                     - choices[0].message.content: The complete response text
                     - choices[0].tool_calls[0].function: Function call details if tools were used
