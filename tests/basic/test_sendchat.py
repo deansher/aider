@@ -445,6 +445,9 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
         
+        # Verify extra_params is not passed through to litellm
+        self.assertNotIn("extra_params", kwargs)
+        
         # Extra params should override model extra params
         self.assertEqual(kwargs.get("response_format"), {"type": "runtime_override"})
         
