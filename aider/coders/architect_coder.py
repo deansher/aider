@@ -430,12 +430,12 @@ class ArchitectCoder(Coder):
             logger.exception(
                 "Editor coder failed",
                 extra={
-                    "editor_model": editor_model.name,
-                    "edit_format": self.main_model.editor_edit_format,
+                    "editor_model": editor_model_config.name,
+                    "edit_format": self.main_model_config.editor_edit_format,
                 }
             )
             self.io.tool_error(
-                f"Editor coder failed ({editor_model.name}, {self.main_model.editor_edit_format}): {str(e)}"
+                f"Editor coder failed ({editor_model_config.name}, {self.main_model_config.editor_edit_format}): {str(e)}"
             )
             exchange.append_editor_response(None)
 
