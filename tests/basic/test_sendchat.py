@@ -346,6 +346,22 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         kwargs = mock_completion.call_args.kwargs
         
         # Extra params should override model extra params
+        self.assertEqual(kwargs.get("extra_params", {}).get("param1"), "extra_override")
+        
+        # Provider params should be preserved
+        self.assertEqual(kwargs.get("extra_params", {}).get("param2"), "model_provider")
+        
+        # New extra params should be included
+        self.assertEqual(kwargs.get("extra_params", {}).get("param3"), "extra_new")
+        
+        # Provider headers should be preserved
+        self.assertEqual(kwargs.get("extra_headers"), {"header1": "model_header"})
+
+        # Verify parameter layering
+        mock_completion.assert_called_once()
+        kwargs = mock_completion.call_args.kwargs
+        
+        # Extra params should override model extra params
         self.assertEqual(kwargs.get("param1"), "extra_override")
         
         # Provider params should be preserved
