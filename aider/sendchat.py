@@ -164,7 +164,9 @@ def send_completion(
 
     This function manages caching and error handling for LLM requests. It uses litellm.completion()
     under the hood, which accepts OpenAI-compatible parameters and passes any non-OpenAI parameters
-    directly to the provider as kwargs.
+    directly to the provider as kwargs. litellm.completion() recognizes many OpenAI-compatible
+    parameters and converts them for the provider, while simply passing through parameters that
+    it does not recognize.
 
     Args:
         model_config (ModelConfig): The model configuration instance to use.
@@ -179,8 +181,11 @@ def send_completion(
             - Provider-specific parameters passed through to the provider
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "send-completion".
-        reasoning_level (int, optional): Reasoning effort level adjustment. Higher values increase
-            effort, lower values decrease it. Only used for reasoning models. Defaults to 0.
+        reasoning_level (int, optional): For reasoning models, sets the reasoning effort level 
+            relative to the model's default. Defaults to 0, which means the model's default level.
+            Each negative integer step reduces the reasoning effort by one level, and each positive
+            integer step increases the reasoning effort by one level. Reasoning effort is truncated
+            to the model's minimum and maximum levels.
 
     Returns:
         tuple: A tuple containing:
@@ -230,10 +235,6 @@ def send_completion(
         stream=stream,
     )
 
-    # Add temperature if model supports it
-    if temperature is not None and model_config.use_temperature:
-        kwargs["temperature"] = temperature
-
     # Add function calling parameters if needed
     if functions:
         kwargs["functions"] = functions
@@ -251,6 +252,10 @@ def send_completion(
     # Add any request-specific parameters
     if extra_params:
         kwargs.update(extra_params)
+
+    # Add or override temperature if model supports it
+    if temperature is not None and model_config.use_temperature:
+        kwargs["temperature"] = temperature
 
     # Add reasoning parameters if applicable
     if model_config.is_reasoning_model:
@@ -272,7 +277,7 @@ def send_completion(
         return hash_object, CACHE[key]
 
     # Call the actual LLM function with the model name and all kwargs
-    res = _send_completion_to_litellm(model_config=model_config, **kwargs)
+    res = _send_completion_to_litellm(model_config=model_config, purpose=purpose, **kwargs)
 
     if not stream and CACHE is not None:
         CACHE[key] = res
@@ -355,7 +360,7 @@ def _send_completion_to_litellm(
     }
 
     # Add optional parameters if provided
-    if temperature is not None:
+    if temperature is not None and model_config.use_temperature:
         completion_kwargs["temperature"] = temperature
     if functions:
         completion_kwargs["functions"] = functions
@@ -372,14 +377,7 @@ def _send_completion_to_litellm(
         "model": model_config.name,
         "input": messages,
         "metadata": {
-            "parameters": {
-                k: v for k, v in completion_kwargs.items()
-                if k in {"temperature", "max_tokens", "top_p", "tools", "tool_choice"}
-            },
-            "other_params": {
-                k: v for k, v in completion_kwargs.items()
-                if k not in {"temperature", "max_tokens", "top_p", "tools", "tool_choice", "extra_headers", "model", "messages", "stream"}
-            }
+            "parameters": kwargs,
         }
     }
     langfuse_context.update_current_observation(**langfuse_params)
