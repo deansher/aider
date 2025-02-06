@@ -162,9 +162,15 @@ def send_completion(
     """
     Send a completion request to the language model and handle the response.
 
-    This function manages caching of responses when applicable and delegates the actual LLM
-    call to `_send_completion_to_litellm`. It adapts its behavior based on whether streaming
-    is enabled or not.
+    This function manages parameter layering, caching, and error handling for LLM requests:
+    1. Combines parameters from multiple sources in this order (later overrides earlier):
+       - Model's configured parameters (model_config.extra_params)
+       - Model's provider-specific parameters (model_config.provider_params)
+       - Request-specific parameters (extra_params)
+       - Reasoning level parameters if applicable
+    2. Manages caching behavior when enabled
+    3. Provides unified error handling and retries
+    4. Tracks costs and token usage
 
     Args:
         model_config (ModelConfig): The model configuration instance to use.
@@ -172,13 +178,15 @@ def send_completion(
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Only used if the model
-            supports temperature. Defaults to 0.
+            supports temperature. Defaults to None.
         extra_params (dict, optional): Additional parameters to pass to the model.
             This includes:
             - OpenAI-compatible parameters like max_tokens, top_p, etc.
             - Provider-specific parameters passed through to the provider
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
+        reasoning_level (int, optional): Reasoning effort level adjustment. Higher values increase
+            effort, lower values decrease it. Only used for reasoning models. Defaults to 0.
 
     Returns:
         tuple: A tuple containing:
