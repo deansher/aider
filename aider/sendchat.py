@@ -233,7 +233,7 @@ def send_completion(
     if model_config.use_temperature:
         kwargs['temperature'] = temperature
 
-    # Add optional OpenAI params
+    # Add function calling parameters if needed
     if functions is not None:
         function = functions[0]
         kwargs["tools"] = [dict(type="function", function=function)]
@@ -242,26 +242,32 @@ def send_completion(
             "function": {"name": function["name"]},
         }
 
-    # Initialize extra_params
-    merged_extra_params = dict(model_config.extra_params or {})
+    # Merge all non-OpenAI parameters
+    # These will be passed directly to the provider as kwargs
+    provider_kwargs = {}
+    
+    # Start with model's configured parameters
+    if model_config.extra_params:
+        provider_kwargs.update(model_config.extra_params)
+    if model_config.provider_params:
+        provider_kwargs.update(model_config.provider_params)
+    
+    # Add any request-specific parameters
     if extra_params:
-        merged_extra_params.update(extra_params)
-
-    # Add reasoning model params if applicable
+        provider_kwargs.update(extra_params)
+        
+    # Add reasoning parameters if applicable
     if model_config.is_reasoning_model:
         reasoning_params = model_config.map_reasoning_level(reasoning_level)
         if reasoning_params:
-            merged_extra_params.update(reasoning_params)
-
-    kwargs["extra_params"] = merged_extra_params
-
-    # Add model's provider-specific params
-    if model_config.provider_params:
-        kwargs["provider_params"] = dict(model_config.provider_params or {})
-
-    # Add model's provider-specific headers
+            provider_kwargs.update(reasoning_params)
+            
+    # Add provider-specific headers if any
     if model_config.provider_headers:
-        kwargs["extra_headers"] = dict(model_config.provider_headers or {})
+        kwargs["extra_headers"] = dict(model_config.provider_headers)
+        
+    # Add all provider parameters to kwargs
+    kwargs.update(provider_kwargs)
 
     # Create cache key from final kwargs
     key = json.dumps(kwargs, sort_keys=True).encode()
