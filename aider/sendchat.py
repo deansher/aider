@@ -370,11 +370,11 @@ def _send_completion_to_litellm(
     if temperature is not None and model_config.use_temperature:
         kwargs["temperature"] = temperature
 
-    # Add extra parameters if provided
+    # Add any provider-specific parameters
     if extra_params is not None:
-        kwargs["extra_params"] = extra_params
+        kwargs.update(extra_params)
     if provider_params is not None:
-        kwargs["provider_params"] = provider_params
+        kwargs.update(provider_params)
     if extra_headers is not None:
         kwargs["extra_headers"] = extra_headers
 
