@@ -348,8 +348,8 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Extra params should override model extra params
         self.assertEqual(kwargs.get("extra_params", {}).get("param1"), "extra_override")
         
-        # Provider params should be preserved
-        self.assertEqual(kwargs.get("extra_params", {}).get("param2"), "model_provider")
+        # Provider params should be passed separately
+        self.assertEqual(kwargs.get("provider_params", {}).get("param2"), "model_provider")
         
         # New extra params should be included
         self.assertEqual(kwargs.get("extra_params", {}).get("param3"), "extra_new")
