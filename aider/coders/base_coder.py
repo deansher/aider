@@ -220,17 +220,6 @@ class Coder:
         new_coder.ignore_mentions = self.ignore_mentions
         return new_coder
 
-    def compute_effective_reasoning_effort(self, request_adjustment: int = 0) -> int:
-        return self.reasoning_effort_modifier + request_adjustment
-
-    def map_reasoning_effort(self, effort: int) -> str:
-        effort_int = int(round(effort))
-        if effort_int >= 0:
-            return "high"
-        elif effort_int == -1:
-            return "medium"
-        else:
-            return "low"
 
     def get_announcements(self):
         lines = []
