@@ -315,9 +315,8 @@ def _send_completion_to_litellm(
     """
     Send a completion request to the language model and handle the response.
 
-    This function manages caching of responses when applicable and delegates the actual LLM
-    call to `_send_completion_to_litellm`. It adapts its behavior based on whether streaming
-    is enabled or not.
+    This function handles Langfuse integration and parameter validation for litellm.completion().
+    It is an internal implementation detail and should not be called directly.
 
     Args:
         model_config (ModelConfig): The model configuration instance to use.
@@ -325,31 +324,31 @@ def _send_completion_to_litellm(
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Only used if the model
-            supports temperature. Defaults to 0.
+            supports temperature. Defaults to None.
         extra_params (dict, optional): Additional parameters to pass to the model.
             This includes:
             - OpenAI-compatible parameters like max_tokens, top_p, etc.
             - Provider-specific parameters passed through to the provider
+        provider_params (dict, optional): Provider-specific parameters to pass through.
+        extra_headers (dict, optional): Provider-specific headers to pass through.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
 
     Returns:
-        tuple: A tuple containing:
-            - hash_object (hashlib.sha1): A SHA1 hash object of the request parameters
-            - res: The model's response object. The structure depends on stream mode:
-                When stream=False:
-                    - choices[0].message.content: The complete response text
-                    - choices[0].tool_calls[0].function: Function call details if tools were used
-                    - usage.prompt_tokens: Number of input tokens
-                    - usage.completion_tokens: Number of output tokens
-                    - usage.total_cost: Total cost in USD if available
-                    - usage.prompt_cost: Input cost in USD if available
-                    - usage.completion_cost: Output cost in USD if available
-                When stream=True:
-                    Returns an iterator yielding chunks, where each chunk has:
-                    - choices[0].delta.content: The next piece of response text
-                    - choices[0].delta.tool_calls[0].function: Partial function call details
-                    - usage: Only available in final chunk if stream_options.include_usage=True
+        litellm.ModelResponse: The model's response object. The structure depends on stream mode:
+            When stream=False:
+                - choices[0].message.content: The complete response text
+                - choices[0].tool_calls[0].function: Function call details if tools were used
+                - usage.prompt_tokens: Number of input tokens
+                - usage.completion_tokens: Number of output tokens
+                - usage.total_cost: Total cost in USD if available
+                - usage.prompt_cost: Input cost in USD if available
+                - usage.completion_cost: Output cost in USD if available
+            When stream=True:
+                Returns an iterator yielding chunks, where each chunk has:
+                - choices[0].delta.content: The next piece of response text
+                - choices[0].delta.tool_calls[0].function: Partial function call details
+                - usage: Only available in final chunk if stream_options.include_usage=True
 
     Raises:
         SendCompletionError: If the API returns a non-200 status code
