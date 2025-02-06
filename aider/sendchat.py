@@ -511,6 +511,6 @@ def simple_send_with_retries(model_config: ModelConfig, messages, extra_params=N
     if hasattr(response, "choices") and response.choices:
         return response.choices[0].message.content
     else:
-        error_message = f"Invalid response from {model.name}: missing choices"
+        error_message = f"Invalid response from {model_config.name}: missing choices"
         logger.error(error_message)
         raise InvalidResponseError(error_message)
