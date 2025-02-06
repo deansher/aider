@@ -303,41 +303,47 @@ def _send_completion_to_litellm(
     purpose="(unlabeled)",
 ):
     """
-    Sends the completion request to litellm.completion and handles the response.
+    Send a completion request to the language model and handle the response.
 
-    This function sends a request to the specified language model and returns the response.
-    It supports both streaming and non-streaming responses.
+    This function manages caching of responses when applicable and delegates the actual LLM
+    call to `_send_completion_to_litellm`. It adapts its behavior based on whether streaming
+    is enabled or not.
 
     Args:
         model_config (ModelConfig): The model configuration instance to use.
         messages (list): A list of message dictionaries to send to the model.
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
-        temperature (float, optional): The sampling temperature to use. Defaults to None.
-        purpose (str, optional): The purpose of this completion, used as the name in Langfuse.
-                               Defaults to "(unlabeled)".
+        temperature (float, optional): The sampling temperature to use. Only used if the model
+            supports temperature. Defaults to 0.
+        purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
+            Defaults to "send-completion".
+        reasoning_level (int, optional): Controls reasoning behavior for reasoning models.
+            0 means default level, negative values reduce reasoning (e.g. -1 for medium, -2 for low),
+            positive values increase reasoning. All positive values map to maximum reasoning.
+            For non-reasoning models, this parameter has no effect. Defaults to 0.
         **kwargs: Additional parameters passed directly to litellm.completion(). This includes:
             - OpenAI-compatible parameters like max_tokens, top_p, etc.
             - Provider-specific parameters passed through to the provider
             - extra_headers for provider-specific headers
 
     Returns:
-        res: The model's response object. The structure depends on stream mode:
-            When stream=False:
-                - choices[0].message.content: The complete response text
-                - choices[0].tool_calls[0].function: Function call details if tools were used
-                - usage.prompt_tokens: Number of input tokens
-                - usage.completion_tokens: Number of output tokens
-                - usage.total_cost: Total cost in USD if available
-                - usage.prompt_cost: Input cost in USD if available
-                - usage.completion_cost: Output cost in USD if available
-            When stream=True:
-                Returns an iterator yielding chunks, where each chunk has:
-                - choices[0].delta.content: The next piece of response text
-                - choices[0].delta.tool_calls[0].function: Partial function call details
-                - usage: Not available
-                  (We could change our implementation to add this
-                  by setting stream_options.include_usage=True)
+        tuple: A tuple containing:
+            - hash_object (hashlib.sha1): A SHA1 hash object of the request parameters
+            - res: The model's response object. The structure depends on stream mode:
+                When stream=False:
+                    - choices[0].message.content: The complete response text
+                    - choices[0].tool_calls[0].function: Function call details if tools were used
+                    - usage.prompt_tokens: Number of input tokens
+                    - usage.completion_tokens: Number of output tokens (includes internal reasoning tokens)
+                    - usage.total_cost: Total cost in USD if available
+                    - usage.prompt_cost: Input cost in USD if available
+                    - usage.completion_cost: Output cost in USD if available
+                When stream=True:
+                    Returns an iterator yielding chunks, where each chunk has:
+                    - choices[0].delta.content: The next piece of response text
+                    - choices[0].delta.tool_calls[0].function: Partial function call details
+                    - usage: Only available in final chunk if stream_options.include_usage=True
 
     Raises:
         SendCompletionError: If the API returns a non-200 status code
@@ -349,11 +355,6 @@ def _send_completion_to_litellm(
         litellm.exceptions.ServiceUnavailableError: If the service is unavailable
         litellm.exceptions.InternalServerError: For server-side errors
         TypeError: If model_config is not a ModelConfig instance
-
-    Notes:
-        - This function uses Langfuse for tracing and monitoring.
-        - The `@observe` decorator captures input and output for Langfuse.
-        - Usage information is captured in Langfuse for both streaming and non-streaming responses.
     """
     logger = logging.getLogger(__name__)
     if not isinstance(model_config, ModelConfig):
