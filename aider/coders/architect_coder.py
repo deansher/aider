@@ -404,7 +404,7 @@ class ArchitectCoder(Coder):
         logger = logging.getLogger(__name__)
         editor_model_config = self.main_model.editor_model or self.main_model
         editor_coder = self.create_coder(
-            edit_format=self.main_model_config.editor_edit_format,
+            edit_format=self.main_model.editor_edit_format,
             main_model=editor_model_config,
         )
         # Give editor_coder the conversation so far
