@@ -155,10 +155,9 @@ def send_completion(
     functions,
     stream,
     temperature=0,
+    reasoning_level: int = 0,
     extra_params=None,
     purpose="send-completion",
-    reasoning_level: int = 0,
-    tools=None,
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -176,7 +175,11 @@ def send_completion(
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to 0.
-        tools (list, optional): A list of tools the model may use. Currently only functions supported.
+        reasoning_level (int, optional): For reasoning models, sets the reasoning effort level 
+            relative to the model's default. Defaults to 0, which means the model's default level.
+            Each negative integer step reduces the reasoning effort by one level, and each positive
+            integer step increases the reasoning effort by one level. Reasoning effort is truncated
+            to the model's minimum and maximum levels.
         extra_params (dict, optional): Additional parameters to pass to litellm.completion().
             These parameters override any matching parameters from model_config.extra_params.
             This includes:
@@ -184,11 +187,6 @@ def send_completion(
             - Provider-specific parameters passed through to the provider
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "send-completion".
-        reasoning_level (int, optional): For reasoning models, sets the reasoning effort level 
-            relative to the model's default. Defaults to 0, which means the model's default level.
-            Each negative integer step reduces the reasoning effort by one level, and each positive
-            integer step increases the reasoning effort by one level. Reasoning effort is truncated
-            to the model's minimum and maximum levels.
 
     Returns:
         tuple: A tuple containing:
@@ -232,7 +230,6 @@ def send_completion(
     logger.debug("send_completion: model=%s use_temperature=%s", model_config.name, model_config.use_temperature)
 
     # Start with base kwargs
-    # Start with base kwargs
     kwargs = dict(
         model=model_config.name,
         messages=messages,
@@ -253,14 +250,6 @@ def send_completion(
         reasoning_params = model_config.map_reasoning_level(reasoning_level)
         if reasoning_params:
             extra.update(reasoning_params)
-
-    # Add function/tool parameters
-    if functions:
-        extra["functions"] = functions
-    if tools:
-        extra["tools"] = tools
-        if tool_choice:
-            extra["tool_choice"] = tool_choice
 
     # Add temperature if model supports it
     if temperature is not None and model_config.use_temperature:
@@ -286,14 +275,7 @@ def send_completion(
     # Call the actual LLM function with the model name and all kwargs
     res = _send_completion_to_litellm(
         model_config=model_config,
-        messages=messages,
-        stream=stream,
-        temperature=temperature if model_config.use_temperature else None,
-        functions=functions,
-        tools=tools,
-        tool_choice=tool_choice if tools else None,
-        extra_headers=kwargs.get("extra_headers"),
-        purpose=purpose,
+        **kwargs,
     )
 
     if not stream and CACHE is not None:
