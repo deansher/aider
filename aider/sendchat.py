@@ -289,7 +289,7 @@ def _send_completion_to_litellm(
     model_config: ModelConfig,
     messages,
     purpose="(unlabeled)",
-    **kwargs
+    **litellm_kwargs
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -326,13 +326,13 @@ def _send_completion_to_litellm(
         "model": model_config.name,
         "input": messages,
         "metadata": {
-            "parameters": kwargs,
+            "parameters": litellm_kwargs,
         }
     }
     langfuse_context.update_current_observation(**langfuse_params)
 
     try:
-        res = litellm.completion(model=model_config.name, messages=messages, **kwargs)
+        res = litellm.completion(**litellm_kwargs)
     except (litellm.exceptions.RateLimitError, litellm.exceptions.APIError) as e:
         # Log the error before re-raising for retry
         logger.warning(f"LiteLLM error ({type(e).__name__}): {str(e)}")
@@ -365,7 +365,7 @@ def _send_completion_to_litellm(
             usage["input_cost"] = res.usage.prompt_cost
             usage["output_cost"] = res.usage.completion_cost
 
-    if kwargs.get("stream"):
+    if litellm_kwargs.get("stream"):
         langfuse_context.update_current_observation(usage=usage, name=purpose)
     else:
         # Handle case where response has text but no choices
@@ -394,10 +394,7 @@ def _send_completion_to_litellm(
             output = choice.message.content
 
         langfuse_context.update_current_observation(
-            name=purpose,
-            input=str(messages),  # Convert messages to string for logging
             output=output if output else None,
-            model=model_config.name,
             usage=usage if usage else None,
         )
 
