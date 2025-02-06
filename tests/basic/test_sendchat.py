@@ -379,6 +379,15 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
         
+        # Extra params should override model params
+        self.assertEqual(kwargs["response_format"], {"type": "runtime_override"})
+        
+        # Model params should be preserved when not overridden
+        self.assertEqual(kwargs["api_version"], "2024-01")
+        
+        # Headers should be preserved
+        self.assertEqual(kwargs["extra_headers"], {"anthropic-version": "2024-01-beta"})
+        
         # Extra params should override model extra params
         self.assertEqual(kwargs.get("response_format"), {"type": "runtime_override"})
         
@@ -433,7 +442,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Verify reasoning_level took precedence
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
-        self.assertEqual(kwargs.get("reasoning_effort"), "high")
+        self.assertEqual(kwargs["reasoning_effort"], "high")
 
         # Verify reasoning_level took precedence
         mock_completion.assert_called_once()
