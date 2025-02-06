@@ -407,7 +407,6 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.assertEqual(kwargs.get("extra_params", {}).get("reasoning_effort"), "high")
 
     @patch("litellm.completion")
-    @patch("litellm.completion")
     def test_parameter_layering(self, mock_completion):
         """Test parameter layering between model config and request params."""
         # Create model with various parameters
@@ -447,10 +446,10 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         kwargs = mock_completion.call_args.kwargs
         
         # Extra params should override model extra params
-        self.assertEqual(kwargs.get("extra_params", {}).get("response_format"), {"type": "runtime_override"})
+        self.assertEqual(kwargs.get("response_format"), {"type": "runtime_override"})
         
         # Model extra params should be preserved when not overridden
-        self.assertEqual(kwargs.get("extra_params", {}).get("api_version"), "2024-01")
+        self.assertEqual(kwargs.get("api_version"), "2024-01")
         
         # Extra headers should be preserved
         self.assertEqual(kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"})
@@ -487,4 +486,4 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Verify reasoning_level took precedence
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
-        self.assertEqual(kwargs.get("extra_params", {}).get("reasoning_effort"), "high")
+        self.assertEqual(kwargs.get("reasoning_effort"), "high")
