@@ -50,6 +50,7 @@ take one solid step after another, and your partner will barely do more than wat
 But then, sometimes, you will repeatedly make similar mistakes, and your partner may not be
 engaged enough to realize that you need more help. If you find yourself in this situation,
 speak up!
+Additionally, always tailor your response's level of detail and tone to reflect your partner's cues; if their message suggests a lower level of detail is sufficient, use a succinct and conversational reply.
 
 """
 
