@@ -294,11 +294,11 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.return_value = success_response
 
         # Test with a reasoning model
-        model = _OpenAiReasoningConfigImpl("o3-mini")
-        self.assertTrue(model.is_reasoning_model)
+        model_config = _OpenAiReasoningConfigImpl("o3-mini")
+        self.assertTrue(model_config.is_reasoning_model)
 
         # Call send_completion with reasoning_level
-        send_completion(model, ["message"], None, False, reasoning_level=1)
+        send_completion(model_config, ["message"], None, False, reasoning_level=1)
 
         # Verify reasoning_effort was passed to litellm
         mock_completion.assert_called_once()
@@ -307,11 +307,11 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Test with a non-reasoning model
         mock_completion.reset_mock()
-        model = _ModelConfigImpl("gpt-4")
-        self.assertFalse(model.is_reasoning_model)
+        model_config = _ModelConfigImpl("gpt-4")
+        self.assertFalse(model_config.is_reasoning_model)
 
         # Call send_completion with reasoning_level
-        send_completion(model, ["message"], None, False, reasoning_level=1)
+        send_completion(model_config, ["message"], None, False, reasoning_level=1)
 
         # Verify no reasoning parameters were passed
         mock_completion.assert_called_once()
