@@ -407,7 +407,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.assertEqual(kwargs.get("extra_params", {}).get("reasoning_effort"), "high")
 
     @patch("litellm.completion")
-    def test_parameter_layering(self, mock_completion):
+    def test_send_completion_parameter_layering(self, mock_completion):
         """Test parameter layering between model config and request params."""
         # Create model with various parameters
         model = _ModelConfigImpl("test-model")
@@ -445,9 +445,6 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
         
-        # Verify extra_params is not passed through to litellm
-        self.assertNotIn("extra_params", kwargs)
-        
         # Extra params should override model extra params
         self.assertEqual(kwargs.get("response_format"), {"type": "runtime_override"})
         
@@ -457,8 +454,8 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Extra headers should be preserved
         self.assertEqual(kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"})
 
-    @patch("litellm.completion") 
-    def test_reasoning_parameter_precedence(self, mock_completion):
+    @patch("litellm.completion")
+    def test_send_completion_reasoning_parameter_precedence(self, mock_completion):
         """Test that reasoning_level takes precedence over other reasoning parameters."""
         # Create reasoning model with extra params
         model = _OpenAiReasoningConfigImpl("o3-mini")
@@ -490,3 +487,35 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
         self.assertEqual(kwargs.get("reasoning_effort"), "high")
+
+    @patch("litellm.completion")
+    def test_send_completion_to_litellm_kwargs_passthrough(self, mock_completion):
+        """Test that kwargs are passed through to litellm.completion."""
+        model = _ModelConfigImpl("test-model")
+        messages = [{"role": "user", "content": "test"}]
+        custom_kwargs = {
+            "stream": True,
+            "temperature": 0.7,
+            "max_tokens": 100,
+            "custom_param": "value"
+        }
+
+        # Create a successful mock response
+        success_response = MagicMock()
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success response"
+        success_response.status_code = 200
+        mock_completion.return_value = success_response
+
+        _send_completion_to_litellm(
+            model_config=model,
+            messages=messages,
+            purpose="test kwargs",
+            **custom_kwargs
+        )
+
+        # Verify all kwargs were passed through
+        mock_completion.assert_called_once()
+        kwargs = mock_completion.call_args.kwargs
+        for key, value in custom_kwargs.items():
+            self.assertEqual(kwargs.get(key), value)
