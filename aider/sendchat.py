@@ -328,6 +328,8 @@ def _send_completion_to_litellm(
         extra_params (dict, optional): Additional parameters to pass to litellm.completion().
             This includes both OpenAI-compatible parameters and provider-specific parameters.
             Any non-OpenAI parameters are passed directly to the provider as kwargs.
+        provider_params (dict, optional): Provider-specific parameters to pass through.
+        extra_headers (dict, optional): Provider-specific headers to pass through.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
 
