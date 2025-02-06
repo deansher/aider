@@ -371,13 +371,17 @@ def _send_completion_to_litellm(
             "function": {"name": function["name"]},
         }
 
-    # Add any additional parameters
+    # Add any model-configured parameters
+    if model_config.extra_params:
+        kwargs.update(model_config.extra_params)
+
+    # Add any request-specific parameters
     if extra_params:
         kwargs.update(extra_params)
 
-    # Add extra headers if provided
-    if extra_headers:
-        kwargs["extra_headers"] = extra_headers
+    # Add provider-specific headers if any
+    if model_config.provider_headers:
+        kwargs["extra_headers"] = dict(model_config.provider_headers)
 
     # Prepare Langfuse parameters
     langfuse_params = {
