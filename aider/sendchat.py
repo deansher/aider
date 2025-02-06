@@ -375,6 +375,8 @@ def _send_completion_to_litellm(
         completion_kwargs["tool_choice"] = tool_choice
     if extra_headers:
         completion_kwargs["extra_headers"] = extra_headers
+    if model_config.extra_params:
+        completion_kwargs.update(model_config.extra_params)
 
     # Prepare Langfuse parameters
     langfuse_params = {
