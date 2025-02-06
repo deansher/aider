@@ -1128,6 +1128,7 @@ def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit
     config.get_editor_model(editor_model, editor_edit_format)
     return config
 
+
 def get_model_info(model):
     if not litellm._lazy_module:
         cache_dir = Path.home() / ".aider" / "caches"
