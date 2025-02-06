@@ -1532,12 +1532,17 @@ class Coder:
             if model.info.get("is_reasoning_model"):
                 effective = self.compute_effective_reasoning_effort()
                 extra["reasoning_effort"] = self.map_reasoning_effort(effective)
+            if self.edit_format == "diff" and self.num_reflections > 0:
+                reasoning_level = -2
+            else:
+                reasoning_level = 0
             hash_object, completion = send_completion(
                 model,
                 messages,
                 functions,
                 self.stream,
                 temp,
+                reasoning_level=reasoning_level,
                 extra_params=extra,
                 purpose=purpose,
             )
