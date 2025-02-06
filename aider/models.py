@@ -116,8 +116,8 @@ class ModelSettings:
     lazy: bool = False
     reminder: str = "user"
     examples_as_sys_msg: bool = False
-    extra_params: Optional[dict] = None  # OpenAI-compatible parameters and provider-specific parameters
-    provider_headers: Optional[dict] = None  # Provider-specific headers (e.g. anthropic-beta)
+    extra_params: Optional[dict] = None  # OpenAI-compatible parameters (like max_tokens, top_p) and provider-specific parameters
+    provider_headers: Optional[dict] = None  # Provider-specific headers passed via extra_headers
     cache_control: bool = False
     caches_by_default: bool = False
     use_system_prompt: bool = True
