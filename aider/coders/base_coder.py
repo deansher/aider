@@ -1151,34 +1151,54 @@ class Coder:
 
     @observe
     def send_message(self, new_user_message):
-        """Core method that processes user input and manages the LLM interaction flow.
+        """
+        Send a completion request to the language model and handle the response.
 
-        This is the central workflow that:
-        1. Adds user message to self.cur_messages
-        2. Creates prompt_messages, a chat history for the LLM that captures all state
-        3. Sends completion request and handles streaming response
-        4. Processes code edits and shell commands from response
-        5. Manages git commits, linting, and testing
-        6. Handles errors, retries, and reflection requests
-
-        The method maintains several key invariants:
-        - Files must be explicitly added before editing
-        - Auto-commits happen after successful edits
-        - Dirty files are committed before edits if configured
-        - Shell commands require user confirmation
+        This function handles Langfuse integration and parameter validation for litellm.completion().
+        It is an internal implementation detail and should not be called directly.
 
         Args:
-            new_user_message: The user's message to process
+            model_config (ModelConfig): The model configuration instance to use.
+            messages (list): A list of message dictionaries to send to the model.
+            functions (list): A list of function definitions that the model can use.
+            stream (bool): Whether to stream the response or not.
+            temperature (float, optional): The sampling temperature to use. Only used if the model
+                supports temperature. Defaults to None.
+            extra_params (dict, optional): Additional parameters to pass to the model.
+                This includes:
+                - OpenAI-compatible parameters like max_tokens, top_p, etc.
+                - Provider-specific parameters passed through to the provider
+            provider_params (dict, optional): Provider-specific parameters to pass through.
+            extra_headers (dict, optional): Provider-specific headers to pass through.
+            purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
+                Defaults to "(unlabeled)".
 
-        Yields:
-            Response chunks when streaming is enabled
+        Returns:
+            litellm.ModelResponse: The model's response object. The structure depends on stream mode:
+                When stream=False:
+                    - choices[0].message.content: The complete response text
+                    - choices[0].tool_calls[0].function: Function call details if tools were used
+                    - usage.prompt_tokens: Number of input tokens
+                    - usage.completion_tokens: Number of output tokens
+                    - usage.total_cost: Total cost in USD if available
+                    - usage.prompt_cost: Input cost in USD if available
+                    - usage.completion_cost: Output cost in USD if available
+                When stream=True:
+                    Returns an iterator yielding chunks, where each chunk has:
+                    - choices[0].delta.content: The next piece of response text
+                    - choices[0].delta.tool_calls[0].function: Partial function call details
+                    - usage: Only available in final chunk if stream_options.include_usage=True
 
-        The method handles many edge cases:
-        - Token limit exhaustion
-        - Malformed edit blocks
-        - Network errors and retries
-        - Keyboard interrupts
-        - Reflection requests
+        Raises:
+            SendCompletionError: If the API returns a non-200 status code
+            InvalidResponseError: If the response is missing required fields or empty
+            litellm.exceptions.RateLimitError: If rate limit is exceeded
+            litellm.exceptions.APIError: For various API-level errors
+            litellm.exceptions.Timeout: If the request times out
+            litellm.exceptions.APIConnectionError: For network connectivity issues
+            litellm.exceptions.ServiceUnavailableError: If the service is unavailable
+            litellm.exceptions.InternalServerError: For server-side errors
+            TypeError: If model_config is not a ModelConfig instance
         """
         user_message_prefix = new_user_message[:15] + " ..."
         langfuse_context.update_current_observation(name=f"{user_message_prefix}")
@@ -1743,9 +1763,23 @@ class Coder:
         self.usage_report = tokens_report + sep + cost_report
 
     def compute_usage(self):
-        self.message_cost = 0.0
-        self.message_tokens_sent = 0
-        self.message_tokens_received = 0
+        """Test that compute_usage resets usage metrics."""
+        with GitTemporaryDirectory():
+            io = InputOutput(yes=True)
+            coder = Coder.create(self.GPT35, "diff", io=io)
+            
+            # Set some initial values
+            coder.message_cost = 42.0
+            coder.message_tokens_sent = 100
+            coder.message_tokens_received = 200
+            
+            # Call compute_usage
+            coder.compute_usage()
+            
+            # Verify all metrics were reset
+            self.assertEqual(coder.message_cost, 0.0)
+            self.assertEqual(coder.message_tokens_sent, 0)
+            self.assertEqual(coder.message_tokens_received, 0)
 
     def get_multi_response_content(self, final=False):
         cur = self.multi_response_content or ""
