@@ -50,7 +50,12 @@ class TestSendChat(unittest.TestCase):
         ]
 
         # Call the simple_send_with_retries method
-        result = simple_send_with_retries(self.test_model, [{"role": "user", "content": "message"}])
+        result = simple_send_with_retries(
+            model_config=self.test_model,
+            messages=[{"role": "user", "content": "message"}],
+            extra_params=None,
+            purpose="send with retries"
+        )
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
@@ -120,7 +125,12 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         ]
 
         # Call the simple_send_with_retries method
-        result = simple_send_with_retries(self.test_model, [{"role": "user", "content": "message"}])
+        result = simple_send_with_retries(
+            model_config=self.test_model,
+            messages=[{"role": "user", "content": "message"}],
+            extra_params=None,
+            purpose="send with retries"
+        )
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
@@ -145,7 +155,12 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         ]
 
         # Call the simple_send_with_retries method
-        result = simple_send_with_retries(self.test_model, ["message"])
+        result = simple_send_with_retries(
+            model_config=self.test_model,
+            messages=["message"],
+            extra_params=None,
+            purpose="send with retries"
+        )
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
@@ -165,7 +180,12 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         ]
 
         # Call the simple_send_with_retries method
-        result = simple_send_with_retries(self.test_model, ["message"])
+        result = simple_send_with_retries(
+            model_config=self.test_model,
+            messages=["message"],
+            extra_params=None,
+            purpose="send with retries"
+        )
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
@@ -182,7 +202,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Call send_completion and verify it raises SendCompletionError
         with self.assertRaises(SendCompletionError) as context:
-            send_completion(self.test_model, ["message"], None, False)
+            send_completion(
+                model_config=self.test_model,
+                messages=["message"],
+                functions=None,
+                stream=False,
+                temperature=0,
+                extra_params=None,
+                purpose="test completion",
+                reasoning_level=0
+            )
 
         self.assertEqual(context.exception.status_code, 400)
         self.assertIn("Bad Request", str(context.exception))
@@ -240,7 +269,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Call send_completion and verify it raises InvalidResponseError
         with self.assertRaises(InvalidResponseError) as context:
-            send_completion(self.test_model, ["message"], None, False)
+            send_completion(
+                model_config=self.test_model,
+                messages=["message"],
+                functions=None,
+                stream=False,
+                temperature=0,
+                extra_params=None,
+                purpose="test completion",
+                reasoning_level=0
+            )
 
         self.assertIn("has no choices attribute", str(context.exception))
 
@@ -259,7 +297,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Call send_completion and verify it raises InvalidResponseError
         with self.assertRaises(InvalidResponseError) as context:
-            send_completion(self.test_model, ["message"], None, False)
+            send_completion(
+                model_config=self.test_model,
+                messages=["message"],
+                functions=None,
+                stream=False,
+                temperature=0,
+                extra_params=None,
+                purpose="test completion",
+                reasoning_level=0
+            )
 
         self.assertIn("empty choices list", str(context.exception))
 
@@ -277,7 +324,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.return_value = mock_response
 
         # Call send_completion with a temperature
-        send_completion(model, ["message"], None, False, temperature=0.7)
+        _hash, completion = send_completion(
+            model_config=model,
+            messages=["message"],
+            functions=None,
+            stream=False,
+            temperature=0.7,
+            extra_params=None,
+            purpose="test completion",
+            reasoning_level=0
+        )
 
         # Verify temperature was not passed to litellm
         mock_completion.assert_called_once()
@@ -298,7 +354,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.assertTrue(model_config.is_reasoning_model)
 
         # Call send_completion with reasoning_level
-        send_completion(model_config, ["message"], None, False, reasoning_level=1)
+        _hash, completion = send_completion(
+            model_config=model_config,
+            messages=["message"],
+            functions=None,
+            stream=False,
+            temperature=0,
+            extra_params=None,
+            purpose="test completion",
+            reasoning_level=1
+        )
 
         # Verify reasoning_effort was passed to litellm
         mock_completion.assert_called_once()
@@ -311,7 +376,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.assertFalse(model_config.is_reasoning_model)
 
         # Call send_completion with reasoning_level
-        send_completion(model_config, ["message"], None, False, reasoning_level=1)
+        _hash, completion = send_completion(
+            model_config=model_config,
+            messages=["message"],
+            functions=None,
+            stream=False,
+            temperature=0,
+            extra_params=None,
+            purpose="test completion",
+            reasoning_level=1
+        )
 
         # Verify no reasoning parameters were passed
         mock_completion.assert_called_once()
@@ -339,7 +413,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             "seed": 42
         }
 
-        send_completion(model, ["message"], None, False, extra_params=extra_params)
+        _hash, completion = send_completion(
+            model_config=model,
+            messages=["message"],
+            functions=None,
+            stream=False,
+            temperature=0,
+            extra_params=extra_params,
+            purpose="test completion",
+            reasoning_level=0
+        )
 
         # Verify parameter layering
         mock_completion.assert_called_once()
@@ -353,23 +436,6 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         
         # Provider headers should be preserved
         self.assertEqual(kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"})
-        self.assertEqual(kwargs.get("extra_headers"), {"header1": "model_header"})
-
-        # Verify parameter layering
-        mock_completion.assert_called_once()
-        kwargs = mock_completion.call_args.kwargs
-        
-        # Extra params should override model extra params
-        self.assertEqual(kwargs.get("param1"), "extra_override")
-        
-        # Provider params should be preserved
-        self.assertEqual(kwargs.get("param2"), "model_provider")
-        
-        # New extra params should be included
-        self.assertEqual(kwargs.get("param3"), "extra_new")
-        
-        # Provider headers should be preserved
-        self.assertEqual(kwargs.get("extra_headers"), {"header1": "model_header"})
 
     @patch("litellm.completion") 
     def test_reasoning_parameter_precedence(self, mock_completion):
@@ -388,8 +454,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         extra_params = {"reasoning_effort": "medium"}
         
         # reasoning_level should take precedence over both model.extra_params and extra_params
-        send_completion(model, ["message"], None, False, 
-                       extra_params=extra_params, reasoning_level=1)
+        _hash, completion = send_completion(
+            model_config=model,
+            messages=["message"],
+            functions=None,
+            stream=False,
+            temperature=0,
+            extra_params=extra_params,
+            purpose="test completion",
+            reasoning_level=1
+        )
 
         # Verify reasoning_level took precedence
         mock_completion.assert_called_once()
