@@ -227,7 +227,6 @@ def send_completion(
         model=model_config.name,  # Use name for API call
         messages=messages,
         stream=stream,
-        extra_params=extra_params,
         functions=functions,
         purpose=purpose
     )
@@ -244,28 +243,26 @@ def send_completion(
             "function": {"name": function["name"]},
         }
 
-    # Add model's OpenAI-compatible params
-    if model_config.extra_params:
-        kwargs.update(model_config.extra_params)
-
-    # Add model's provider-specific params
-    if model_config.provider_params:
-        kwargs.update(model_config.provider_params)
-
-    # Add model's provider-specific headers
-    if model_config.provider_headers:
-        kwargs["extra_headers"] = model_config.provider_headers
-
     # Initialize extra_params
-    extra_params = dict(extra_params) if extra_params else {}
+    merged_extra_params = dict(model_config.extra_params or {})
+    if extra_params:
+        merged_extra_params.update(extra_params)
 
     # Add reasoning model params if applicable
     if model_config.is_reasoning_model:
         reasoning_params = model_config.map_reasoning_level(reasoning_level)
         if reasoning_params:
-            extra_params.update(reasoning_params)
+            merged_extra_params.update(reasoning_params)
 
-    kwargs["extra_params"] = extra_params
+    kwargs["extra_params"] = merged_extra_params
+
+    # Add model's provider-specific params
+    if model_config.provider_params:
+        kwargs["provider_params"] = dict(model_config.provider_params or {})
+
+    # Add model's provider-specific headers
+    if model_config.provider_headers:
+        kwargs["extra_headers"] = dict(model_config.provider_headers or {})
 
     # Create cache key from final kwargs
     key = json.dumps(kwargs, sort_keys=True).encode()
@@ -276,7 +273,7 @@ def send_completion(
     if not stream and CACHE is not None and key in CACHE:
         return hash_object, CACHE[key]
 
-    # Create kwargs for _send_completion_to_litellm
+    # Adjust kwargs for _send_completion_to_litellm
     litellm_kwargs = dict(kwargs)
     litellm_kwargs['model_config'] = model_config
     del litellm_kwargs['model']
