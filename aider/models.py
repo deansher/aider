@@ -116,7 +116,7 @@ class ModelSettings:
     lazy: bool = False
     reminder: str = "user"
     examples_as_sys_msg: bool = False
-    extra_params: Optional[dict] = None  # OpenAI-compatible parameters and provider-specific parameters
+    extra_params: Optional[dict] = None  # OpenAI-compatible parameters and provider-specific parameters that litellm will pass through
     extra_headers: Optional[dict] = None  # Headers to pass to the provider via litellm
     cache_control: bool = False
     caches_by_default: bool = False
@@ -688,8 +688,6 @@ MODEL_SETTINGS = [
         accepts_images=True,
         extra_params={
             "max_tokens": 8192,
-        },
-        extra_headers={
             "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
@@ -706,8 +704,6 @@ MODEL_SETTINGS = [
         accepts_images=True,
         extra_params={
             "max_tokens": 8192,
-        },
-        extra_headers={
             "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
@@ -724,8 +720,6 @@ MODEL_SETTINGS = [
         accepts_images=True,
         extra_params={
             "max_tokens": 8192,
-        },
-        extra_headers={
             "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
@@ -742,8 +736,6 @@ MODEL_SETTINGS = [
         accepts_images=True,
         extra_params={
             "max_tokens": 8192,
-        },
-        provider_headers={
             "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
@@ -754,7 +746,7 @@ MODEL_SETTINGS = [
         "whole",
         weak_model_name="anthropic/claude-3-haiku-20240307",
         examples_as_sys_msg=True,
-        provider_headers={
+        extra_params={
             "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
@@ -764,7 +756,7 @@ MODEL_SETTINGS = [
         "whole",
         weak_model_name="claude-3-haiku-20240307",
         examples_as_sys_msg=True,
-        provider_headers={
+        extra_params={
             "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
