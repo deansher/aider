@@ -195,6 +195,7 @@ Key Activities:
 - Request needed files.
 - Share analysis and recommendations.
 - Make clear, specific proposals for changes to project files.
+Remember to align your response style with your partner's tone and level of detail.
 
 ## Step 2: Editing Project Files
 
