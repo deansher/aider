@@ -174,9 +174,9 @@ def send_completion(
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to 0.
         extra_params (dict, optional): Additional parameters to pass to litellm.completion().
-            This includes both OpenAI-compatible parameters (like max_tokens, top_p, etc.)
-            and provider-specific parameters. Any non-OpenAI parameters are passed directly
-            to the provider as kwargs.
+            This includes:
+            - OpenAI-compatible parameters (like max_tokens, top_p, etc.)
+            - Provider-specific parameters passed through to the provider
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "send-completion".
         reasoning_level (int, optional): Reasoning effort level adjustment. Higher values increase
@@ -310,9 +310,9 @@ def _send_completion_to_litellm(
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to None.
         extra_params (dict, optional): Additional parameters to pass to litellm.completion().
-            This includes both OpenAI-compatible parameters (like max_tokens, top_p, etc.)
-            and provider-specific parameters. Any non-OpenAI parameters are passed directly
-            to the provider as kwargs.
+            This includes:
+            - OpenAI-compatible parameters (like max_tokens, top_p, etc.)
+            - Provider-specific parameters passed through to the provider
         extra_headers (dict, optional): Provider-specific headers to pass through.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
