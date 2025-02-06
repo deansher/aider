@@ -236,14 +236,15 @@ def send_completion(
     )
 
     # Add function calling parameters if needed
+    # Add function calling parameters if needed
     if functions:
         kwargs["functions"] = functions
-        function = functions[0]
-        kwargs["tools"] = [dict(type="function", function=function)]
-        kwargs["tool_choice"] = {
-            "type": "function",
-            "function": {"name": function["name"]},
-        }
+
+    # Add tool calling parameters if needed
+    if tools:
+        kwargs["tools"] = tools
+        if tool_choice:
+            kwargs["tool_choice"] = tool_choice
 
     # Add any model-configured parameters
     if model_config.extra_params:
