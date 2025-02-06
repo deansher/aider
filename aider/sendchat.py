@@ -3,12 +3,16 @@ import json
 import logging
 
 import backoff
+import logging
 from langfuse.decorators import langfuse_context, observe
 from llm_multiple_choice import DisplayFormat, InvalidChoicesResponseError
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
 from aider.models import ModelConfig
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -159,6 +163,7 @@ def send_completion(
     extra_params=None,
     purpose="send-completion",
 ):
+    logger.debug("send_completion input messages: %s", messages)
     """
     Send a completion request to the language model and handle the response.
 
@@ -275,6 +280,7 @@ def send_completion(
         return hash_object, CACHE[key]
 
     # Call the actual LLM function with the model name and all kwargs
+    logger.debug("_send_completion_to_litellm kwargs: %s", kwargs)
     res = _send_completion_to_litellm(
         model_config=model_config,
         **kwargs,
