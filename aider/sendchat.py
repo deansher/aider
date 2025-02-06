@@ -3,7 +3,6 @@ import json
 import logging
 
 import backoff
-import logging
 from langfuse.decorators import langfuse_context, observe
 from llm_multiple_choice import DisplayFormat, InvalidChoicesResponseError
 
@@ -13,8 +12,6 @@ from aider.models import ModelConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-logger = logging.getLogger(__name__)
 
 
 def is_anthropic_model(model_name):
