@@ -269,9 +269,9 @@ def send_completion(
     if model_config.extra_headers:
         kwargs["extra_headers"] = dict(model_config.extra_headers)
 
-    # Add the layered extra_params
+    # Layer in any remaining parameters from extra
     if extra:
-        kwargs["extra_params"] = extra
+        kwargs.update(extra)
 
     # Create cache key from final kwargs
     key = json.dumps(kwargs, sort_keys=True).encode()
@@ -283,7 +283,17 @@ def send_completion(
         return hash_object, CACHE[key]
 
     # Call the actual LLM function with the model name and all kwargs
-    res = _send_completion_to_litellm(model_config=model_config, purpose=purpose, **kwargs)
+    res = _send_completion_to_litellm(
+        model_config=model_config,
+        messages=messages,
+        stream=stream,
+        temperature=temperature if model_config.use_temperature else None,
+        functions=functions,
+        tools=tools,
+        tool_choice=tool_choice if tools else None,
+        extra_headers=kwargs.get("extra_headers"),
+        purpose=purpose,
+    )
 
     if not stream and CACHE is not None:
         CACHE[key] = res
@@ -302,7 +312,6 @@ def _send_completion_to_litellm(
     tool_choice=None,
     extra_headers=None,
     purpose="(unlabeled)",
-    **kwargs
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -322,7 +331,6 @@ def _send_completion_to_litellm(
         extra_headers (dict, optional): Provider-specific headers to pass through.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
-        **kwargs: Additional parameters passed directly to litellm.completion().
 
     Returns:
         litellm.ModelResponse: The model's response object. The structure depends on stream mode:
@@ -362,7 +370,6 @@ def _send_completion_to_litellm(
         "model": model_config.name,
         "messages": messages,
         "stream": stream,
-        **kwargs  # Include any additional parameters
     }
 
     # Add optional parameters if provided
@@ -376,8 +383,6 @@ def _send_completion_to_litellm(
         completion_kwargs["tool_choice"] = tool_choice
     if extra_headers:
         completion_kwargs["extra_headers"] = extra_headers
-    if model_config.extra_params:
-        completion_kwargs.update(model_config.extra_params)
 
     # Prepare Langfuse parameters
     langfuse_params = {
@@ -385,7 +390,7 @@ def _send_completion_to_litellm(
         "model": model_config.name,
         "input": messages,
         "metadata": {
-            "parameters": kwargs,
+            "parameters": completion_kwargs,
         }
     }
     langfuse_context.update_current_observation(**langfuse_params)
