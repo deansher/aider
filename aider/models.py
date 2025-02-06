@@ -1113,8 +1113,8 @@ def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit
     # Find matching settings
     for ms in MODEL_SETTINGS:
         if model == ms.name:
-            # Create instance of model_config_class if specified, otherwise ModelConfig
-            config_class = ms.model_config_class or ModelConfig
+            # Create instance of model_config_class if specified, otherwise use default implementation
+            config_class = ms.model_config_class or _ModelConfigImpl
             config = config_class(model, weak_model=weak_model, editor_model=editor_model)
             
             # Complete initialization
