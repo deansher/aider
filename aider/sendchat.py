@@ -303,7 +303,6 @@ def _send_completion_to_litellm(
     stream,
     temperature=None,
     extra_params=None,
-    provider_params=None,
     extra_headers=None,
     purpose="(unlabeled)",
 ):
