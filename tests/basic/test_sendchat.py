@@ -7,7 +7,7 @@ from llm_multiple_choice import ChoiceManager
 
 from aider.exceptions import InvalidResponseError, SendCompletionError
 from aider.llm import litellm
-from aider.models import _ModelConfigImpl, get_model_config
+from aider.models import _ModelConfigImpl, _OpenAiReasoningConfigImpl, get_model_config
 from aider.sendchat import (
     analyze_assistant_response,
     send_completion,
@@ -294,7 +294,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.return_value = success_response
 
         # Test with a reasoning model
-        model = _ModelConfigImpl("o3-mini")
+        model = _OpenAiReasoningConfigImpl("o3-mini")
         self.assertTrue(model.is_reasoning_model)
 
         # Call send_completion with reasoning_level
