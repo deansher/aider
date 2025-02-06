@@ -295,6 +295,8 @@ def _send_completion_to_litellm(
     stream,
     temperature=None,
     extra_params=None,
+    provider_params=None,
+    extra_headers=None,
     purpose="(unlabeled)",
 ):
     """
@@ -360,11 +362,18 @@ def _send_completion_to_litellm(
         model=model_config.name,
         messages=messages,
         stream=stream,
-        extra_params=extra_params,
         functions=functions,
     )
-    if temperature is not None:
+    if temperature is not None and model_config.use_temperature:
         kwargs["temperature"] = temperature
+
+    # Add extra parameters if provided
+    if extra_params is not None:
+        kwargs["extra_params"] = extra_params
+    if provider_params is not None:
+        kwargs["provider_params"] = provider_params
+    if extra_headers is not None:
+        kwargs["extra_headers"] = extra_headers
 
     # Prepare Langfuse parameters
     langfuse_params = {
