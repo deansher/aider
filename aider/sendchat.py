@@ -365,24 +365,47 @@ def _send_completion_to_litellm(
         logger.error(error_msg)
         raise TypeError(error_msg)
 
-    # Build kwargs dict for litellm.completion()
-    completion_kwargs = {
-        "model": model_config.name,
-        "messages": messages,
-        "stream": stream,
-    }
+    # Start with base kwargs
+    kwargs = dict(
+        model=model_config.name,
+        messages=messages,
+        stream=stream,
+    )
 
-    # Add optional parameters if provided
-    if temperature is not None and model_config.use_temperature:
-        completion_kwargs["temperature"] = temperature
+    # Build extra_params dict starting with model defaults
+    extra = {}
+    if model_config.extra_params:
+        extra.update(model_config.extra_params)
+
+    # Add request-specific parameters, overriding model defaults
+    if extra_params:
+        extra.update(extra_params)
+
+    # Add reasoning parameters with highest precedence
+    if model_config.is_reasoning_model:
+        reasoning_params = model_config.map_reasoning_level(reasoning_level)
+        if reasoning_params:
+            extra.update(reasoning_params)
+
+    # Add function/tool parameters
     if functions:
-        completion_kwargs["functions"] = functions
+        kwargs["functions"] = functions
     if tools:
-        completion_kwargs["tools"] = tools
-    if tool_choice:
-        completion_kwargs["tool_choice"] = tool_choice
-    if extra_headers:
-        completion_kwargs["extra_headers"] = extra_headers
+        kwargs["tools"] = tools
+        if tool_choice:
+            kwargs["tool_choice"] = tool_choice
+
+    # Add temperature if model supports it
+    if temperature is not None and model_config.use_temperature:
+        kwargs["temperature"] = temperature
+
+    # Add provider-specific headers if any
+    if model_config.extra_headers:
+        kwargs["extra_headers"] = dict(model_config.extra_headers)
+
+    # Layer in any remaining parameters from extra
+    if extra:
+        kwargs.update(extra)
 
     # Prepare Langfuse parameters
     langfuse_params = {
@@ -390,13 +413,13 @@ def _send_completion_to_litellm(
         "model": model_config.name,
         "input": messages,
         "metadata": {
-            "parameters": completion_kwargs,
+            "parameters": kwargs,
         }
     }
     langfuse_context.update_current_observation(**langfuse_params)
 
     try:
-        res = litellm.completion(**completion_kwargs)
+        res = litellm.completion(**kwargs)
     except (litellm.exceptions.RateLimitError, litellm.exceptions.APIError) as e:
         # Log the error before re-raising for retry
         logger.warning(f"LiteLLM error ({type(e).__name__}): {str(e)}")
