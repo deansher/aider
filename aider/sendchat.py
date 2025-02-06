@@ -298,7 +298,6 @@ def send_completion(
 @observe(as_type="generation", capture_output=False)
 def _send_completion_to_litellm(
     model_config: ModelConfig,
-    messages,
     purpose="(unlabeled)",
     **litellm_kwargs
 ):
@@ -310,7 +309,6 @@ def _send_completion_to_litellm(
 
     Args:
         model_config (ModelConfig): The model configuration instance to use.
-        messages (list): A list of message dictionaries to send to the model.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
         **kwargs: Additional arguments passed directly to litellm.completion().
@@ -334,7 +332,7 @@ def _send_completion_to_litellm(
     langfuse_params = {
         "name": purpose,
         "model": model_config.name,
-        "input": messages,
+        "input": litellm_kwargs["messages"],
         "metadata": {
             "parameters": litellm_kwargs,
         }
