@@ -260,8 +260,7 @@ def send_completion(
     if extra_params is not None:
         kwargs.update(extra_params)
 
-    # Add reasoning model params last to avoid being overwritten
-    if model_config.info.get("is_reasoning_model"):
+    if model_config.is_reasoning_model:
         reasoning_params = model_config.map_reasoning_level(reasoning_level)
         if reasoning_params:
             logger.debug("send_completion: adding reasoning_params=%s", reasoning_params)
