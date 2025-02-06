@@ -256,15 +256,16 @@ def send_completion(
     if model_config.provider_headers:
         kwargs["extra_headers"] = model_config.provider_headers
 
-    # Add caller's extra params
-    if extra_params is not None:
-        kwargs.update(extra_params)
+    # Initialize extra_params
+    extra_params = dict(extra_params) if extra_params else {}
 
+    # Add reasoning model params if applicable
     if model_config.is_reasoning_model:
         reasoning_params = model_config.map_reasoning_level(reasoning_level)
         if reasoning_params:
-            logger.debug("send_completion: adding reasoning_params=%s", reasoning_params)
-            kwargs.update(reasoning_params)
+            extra_params.update(reasoning_params)
+
+    kwargs["extra_params"] = extra_params
 
     # Create cache key from final kwargs
     key = json.dumps(kwargs, sort_keys=True).encode()
@@ -275,20 +276,10 @@ def send_completion(
     if not stream and CACHE is not None and key in CACHE:
         return hash_object, CACHE[key]
 
-    # Initialize extra_params
-    extra_params = dict(extra_params) if extra_params else {}
-
-    # Add reasoning model params if applicable
-    if model_config.is_reasoning_model:
-        reasoning_params = model_config.map_reasoning_level(reasoning_level)
-        if reasoning_params:
-            extra_params.update(reasoning_params)
-
     # Create kwargs for _send_completion_to_litellm
     # Note: extra_params will be passed through to the actual LLM call
     litellm_kwargs = dict(kwargs)
     litellm_kwargs['model_config'] = model_config
-    litellm_kwargs['extra_params'] = extra_params
     del litellm_kwargs['model']
 
     # Call the actual LLM function
