@@ -48,6 +48,22 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.editor_model_name, "o3-mini")
         self.assertEqual(model.editor_edit_format, "editor-diff")
 
+    def test_model_class_selection(self):
+        """Test that get_model_config returns the correct implementation class."""
+        # Test reasoning model gets _OpenAiReasoningConfigImpl
+        model = get_model_config("o3-mini")
+        self.assertIsInstance(model, _OpenAiReasoningConfigImpl)
+        
+        # Test non-reasoning model gets _ModelConfigImpl
+        model = get_model_config("gpt-4")
+        self.assertIsInstance(model, _ModelConfigImpl)
+        self.assertNotIsInstance(model, _OpenAiReasoningConfigImpl)
+        
+        # Test unknown model gets _ModelConfigImpl
+        model = get_model_config("unknown-model")
+        self.assertIsInstance(model, _ModelConfigImpl)
+        self.assertNotIsInstance(model, _OpenAiReasoningConfigImpl)
+
     def test_map_reasoning_level(self):
         """Test reasoning level mapping for different model types."""
         # Test base ModelConfig class returns empty dict
