@@ -222,7 +222,7 @@ class ArchitectCoder(Coder):
 
     def __init__(
         self,
-        main_model,
+        main_model_config,
         io,
         repo=None,
         fnames=None,
@@ -257,23 +257,23 @@ class ArchitectCoder(Coder):
 
         This method:
         1. Delegates to Coder.__init__() for base initialization
-        2. Initializes gpt_prompts with both main_model and editor_model
+        2. Initializes gpt_prompts with both main_model_config and editor_model_config
 
         Args:
-            main_model: The ModelConfig instance for the architect role
+            main_model_config: The ModelConfig instance for the architect role
             io: The InputOutput instance for user interaction
             **kwargs: Additional arguments passed through to Coder.__init__()
         """
         self.architect_prompts = ArchitectPrompts(
-            main_model=main_model,
-            editor_model=main_model.editor_model,
+            main_model=main_model_config,
+            editor_model=main_model_config.editor_model,
         )
         # Provide the same prompts for use by our superclass Coder.
         # Coder requires self.gpt_prompts in its __init__().
         self.gpt_prompts = self.architect_prompts
 
         super().__init__(
-            main_model=main_model,
+            main_model=main_model_config,
             io=io,
             repo=repo,
             fnames=fnames,
@@ -353,7 +353,7 @@ class ArchitectCoder(Coder):
                 "Which one of the following choices best characterizes the assistant"
                 " response shown below?"
             ),
-            self.main_model,  # Use architect's model to analyze architect's response
+            self.main_model_config,  # Use architect's model config to analyze architect's response
             architect_response,
         )
 
@@ -402,10 +402,10 @@ class ArchitectCoder(Coder):
         - Cost and commit tracking are only updated on successful execution
         """
         logger = logging.getLogger(__name__)
-        editor_model = self.main_model.editor_model or self.main_model
+        editor_model_config = self.main_model_config.editor_model or self.main_model_config
         editor_coder = self.create_coder(
-            edit_format=self.main_model.editor_edit_format,
-            main_model=editor_model,
+            edit_format=self.main_model_config.editor_edit_format,
+            main_model=editor_model_config,
         )
         # Give editor_coder the conversation so far
         editor_coder.cur_messages = editor_coder.cur_messages + exchange.get_messages()
