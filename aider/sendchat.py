@@ -221,7 +221,6 @@ def send_completion(
         litellm.exceptions.InternalServerError: For server-side errors
         TypeError: If model_config is not a ModelConfig instance
     """
-    logger = logging.getLogger(__name__)
     if not isinstance(model_config, ModelConfig):
         error_msg = f"Expected ModelConfig instance, got {type(model_config)}"
         logger.error(error_msg)
@@ -326,7 +325,6 @@ def _send_completion_to_litellm(
         litellm.exceptions.APIError: For various API-level errors
         TypeError: If model_config is not a ModelConfig instance
     """
-    logger = logging.getLogger(__name__)
     if not isinstance(model_config, ModelConfig):
         error_msg = f"Expected ModelConfig instance, got {type(model_config)}"
         logger.error(error_msg)
