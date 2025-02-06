@@ -317,3 +317,67 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
         self.assertNotIn("reasoning_effort", kwargs)
+
+    @patch("litellm.completion")
+    def test_parameter_layering(self, mock_completion):
+        # Create a successful mock response
+        success_response = MagicMock()
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success response"
+        success_response.status_code = 200
+        mock_completion.return_value = success_response
+
+        # Create model with various parameters
+        model = _ModelConfigImpl("test-model")
+        model.extra_params = {"param1": "model_extra"}
+        model.provider_params = {"param2": "model_provider"}
+        model.provider_headers = {"header1": "model_header"}
+
+        # Call with extra params that should override model params
+        extra_params = {
+            "param1": "extra_override",
+            "param3": "extra_new"
+        }
+
+        send_completion(model, ["message"], None, False, extra_params=extra_params)
+
+        # Verify parameter layering
+        mock_completion.assert_called_once()
+        kwargs = mock_completion.call_args.kwargs
+        
+        # Extra params should override model extra params
+        self.assertEqual(kwargs.get("param1"), "extra_override")
+        
+        # Provider params should be preserved
+        self.assertEqual(kwargs.get("param2"), "model_provider")
+        
+        # New extra params should be included
+        self.assertEqual(kwargs.get("param3"), "extra_new")
+        
+        # Provider headers should be preserved
+        self.assertEqual(kwargs.get("extra_headers"), {"header1": "model_header"})
+
+    @patch("litellm.completion") 
+    def test_reasoning_parameter_precedence(self, mock_completion):
+        # Create a successful mock response
+        success_response = MagicMock()
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success response"
+        success_response.status_code = 200
+        mock_completion.return_value = success_response
+
+        # Create reasoning model with extra params
+        model = _OpenAiReasoningConfigImpl("o3-mini")
+        model.extra_params = {"reasoning_effort": "low"}
+
+        # Call with extra params that should NOT override reasoning level
+        extra_params = {"reasoning_effort": "medium"}
+        
+        # reasoning_level should take precedence over both model.extra_params and extra_params
+        send_completion(model, ["message"], None, False, 
+                       extra_params=extra_params, reasoning_level=1)
+
+        # Verify reasoning_level took precedence
+        mock_completion.assert_called_once()
+        kwargs = mock_completion.call_args.kwargs
+        self.assertEqual(kwargs.get("reasoning_effort"), "high")
