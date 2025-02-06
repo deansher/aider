@@ -340,10 +340,18 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         kwargs = mock_completion.call_args.kwargs
         self.assertNotIn("temperature", kwargs)
 
-    def test_parameter_layering(self):
+    @patch("litellm.completion")
+    def test_parameter_layering(self, mock_completion):
         """Test parameter layering between model config and request params."""
+        # Create successful mock response
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = "Success response"
+        mock_response.status_code = 200
+        mock_completion.return_value = mock_response
+
         # Create model with various parameters
-        model = _ModelConfigImpl("test-model")
+        model = _ModelConfigImpl("gpt-4")
         model.extra_params = {
             "response_format": {"type": "model_default"},
             "api_version": "2024-01"
@@ -372,6 +380,19 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         kwargs = mock_completion.call_args.kwargs
         
         # Extra params should override model extra params
+        self.assertEqual(kwargs.get("response_format"), {"type": "runtime_override"})
+        
+        # Model extra params should be preserved when not overridden
+        self.assertEqual(kwargs.get("api_version"), "2024-01")
+        
+        # Extra headers should be preserved
+        self.assertEqual(kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"})
+
+        # Verify parameter layering
+        mock_completion.assert_called_once()
+        kwargs = mock_completion.call_args.kwargs
+        
+        # Extra params should override model extra params
         self.assertEqual(kwargs.get("extra_params", {}).get("response_format"), {"type": "runtime_override"})
         
         # Model extra params should be preserved when not overridden
@@ -380,8 +401,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Extra headers should be preserved
         self.assertEqual(kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"})
 
-    def test_reasoning_parameter_precedence(self):
+    @patch("litellm.completion")
+    def test_reasoning_parameter_precedence(self, mock_completion):
         """Test that reasoning_level takes precedence over other reasoning parameters."""
+        # Create successful mock response
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = "Success response"
+        mock_response.status_code = 200
+        mock_completion.return_value = mock_response
+
         # Create reasoning model with extra params
         model = _OpenAiReasoningConfigImpl("o3-mini")
         model.extra_params = {"reasoning_effort": "low"}
@@ -400,6 +429,11 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             purpose="test completion",
             reasoning_level=1
         )
+
+        # Verify reasoning_level took precedence
+        mock_completion.assert_called_once()
+        kwargs = mock_completion.call_args.kwargs
+        self.assertEqual(kwargs.get("reasoning_effort"), "high")
 
         # Verify reasoning_level took precedence
         mock_completion.assert_called_once()
