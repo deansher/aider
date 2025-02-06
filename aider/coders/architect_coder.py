@@ -5,6 +5,8 @@ from enum import Enum
 import logging
 from typing import Any
 
+import litellm
+
 from aider.types import ChatMessage
 
 from ..sendchat import analyze_assistant_response
@@ -14,6 +16,8 @@ from .architect_prompts import (
     possible_architect_responses,
 )
 from .base_coder import Coder
+
+logger = logging.getLogger(__name__)
 
 
 class ArchitectPhase(Enum):
@@ -353,7 +357,7 @@ class ArchitectCoder(Coder):
                 "Which one of the following choices best characterizes the assistant"
                 " response shown below?"
             ),
-            self.main_model_config,  # Use architect's model config to analyze architect's response
+            self.main_model,  # Use architect's model config to analyze architect's response
             architect_response,
         )
 
@@ -431,11 +435,11 @@ class ArchitectCoder(Coder):
                 "Editor coder failed",
                 extra={
                     "editor_model": editor_model_config.name,
-                    "edit_format": self.main_model_config.editor_edit_format,
+                    "edit_format": self.main_model.editor_edit_format,
                 }
             )
             self.io.tool_error(
-                f"Editor coder failed ({editor_model_config.name}, {self.main_model_config.editor_edit_format}): {str(e)}"
+                f"Editor coder failed ({editor_model_config.name}, {self.main_model.editor_edit_format}): {str(e)}"
             )
             exchange.append_editor_response(None)
 
