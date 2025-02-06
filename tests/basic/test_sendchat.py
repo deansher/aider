@@ -326,7 +326,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Call send_completion with a temperature
         _hash, completion = send_completion(
             model_config=model,
-            messages=["message"],
+            messages=[{"role": "user", "content": "message"}],
             functions=None,
             stream=False,
             temperature=0.7,
@@ -358,7 +358,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         _hash, completion = send_completion(
             model_config=model,
-            messages=["message"],
+            messages=[{"role": "user", "content": "message"}],
             functions=None,
             stream=False,
             temperature=0,
@@ -392,7 +392,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # reasoning_level should take precedence over both model.extra_params and extra_params
         _hash, completion = send_completion(
             model_config=model,
-            messages=["message"],
+            messages=[{"role": "user", "content": "message"}],
             functions=None,
             stream=False,
             temperature=0,
@@ -507,6 +507,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         success_response.status_code = 200
         mock_completion.return_value = success_response
 
+        from aider.sendchat import _send_completion_to_litellm
         _send_completion_to_litellm(
             model_config=model,
             messages=messages,

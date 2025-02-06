@@ -232,6 +232,7 @@ def send_completion(
     logger.debug("send_completion: model=%s use_temperature=%s", model_config.name, model_config.use_temperature)
 
     # Start with base kwargs
+    # Start with base kwargs
     kwargs = dict(
         model=model_config.name,
         messages=messages,
@@ -255,19 +256,19 @@ def send_completion(
 
     # Add function/tool parameters
     if functions:
-        kwargs["functions"] = functions
+        extra["functions"] = functions
     if tools:
-        kwargs["tools"] = tools
+        extra["tools"] = tools
         if tool_choice:
-            kwargs["tool_choice"] = tool_choice
+            extra["tool_choice"] = tool_choice
 
     # Add temperature if model supports it
     if temperature is not None and model_config.use_temperature:
-        kwargs["temperature"] = temperature
+        extra["temperature"] = temperature
 
     # Add provider-specific headers if any
     if model_config.extra_headers:
-        kwargs["extra_headers"] = dict(model_config.extra_headers)
+        extra["extra_headers"] = dict(model_config.extra_headers)
 
     # Layer in any remaining parameters from extra
     if extra:
