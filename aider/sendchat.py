@@ -172,13 +172,13 @@ def send_completion(
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Only used if the model
-            supports temperature. Defaults to None.
+            supports temperature. Defaults to 0.
         extra_params (dict, optional): Additional parameters to pass to litellm.completion().
             This includes both OpenAI-compatible parameters (like max_tokens, top_p, etc.)
             and provider-specific parameters. Any non-OpenAI parameters are passed directly
             to the provider as kwargs.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
-            Defaults to "(unlabeled)".
+            Defaults to "send-completion".
         reasoning_level (int, optional): Reasoning effort level adjustment. Higher values increase
             effort, lower values decrease it. Only used for reasoning models. Defaults to 0.
 
@@ -222,27 +222,6 @@ def send_completion(
         messages = transform_messages_for_anthropic(messages)
 
     logger.debug("send_completion: model=%s use_temperature=%s", model_config.name, model_config.use_temperature)
-
-    # Build kwargs dict that will be used for both cache key and API call
-    kwargs = dict(
-        model=model_config.name,  # Use name for API call
-        messages=messages,
-        stream=stream,
-        functions=functions,
-        purpose=purpose
-    )
-
-    if model_config.use_temperature:
-        kwargs['temperature'] = temperature
-
-    # Add function calling parameters if needed
-    if functions is not None:
-        function = functions[0]
-        kwargs["tools"] = [dict(type="function", function=function)]
-        kwargs["tool_choice"] = {
-            "type": "function",
-            "function": {"name": function["name"]},
-        }
 
     # Build kwargs dict for litellm.completion()
     kwargs = dict(
@@ -334,6 +313,7 @@ def _send_completion_to_litellm(
             This includes both OpenAI-compatible parameters (like max_tokens, top_p, etc.)
             and provider-specific parameters. Any non-OpenAI parameters are passed directly
             to the provider as kwargs.
+        extra_headers (dict, optional): Provider-specific headers to pass through.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
 
@@ -370,6 +350,35 @@ def _send_completion_to_litellm(
         logger.error(error_msg)
         raise TypeError(error_msg)
 
+    # Build kwargs dict for litellm.completion()
+    kwargs = dict(
+        model=model_config.name,
+        messages=messages,
+        stream=stream,
+        functions=functions,
+    )
+
+    # Add temperature if model supports it
+    if temperature is not None and model_config.use_temperature:
+        kwargs["temperature"] = temperature
+
+    # Add function calling parameters if needed
+    if functions is not None:
+        function = functions[0]
+        kwargs["tools"] = [dict(type="function", function=function)]
+        kwargs["tool_choice"] = {
+            "type": "function",
+            "function": {"name": function["name"]},
+        }
+
+    # Add any additional parameters
+    if extra_params:
+        kwargs.update(extra_params)
+
+    # Add extra headers if provided
+    if extra_headers:
+        kwargs["extra_headers"] = extra_headers
+
     # Prepare Langfuse parameters
     langfuse_params = {
         "name": purpose,
@@ -382,7 +391,7 @@ def _send_completion_to_litellm(
             },
             "other_params": {
                 k: v for k, v in kwargs.items()
-                if k not in {"temperature", "max_tokens", "top_p", "tools", "tool_choice"}
+                if k not in {"temperature", "max_tokens", "top_p", "tools", "tool_choice", "extra_headers"}
             }
         }
     }
