@@ -223,9 +223,11 @@ def send_completion(
         logger.error(error_msg)
         raise TypeError(error_msg)
 
-    # Transform messages for Anthropic models
+    # Transform messages for Anthropic and o3 models
     if is_anthropic_model(model_config.name):
         messages = transform_messages_for_anthropic(messages)
+    elif "o3" in model_config.name.lower():
+        messages = transform_messages_for_o3(messages)
 
     logger.debug("send_completion: model=%s use_temperature=%s", model_config.name, model_config.use_temperature)
 
