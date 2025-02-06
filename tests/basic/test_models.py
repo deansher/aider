@@ -49,6 +49,7 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.editor_edit_format, "editor-diff")
 
     def test_map_reasoning_level(self):
+        """Test reasoning level mapping for different model types."""
         # Test base ModelConfig class returns empty dict
         model = _ModelConfigImpl("gpt-4")
         self.assertEqual(model.map_reasoning_level(0), {})
@@ -57,11 +58,22 @@ class TestModels(unittest.TestCase):
 
         # Test _OpenAiReasoningConfigImpl returns correct mappings
         model = get_model_config("o3-mini")
+        
+        # Test default level (0)
         self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "high"})
+        
+        # Test reduced levels
         self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "medium"})
         self.assertEqual(model.map_reasoning_level(-2), {"reasoning_effort": "low"})
         self.assertEqual(model.map_reasoning_level(-3), {"reasoning_effort": "low"})
+        
+        # Test increased levels
         self.assertEqual(model.map_reasoning_level(1), {"reasoning_effort": "high"})
+        self.assertEqual(model.map_reasoning_level(2), {"reasoning_effort": "high"})
+        
+        # Test float values are truncated
+        self.assertEqual(model.map_reasoning_level(1.7), {"reasoning_effort": "high"})
+        self.assertEqual(model.map_reasoning_level(-1.7), {"reasoning_effort": "medium"})
 
     def test_model_creation(self):
         # Test base model creation
