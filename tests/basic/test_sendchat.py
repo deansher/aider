@@ -396,4 +396,4 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Verify reasoning_level took precedence
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
-        self.assertEqual(kwargs.get("reasoning_effort"), "high")
+        self.assertEqual(kwargs.get("extra_params", {}).get("reasoning_effort"), "high")
