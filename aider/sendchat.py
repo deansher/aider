@@ -164,6 +164,8 @@ def send_completion(
     purpose="send-completion",
 ):
     logger.debug("send_completion input messages: %s", messages)
+    logger.debug("send_completion input kwargs: model=%s temperature=%s reasoning_level=%s extra_params=%s", 
+                model_config.name, temperature, reasoning_level, extra_params)
     """
     Send a completion request to the language model and handle the response.
 
@@ -283,6 +285,9 @@ def send_completion(
 
     # Call the actual LLM function with the model name and all kwargs
     logger.debug("_send_completion_to_litellm kwargs: %s", kwargs)
+    logger.debug("_send_completion_to_litellm final messages: %s", kwargs.get("messages"))
+    if not kwargs.get("messages"):
+        logger.error("Empty messages array before litellm.completion call!")
     res = _send_completion_to_litellm(
         model_config=model_config,
         **kwargs,
