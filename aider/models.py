@@ -218,7 +218,6 @@ class _ModelConfigImpl(ModelConfig):
         self.reminder = "user"
         self.examples_as_sys_msg = False
         self.extra_params = None
-        self.provider_params = None
         self.provider_headers = None
         self.cache_control = False
         self.caches_by_default = False

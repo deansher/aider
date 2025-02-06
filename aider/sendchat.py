@@ -166,12 +166,6 @@ def send_completion(
     under the hood, which accepts OpenAI-compatible parameters and passes any non-OpenAI parameters
     directly to the provider as kwargs.
 
-    Parameter handling:
-    1. Model's configured parameters (model_config.extra_params)
-    2. Request-specific parameters (extra_params)
-    3. Reasoning level parameters if applicable
-    4. Model's provider-specific headers (model_config.provider_headers)
-
     Args:
         model_config (ModelConfig): The model configuration instance to use.
         messages (list): A list of message dictionaries to send to the model.
@@ -251,23 +245,40 @@ def send_completion(
         }
 
     # Build kwargs dict for litellm.completion()
-    # OpenAI-compatible parameters and provider-specific parameters are both passed as kwargs
-    kwargs = {}
-    
-    # Start with model's configured parameters
+    kwargs = dict(
+        model=model_config.name,
+        messages=messages,
+        stream=stream,
+        functions=functions,
+    )
+
+    # Add temperature if model supports it
+    if temperature is not None and model_config.use_temperature:
+        kwargs["temperature"] = temperature
+
+    # Add function calling parameters if needed
+    if functions is not None:
+        function = functions[0]
+        kwargs["tools"] = [dict(type="function", function=function)]
+        kwargs["tool_choice"] = {
+            "type": "function",
+            "function": {"name": function["name"]},
+        }
+
+    # Add any model-configured parameters
     if model_config.extra_params:
         kwargs.update(model_config.extra_params)
-    
+
     # Add any request-specific parameters
     if extra_params:
         kwargs.update(extra_params)
-        
+
     # Add reasoning parameters if applicable
     if model_config.is_reasoning_model:
         reasoning_params = model_config.map_reasoning_level(reasoning_level)
         if reasoning_params:
             kwargs.update(reasoning_params)
-            
+
     # Add provider-specific headers if any
     if model_config.provider_headers:
         kwargs["extra_headers"] = dict(model_config.provider_headers)
@@ -359,22 +370,6 @@ def _send_completion_to_litellm(
         logger.error(error_msg)
         raise TypeError(error_msg)
 
-    # Build kwargs dict for API call
-    kwargs = dict(
-        model=model_config.name,
-        messages=messages,
-        stream=stream,
-        functions=functions,
-    )
-    if temperature is not None and model_config.use_temperature:
-        kwargs["temperature"] = temperature
-
-    # Add any additional parameters
-    if extra_params is not None:
-        kwargs.update(extra_params)
-    if extra_headers is not None:
-        kwargs["extra_headers"] = extra_headers
-
     # Prepare Langfuse parameters
     langfuse_params = {
         "name": purpose,
@@ -391,30 +386,7 @@ def _send_completion_to_litellm(
             }
         }
     }
-
-    # Add provider-specific metadata
-    if model_config.provider_params:
-        langfuse_params["metadata"]["provider_params"] = model_config.provider_params
-    if model_config.provider_headers:
-        langfuse_params["metadata"]["provider_headers"] = model_config.provider_headers
     langfuse_context.update_current_observation(**langfuse_params)
-
-    # Handle temperature
-    if temperature is not None and model_config.use_temperature:
-        kwargs["temperature"] = temperature
-
-    # Add function calling parameters if needed
-    if functions is not None:
-        function = functions[0]
-        kwargs["tools"] = [dict(type="function", function=function)]
-        kwargs["tool_choice"] = {
-            "type": "function",
-            "function": {"name": function["name"]},
-        }
-
-    # Add any extra parameters
-    if extra_params is not None:
-        kwargs.update(extra_params)
 
     try:
         res = litellm.completion(**kwargs)
