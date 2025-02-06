@@ -1763,23 +1763,9 @@ class Coder:
         self.usage_report = tokens_report + sep + cost_report
 
     def compute_usage(self):
-        """Test that compute_usage resets usage metrics."""
-        with GitTemporaryDirectory():
-            io = InputOutput(yes=True)
-            coder = Coder.create(self.GPT35, "diff", io=io)
-            
-            # Set some initial values
-            coder.message_cost = 42.0
-            coder.message_tokens_sent = 100
-            coder.message_tokens_received = 200
-            
-            # Call compute_usage
-            coder.compute_usage()
-            
-            # Verify all metrics were reset
-            self.assertEqual(coder.message_cost, 0.0)
-            self.assertEqual(coder.message_tokens_sent, 0)
-            self.assertEqual(coder.message_tokens_received, 0)
+        self.message_cost = 0.0
+        self.message_tokens_sent = 0
+        self.message_tokens_received = 0
 
     def get_multi_response_content(self, final=False):
         cur = self.multi_response_content or ""
