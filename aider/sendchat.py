@@ -238,6 +238,7 @@ def send_completion(
         model=model_config.name,
         messages=messages,
         stream=stream,
+        purpose=purpose,
     )
 
     # Build extra_params dict starting with model defaults
