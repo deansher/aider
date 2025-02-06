@@ -407,14 +407,9 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.assertEqual(kwargs.get("extra_params", {}).get("reasoning_effort"), "high")
 
     @patch("litellm.completion")
+    @patch("litellm.completion")
     def test_parameter_layering(self, mock_completion):
-        # Create a successful mock response
-        success_response = MagicMock()
-        success_response.choices = [MagicMock()]
-        success_response.choices[0].message.content = "Success response"
-        success_response.status_code = 200
-        mock_completion.return_value = success_response
-
+        """Test parameter layering between model config and request params."""
         # Create model with various parameters
         model = _ModelConfigImpl("test-model")
         model.extra_params = {
@@ -428,6 +423,13 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             "response_format": {"type": "runtime_override"},
             "seed": 42
         }
+
+        # Create a successful mock response
+        success_response = MagicMock()
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success response"
+        success_response.status_code = 200
+        mock_completion.return_value = success_response
 
         _hash, completion = send_completion(
             model_config=model,
@@ -455,19 +457,20 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
     @patch("litellm.completion") 
     def test_reasoning_parameter_precedence(self, mock_completion):
-        # Create a successful mock response
-        success_response = MagicMock()
-        success_response.choices = [MagicMock()]
-        success_response.choices[0].message.content = "Success response"
-        success_response.status_code = 200
-        mock_completion.return_value = success_response
-
+        """Test that reasoning_level takes precedence over other reasoning parameters."""
         # Create reasoning model with extra params
         model = _OpenAiReasoningConfigImpl("o3-mini")
         model.extra_params = {"reasoning_effort": "low"}
 
         # Call with extra params that should NOT override reasoning level
         extra_params = {"reasoning_effort": "medium"}
+        
+        # Create a successful mock response
+        success_response = MagicMock()
+        success_response.choices = [MagicMock()]
+        success_response.choices[0].message.content = "Success response"
+        success_response.status_code = 200
+        mock_completion.return_value = success_response
         
         # reasoning_level should take precedence over both model.extra_params and extra_params
         _hash, completion = send_completion(
