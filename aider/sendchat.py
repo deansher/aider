@@ -275,9 +275,20 @@ def send_completion(
     if not stream and CACHE is not None and key in CACHE:
         return hash_object, CACHE[key]
 
-    # Create new kwargs for _send_completion_to_litellm, replacing 'model' with 'model_config'
+    # Initialize extra_params
+    extra_params = dict(extra_params) if extra_params else {}
+
+    # Add reasoning model params if applicable
+    if model_config.is_reasoning_model:
+        reasoning_params = model_config.map_reasoning_level(reasoning_level)
+        if reasoning_params:
+            extra_params.update(reasoning_params)
+
+    # Create kwargs for _send_completion_to_litellm
+    # Note: extra_params will be passed through to the actual LLM call
     litellm_kwargs = dict(kwargs)
     litellm_kwargs['model_config'] = model_config
+    litellm_kwargs['extra_params'] = extra_params
     del litellm_kwargs['model']
 
     # Call the actual LLM function
