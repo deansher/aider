@@ -158,6 +158,7 @@ def send_completion(
     extra_params=None,
     purpose="send-completion",
     reasoning_level: int = 0,
+    tools=None,
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -175,6 +176,7 @@ def send_completion(
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to 0.
+        tools (list, optional): A list of tools the model may use. Currently only functions supported.
         extra_params (dict, optional): Additional parameters to pass to litellm.completion().
             This includes:
             - OpenAI-compatible parameters (like max_tokens, top_p, etc.)
@@ -235,7 +237,6 @@ def send_completion(
         stream=stream,
     )
 
-    # Add function calling parameters if needed
     # Add function calling parameters if needed
     if functions:
         kwargs["functions"] = functions
