@@ -464,7 +464,7 @@ def _send_completion_to_litellm(
 def analyze_assistant_response(
     choice_manager,
     introduction,
-    model,
+    model_config,
     response_text,
 ):
     """
@@ -480,9 +480,8 @@ def analyze_assistant_response(
             Write this as though for a human who will fill out the questionnaire. Refer to the
             assistant's response as appearing "below" -- it will automatically be appended
             at the end of the prompt, in a markdown section titled "Assistant's Response".
-        model_name (str): The name of the language model to use
+        model_config (ModelConfig): The model configuration to use
         response_text (str): The assistant's response text to analyze
-        extra_params (dict, optional): Additional parameters to pass to the model.
 
     Returns:
         ChoiceCodeSet: The validated set of choices made by the model
@@ -508,12 +507,12 @@ def analyze_assistant_response(
 
         chat_messages = [{"role": "user", "content": prompt}]
         _hash, response = send_completion(
-            model,
+            model_config=model_config,
             messages=chat_messages,
             functions=None,
             stream=False,
             temperature=0,
-            extra_params=model.extra_params,
+            extra_params=model_config.extra_params,
             purpose=f"analyze assistant response (attempt {attempt + 1})",
         )
         content = response.choices[0].message.content
@@ -537,7 +536,7 @@ def simple_send_with_retries(model_config: ModelConfig, messages, extra_params=N
     It will retry on connection errors, rate limit errors, and invalid responses.
 
     Args:
-        model_config (ModelConfig): The ModelConfig instance to use
+        model_config (ModelConfig): The model configuration to use
         messages (list): A list of message dictionaries to send to the model
         extra_params (dict, optional): Additional parameters to pass to the model.
             This includes:
