@@ -353,7 +353,7 @@ class ArchitectCoder(Coder):
                 "Which one of the following choices best characterizes the assistant"
                 " response shown below?"
             ),
-            self.main_model.editor_model,
+            self.main_model,  # Use architect's model to analyze architect's response
             architect_response,
         )
 
