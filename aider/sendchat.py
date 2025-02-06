@@ -314,11 +314,12 @@ def _send_completion_to_litellm(
         functions (list): A list of function definitions that the model can use.
         stream (bool): Whether to stream the response or not.
         temperature (float, optional): The sampling temperature to use. Defaults to None.
-        extra_params (dict, optional): Additional parameters to pass to the model. Defaults to None.
-                                     This includes any provider-specific parameters like reasoning_effort
-                                     that were mapped by the model class.
         purpose (str, optional): The purpose of this completion, used as the name in Langfuse.
                                Defaults to "(unlabeled)".
+        **kwargs: Additional parameters passed directly to litellm.completion(). This includes:
+            - OpenAI-compatible parameters like max_tokens, top_p, etc.
+            - Provider-specific parameters passed through to the provider
+            - extra_headers for provider-specific headers
 
     Returns:
         res: The model's response object. The structure depends on stream mode:
