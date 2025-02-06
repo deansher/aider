@@ -330,8 +330,8 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # Create model with various parameters
         model = _ModelConfigImpl("test-model")
         model.extra_params = {"param1": "model_extra"}
-        model.provider_params = {"param2": "model_provider"}
-        model.provider_headers = {"header1": "model_header"}
+        model.provider_params = {"provider_param2": "provider_value2"}
+        model.provider_headers = {"provider_header3": "provider_value3"}
 
         # Call with extra params that should override model params
         extra_params = {
