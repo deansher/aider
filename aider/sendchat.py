@@ -162,16 +162,15 @@ def send_completion(
     """
     Send a completion request to the language model and handle the response.
 
-    This function manages parameter layering, caching, and error handling for LLM requests.
-    It uses litellm.completion() under the hood, which accepts OpenAI-compatible parameters
-    and passes any non-OpenAI parameters directly to the provider as kwargs.
+    This function manages caching and error handling for LLM requests. It uses litellm.completion()
+    under the hood, which accepts OpenAI-compatible parameters and passes any non-OpenAI parameters
+    directly to the provider as kwargs.
 
-    Parameter layering (later overrides earlier):
+    Parameter handling:
     1. Model's configured parameters (model_config.extra_params)
-    2. Model's provider-specific parameters (model_config.provider_params)
-    3. Model's provider-specific headers (model_config.provider_headers)
-    4. Request-specific parameters (extra_params)
-    5. Reasoning level parameters if applicable
+    2. Request-specific parameters (extra_params)
+    3. Reasoning level parameters if applicable
+    4. Model's provider-specific headers (model_config.provider_headers)
 
     Args:
         model_config (ModelConfig): The model configuration instance to use.
@@ -181,8 +180,9 @@ def send_completion(
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to None.
         extra_params (dict, optional): Additional parameters to pass to litellm.completion().
-            This includes both OpenAI-compatible parameters and provider-specific parameters.
-            Any non-OpenAI parameters are passed directly to the provider as kwargs.
+            This includes both OpenAI-compatible parameters (like max_tokens, top_p, etc.)
+            and provider-specific parameters. Any non-OpenAI parameters are passed directly
+            to the provider as kwargs.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
         reasoning_level (int, optional): Reasoning effort level adjustment. Higher values increase
@@ -250,32 +250,27 @@ def send_completion(
             "function": {"name": function["name"]},
         }
 
-    # Merge all non-OpenAI parameters
-    # These will be passed directly to the provider as kwargs
-    provider_kwargs = {}
+    # Build kwargs dict for litellm.completion()
+    # OpenAI-compatible parameters and provider-specific parameters are both passed as kwargs
+    kwargs = {}
     
     # Start with model's configured parameters
     if model_config.extra_params:
-        provider_kwargs.update(model_config.extra_params)
-    if model_config.provider_params:
-        provider_kwargs.update(model_config.provider_params)
+        kwargs.update(model_config.extra_params)
     
     # Add any request-specific parameters
     if extra_params:
-        provider_kwargs.update(extra_params)
+        kwargs.update(extra_params)
         
     # Add reasoning parameters if applicable
     if model_config.is_reasoning_model:
         reasoning_params = model_config.map_reasoning_level(reasoning_level)
         if reasoning_params:
-            provider_kwargs.update(reasoning_params)
+            kwargs.update(reasoning_params)
             
     # Add provider-specific headers if any
     if model_config.provider_headers:
         kwargs["extra_headers"] = dict(model_config.provider_headers)
-        
-    # Add all provider parameters to kwargs
-    kwargs.update(provider_kwargs)
 
     # Create cache key from final kwargs
     key = json.dumps(kwargs, sort_keys=True).encode()
@@ -326,10 +321,9 @@ def _send_completion_to_litellm(
         temperature (float, optional): The sampling temperature to use. Only used if the model
             supports temperature. Defaults to None.
         extra_params (dict, optional): Additional parameters to pass to litellm.completion().
-            This includes both OpenAI-compatible parameters and provider-specific parameters.
-            Any non-OpenAI parameters are passed directly to the provider as kwargs.
-        provider_params (dict, optional): Provider-specific parameters to pass through.
-        extra_headers (dict, optional): Provider-specific headers to pass through.
+            This includes both OpenAI-compatible parameters (like max_tokens, top_p, etc.)
+            and provider-specific parameters. Any non-OpenAI parameters are passed directly
+            to the provider as kwargs.
         purpose (str, optional): The purpose label for this completion request for Langfuse tracing.
             Defaults to "(unlabeled)".
 
@@ -376,11 +370,9 @@ def _send_completion_to_litellm(
     if temperature is not None and model_config.use_temperature:
         kwargs["temperature"] = temperature
 
-    # Add any provider-specific parameters
+    # Add any additional parameters
     if extra_params is not None:
         kwargs.update(extra_params)
-    if provider_params is not None:
-        kwargs.update(provider_params)
     if extra_headers is not None:
         kwargs["extra_headers"] = extra_headers
 
