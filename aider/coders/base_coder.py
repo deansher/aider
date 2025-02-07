@@ -1518,9 +1518,6 @@ class Coder:
                 raise TypeError(f"Expected ModelConfig instance, got {type(model)}")
 
             extra = model.extra_params.copy() if model.extra_params else {}
-            if model.info.get("is_reasoning_model"):
-                effective = self.compute_effective_reasoning_effort()
-                extra["reasoning_effort"] = self.map_reasoning_effort(effective)
             if self.edit_format == "diff" and self.num_reflections > 0:
                 reasoning_level = -2
             else:
