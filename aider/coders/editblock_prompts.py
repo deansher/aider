@@ -134,6 +134,7 @@ from hello import hello
 1. File Path:
    - Full path from project root
    - No quotes, asterisks, or escaping
+   - Placed on the line immediately above the Code Fence
 
 2. Code Fence:
    - Format is: {fence[0]}language, like ```python or <source>python
@@ -145,11 +146,7 @@ from hello import hello
 3. Search Block:
    - Starts with <<<<<<< SEARCH
    - Empty when creating a new file
-   - Else exactly matches consecutive lines of an existing file
-    - Exactly matches lines from the version of the file in 
-      <brade:editable_files>...</brade:editable_files> or 
-      <brade:readonly_files>...</brade:readonly_files>
-    - Reproduces each line verbatim, including indentation and other whitespace
+   - Else reproduces entire lines of the content to be replaced, verbatim
 
 4. Divider:
    - =======
