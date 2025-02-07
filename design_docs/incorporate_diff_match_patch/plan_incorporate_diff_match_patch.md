@@ -43,6 +43,8 @@ In rare cases, the LLM might try to replace just one or several lines of the tar
 
 Our intuition is that when the LLM accurately sees what it wants to replace in the target file but just makes mistakes in the transcription, the match is probably something like 0.95, or even 0.99.
 
+Initially, as the simplest thing that might work, we want to use diff-match-patch algorithms directly, rather than layering normalization or our own heuristics above it.
+
 ### Simplify the code
 
 Simplify the code by removing homegrown heuristics.
