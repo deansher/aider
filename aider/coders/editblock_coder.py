@@ -115,55 +115,52 @@ class EditBlockCoder(Coder):
             else:
                 failed.append(edit)
 
-        if not failed:
-            return
+        if failed:
+            raise ValueError(self._build_failed_edit_error_message(failed, passed))
 
-        blocks = "block" if len(failed) == 1 else "blocks"
-        res = f"# {len(failed)} SEARCH/REPLACE {blocks} failed to match!\n"
+    def _build_failed_edit_error_message(self, failed, passed):
+        from difflib import SequenceMatcher, unified_diff
+        messages = []
         for edit in failed:
             path, original, updated = edit
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
-            res += f"""
- ## SearchReplaceNoExactMatch: The SEARCH block in {path} did not exactly match any content.
- <<<<<<< SEARCH
- {original}=======
- {updated}>>>>>>> REPLACE
- """
-            did_you_mean = find_similar_lines(original, content)
-            if did_you_mean:
-                # Compute similarity percentage using difflib's SequenceMatcher.
-                from difflib import SequenceMatcher
-                similarity_ratio = SequenceMatcher(None, original, did_you_mean).ratio()
+            header = f"## SearchReplaceNoExactMatch: The SEARCH block in {path} did not exactly match any content."
+            block_info = f"<<<<<<< SEARCH\n{original}=======\n{updated}>>>>>>> REPLACE"
+            candidate = find_similar_lines(original, content)
+            if candidate:
+                similarity_ratio = SequenceMatcher(None, original, candidate).ratio()
                 similarity_percent = similarity_ratio * 100
-                res += f"""Detected similarity: {similarity_percent:.0f}% (threshold: {SIMILARITY_THRESHOLD * 100:.0f}%)
- Did you mean to match some of these actual lines from {path}?
-
- {self.fence[0]}
- {did_you_mean}
- {self.fence[1]}
- """
-            res += f"""
- Suggested corrections for {path}:
- - Verify the SEARCH block exactly matches the file content (including whitespace, indentation, and punctuation).
- - Check for accidental extra or missing spaces.
- - Confirm that the file content has not been altered unexpectedly.
- """
+                diff_lines = list(unified_diff(
+                    original.splitlines(keepends=True),
+                    candidate.splitlines(keepends=True),
+                    fromfile="Expected SEARCH",
+                    tofile="Candidate Snippet",
+                ))
+                diff_text = "".join(diff_lines)
+                detail = (f"Detected similarity: {similarity_percent:.0f}% (threshold: {SIMILARITY_THRESHOLD * 100:.0f}%)\n"
+                          f"Unified diff between expected and candidate snippet:\n{diff_text}\n"
+                          f"Did you mean to match these actual lines from {path}?\n"
+                          f"{self.fence[0]}\n{candidate}\n{self.fence[1]}")
+            else:
+                detail = "No similar candidate snippet found."
+            suggestion = (f"Suggested corrections for {path}:\n"
+                          "- Verify the SEARCH block exactly matches the file content (including whitespace, indentation, and punctuation).\n"
+                          "- Check for accidental extra or missing spaces.\n"
+                          "- Confirm that the file content has not been altered unexpectedly.")
+            warning = ""
             if updated in content and updated:
-                res += f"""Warning: The REPLACE block content already exists in {path}.
-Please confirm if the SEARCH/REPLACE block is still needed.
-"""
-        res += (
-            "Note: The SEARCH section must exactly match an existing block of lines including all whitespace, "
-            "comments, indentation, and formatting details.\n"
-        )
+                warning = (f"Warning: The REPLACE block content already exists in {path}.\n"
+                           "Please confirm if the SEARCH/REPLACE block is still needed.")
+            messages.append("\n".join([header, block_info, detail, suggestion, warning]))
+        summary = ""
         if passed:
             pblocks = "block" if len(passed) == 1 else "blocks"
-            res += f"""
- # {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.
- Only resend fixed versions of the {blocks} that failed.
- """
-        raise ValueError(res)
+            blocks_str = "block" if len(failed) == 1 else "blocks"
+            summary = f"\n# {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.\nOnly resend fixed versions of the {blocks_str} that failed."
+        note = ("Note: The SEARCH section must exactly match an existing block of lines including all whitespace, "
+                "comments, indentation, and formatting details.\n")
+        return f"# {len(failed)} SEARCH/REPLACE block(s) failed to match!\n" + "\n".join(messages) + "\n" + note + summary
 
 
 def prep(content):
