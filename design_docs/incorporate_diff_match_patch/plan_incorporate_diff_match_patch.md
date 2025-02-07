@@ -35,9 +35,11 @@ Change editblock_coder.py to more reliably apply search/replace blocks by using 
 
 - In an intermediate case, if the search block doesn't uniquely match one region of the target file, or if it is unclear whether the LLM clearly saw its intended match target, then this should not match.
 
-In our experience, the LLM normally makes only a few, small mistakes in reproducing tens of lines of existing file content in its search block.
+Given how we prompt the LLM, it usually produces search blocks that cover tens of lines of the target file. In our experience, the LLM normally makes only a few, small mistakes in its transcription of existing content into the search block. Our algorithms and tests should expect this level of accuracy.
 
 In less common cases where it makes more or larger mistakes, that usually does mean the LLM failed to "see" the target file accurately. For example, maybe it overlooked an entire small function when reproducing the "search" text. We do want to treat these cases as "no match" and retry.
+
+In rare cases, the LLM might try to replace just one or several lines of the target file. In these cases, we should expect the LLM to be very accurate in what it wants to replace. If the LLM's search block appears multiple times in the file, we should reject this.
 
 Our intuition is that when the LLM accurately sees what it wants to replace in the target file but just makes mistakes in the transcription, the match is probably something like 0.95, or even 0.99.
 
