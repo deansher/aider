@@ -15,7 +15,8 @@ from .editblock_prompts import EditBlockPrompts
 
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+# Debug messages will propagate to root logger's handlers
+logger.propagate = True
 
 DEFAULT_FENCE = ("`" * 3, "`" * 3)
 
