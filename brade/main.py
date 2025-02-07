@@ -16,11 +16,10 @@ def setup_file_logging():
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     file_handler.setFormatter(formatter)
 
-    # Set the root logger to DEBUG so it passes debug messages to its handlers
-    # The file handler is already configured for DEBUG level, so this allows
-    # debug messages to reach it while still controlling output at the handler level
+    # Set the root logger to INFO level so it blocks debug messages by default
+    # Individual loggers that need debug output can add handlers directly
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)
+    root_logger.setLevel(logging.INFO)
     root_logger.addHandler(file_handler)
 
 
