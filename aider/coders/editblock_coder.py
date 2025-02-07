@@ -465,33 +465,24 @@ def find_filename(line, valid_fnames):
     return None
 
 
-def find_similar_lines(search_lines, content_lines, threshold=0.6):
-    search_lines = search_lines.splitlines()
-    content_lines = content_lines.splitlines()
-
-    best_ratio = 0
-    best_match = None
-
-    for i in range(len(content_lines) - len(search_lines) + 1):
-        chunk = content_lines[i : i + len(search_lines)]
-        ratio = SequenceMatcher(None, search_lines, chunk).ratio()
-        if ratio > best_ratio:
-            best_ratio = ratio
-            best_match = chunk
-            best_match_i = i
-
-    if best_ratio < threshold:
+def find_similar_lines(search_text: str, content_text: str, threshold: float = 0.6) -> str:
+    """
+    Use diff-match-patch to locate a candidate snippet in content_text that is similar
+    to search_text. Returns the candidate snippet if the similarity is above the threshold,
+    otherwise returns an empty string.
+    """
+    dmp = diff_match_patch.diff_match_patch()
+    match_index = dmp.match_main(content_text, search_text, 0)
+    if match_index == -1:
         return ""
-
-    if best_match[0] == search_lines[0] and best_match[-1] == search_lines[-1]:
-        return "\n".join(best_match)
-
-    N = 5
-    best_match_end = min(len(content_lines), best_match_i + len(search_lines) + N)
-    best_match_i = max(0, best_match_i - N)
-
-    best = content_lines[best_match_i:best_match_end]
-    return "\n".join(best)
+    candidate = content_text[match_index: match_index + len(search_text)]
+    diffs = dmp.diff_main(candidate, search_text)
+    dmp.diff_cleanupSemantic(diffs)
+    distance = dmp.diff_levenshtein(diffs)
+    similarity = 1 - (distance / len(search_text))
+    if similarity < threshold:
+        return ""
+    return candidate
 
 
 def main():
