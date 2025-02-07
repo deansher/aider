@@ -126,34 +126,36 @@ from hello import hello
     @property
     def task_instructions(self) -> str:
         """Task-specific instructions for the edit block workflow."""
-        return """# Implementation Requirements
+        return """ # SEARCH/REPLACE Block Format
 
-## SEARCH/REPLACE Block Format Reference
+ Every SEARCH/REPLACE block must strictly follow this format:
 
-## Required Components
-1. File Path:
-   - Full path from project root
-   - No quotes, asterisks, or escaping
-   - Placed on the line immediately above the Code Fence
+ 1. **File Path**
+    - Must be the full, relative file path (from project root) on a line by itself immediately *above* the opening fence.
+    - No extra characters (quotes, asterisks, etc.) are allowed.
 
-2. Code Fence:
-   - Format is: {fence[0]}language, like ```python or <source>python
-   - The fence marker varies from request to request, to make you you use {fence[0]} right now.
-   - Infer language from file extension.
-   - Must exactly match the format shown in these instructions.
-   - Using a different fence format will cause the edit to fail.
+ 2. **Code Fence**
+    - Use the provided fence format exactly (e.g. `{fence[0]}python` to start and `{fence[1]}` to end).
+    - The language specifier (e.g. “python”) should match the target file’s extension.
 
-3. Search Block:
-   - Starts with <<<<<<< SEARCH
-   - Empty when creating a new file
-   - Else reproduces entire lines of the content to be replaced, verbatim
+ 3. **SEARCH Block**
+    - Begins with a line exactly reading `<<<<<<< SEARCH`.
+    - For existing files, the SEARCH block must match the current file content *exactly* (including whitespace, comments, and indentation).
+    - For new files, leave the SEARCH block empty.
 
-4. Divider:
-   - =======
+ 4. **Divider**
+    - A single line exactly reading `=======` separates the SEARCH and REPLACE sections.
 
-5. Replace Block:
-   - Your new content
-   - Ends with >>>>>>> REPLACE
+ 5. **REPLACE Block**
+    - Contains the new content that will replace the matched text.
+    - Ends with a line exactly reading `>>>>>>> REPLACE`.
+
+ # Important Soft Guidelines
+
+ - **Minimal Context:** Use just enough surrounding context (about 5-10 lines) to accurately identify the target text.
+ - **Isolated Changes:** Each block should focus on a single logical change; avoid mixing unrelated changes.
+ - **Preserve Format:** Do not alter indentation, remove comments, or change spacing unless it's part of the intended edit.
+ - **Exact Matching:** The SEARCH part must be a verbatim copy of whole lines of the existing file content.
 
 ## Example
 
@@ -172,80 +174,15 @@ def echo(msg):
 >>>>>>> REPLACE
 {fence[1]}
 
-## Key Requirements
+## Special Cases
 
-1. **Choosing Scope of a SEARCH block**
-
-  a. General Guidance
-    - Each SEARCH/REPLACE block should cover one small portion of the target file.
-    - The SEARCH block should cover just the content that will be changed plus a small amount of
-      context above and below.
-    - Use multiple SEARCH/REPLACE blocks as need.
-    - Motivation: narrow scope helps avoid errors and makes it easier to review changes.
-
-  b. For Source Code
-
-    Each SEARCH/REPLACE block should cover changes to one high-level declaration:   
-
-    - Let's use the term "high-level declaration" to mean either a top-level declarartion
-      such as a constant or function declaration, or the next level down when it is still
-      a high-level unit such as a method of a class.
-
-    - For tests, a "high-level declaration" is an individual unit test 
-      (such as `it("should do something")` in a test suite).
-
-    - Each SEARCH/REPLACE block should only make changes to one high-level declaration.
-
-    - If a high-level declaration is larger than about 50 lines, then unless you are completely
-      rewriting it, each SEARCH/REPLACE block should just cover your changes to one portion of
-      it with 5-10 lines of context above and below.
-
-  c. For Documents
-
-    - Generally, each SEARCH/REPLACE block should cover changes to 1-3 paragraphs.
-
-    - If an inner subsection being changed is around 3 paragraphs or shorter, it is great
-      for the SEARCH block to cover the entire subsection.
-
-    - For content where paragraph boundaries are unclear or paragraphs are very long, 
-      use your judgement to keep each SEARCH/REPLACE block focused and not too large.
-      Try to only provide 5-10 lines of context above and below the changed content.
-
-2. **Exact Matching**
-   - The SEARCH block must exactly match the latest file content that you see in
-     <brade:editable_files>...</brade:editable_files> 
-     or <brade:readonly_files>...</brade:readonly_files>.
-     By placing files in <brade:editable_files />, your partner is suggesting that you
-     will more likely need to edit these, but you can freely edit files in
-     <brade:readonly_files /> if necessary to get the job done.
-   - Match every character exactly, including:
-     - Whitespace and indentation
-     - Comments and docstrings
-     - Container syntax (quotes, XML, etc.)
-
-3. **Common Mistakes to Avoid in your REPLACE Block**
-  - Avoid deleting comments.
-  - Avoid changing indentation.
-  - Avoid removing blank lines.
-  - Copy unchanged context exactly.
-
-# Special Cases
-
-1. **File Selection**
-   - Default to files in <editable_files>
-   - Only touch <readonly_files> if essential
-   - Follow partner's filename requests exactly
-
-2. **Creating New Files**
+1. **Creating New Files**
    - Use empty SEARCH section
    - Put new content in REPLACE section
    - Use full path from project root
 
-3. **Moving Code**
+2. **Moving Code**
    - Use two blocks:
      1. Delete from original location
      2. Insert at new location
-
-4. **Renaming Files**
-   - Use shell commands at end of response
 """
