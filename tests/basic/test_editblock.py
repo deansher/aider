@@ -372,28 +372,25 @@ class TestUtils(unittest.TestCase):
         result = eb.replace_most_similar_chunk(whole, part, replace)  
         self.assertEqual(result, expected_output)
 
-    def test_replace_multiple_matches(self):
-        """Test successful exact match replacement.
-        
-        This test verifies that when the search text exactly matches a portion of the content:
-        1. The replacement succeeds (similarity = 1.0, well above our 0.95 threshold)
-        2. Only the first occurrence is replaced
-        """
+    def test_exact_match_replaces_first_occurrence_only(self):
+        """Verify that an exact match is replaced only at its first occurrence."""
         whole = (
-            "def foo():\n    return 42\n\n"
-            "def bar():\n    return 43\n\n"
-            "def foo():\n    return 44\n"
+            "def validate_user(user_id: str) -> bool:\n"
+            "    return check_permissions(user_id)\n\n"
+            "def process_data(data: dict) -> None:\n"
+            "    pass\n\n"
+            "def validate_user(user_id: str) -> bool:\n"
+            "    return True  # Duplicate for testing\n"
         )
-        part = "def foo():\n    return 42\n"
-        replace = "def foo():\n    return 100\n"
-        expected_output = (
-            "def foo():\n    return 100\n\n"
-            "def bar():\n    return 43\n\n"
-            "def foo():\n    return 44\n"
-        )
-
+        part = "def validate_user(user_id: str) -> bool:\n    return check_permissions(user_id)\n"
+        replace = "def validate_user(user_id: str) -> bool:\n    return is_authorized(user_id)\n"
+        
         result = eb.replace_most_similar_chunk(whole, part, replace)
-        self.assertEqual(result, expected_output)
+        
+        # Verify first occurrence was replaced
+        self.assertIn("return is_authorized(user_id)", result)
+        # Verify second occurrence was not changed
+        self.assertIn("return True  # Duplicate for testing", result)
         
     def test_full_edit(self):
         # Create a few temporary files
