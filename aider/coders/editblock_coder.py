@@ -1,9 +1,9 @@
 import difflib
+from difflib import SequenceMatcher, unified_diff
 import math
 import re
 import sys
 import diff_match_patch
-from difflib import SequenceMatcher
 from pathlib import Path
 
 from aider import utils
@@ -11,6 +11,7 @@ from aider import utils
 from ..dump import dump  # noqa: F401
 from .base_coder import Coder
 from .editblock_prompts import EditBlockPrompts
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -119,7 +120,6 @@ class EditBlockCoder(Coder):
             raise ValueError(self._build_failed_edit_error_message(failed, passed))
 
     def _build_failed_edit_error_message(self, failed, passed):
-        from difflib import SequenceMatcher, unified_diff
         messages = []
         for edit in failed:
             path, original, updated = edit
