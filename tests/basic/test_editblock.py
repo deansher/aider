@@ -508,5 +508,30 @@ Hope you like it!
         )
 
 
+# New tests for diff-match-patch integration
+
+def test_diff_match_patch_minor_inaccuracy(self):
+    """
+    Test that a minor inaccuracy in the search text (e.g. a missing comma)
+    is tolerated and the replacement is applied.
+    """
+    whole = "Hello, world!\n"
+    part = "Hello world!\n"  # missing comma
+    replace = "Hi, world!\n"
+    expected = "Hi, world!\n"
+    result = eb.replace_most_similar_chunk(whole, part, replace)
+    self.assertEqual(result, expected)
+
+def test_diff_match_patch_significant_mismatch(self):
+    """
+    Test that when the search text is significantly different from the target content,
+    the diff-match-patch based matching rejects the match (i.e. returns None).
+    """
+    whole = "This is a completely different text.\n"
+    part = "Hello, world!\n"
+    replace = "Hi, world!\n"
+    result = eb.replace_most_similar_chunk(whole, part, replace)
+    self.assertIsNone(result)
+
 if __name__ == "__main__":
     unittest.main()
