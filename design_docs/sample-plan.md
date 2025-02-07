@@ -20,8 +20,8 @@ We use simple, textual checkboxes at each level of task, both for tasks represen
 ```
 ### ( ) Complex Task
 
-- (✅) Subtask
-  - (✅) Subsubtask
+- (✔︎) Subtask
+  - (✔︎) Subsubtask
 - ( ) Another subtask
 ```
 
