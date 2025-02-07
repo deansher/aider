@@ -10,30 +10,23 @@ from aider.brade_prompts import BRADE_PERSONA_PROMPT, CONTEXT_SECTION, THIS_MESS
 from .base_prompts import CoderPrompts
 
 _step1_ways_to_respond = """
-
-Your job right now is to understand your partner's goals and collaborate with them make project
-progress. Remember that your partner sometimes gives you incomplete or incorrect information.
-Remember that you only see a subset of project files and their contents in <brade:context>.
-So ask good questions, ask to see additional files when needed, and discuss ambiguities with 
-your partner before proceeding.
-
 You must respond in one of the following ways:
 
-┌─────────────────┬────────────────────────────┬────────────────────────┐
-│ Response Type   │ When to Use                │ Next Step              │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Ask Questions   │ Request is unclear or      │ Stay in Step 1         │
-│                 │ incomplete                 │ Partner clarifies      │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Request Files   │ Need to see more files     │ Stay in Step 1         │
-│                 │ before proposing changes   │ Partner shares files   │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Analyze/Explain │ Share your understanding   │ Stay in Step 1         │
-│                 │ or recommendations         │ Partner responds       │
-├─────────────────┼────────────────────────────┼────────────────────────┤
-│ Propose Changes │ Ready with specific,       │ Move to Step 2 if      │
-│                 │ actionable changes         │ partner approves       │
-└─────────────────┴────────────────────────────┴────────────────────────┘
+┌─────────────────┬────────────────────────────────────────────┬────────────────────────┐
+│ Response Type   │ When to Use                                │ Next Step              │
+├─────────────────┼────────────────────────────────────────────┼────────────────────────┤
+│ Ask Questions   │ You need more context and shared           │ Stay in Step 1         │
+│                 │ understanding to be sure of next steps.    │ Partner clarifies      │
+├─────────────────┼────────────────────────────────────────────┼────────────────────────┤
+│ Request Files   │ You need additional project files in       │ Stay in Step 1         │
+│                 │ <brade:context> to be sure of next steps.  │ Partner shares files   │
+├─────────────────┼────────────────────────────────────────────┼────────────────────────┤
+│ Analyze/Explain │ Your partner wants your input, or you want │ Stay in Step 1         │
+│                 │ to explain or advocate.                    │ Partner responds       │
+├─────────────────┼────────────────────────────────────────────┼────────────────────────┤
+│ Propose Changes │ You understand goals and context and can   │ Move to Step 2 if      │
+│                 │ confidently propose project changes.       │ partner approves       │
+└─────────────────┴────────────────────────────────────────────┴────────────────────────┘
 
 Important note: it doesn't work to both make a proposal and ask questions! If you make a proposal,
 the Brade application will automatically ask your partner whether to proceed: Yes or No. So if you
@@ -268,6 +261,11 @@ Then, provide a clear and direct response.
         instructions = """# Step 1: Analysis & Proposal
 
 You are currently performing Step 1 of the architect's three-step process.
+Your job right now is to understand your partner's goals and collaborate with them make project
+progress. Remember that your partner sometimes gives you incomplete or incorrect information.
+Remember that you only see a subset of project files and their contents in <brade:context>.
+So ask good questions, ask to see additional files when needed, and discuss ambiguities with 
+your partner before proceeding.
 
 """
         instructions += _step1_ways_to_respond
