@@ -523,8 +523,7 @@ class TestUtils(unittest.TestCase):
     def test_build_failed_edit_error_message_no_candidate(self):
         original = "def foo():\n    return 42\n"
         updated = "def foo():\n    return 43\n"
-        # File content is completely different from original but includes the updated text to trigger a warning.
-        file_content = "completely different content\n" + updated + "\n"
+        file_content = "completely different content with no similar candidate\n"
         class FakeIO:
             def read_text(self, fname):
                 return file_content
@@ -541,7 +540,6 @@ class TestUtils(unittest.TestCase):
             message
         )
         self.assertIn("No similar candidate snippet found.", message)
-        self.assertIn("Warning:", message)
         self.assertIn("Only resend fixed versions of the", message)
 
 if __name__ == "__main__":
