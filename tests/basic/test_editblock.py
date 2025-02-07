@@ -127,7 +127,7 @@ class TestUtils(unittest.TestCase):
             "def calculate_total(numbers):\n"
             "    total = 0\n"
             "    for num in numbers:\n"
-            "    total += num\n"
+            "        total += num\n"
             "    return total\n",
             "def calculate_total(numbers):\n"
             "    return sum(numbers)\n")])
