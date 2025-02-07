@@ -304,7 +304,7 @@ class TestUtils(unittest.TestCase):
             "patches in both `test_check_for_ctags_failure` and `test_check_for_ctags_success` tests.\n"
         )
 
-    def test_replace_part_with_missing_varied_leading_whitespace(self):
+    def test_diff_match_patch_whitespace_differences(self):
         whole = (
             "\n"
             "    line1\n"
