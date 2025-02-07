@@ -13,14 +13,28 @@ from aider.models import _ModelConfigImpl
 class TestUtils(unittest.TestCase):
     """Test suite for editblock_coder.py focusing on key behaviors.
     
-    Our testing strategy:
-    1. Success Case - verify exact matches work and only replace first occurrence
-    2. Failure Case - verify that even minor differences (similarity < 0.95) fail
-    3. Parsing Tests - verify filename and edit block extraction machinery
+    Our testing strategy focuses on three essential aspects:
     
-    We intentionally use raw diff-match-patch with a 0.95 similarity threshold,
-    so any case that produces a similarity below 0.95 (even when the only
-    differences are whitespace) raises a ValueError.
+    1. Success Cases:
+       - Verify that exact matches work correctly
+       - Confirm only first occurrence is replaced
+       - Test with representative real-world content
+    
+    2. Failure Cases:
+       - Verify that similarity below 0.95 triggers failure
+       - Test with realistic transcription errors
+       - Confirm even minor differences fail
+    
+    3. Parsing Tests:
+       - Verify filename extraction and validation
+       - Test edit block parsing and validation
+       - Confirm proper handling of edge cases
+    
+    Design Decision:
+    We intentionally use raw diff-match-patch with a strict 0.95 similarity threshold.
+    Any case that produces similarity below 0.95 (even when differences are just
+    whitespace) raises a ValueError. This enforces our requirement that the LLM must
+    be highly accurate in its transcription of existing code.
     """
     
     def setUp(self):
