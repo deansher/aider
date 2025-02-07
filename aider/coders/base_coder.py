@@ -964,7 +964,8 @@ class Coder:
 
         return platform_text
 
-    def fmt_system_prompt(self, prompt):
+    def format_prompt(self, prompt):
+        """Formats a prompt template by substituting dynamic content such as fence and platform."""
         lazy_prompt = self.gpt_prompts.lazy_prompt if self.main_model.lazy else ""
         platform_text = self.get_platform_info()
 
@@ -1093,9 +1094,9 @@ class Coder:
         task_instructions_reminder = None
         prompts = getattr(self, "gpt_prompts", None)
         if prompts and prompts.task_instructions:
-            task_instructions = prompts.task_instructions
+            task_instructions = self.format_prompt(prompts.task_instructions)
         if prompts and prompts.system_reminder:
-            task_instructions_reminder = self.fmt_system_prompt(prompts.system_reminder)
+            task_instructions_reminder = self.format_prompt(prompts.system_reminder)
 
         # Get task examples from prompts
         task_examples = None
@@ -1103,13 +1104,13 @@ class Coder:
             task_examples = [
                 dict(
                     role=msg["role"],
-                    content=self.fmt_system_prompt(msg["content"]),
+                    content=self.format_prompt(msg["content"]),
                 )
                 for msg in self.gpt_prompts.example_messages
             ]
 
         return format_brade_messages(
-            system_prompt=self.fmt_system_prompt(prompts.main_system_core if prompts else ""),
+            system_prompt=self.format_prompt(prompts.main_system_core if prompts else ""),
             task_instructions=task_instructions,
             done_messages=self.done_messages,
             cur_messages=self.cur_messages,
