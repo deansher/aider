@@ -491,7 +491,7 @@ class TestUtils(unittest.TestCase):
         # Target content in file
         whole = "def process_data(data, options):\n    return data.process(options)\n"
         # Search block with missing comma - similarity will be about 0.92
-        part = "def process_data(data options):\n    return data.process(options)\n"
+        part = "def process_data(data options):\n    return data.procced(options)\n"
         # Replacement content (not used since match should fail)
         replace = "def process_data(data, options):\n    return data.transform(options)\n"
         
