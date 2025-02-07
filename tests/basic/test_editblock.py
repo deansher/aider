@@ -477,9 +477,6 @@ class TestUtils(unittest.TestCase):
             ],
         )
 
-
-# New tests for diff-match-patch integration
-
     def test_diff_match_patch_minor_inaccuracy(self):
         """Test that even minor differences trigger a failure when similarity falls below 0.95.
         
@@ -498,6 +495,54 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
+
+    def test_build_failed_edit_error_message_candidate_found(self):
+        original = "def foo():\n    return 42\n"
+        updated = "def foo():\n    return 43\n"
+        # File content is almost the same as the original (extra space before 42) to trigger a candidate match.
+        file_content = "def foo():\n    return  42\n"
+        class FakeIO:
+            def read_text(self, fname):
+                return file_content
+        from aider.coders import editblock_coder as eb
+        dummy = eb.EditBlockCoder.__new__(eb.EditBlockCoder)
+        dummy.io = FakeIO()
+        dummy.fence = ("```", "```")
+        dummy.abs_root_path = lambda path: path
+        failed = [("dummy.py", original, updated)]
+        passed = []
+        message = dummy._build_failed_edit_error_message(failed, passed)
+        self.assertIn(
+            "## SearchReplaceNoExactMatch: The SEARCH block in dummy.py did not exactly match any content.",
+            message
+        )
+        self.assertIn("Detected similarity:", message)
+        self.assertIn("Unified diff between expected and candidate snippet:", message)
+        self.assertNotIn("Warning:", message)
+
+    def test_build_failed_edit_error_message_no_candidate(self):
+        original = "def foo():\n    return 42\n"
+        updated = "def foo():\n    return 43\n"
+        # File content is completely different from original but includes the updated text to trigger a warning.
+        file_content = "completely different content\n" + updated + "\n"
+        class FakeIO:
+            def read_text(self, fname):
+                return file_content
+        from aider.coders import editblock_coder as eb
+        dummy = eb.EditBlockCoder.__new__(eb.EditBlockCoder)
+        dummy.io = FakeIO()
+        dummy.fence = ("```", "```")
+        dummy.abs_root_path = lambda path: path
+        failed = [("dummy.py", original, updated)]
+        passed = [("dummy.py", original, updated)]
+        message = dummy._build_failed_edit_error_message(failed, passed)
+        self.assertIn(
+            "## SearchReplaceNoExactMatch: The SEARCH block in dummy.py did not exactly match any content.",
+            message
+        )
+        self.assertIn("No similar candidate snippet found.", message)
+        self.assertIn("Warning:", message)
+        self.assertIn("Only resend fixed versions of the", message)
 
 if __name__ == "__main__":
     unittest.main()
