@@ -277,12 +277,19 @@ You are currently performing Step 1 of the architect's three-step process.
 
 Your human partner has approved the changes that you proposed in your last message.
 Your current task is to implement that proposal by using SEARCH/REPLACE blocks
-to create or revise project files:
-- Use SEARCH/REPLACE blocks for all changes.
-- Adhere closely to the spirit of your proposal.
-- However, your mission now is to produce high-quality code or other content.
-  Apply your own expertise to notice any mistakes or poor choices in the details
-  of the proposal and improve upon them.
+to create or revise project files.
+
+Start by writing a concise but thorough plan for how you will implement the 
+approved proposal. Your mission is to implement the spirit of the proposal
+with high-quality code other other content. This is your opportunity to take
+a fresh look at the details of the propose -- use your judgment. Stay within
+the intended scope of the proposal.
+
+Then write down a punchlist of changes you will have to make to implement the
+proposal. Use a short bullet point for each change, providing the file path
+and concisely describing the change.
+
+Then produce a SEARCH/REPLACE block for each change.
 
 When you are done:
 - Stop immediately, without further comment to your human partner.
