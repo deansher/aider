@@ -2,6 +2,7 @@ import difflib
 import math
 import re
 import sys
+import diff_match_patch
 from difflib import SequenceMatcher
 from pathlib import Path
 
@@ -342,39 +343,32 @@ def match_but_for_leading_whitespace(whole_lines, part_lines):
 
 
 def replace_closest_edit_distance(whole_lines, part, part_lines, replace_lines):
-    similarity_thresh = 0.8
-
-    max_similarity = 0
-    most_similar_chunk_start = -1
-    most_similar_chunk_end = -1
-
-    scale = 0.1
-    min_len = math.floor(len(part_lines) * (1 - scale))
-    max_len = math.ceil(len(part_lines) * (1 + scale))
-
-    for length in range(min_len, max_len):
-        for i in range(len(whole_lines) - length + 1):
-            chunk = whole_lines[i : i + length]
-            chunk = "".join(chunk)
-
-            similarity = SequenceMatcher(None, chunk, part).ratio()
-
-            if similarity > max_similarity and similarity:
-                max_similarity = similarity
-                most_similar_chunk_start = i
-                most_similar_chunk_end = i + length
-
-    if max_similarity < similarity_thresh:
+    # New implementation using diff-match-patch for flexible fuzzy matching.
+    # Combine the whole file content into a single string.
+    whole_text = "".join(whole_lines)
+    # The search text to match is taken from 'part'.
+    search_text = part
+    # Combine replacement lines into a single string.
+    replacement_text = "".join(replace_lines)
+    # Instantiate a diff_match_patch object.
+    dmp = diff_match_patch.diff_match_patch()
+    # Attempt to find search_text in whole_text starting from index 0.
+    match_index = dmp.match_main(whole_text, search_text, 0)
+    if match_index == -1:
         return
-
-    modified_whole = (
-        whole_lines[:most_similar_chunk_start]
-        + replace_lines
-        + whole_lines[most_similar_chunk_end:]
-    )
-    modified_whole = "".join(modified_whole)
-
-    return modified_whole
+    # Extract the candidate substring from whole_text.
+    candidate = whole_text[match_index: match_index + len(search_text)]
+    # Compute differences between candidate and search_text.
+    diffs = dmp.diff_main(candidate, search_text)
+    dmp.diff_cleanupSemantic(diffs)
+    # Compute Levenshtein distance and derive a similarity ratio.
+    distance = dmp.diff_levenshtein(diffs)
+    similarity = 1 - (distance / len(search_text)) if len(search_text) > 0 else 0
+    if similarity < 0.8:
+        return
+    # Replace the found segment with the replacement text.
+    new_text = whole_text[:match_index] + replacement_text + whole_text[match_index + len(search_text):]
+    return new_text
 
 
 DEFAULT_FENCE = ("`" * 3, "`" * 3)
