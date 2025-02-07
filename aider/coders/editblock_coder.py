@@ -173,9 +173,7 @@ def replace_most_similar_chunk(whole, part, replace):
     Raises a ValueError with diagnostic information if the similarity falls below the threshold.
     """
     dmp = diff_match_patch.diff_match_patch()
-    def normalize(text):
-        return "".join(line.lstrip() for line in text.splitlines())
-    search_text = normalize(part)
+    search_text = part
     if not search_text:
         return whole + replace
     match_index = dmp.match_main(whole, search_text, 0)
