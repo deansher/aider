@@ -503,7 +503,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         # reasoning_level should take precedence over both model.extra_params and extra_params
         _hash, completion = send_completion(
             model_config=model,
-            messages=["message"],
+            messages=[{"role": "user", "content": "message"}],
             functions=None,
             stream=False,
             temperature=0,
