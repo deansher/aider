@@ -192,7 +192,7 @@ def replace_most_similar_chunk(whole, part, replace):
 
 DEFAULT_FENCE = ("`" * 3, "`" * 3)
 # New constant for fuzzy matching tolerance using diff-match-patch
-SIMILARITY_THRESHOLD = 0.8
+SIMILARITY_THRESHOLD = 0.95  # Only near-perfect (≈95%+) matches are accepted
 
 import logging
 logger = logging.getLogger(__name__)

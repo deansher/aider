@@ -62,10 +62,10 @@ class TestUtils(unittest.TestCase):
         whole = "This is a sample text.\nAnother line of text.\nYet another line.\n"
         part = "This is a sample text\n"
         replace = "This is a replaced text.\n"
-        expected_output = "This is a replaced text.\nAnother line of text.\nYet another line.\n"
+        expected_output = "This is a replaced text.\n\nAnother line of text.\nYet another line.\n"
 
-        result = eb.replace_most_similar_chunk(whole, part, replace)
-        self.assertEqual(result, expected_output)
+        with self.assertRaises(ValueError):
+             eb.replace_most_similar_chunk(whole, part, replace)
 
     # fuzzy logic disabled v0.11.2-dev
     def test_replace_most_similar_chunk_not_perfect_match(self):
@@ -74,8 +74,8 @@ class TestUtils(unittest.TestCase):
         replace = "This is a replaced text.\nModified line of text.\n"
         expected_output = "This is a replaced text.\nModified line of text.\nYet another line.\n"
 
-        result = eb.replace_most_similar_chunk(whole, part, replace)
-        self.assertEqual(result, expected_output)
+        with self.assertRaises(ValueError):
+             eb.replace_most_similar_chunk(whole, part, replace)
 
     def test_strip_quoted_wrapping(self):
         input_text = (
@@ -300,8 +300,8 @@ These changes replace the `subprocess.run` patches with `subprocess.check_output
     line4
 """
 
-        result = eb.replace_most_similar_chunk(whole, part, replace)
-        self.assertEqual(result, expected_output)
+        with self.assertRaises(ValueError):
+             eb.replace_most_similar_chunk(whole, part, replace)
 
     def test_replace_part_with_missing_leading_whitespace(self):
         whole = "    line1\n    line2\n    line3\n"
