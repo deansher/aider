@@ -524,13 +524,14 @@ def test_diff_match_patch_minor_inaccuracy(self):
 def test_diff_match_patch_significant_mismatch(self):
     """
     Test that when the search text is significantly different from the target content,
-    the diff-match-patch based matching rejects the match (i.e. returns None).
+    the diff-match-patch based matching raises a ValueError.
     """
     whole = "This is a completely different text.\n"
     part = "Hello, world!\n"
     replace = "Hi, world!\n"
-    result = eb.replace_most_similar_chunk(whole, part, replace)
-    self.assertIsNone(result)
+    with self.assertRaises(ValueError) as context:
+         eb.replace_most_similar_chunk(whole, part, replace)
+    self.assertIn("SEARCH/REPLACE block failed", str(context.exception))
 
 if __name__ == "__main__":
     unittest.main()

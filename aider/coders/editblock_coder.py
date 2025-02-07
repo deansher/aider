@@ -164,35 +164,32 @@ def prep(content):
 
 def replace_most_similar_chunk(whole, part, replace):
     """
-    Uses diff-match-patch to perform fuzzy matching for the search block (part) in the file content (whole),
-    tolerating minor differences in leading whitespace. This function splits the file content into lines,
-    normalizes each line by stripping leading whitespace, and computes a similarity score using diff-match-patch.
-    If a contiguous block of lines in 'whole' has a similarity score >= 0.8 compared to the search block,
-    that block is replaced with the 'replace' text.
+    Uses diff-match-patch to perform fuzzy matching for the search block (part) in the file content (whole).
+    This implementation leverages diff_match_patch.match_main to locate the best match for the search block,
+    then computes the similarity using diff_levenshtein.
+    
+    Tolerates minor differences (e.g., extra spaces, slight punctuation differences) but rejects significant mismatches.
+    Returns the new content with the matched region replaced by `replace`.
+    Raises a ValueError with diagnostic information if the similarity falls below the threshold.
     """
     dmp = diff_match_patch.diff_match_patch()
-    whole_lines = whole.splitlines(keepends=True)
-    part_lines = part.splitlines(keepends=False)
-    num_part_lines = len(part_lines)
-    if num_part_lines == 0:
-        return None
+    def normalize(text):
+        return "".join(line.lstrip() for line in text.splitlines())
+    search_text = normalize(part)
+    if not search_text:
+        return whole + replace
+    match_index = dmp.match_main(whole, search_text, 0)
+    if match_index == -1:
+        raise ValueError(f"SEARCH/REPLACE block failed: No match found for search text: {search_text!r}")
+    candidate = whole[match_index: match_index + len(search_text)]
+    diffs = dmp.diff_main(candidate, search_text)
+    dmp.diff_cleanupSemantic(diffs)
+    distance = dmp.diff_levenshtein(diffs)
+    similarity = 1 - (distance / len(search_text))
     threshold = 0.8
-    best_similarity = 0.0
-    best_index = -1
-    for i in range(len(whole_lines) - num_part_lines + 1):
-        candidate = "".join(line.lstrip() for line in whole_lines[i:i+num_part_lines])
-        search_text = "".join(line.lstrip() for line in part_lines)
-        diffs = dmp.diff_main(candidate, search_text)
-        dmp.diff_cleanupSemantic(diffs)
-        distance = dmp.diff_levenshtein(diffs)
-        similarity = 1 - (distance / len(search_text)) if len(search_text) > 0 else 0
-        if similarity > best_similarity:
-            best_similarity = similarity
-            best_index = i
-    if best_similarity < threshold or best_index == -1:
-        return None
-    new_lines = whole_lines[:best_index] + [replace] + whole_lines[best_index+num_part_lines:]
-    return "".join(new_lines)
+    if similarity < threshold:
+        raise ValueError(f"SEARCH/REPLACE block failed: Similarity {similarity:.2f} below threshold {threshold}. Candidate: {candidate!r}")
+    return whole[:match_index] + replace + whole[match_index + len(search_text):]
 
 
 DEFAULT_FENCE = ("`" * 3, "`" * 3)
