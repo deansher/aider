@@ -58,8 +58,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(eb.find_filename("path/to/newfile.py", None), "path/to/newfile.py")
         self.assertIsNone(eb.find_filename("invalid", None))  # No extension
 
-    # fuzzy logic disabled v0.11.2-dev
-    def __test_replace_most_similar_chunk(self):
+    def test_replace_most_similar_chunk(self):
         whole = "This is a sample text.\nAnother line of text.\nYet another line.\n"
         part = "This is a sample text\n"
         replace = "This is a replaced text.\n"
@@ -69,7 +68,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(result, expected_output)
 
     # fuzzy logic disabled v0.11.2-dev
-    def __test_replace_most_similar_chunk_not_perfect_match(self):
+    def test_replace_most_similar_chunk_not_perfect_match(self):
         whole = "This is a sample text.\nAnother line of text.\nYet another line.\n"
         part = "This was a sample text.\nAnother line of txt\n"
         replace = "This is a replaced text.\nModified line of text.\n"
