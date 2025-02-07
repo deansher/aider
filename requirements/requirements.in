@@ -2,33 +2,33 @@
 #    pip-compile requirements.in --upgrade
 #
 
-pydub
-configargparse
-GitPython
-jsonschema
-rich
-prompt_toolkit
 backoff
-pathspec
+beautifulsoup4
+configargparse
+diff-match-patch
 diskcache
+flake8
+GitPython
 grep_ast
+importlib_resources
+json5
+jsonschema
+langfuse
+litellm
+llm-multiple-choice
 packaging
+pathspec
+pexpect
+Pillow
+prompt_toolkit
+psutil
+pydub
+pypandoc
+pyperclip
+PyYAML
+rich
 sounddevice
 soundfile
-beautifulsoup4
-PyYAML
-Pillow
-diff-match-patch
-pypandoc
-litellm
-flake8
-importlib_resources
-pyperclip
-pexpect
-json5
-psutil
-langfuse
-llm-multiple-choice
 
 # The proper dependency is networkx[default], but this brings
 # in matplotlib and a bunch of other deps
