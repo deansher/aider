@@ -111,47 +111,50 @@ class EditBlockCoder(Coder):
             return
 
         blocks = "block" if len(failed) == 1 else "blocks"
-
         res = f"# {len(failed)} SEARCH/REPLACE {blocks} failed to match!\n"
         for edit in failed:
             path, original, updated = edit
-
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
-
             res += f"""
-## SearchReplaceNoExactMatch: This SEARCH block failed to exactly match lines in {path}
-<<<<<<< SEARCH
-{original}=======
-{updated}>>>>>>> REPLACE
-
-"""
+ ## SearchReplaceNoExactMatch: The SEARCH block in {path} did not exactly match any content.
+ <<<<<<< SEARCH
+ {original}=======
+ {updated}>>>>>>> REPLACE
+ """
             did_you_mean = find_similar_lines(original, content)
             if did_you_mean:
-                res += f"""Did you mean to match some of these actual lines from {path}?
+                # Compute similarity percentage using difflib's SequenceMatcher.
+                from difflib import SequenceMatcher
+                similarity_ratio = SequenceMatcher(None, original, did_you_mean).ratio()
+                similarity_percent = similarity_ratio * 100
+                res += f"""Detected similarity: {similarity_percent:.0f}% (threshold: {SIMILARITY_THRESHOLD*100:.0f}%)
+ Did you mean to match some of these actual lines from {path}?
 
-{self.fence[0]}
-{did_you_mean}
-{self.fence[1]}
-
-"""
-
+ {self.fence[0]}
+ {did_you_mean}
+ {self.fence[1]}
+ """
+            res += f"""
+ Suggested corrections for {path}:
+ - Verify the SEARCH block exactly matches the file content (including whitespace, indentation, and punctuation).
+ - Check for accidental extra or missing spaces.
+ - Confirm that the file content has not been altered unexpectedly.
+ """
             if updated in content and updated:
-                res += f"""Are you sure you need this SEARCH/REPLACE block?
-The REPLACE lines are already in {path}!
-
+                res += f"""Warning: The REPLACE block content already exists in {path}.
+Please confirm if the SEARCH/REPLACE block is still needed.
 """
         res += (
-            "The SEARCH section must exactly match an existing block of lines including all white"
-            " space, comments, indentation, docstrings, etc\n"
+            "Note: The SEARCH section must exactly match an existing block of lines including all whitespace, "
+            "comments, indentation, and formatting details.\n"
         )
         if passed:
             pblocks = "block" if len(passed) == 1 else "blocks"
             res += f"""
-# The other {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.
-Don't re-send them.
-Just reply with fixed versions of the {blocks} above that failed to match.
-"""
+ # {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.
+ Only resend fixed versions of the {blocks} that failed.
+ """
         raise ValueError(res)
 
 
