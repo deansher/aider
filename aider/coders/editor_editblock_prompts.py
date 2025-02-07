@@ -48,19 +48,6 @@ from .editblock_prompts import EditBlockPrompts
 
 
 class EditorEditBlockPrompts(EditBlockPrompts):
-    @property
-    def task_instructions(self) -> str:
-        """Task-specific instructions for the edit block workflow."""
-        return """
-After you specify the changes and stop, the Brade application will apply them to the
- project files. Then you will review the updated files to ensure the changes fully and
- correctly implement your proposal.
-
- Make each change by producing a *SEARCH/REPLACE block* as instructed. You must use
- precisely this format. Study the <task_examples>...</task_examples> to ensure that you
- understand it.
- """
-
     shell_cmd_prompt = ""
     no_shell_cmd_prompt = ""
     shell_cmd_reminder = ""

@@ -279,10 +279,8 @@ your partner before proceeding.
 
     def get_approved_non_plan_changes_prompt(self) -> str:
         """Get the prompt for approved non-plan changes."""
-        return """# Implementation
-
-Your human partner has approved the changes that you proposed in your last message.
-Your current task is to implement that proposal by using SEARCH/REPLACE blocks
+        return """Your human partner has approved the changes that you proposed in your last message.
+Now, you must implement that proposal by using SEARCH/REPLACE blocks
 to create or revise project files.
 
 Start by writing a concise but thorough plan for how you will implement the 
@@ -314,13 +312,11 @@ When you are done:
         prompt = ""
 
         prompt += f"{THIS_MESSAGE_IS_FROM_APP}\n"
-        prompt += """# Review
+        prompt += """Review the latest versions of the affected project files to ensure that:
+- The approved change proposal was implemented fully, correctly, and well.
+- The latest project files are now in a solid working state.
 
-Review the latest versions of the affected project files to ensure that:
-1. The changes were applied completely and correctly
-2. The implementation achieves the goals we discussed
-3. No new problems were introduced
-4. No serious existing problems were left unaddressed
+You can see the most recent approved change proposal in our chat history, above.
 
 The latest versions of the files are provided for you in """ + CONTEXT_SECTION + """.
 Read with a fresh, skeptical eye.
@@ -333,14 +329,6 @@ Read with a fresh, skeptical eye.
                 " step by step, as you review the affected portions of the modified files.\n\n"
             )
 
-        prompt += """Focus Areas:
-1. Completeness: Were all proposed changes implemented?
-2. Correctness: Do the changes work as intended?
-3. Side Effects: Were any unintended changes introduced?
-4. Quality: Does the implementation maintain good practices?
-
-"""
-
         # Add # Conclusions heading if we are *not* dealing with a "reasoning" model
         if not self.main_model.is_reasoning_model:
             prompt += """
@@ -351,7 +339,7 @@ believe about the changes.
 
         prompt += """Response Guidelines:
 
-1. If you are fully satisfied:
+1. If the approved chat proposal was implemented well:
    - Say so briefly and stop
    - No need to explain what works well
 

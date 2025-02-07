@@ -121,7 +121,12 @@ from hello import hello
 
 
 
-    system_reminder = """# Implementation Requirements
+    system_reminder = ""
+
+    @property
+    def task_instructions(self) -> str:
+        """Task-specific instructions for the edit block workflow."""
+        return """# Implementation Requirements
 
 ## SEARCH/REPLACE Block Format Reference
 
@@ -246,35 +251,4 @@ def echo(msg):
 
 4. **Renaming Files**
    - Use shell commands at end of response
-
-{lazy_prompt}
-ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
-{shell_cmd_reminder}
-"""
-
-    @property
-    def task_instructions(self) -> str:
-        """Task-specific instructions for the edit block workflow."""
-        return """
-Take requests for changes to the supplied code.
-If the request is ambiguous, ask questions.
-
-Always reply to your partner in the same language they are using.
-
-Once you understand the request you MUST:
-
-1. Decide if you need to propose *SEARCH/REPLACE* edits to any files that haven't been 
-   added to the chat. You can create new files without asking!
-
-   But if you need to propose edits to existing files not already added to the chat, you 
-   *MUST* tell your partner their full path names and ask them to *add the files to the chat*.
-   End your reply and wait for their approval.
-   You can keep asking if you then decide you need to edit more files.
-
-2. Think step-by-step and explain the needed changes in a few short sentences.
-
-3. Describe each change with a *SEARCH/REPLACE block* per the examples below.
-
-All changes to files must use this *SEARCH/REPLACE block* format.
-ONLY EVER RETURN CODE IN A *SEARCH/REPLACE BLOCK*!
 """
