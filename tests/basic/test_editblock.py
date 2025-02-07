@@ -509,7 +509,7 @@ Hope you like it!
 
 # New tests for diff-match-patch integration
 
-def test_diff_match_patch_minor_inaccuracy(self):
+def test_diff_match_patch_minor_inaccuracy():
     """
     Test that a minor inaccuracy in the search text (e.g. a missing comma)
     is tolerated and the replacement is applied.
@@ -519,19 +519,20 @@ def test_diff_match_patch_minor_inaccuracy(self):
     replace = "Hi, world!\n"
     expected = "Hi, world!\n"
     result = eb.replace_most_similar_chunk(whole, part, replace)
-    self.assertEqual(result, expected)
+    assert result == expected
 
-def test_diff_match_patch_significant_mismatch(self):
+def test_diff_match_patch_significant_mismatch():
     """
     Test that when the search text is significantly different from the target content,
     the diff-match-patch based matching raises a ValueError.
     """
+    import pytest
     whole = "This is a completely different text.\n"
     part = "Hello, world!\n"
     replace = "Hi, world!\n"
-    with self.assertRaises(ValueError) as context:
+    with pytest.raises(ValueError) as excinfo:
          eb.replace_most_similar_chunk(whole, part, replace)
-    self.assertIn("SEARCH/REPLACE block failed", str(context.exception))
+    assert "SEARCH/REPLACE block failed" in str(excinfo.value)
 
 if __name__ == "__main__":
     unittest.main()
