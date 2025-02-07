@@ -15,6 +15,7 @@ from .editblock_prompts import EditBlockPrompts
 
 import logging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 DEFAULT_FENCE = ("`" * 3, "`" * 3)
 
@@ -188,6 +189,8 @@ def replace_most_similar_chunk(whole, part, replace):
     if match_index == -1:
         raise ValueError(f"SEARCH/REPLACE block failed: No match found for search text: {search_text!r}")
     candidate = whole[match_index: match_index + len(search_text)]
+    logger.debug("SEARCH block hex (first 40 characters): %s", search_text[:40].encode("utf-8").hex())
+    logger.debug("Candidate block hex (first 40 characters): %s", candidate[:40].encode("utf-8").hex())
     diffs = dmp.diff_main(candidate, search_text)
     dmp.diff_cleanupSemantic(diffs)
     distance = dmp.diff_levenshtein(diffs)
