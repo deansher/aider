@@ -42,3 +42,35 @@ When the match fails, provide clearer feedback to the LLM (i.e. to the editor as
 When the match fails and we retry ("reflection"), retain the entire dialog (all messages) between the editor assistant and the business logic in the chat history so that `ArchitectCoder`'s review pass fully understands what happened.
 
 ## Tasks
+
+### ( ) Integrate diff‐match‐patch into editblock_coder.py
+
+- ( ) Add the diff‐match‐patch library as a project dependency.
+- ( ) Replace the existing homegrown fuzzy matching in replace_most_similar_chunk with diff‐match‐patch based matching.
+- ( ) Configure matching tolerances so that:
+  - Minor differences (extra spaces, inconsistent line breaks, slight punctuation variations) are tolerated.
+  - Significant mismatches are rejected.
+  - Ambiguous or non-unique matches are flagged as failures.
+- ( ) Update error handling to provide clear feedback when no match is found.
+
+### ( ) Update and Expand Unit Tests
+
+- ( ) Revise tests in tests/basic/test_editblock.py to reflect the new matching behavior.
+- ( ) Add tests for:
+  - Tolerance of minor inaccuracies.
+  - Rejection of significant mismatches.
+  - Detection of ambiguous matches.
+- ( ) Confirm that error messages clearly identify match failures.
+
+### ( ) Enhance Feedback and Dialog Logging
+
+- ( ) Retain full dialog history during reflection so that ArchitectCoder’s review sees complete context.
+- ( ) Update logs to indicate how diff‐match‐patch interpreted the search/replace block.
+
+### ( ) Code Cleanup and Documentation
+
+- ( ) Remove obsolete heuristics and matching hacks.
+- ( ) Add inline documentation in editblock_coder.py on diff‐match‐patch integration and tolerance settings.
+- ( ) Update overall project documentation to describe the new matching mechanism.
+
+## Tasks
