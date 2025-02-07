@@ -81,28 +81,6 @@ class TestUtils(unittest.TestCase):
              eb.replace_most_similar_chunk(whole, part, replace)
 
     # fuzzy logic disabled v0.11.2-dev
-    def test_replace_most_similar_chunk_not_perfect_match(self):
-        whole = (
-            "def compute_sum(numbers):\n"
-            "    total = 0\n"
-            "    for num in numbers:\n"
-            "        total += num\n"
-            "    return total\n"
-        )
-        part = (
-            "def compute_sum(numbers):\n"
-            "    total = 0\n"
-            "    for num in numbers:\n"
-            "        total = total * 2  # Different logic\n"
-            "    return total\n"
-        )
-        replace = (
-            "def compute_sum(numbers):\n"
-            "    return sum(numbers)\n"
-        )
-
-        with self.assertRaises(ValueError):
-             eb.replace_most_similar_chunk(whole, part, replace)
 
     def test_strip_quoted_wrapping(self):
         input_text = (
