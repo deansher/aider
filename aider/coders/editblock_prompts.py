@@ -157,7 +157,7 @@ from hello import hello
  - **Preserve Format:** Do not alter indentation, remove comments, or change spacing unless it's part of the intended edit.
  - **Exact Matching:** The SEARCH part must be a verbatim copy of whole lines of the existing file content.
 
-## Example
+## Example 1
 
 utils/echo.py
 {fence[0]}python
@@ -185,4 +185,37 @@ def echo(msg):
    - Use two blocks:
      1. Delete from original location
      2. Insert at new location
+
+## Example 2
+
+To make this change we need to modify `main.py` and make a new file 
+`hello.py`:
+
+1. Make a new hello.py file with hello() in it.
+2. Remove hello() from main.py and replace it with an import.
+
+Here are the *SEARCH/REPLACE* blocks:
+
+hello.py
+{fence[0]}python
+<<<<<<< SEARCH
+=======
+def hello():
+    "print a greeting"
+
+    print("hello")
+>>>>>>> REPLACE
+{fence[1]}
+
+main.py
+{fence[0]}python
+<<<<<<< SEARCH
+def hello():
+    "print a greeting"
+
+    print("hello")
+=======
+from hello import hello
+>>>>>>> REPLACE
+{fence[1]}     
 """
