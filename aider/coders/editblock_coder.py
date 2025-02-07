@@ -15,8 +15,10 @@ from .editblock_prompts import EditBlockPrompts
 
 import logging
 logger = logging.getLogger(__name__)
-# Debug messages will propagate to root logger's handlers
-logger.propagate = True
+# Get handlers from root logger to bypass its level filter
+for handler in logging.getLogger().handlers:
+    logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
 
 DEFAULT_FENCE = ("`" * 3, "`" * 3)
 
