@@ -186,13 +186,18 @@ def replace_most_similar_chunk(whole, part, replace):
     dmp.diff_cleanupSemantic(diffs)
     distance = dmp.diff_levenshtein(diffs)
     similarity = 1 - (distance / len(search_text))
-    threshold = 0.8
-    if similarity < threshold:
-        raise ValueError(f"SEARCH/REPLACE block failed: Similarity {similarity:.2f} below threshold {threshold}. Candidate: {candidate!r}")
+    logger.debug(f"Match details: index={match_index}, candidate={candidate!r}, similarity={similarity:.2f}")
+    if similarity < SIMILARITY_THRESHOLD:
+        raise ValueError(f"SEARCH/REPLACE block failed: Similarity {similarity:.2f} (threshold {SIMILARITY_THRESHOLD}) below cutoff. Candidate snippet: {candidate!r}")
     return whole[:match_index] + replace + whole[match_index + len(search_text):]
 
 
 DEFAULT_FENCE = ("`" * 3, "`" * 3)
+# New constant for fuzzy matching tolerance using diff-match-patch
+SIMILARITY_THRESHOLD = 0.8
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 def strip_quoted_wrapping(res, fname=None, fence=DEFAULT_FENCE):
