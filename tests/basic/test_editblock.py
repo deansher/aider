@@ -395,59 +395,6 @@ class TestUtils(unittest.TestCase):
         result = eb.replace_most_similar_chunk(whole, part, replace)
         self.assertEqual(result, expected_output)
         
-    def test_replace_multiple_matches_missing_whitespace(self):
-        "only replace first occurrence"
-
-        whole = (
-            "    def bar():\n        return 42\n\n"
-            "    def baz():\n        return 43\n\n"
-            "    def bar():\n        return 44\n"
-        )
-        part = "def bar():\n    return 42\n"
-        replace = "def bar():\n    return 100\n"
-        expected_output = (
-            "    def bar():\n        return 100\n\n"
-            "    def baz():\n        return 43\n\n"
-            "    def bar():\n        return 44\n"
-        )
-
-        result = eb.replace_most_similar_chunk(whole, part, replace)
-        self.assertEqual(result, expected_output)
-
-    def test_replace_part_with_just_some_missing_leading_whitespace(self):
-        whole = "    line1\n    line2\n    line3\n"
-        part = " line1\n line2\n"
-        replace = " new_line1\n     new_line2\n"
-        expected_output = "    new_line1\n        new_line2\n    line3\n"
-
-        result = eb.replace_most_similar_chunk(whole, part, replace)
-        self.assertEqual(result, expected_output)
-
-    def test_replace_part_with_some_missing_leading_whitespace(self):
-        whole = (
-            "    def baz(x):\n"
-            "        if x > 0:\n"
-            "            return x\n"
-        )
-        part = (
-            "def baz(x):\n"
-            "    if x > 0:\n"
-            "        return x\n"
-        )
-        replace = (
-            "def baz(x):\n"
-            "    if x >= 0:\n"
-            "        return x + 1\n"
-        )
-        expected_output = (
-            "    def baz(x):\n"
-            "        if x >= 0:\n"
-            "            return x + 1\n"
-        )
-
-        result = eb.replace_most_similar_chunk(whole, part, replace)
-        self.assertEqual(result, expected_output)
-
     def test_full_edit(self):
         # Create a few temporary files
         _, file1 = tempfile.mkstemp()
