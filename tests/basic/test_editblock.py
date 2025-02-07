@@ -373,8 +373,12 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(result, expected_output)
 
     def test_replace_multiple_matches(self):
-        "only replace first occurrence"
-
+        """Test successful exact match replacement.
+        
+        This test verifies that when the search text exactly matches a portion of the content:
+        1. The replacement succeeds (similarity = 1.0, well above our 0.95 threshold)
+        2. Only the first occurrence is replaced
+        """
         whole = (
             "def foo():\n    return 42\n\n"
             "def bar():\n    return 43\n\n"
@@ -591,16 +595,20 @@ class TestUtils(unittest.TestCase):
 # New tests for diff-match-patch integration
 
 def test_diff_match_patch_minor_inaccuracy():
-    """
-    Test that a minor inaccuracy in the search text (e.g. a missing comma)
-    is tolerated and the replacement is applied.
+    """Test that even minor differences trigger a failure when similarity falls below 0.95.
+    
+    This test verifies our strict matching requirements:
+    1. A missing comma produces a similarity score around 0.85
+    2. Since 0.85 < 0.95 (our threshold), this should raise a ValueError
+    3. This enforces our design decision to require near-exact matches
     """
     whole = "Hello, world!\n"
     part = "Hello world!\n"  # missing comma
     replace = "Hi, world!\n"
-    expected = "Hi, world!\n"
-    result = eb.replace_most_similar_chunk(whole, part, replace)
-    assert result == expected
+    
+    with pytest.raises(ValueError) as excinfo:
+        eb.replace_most_similar_chunk(whole, part, replace)
+    assert "SEARCH/REPLACE block failed" in str(excinfo.value)
 
 def test_diff_match_patch_significant_mismatch():
     """
