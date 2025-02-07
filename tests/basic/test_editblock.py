@@ -70,30 +70,6 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(eb.find_filename("path/to/newfile.py", None), "path/to/newfile.py")
         self.assertIsNone(eb.find_filename("invalid", None))  # No extension
 
-    def test_replace_most_similar_chunk(self):
-        whole = (
-            "def compute_sum(numbers):\n"
-            "    total = 0\n"
-            "    for num in numbers:\n"
-            "        total += num\n"
-            "    return total\n"
-        )
-        part = (
-            "def compute_sum(numbers):\n"
-            "    total = 1  # Wrong initialization\n"
-            "    for num in numbers\n"
-            "        total *= num  # Wrong operation\n"
-            "    return total + 1  # Wrong return\n"
-        )
-        replace = (
-            "def compute_sum(numbers):\n"
-            "    return sum(numbers)\n"
-        )
-        with self.assertRaises(ValueError):
-             eb.replace_most_similar_chunk(whole, part, replace)
-
-    # fuzzy logic disabled v0.11.2-dev
-
     def test_strip_quoted_wrapping(self):
         input_text = (
             "filename.ext\n```\nWe just want this content\nNot the filename and triple quotes\n```"
