@@ -45,7 +45,6 @@ When the match fails and we retry ("reflection"), retain the entire dialog (all 
 
 ### ( ) Integrate diff‐match‐patch into editblock_coder.py
 
-- ( ) Add the diff‐match‐patch library as a project dependency.
 - ( ) Replace the existing homegrown fuzzy matching in replace_most_similar_chunk with diff‐match‐patch based matching.
 - ( ) Configure matching tolerances so that:
   - Minor differences (extra spaces, inconsistent line breaks, slight punctuation variations) are tolerated.

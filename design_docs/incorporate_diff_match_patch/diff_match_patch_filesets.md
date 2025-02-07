@@ -7,6 +7,7 @@ aider/coders/editor_editblock_coder.py
 design_docs/incorporate_diff_match_patch/plan_incorporate_diff_match_patch.md
 pyproject.toml
 pytest.ini
+requirements/requirements.in
 tests/basic/test_editblock.py
 ```
 
