@@ -232,58 +232,14 @@ The built documentation will be available in the `aider/website/_site` directory
 
 Brade supports Python versions 3.10, 3.11, 3.12, and 3.13. When contributing code, ensure compatibility with these supported Python versions.
 
-### Common Code Style between Aider and Brade
+### Code Style
 
-All source files follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide for Python code. Additionally, aider files use [isort](https://pycqa.github.io/isort/) and [Black](https://black.readthedocs.io/en/stable/) for sorting imports and code formatting, respectively. Please install the pre-commit hooks to automatically format your code before committing changes.
+We are gradually moving this codebase to a more modern and more strongly typed style. We only make stylistic changes in code that we must touch for other reasons.
 
-### Aider Code Style
+Follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide for Python code. Use [isort](https://pycqa.github.io/isort/) for sorting imports and [Black](https://black.readthedocs.io/en/stable/) for code formatting. Please install the pre-commit hooks to automatically format your code before committing changes.
 
-Unless otherwise marked with a comment at the top of the file, source files in this repo follow Aider coding standards. We keep files in Aider style unless they are unique to Brade, or have diverged so much that mechanical merges are no longer possible anyway.
+Use full type hints, following these conventions:
 
-Aider source files do **not** use type hints.
-
-#### Docstring Type Signatures
-
-While Aider-style files avoid type hints in the code, they should include type information in docstrings using a consistent format:
-
-1. Type signatures appear immediately after the one-line description
-2. Use types from `coders/types.py` for consistency across the codebase
-3. Follow this format for functions and methods:
-   ```python
-   def process_messages(self, messages):
-       """Process chat messages to extract edit blocks.
-       
-       Args:
-         messages: list[ChatMessage] - Messages to analyze
-         
-       Returns:
-         list[EditBlock] - Extracted and validated edit blocks
-       """
-   ```
-
-4. For class attributes, document types in the class docstring:
-   ```python
-   class Editor:
-       """Manages code editing operations.
-       
-       Attributes:
-         history: list[ChatMessage] - Chat message history
-         files: dict[str, str] - Mapping of filenames to content
-       """
-   ```
-
-This approach maintains type information for developers while preserving mechanical merge compatibility with upstream Aider. The consistent use of types from `coders/types.py` ensures we use the same vocabulary across both Aider and Brade style files.
-
-### Brade Code Style
-
-When a file adopts the Brade coding style, place the following comment at the very top of the file:
-
-```
-# This file uses the Brade coding style: full modern type hints and strong documentation.
-# Expect to resolve merges from upstream manually. See CONTRIBUTING.md.
-```
-
-Brade source files use full type hints, following these conventions:
 - Use built-in collection types directly (e.g. `list` not `List`)
 - Use union operator syntax (e.g. `str | None` not `Optional[str]`, `str | int` not `Union[str, int]`)
 - Use type hints for all:
@@ -293,47 +249,7 @@ Brade source files use full type hints, following these conventions:
 
 ### Type System
 
-The project uses a shared type vocabulary defined in `coders/types.py`. This supports both code and documentation:
-
-- Files in Brade style:
-  - Import and use types from `coders/types.py` for type hints
-  - Follow modern type hint conventions as described above
-  
-- Files in Aider style:
-  - Do not use type hints to maintain merge compatibility
-  - Use types from `coders/types.py` in docstrings and comments
-  - This provides consistent terminology across the codebase
-
-For example, a method in an Aider-style file might have a docstring like:
-```python
-def process_messages(self, messages):
-    """Processes a list of ChatMessage objects.
-    
-    Args:
-        messages: list[ChatMessage] - Messages to process
-        
-    Returns:
-        list[EditBlock] - Extracted code edit blocks
-    """
-```
-
-And the same method in a Brade-style file would use explicit type hints:
-```python
-def process_messages(self, messages: list[ChatMessage]) -> list[EditBlock]:
-    """Processes chat messages to extract code edit blocks.
-    
-    The method parses the LLM responses to find code edit blocks and validates
-    them against the EditBlock schema.
-    
-    Args:
-        messages: The chat messages to process
-        
-    Returns:
-        The extracted and validated edit blocks
-    """
-```
-
-This approach allows us to maintain a consistent vocabulary for types across both coding styles while preserving merge compatibility where needed.
+The project uses a shared type vocabulary defined in `coders/types.py`.
 
 ### Testing
 
