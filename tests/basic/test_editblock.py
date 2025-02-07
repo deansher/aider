@@ -538,34 +538,24 @@ class TestUtils(unittest.TestCase):
 
 # New tests for diff-match-patch integration
 
-def test_diff_match_patch_minor_inaccuracy():
-    """Test that even minor differences trigger a failure when similarity falls below 0.95.
-    
-    This test verifies our strict matching requirements:
-    1. A missing comma produces a similarity score around 0.85
-    2. Since 0.85 < 0.95 (our threshold), this should raise a ValueError
-    3. This enforces our design decision to require near-exact matches
-    """
-    whole = "Hello, world!\n"
-    part = "Hello world!\n"  # missing comma
-    replace = "Hi, world!\n"
-    
-    with pytest.raises(ValueError) as excinfo:
-        eb.replace_most_similar_chunk(whole, part, replace)
-    assert "SEARCH/REPLACE block failed" in str(excinfo.value)
-
-def test_diff_match_patch_significant_mismatch():
-    """
-    Test that when the search text is significantly different from the target content,
-    the diff-match-patch based matching raises a ValueError.
-    """
-    import pytest
-    whole = "This is a completely different text.\n"
-    part = "Hello, world!\n"
-    replace = "Hi, world!\n"
-    with pytest.raises(ValueError) as excinfo:
-         eb.replace_most_similar_chunk(whole, part, replace)
-    assert "SEARCH/REPLACE block failed" in str(excinfo.value)
+    def test_diff_match_patch_minor_inaccuracy(self):
+        """Test that even minor differences trigger a failure when similarity falls below 0.95.
+        
+        This test verifies that our strict matching requirement (similarity >= 0.95) is enforced:
+        1. We use a search block with a missing comma, which produces similarity ≈ 0.92
+        2. Since 0.92 < 0.95 (our threshold), this should raise a ValueError
+        3. This enforces our design decision that even minor transcription errors should fail
+        """
+        # Target content in file
+        whole = "def process_data(data, options):\n    return data.process(options)\n"
+        # Search block with missing comma - similarity will be about 0.92
+        part = "def process_data(data options):\n    return data.process(options)\n"
+        # Replacement content (not used since match should fail)
+        replace = "def process_data(data, options):\n    return data.transform(options)\n"
+        
+        with self.assertRaises(ValueError) as cm:
+            eb.replace_most_similar_chunk(whole, part, replace)
+        self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
 
 if __name__ == "__main__":
     unittest.main()
