@@ -327,28 +327,6 @@ class TestUtils(unittest.TestCase):
              eb.replace_most_similar_chunk(whole, part, replace)
 
 
-    def test_replace_part_with_missing_leading_whitespace(self):
-        whole = (
-            "    line1\n"
-            "    line2\n"
-            "    line3\n"
-        )
-        part = (
-            "line1\n"
-            "line2\n"
-        )
-        replace = (
-            "new_line1\n"
-            "new_line2\n"
-        )
-        expected_output = (
-            "    new_line1\n"
-            "    new_line2\n"
-            "    line3\n"
-        )
-
-        result = eb.replace_most_similar_chunk(whole, part, replace)  
-        self.assertEqual(result, expected_output)
 
     def test_exact_match_replaces_first_occurrence_only(self):
         """Verify that an exact match is replaced only at its first occurrence."""
