@@ -12,6 +12,14 @@ from ..dump import dump  # noqa: F401
 from .base_coder import Coder
 from .editblock_prompts import EditBlockPrompts
 
+import logging
+logger = logging.getLogger(__name__)
+
+DEFAULT_FENCE = ("`" * 3, "`" * 3)
+
+# fuzzy matching tolerance using diff-match-patch
+SIMILARITY_THRESHOLD = 0.95
+
 
 class EditBlockCoder(Coder):
     """A coder that uses search/replace blocks for code modifications.
@@ -128,7 +136,7 @@ class EditBlockCoder(Coder):
                 from difflib import SequenceMatcher
                 similarity_ratio = SequenceMatcher(None, original, did_you_mean).ratio()
                 similarity_percent = similarity_ratio * 100
-                res += f"""Detected similarity: {similarity_percent:.0f}% (threshold: {SIMILARITY_THRESHOLD*100:.0f}%)
+                res += f"""Detected similarity: {similarity_percent:.0f}% (threshold: {SIMILARITY_THRESHOLD * 100:.0f}%)
  Did you mean to match some of these actual lines from {path}?
 
  {self.fence[0]}
@@ -191,14 +199,6 @@ def replace_most_similar_chunk(whole, part, replace):
     if similarity < SIMILARITY_THRESHOLD:
         raise ValueError(f"SEARCH/REPLACE block failed: Similarity {similarity:.2f} (threshold {SIMILARITY_THRESHOLD}) below cutoff. Candidate snippet: {candidate!r}")
     return whole[:match_index] + replace + whole[match_index + len(search_text):]
-
-
-DEFAULT_FENCE = ("`" * 3, "`" * 3)
-# New constant for fuzzy matching tolerance using diff-match-patch
-SIMILARITY_THRESHOLD = 0.95  # Only near-perfect (≈95%+) matches are accepted
-
-import logging
-logger = logging.getLogger(__name__)
 
 
 def strip_quoted_wrapping(res, fname=None, fence=DEFAULT_FENCE):
