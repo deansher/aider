@@ -307,7 +307,15 @@ class TestUtils(unittest.TestCase):
         )
 
     def test_exact_match_replaces_first_occurrence_only(self):
-        """Verify that an exact match is replaced only at its first occurrence."""
+        """Verify exact match replacement behavior.
+        
+        This test is our primary success case, validating two key requirements:
+        1. An exact match is correctly identified and replaced
+        2. Only the first occurrence is modified
+        
+        The test uses realistic Python code with type hints and docstrings to
+        represent typical content that the LLM would process.
+        """
         whole = (
             "def validate_user(user_id: str) -> bool:\n"
             "    return check_permissions(user_id)\n\n"
