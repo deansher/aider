@@ -126,7 +126,11 @@ from hello import hello
     @property
     def task_instructions(self) -> str:
         """Task-specific instructions for the edit block workflow."""
-        return """ # SEARCH/REPLACE Block Format
+        return """# SEARCH/REPLACE Block Format
+
+For each change you want to make to a project file, you must provide a *SEARCH/REPLACE* block.
+The SEARCH block must match existing content exactly, line-by-line, except in the special case
+of creating a new file. The REPLACE block must contain your new or revised content.
 
  Every SEARCH/REPLACE block must strictly follow this format:
 
@@ -176,12 +180,20 @@ def echo(msg):
 
 ## Special Cases
 
-1. **Creating New Files**
+1. **Creating New File**
    - Use empty SEARCH section
    - Put new content in REPLACE section
    - Use full path from project root
 
-2. **Moving Code**
+2. **Just Inserting Code**
+   - SEARCH section must still match enough context to locate insertion point
+
+3. **Deleting Code**
+   - SEARCH section must unambiguously match a region of the file that contains
+     the lines to be deleted
+   - REPLACE section must omit the lines to be deleted, potentially meaning it is empty
+
+4. **Moving Code**
    - Use two blocks:
      1. Delete from original location
      2. Insert at new location
