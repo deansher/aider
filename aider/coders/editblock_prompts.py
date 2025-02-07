@@ -123,11 +123,6 @@ from hello import hello
 
     system_reminder = """# Implementation Requirements
 
-## Stay Focused
-- Implement ONLY the specified changes.
-- Avoid starting new analysis, proposing new changes, or expanding scope.
-- If you encounter issues, then explain them, stop, and wait for your partner's feedback.
-
 ## SEARCH/REPLACE Block Format Reference
 
 ## Required Components
@@ -144,7 +139,12 @@ from hello import hello
 
 3. Search Block:
    - Starts with <<<<<<< SEARCH
-   - Exact match of existing content
+   - Empty when creating a new file
+   - Else exactly matches consecutive lines of an existing file
+    - Exactly matches lines from the version of the file in 
+      <brade:editable_files>...</brade:editable_files> or 
+      <brade:readonly_files>...</brade:readonly_files>
+    - Reproduces each line verbatim, including indentation and other whitespace
 
 4. Divider:
    - =======
