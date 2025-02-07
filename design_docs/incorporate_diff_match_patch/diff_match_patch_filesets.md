@@ -1,10 +1,13 @@
 ## Editable
 
 ```
+CONTRIBUTING.md
 aider/coders/editblock_coder.py
 aider/coders/editor_editblock_coder.py
-tests/basic/test_editblock.py
 design_docs/incorporate_diff_match_patch/plan_incorporate_diff_match_patch.md
+pyproject.toml
+pytest.ini
+tests/basic/test_editblock.py
 ```
 
 ## Read-Only
