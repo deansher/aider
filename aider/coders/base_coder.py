@@ -1527,11 +1527,7 @@ class Coder:
                 raise TypeError(f"Expected ModelConfig instance, got {type(model)}")
 
             extra = model.extra_params.copy() if model.extra_params else {}
-            if self.edit_format == "diff" and self.num_reflections > 0:
-                reasoning_level = -2
-            else:
-                reasoning_level = 0
-
+            reasoning_level = 0
             reasoning_level += self.reasoning_effort_modifier
             hash_object, completion = send_completion(
                 model,
