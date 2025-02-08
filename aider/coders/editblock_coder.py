@@ -174,7 +174,7 @@ def prep(content):
     return content, lines
 
 
-def replace_most_similar_chunk(whole, part, replace):
+def replace_most_similar_chunk(whole, original, updated):
     """
     Uses diff-match-patch to perform fuzzy matching for the search block (part) in the file content (whole).
     This implementation leverages diff_match_patch.match_main to locate the best match for the search block,
@@ -185,23 +185,24 @@ def replace_most_similar_chunk(whole, part, replace):
     Raises a ValueError with diagnostic information if the similarity falls below the threshold.
     """
     dmp = diff_match_patch.diff_match_patch()
-    search_text = part
+    search_text = original
     if not search_text:
-        return whole + replace
+        logger.debug("SEARCH block is empty; appending REPLACE block to the end of the file")
+        return whole + updated
     match_index = dmp.match_main(whole, search_text, 0)
     if match_index == -1:
+        logger.debug("SEARCH block not found in file content")
+        logger.debug(f"search_text:\n{search_text}\nwhole:\n{whole}")
         raise ValueError(f"SEARCH/REPLACE block failed: No match found for search text: {search_text!r}")
     candidate = whole[match_index: match_index + len(search_text)]
-    logger.info("SEARCH block hex (first 40 characters): %s", search_text[:40].encode("utf-8").hex())
-    logger.info("Candidate block hex (first 40 characters): %s", candidate[:40].encode("utf-8").hex())
     diffs = dmp.diff_main(candidate, search_text)
     dmp.diff_cleanupSemantic(diffs)
     distance = dmp.diff_levenshtein(diffs)
     similarity = 1 - (distance / len(search_text))
-    logger.info(f"Match details: index={match_index}, candidate={candidate!r}, similarity={similarity:.2f}")
+    logger.debug(f"Match details: index={match_index}, candidate={candidate!r}, similarity={similarity:.2f}")
     if similarity < SIMILARITY_THRESHOLD:
         raise ValueError(f"SEARCH/REPLACE block failed: Similarity {similarity:.2f} (threshold {SIMILARITY_THRESHOLD}) below cutoff. Candidate snippet: {candidate!r}")
-    return whole[:match_index] + replace + whole[match_index + len(search_text):]
+    return whole[:match_index] + updated + whole[match_index + len(search_text):]
 
 
 def strip_quoted_wrapping(res, fname=None, fence=DEFAULT_FENCE):
@@ -233,24 +234,31 @@ def strip_quoted_wrapping(res, fname=None, fence=DEFAULT_FENCE):
     return res
 
 
-def do_replace(fname, content, before_text, after_text, fence=None):
-    before_text = strip_quoted_wrapping(before_text, fname, fence)
-    after_text = strip_quoted_wrapping(after_text, fname, fence)
+def do_replace(fname, content, original, updated, fence=None):
+    logger.debug(f"do_replace: {fname}\nSEARCH:\n{original}\nREPLACE:\n{updated}")
+    original = strip_quoted_wrapping(original, fname, fence)
+    updated = strip_quoted_wrapping(updated, fname, fence)
+    logger.debug("do_replace: stripped original and updated content")
+    logger.debug(f"do_replace: {fname}\nSEARCH:\n{original}\nREPLACE:\n{updated}")
     fname = Path(fname)
 
     # does it want to make a new file?
-    if not fname.exists() and not before_text.strip():
+    if not fname.exists() and not original.strip():
+        logger.debug(f"do_replace: creating new file {fname}")
         fname.touch()
         content = ""
 
     if content is None:
+        logger.debug(f"do_replace: content is None for {fname}")
         return
 
-    if not before_text.strip():
+    if not original.strip():
         # append to existing file, or start a new file
-        new_content = content + after_text
+        logger.debug(f"do_replace: appending to {fname}")
+        new_content = content + updated
     else:
-        new_content = replace_most_similar_chunk(content, before_text, after_text)
+        logger.debug(f"do_replace: replacing in {fname}")
+        new_content = replace_most_similar_chunk(content, original, updated)
         if new_content is None:
             raise ValueError("SEARCH/REPLACE block failed to match: similarity below threshold. Check that the SEARCH block exactly matches the file content with only minor allowable differences.")
     return new_content
