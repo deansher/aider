@@ -141,7 +141,7 @@ class EditBlockCoder(Coder):
                     tofile="Candidate Snippet",
                 ))
                 diff_text = "".join(diff_lines)
-                detail = (f"Detected similarity: {similarity_percent:.0f}% (threshold: {SIMILARITY_THRESHOLD * 100:.0f}%)\n"
+                detail = (f"Detected similarity: {similarity_percent:.0f}%)\n"
                           f"Unified diff between expected and candidate snippet:\n{diff_text}\n"
                           f"Did you mean to match these actual lines from {path}?\n"
                           f"{self.fence[0]}\n{candidate}\n{self.fence[1]}")
@@ -242,7 +242,7 @@ def replace_most_similar_chunk(whole, original, updated):
     #    - Points to just after "z"*40 in whole
     #    - Ignores remainder of whole, which doesn't match original
     #    - Exactly captures the region that matches original
-    
+
     diffs = dmp.diff_main(whole[match_index:match_index + 2*len(original)], original)
     dmp.diff_cleanupSemantic(diffs)
     whole_chars = 0  # count of characters we move through in whole
