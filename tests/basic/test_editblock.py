@@ -683,7 +683,7 @@ class TestUtils(unittest.TestCase):
         passed = []
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(
-            "## SearchReplaceNoExactMatch: The SEARCH block in dummy.py did not exactly match any content.",
+            "## SearchReplaceNo_Match: The no_match error occurred in dummy.py",
             message
         )
         self.assertIn("Detected similarity:", message)
