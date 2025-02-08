@@ -576,12 +576,12 @@ class TestUtils(unittest.TestCase):
         
     def test_search_rejects_ambiguous_matches(self):
         """Test that ambiguous matches are rejected.
-        
+    
         If a search block could match multiple places in the file:
         - Common helper function
         - Repeated boilerplate
         - Generic error handling
-        
+    
         These should be rejected since we can't be sure which match the LLM intended.
         """
         # Create content with two identical functions
@@ -593,6 +593,63 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
+
+    def test_find_match_end(self):
+        """Test the find_match_end function.
+        
+        This test verifies that find_match_end correctly identifies where a match ends
+        in various scenarios including:
+        - Basic exact matches
+        - Matches with nearby insertions/deletions
+        - Matches at start/end of text
+        - Edge cases like empty strings
+        """
+        dmp = diff_match_patch.diff_match_patch()
+        
+        # Test basic exact match
+        whole = "prefix abc suffix"
+        match_index = 7  # start of "abc"
+        original = "abc"
+        self.assertEqual(
+            eb.find_match_end(dmp, whole, match_index, original),
+            10  # end of "abc"
+        )
+        
+        # Test match with deletion right after
+        whole = "prefix abcsuffix"  # missing space
+        match_index = 7
+        original = "abc "  # note trailing space
+        self.assertEqual(
+            eb.find_match_end(dmp, whole, match_index, original),
+            10  # still end of "abc"
+        )
+        
+        # Test match with insertion right after
+        whole = "prefix abc  suffix"  # extra space
+        match_index = 7
+        original = "abc"
+        self.assertEqual(
+            eb.find_match_end(dmp, whole, match_index, original),
+            10  # end of "abc"
+        )
+        
+        # Test match at start
+        whole = "abc suffix"
+        match_index = 0
+        original = "abc"
+        self.assertEqual(
+            eb.find_match_end(dmp, whole, match_index, original),
+            3  # length of "abc"
+        )
+        
+        # Test match at end
+        whole = "prefix abc"
+        match_index = 7
+        original = "abc"
+        self.assertEqual(
+            eb.find_match_end(dmp, whole, match_index, original),
+            10  # end of string
+        )
 
     def test_build_failed_edit_error_message_candidate_found(self):
         original = "def foo():\n    return 42\n"
