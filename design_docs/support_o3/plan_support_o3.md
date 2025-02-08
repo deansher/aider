@@ -35,7 +35,7 @@ This document outlines our progress and remaining work toward enhancing Brade to
 OpenAI has released a new model, o3-mini. We need to add support for this model to the Brade application. We will add support for the o3-mini model in a way that is consistent with our existing support for other models.
 
 As our MVP, we'll use o3-mini as the default model in all cases except when only ANTHROPIC_API_KEY exists. This means:
-- o3-mini is the default model, even when no API keys are present (supporting use with OpenAI proxies)
+- o1 is the default model, even when no API keys are present (supporting use with OpenAI proxies)
 - Claude 3.5 Sonnet is only used when ANTHROPIC_API_KEY exists but OPENAI_API_KEY does not
 
 OpenAI's documentation states:
@@ -107,7 +107,7 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 1. Set o3-mini as the primary default model:
    - Use for all roles in ArchitectCoder (primary, editor, reviewer)
    - Use as default for all other use cases
-   - Use whenever OPENAI_API_KEY is present
+   - Use o1 whenever OPENAI_API_KEY is present
 
 2. Implement fallback logic:
    - Use latest Claude 3.5 Sonnet when only ANTHROPIC_API_KEY exists
@@ -123,7 +123,7 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 - (✔︎) Update default model selection in main.py
   - (✔︎) Add clear comments explaining the default model strategy
   - (✔︎) Implement API key availability checks
-  - (✔︎) Set o3-mini as primary default
+  - (✔︎) Set o1 as primary default
   - (✔︎) Configure Claude 3.5 Sonnet fallback
 
 - (✔︎) Verify model settings in models.py
@@ -132,7 +132,7 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
   - (✔︎) Test model settings
 
 - (✔︎) Add systematic integration tests for API key combinations:
-  - (✔︎) Verify behavior with both OPENAI_API_KEY and ANTHROPIC_API_KEY present, ensuring o3-mini is selected.
+  - (✔︎) Verify behavior with both OPENAI_API_KEY and ANTHROPIC_API_KEY present, ensuring o1 is selected.
   - (✔︎) Verify fallback behavior with only ANTHROPIC_API_KEY set, ensuring Claude 3.5 Sonnet is used.
   - (✔︎) Document observed behavior and any discrepancies.
 

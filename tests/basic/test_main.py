@@ -672,7 +672,7 @@ class TestMain(TestCase):
                     output=DummyOutput(),
                     return_coder=True,
                 )
-                self.assertEqual(coder.main_model.name, "o3-mini")
+                self.assertEqual(coder.main_model.name, "o1")
 
     def test_default_model_selection_anthropic_only(self):
         """Test that Claude 3.5 Sonnet is selected when only Anthropic key is present."""
