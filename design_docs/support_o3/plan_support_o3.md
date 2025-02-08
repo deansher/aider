@@ -157,31 +157,31 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 #### Requirements
 
 1. Make o1 the default OpenAI model
-   - Use o1 whenever OPENAI_API_KEY is present
-   - Keep Claude 3.5 Sonnet as default when only ANTHROPIC_API_KEY exists
+   - ✓ Use o1 whenever OPENAI_API_KEY is present (see main.py model selection)
+   - ✓ Keep Claude 3.5 Sonnet as default when only ANTHROPIC_API_KEY exists (see main.py model selection)
 
 2. Handle o1's streaming limitations
-   - Disable streaming for o1 since it's not yet supported
-   - Add clear warning when streaming is requested but not available
+   - ✓ Disable streaming for o1 since it's not yet supported (see ModelSettings for o1)
+   - ✓ Add clear warning when streaming is requested but not available (see main.py streaming check)
 
 3. Configure o1's reasoning effort mapping
-   - Map reasoning_level=0 to "medium" reasoning effort
-   - Map negative levels to "low"
-   - Map positive levels to "high"
+   - ✓ Map reasoning_level=0 to "medium" reasoning effort (see _OpenAiReasoningConfigImpl.map_reasoning_level)
+   - ✓ Map negative levels to "low" (see _OpenAiReasoningConfigImpl.map_reasoning_level)
+   - ✓ Map positive levels to "high" (see _OpenAiReasoningConfigImpl.map_reasoning_level)
 
 #### Implementation Steps
 
-- ( ) Update model settings in models.py
-  - ( ) Configure o1 as default OpenAI model
-  - ( ) Set streaming=False for o1
-  - ( ) Update reasoning level mapping for o1
+- (✓) Update model settings in models.py
+  - (✓) Configure o1 as default OpenAI model
+  - (✓) Set streaming=False for o1
+  - (✓) Update reasoning level mapping for o1
 
-- ( ) Modify default model selection in main.py
-  - ( ) Use o1 when OPENAI_API_KEY exists
-  - ( ) Keep Claude fallback when only ANTHROPIC_API_KEY exists
-  - ( ) Add warning for unsupported streaming
+- (✓) Modify default model selection in main.py
+  - (✓) Use o1 when OPENAI_API_KEY exists
+  - (✓) Keep Claude fallback when only ANTHROPIC_API_KEY exists
+  - (✓) Add warning for unsupported streaming
 
-- ( ) Add tests
-  - ( ) Test default model selection logic
-  - ( ) Test streaming behavior
-  - ( ) Test reasoning level mapping
+- (✓) Add tests
+  - (✓) Test default model selection logic
+  - (✓) Test streaming behavior
+  - (✓) Test reasoning level mapping
