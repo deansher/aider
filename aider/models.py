@@ -51,7 +51,6 @@ def max_chat_history_tokens(max_input_tokens):
 
 
 DEFAULT_MODEL_NAME = "gpt-4o"
-ANTHROPIC_BETA_HEADER = "prompt-caching-2024-07-31"
 
 OPENAI_MODELS = """
 gpt-4
@@ -87,6 +86,7 @@ claude-2
 claude-2.1
 claude-3-haiku-20240307
 claude-3-opus-20240229
+claude-3-5-haiku-20241024
 claude-3-sonnet-20240229
 claude-3-5-sonnet-20240620
 claude-3-5-sonnet-20241022
@@ -688,7 +688,6 @@ MODEL_SETTINGS = [
         accepts_images=True,
         extra_params={
             "max_tokens": 8192,
-            "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
         reminder="user",
@@ -704,7 +703,6 @@ MODEL_SETTINGS = [
         accepts_images=True,
         extra_params={
             "max_tokens": 8192,
-            "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
         reminder="user",
@@ -720,7 +718,6 @@ MODEL_SETTINGS = [
         accepts_images=True,
         extra_params={
             "max_tokens": 8192,
-            "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
         reminder="user",
@@ -736,7 +733,6 @@ MODEL_SETTINGS = [
         accepts_images=True,
         extra_params={
             "max_tokens": 8192,
-            "anthropic-beta": ANTHROPIC_BETA_HEADER,
         },
         cache_control=True,
         reminder="user",
@@ -746,9 +742,13 @@ MODEL_SETTINGS = [
         "whole",
         weak_model_name="anthropic/claude-3-haiku-20240307",
         examples_as_sys_msg=True,
-        extra_params={
-            "anthropic-beta": ANTHROPIC_BETA_HEADER,
-        },
+        cache_control=True,
+    ),
+    ModelSettings(
+        "anthropic/claude-3-5-haiku-20241024",
+        "whole",
+        weak_model_name="anthropic/claude-3-5-haiku-20241024",
+        examples_as_sys_msg=True,
         cache_control=True,
     ),
     ModelSettings(
@@ -756,9 +756,6 @@ MODEL_SETTINGS = [
         "whole",
         weak_model_name="claude-3-haiku-20240307",
         examples_as_sys_msg=True,
-        extra_params={
-            "anthropic-beta": ANTHROPIC_BETA_HEADER,
-        },
         cache_control=True,
     ),
     ModelSettings(
