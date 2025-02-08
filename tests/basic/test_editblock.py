@@ -718,6 +718,44 @@ class TestUtils(unittest.TestCase):
             "Warning: The REPLACE block content already exists in dummy.py.\nPlease confirm if the SEARCH/REPLACE block is still needed.",
             message
         )
+
+    def test_calculate_text_similarity_exact_match(self):
+        """Test that identical texts have similarity 1.0."""
+        text = "def validate_user(user_id: str) -> bool:\n    return check_permissions(user_id)\n"
+        from aider.coders import editblock_coder as eb
+        self.assertEqual(eb.calculate_text_similarity(text, text), 1.0)
+
+    def test_calculate_text_similarity_whitespace_variations(self):
+        """Test that minor whitespace differences still give high similarity."""
+        text1 = "def validate_user(user_id: str) -> bool:\n    return check_permissions(user_id)\n"
+        text2 = "def validate_user (user_id:  str) -> bool:\n    return check_permissions(user_id)\n"
+        from aider.coders import editblock_coder as eb
+        self.assertGreater(eb.calculate_text_similarity(text1, text2), 0.95)
+
+    def test_calculate_text_similarity_minor_differences(self):
+        """Test that typical LLM transcription errors still give high similarity."""
+        text1 = "def process_data(data: dict) -> None:\n    # Process the input data\n    result = transform(data)\n"
+        text2 = "def process_data(data: dict) -> None:\n    # Process input data\n    result = transform(data)\n"
+        from aider.coders import editblock_coder as eb
+        self.assertGreater(eb.calculate_text_similarity(text1, text2), 0.95)
+
+    def test_calculate_text_similarity_major_differences(self):
+        """Test that significant content changes give low similarity."""
+        text1 = "def process_data(data: dict) -> None:\n    result = transform(data)\n"
+        text2 = "def validate_input(data: dict) -> bool:\n    return is_valid(data)\n"
+        from aider.coders import editblock_coder as eb
+        self.assertLess(eb.calculate_text_similarity(text1, text2), 0.5)
+
+    def test_calculate_text_similarity_edge_cases(self):
+        """Test edge cases like empty strings."""
+        from aider.coders import editblock_coder as eb
+        # Empty strings
+        self.assertEqual(eb.calculate_text_similarity("", ""), 1.0)
+        self.assertEqual(eb.calculate_text_similarity("some text", ""), 0.0)
+        self.assertEqual(eb.calculate_text_similarity("", "some text"), 0.0)
+        # Single character differences
+        self.assertGreater(eb.calculate_text_similarity("a", "b"), 0.0)
+        self.assertEqual(eb.calculate_text_similarity("a", "a"), 1.0)
         
 if __name__ == "__main__":
     unittest.main()
