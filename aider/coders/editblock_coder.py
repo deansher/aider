@@ -210,10 +210,14 @@ def replace_most_similar_chunk(whole, original, updated):
     diffs = dmp.diff_main(whole[match_index:match_index + 2*len(original)], original)
     dmp.diff_cleanupSemantic(diffs)
     whole_chars = 0  # count of characters we move through in whole
+    last_equal_endpoint = 0  # track where the last equal text ends
     for op, text in diffs:
-        if op != 1:  # count chars from both equal and deletion ops
+        if op == 0:  # equal text
             whole_chars += len(text)
-    match_end = match_index + whole_chars
+            last_equal_endpoint = whole_chars
+        elif op == -1:  # deletion text
+            whole_chars += len(text)
+    match_end = match_index + last_equal_endpoint
     
     # Create a patch to replace the matched content
     matched_text = whole[match_index:match_end]
