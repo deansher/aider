@@ -591,7 +591,7 @@ class TestUtils(unittest.TestCase):
         part = "def validate_user(user_id: str, permissions: dict) -> bool:\\n"
         replace = "def check_permissions(user_id: str, permissions: dict) -> bool:\\n"
 
-        with self.assertRaises(MultipleMatchesError) as cm:
+        with self.assertRaises(eb.MultipleMatchesError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
 
