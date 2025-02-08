@@ -117,12 +117,21 @@ class EditBlockCoder(Coder):
                 self.io.write_text(full_path, new_content)
                 passed.append(edit)
             else:
+                # If do_replace failed, see if we can categorize the error:
+                err_text = str(e) if 'e' in locals() else ""
+                if "Multiple good matches found" in err_text:
+                    error_type = "multiple_matches"
+                elif "No valid file path" in err_text or "missing filename" in err_text:
+                    error_type = "missing_filename"
+                else:
+                    error_type = "no_match"
+
                 failed_info = {
                     "path": path,
                     "original": original,
                     "updated": updated,
-                    "error_type": "no_match",  # or a default error
-                    "error_context": None
+                    "error_type": error_type,
+                    "error_context": err_text if err_text else None
                 }
                 failed.append(failed_info)
 
