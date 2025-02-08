@@ -206,8 +206,13 @@ def replace_most_similar_chunk(whole, original, updated):
             f"Search text was: {original!r}"
         )
 
+    # Find the actual length of the matched region
+    diffs = dmp.diff_main(whole[match_index:match_index + 2*len(original)], original)
+    dmp.diff_cleanupSemantic(diffs)
+    match_length = sum(len(text) for op, text in diffs if op == 0)  # length of matching text
+    
     # Create a patch to replace the matched content
-    matched_text = whole[match_index:match_index + len(original)]
+    matched_text = whole[match_index:match_index + match_length]
     patches = dmp.patch_make(matched_text, updated)
     new_text, results = dmp.patch_apply(patches, whole)
     if not all(results):
