@@ -286,14 +286,12 @@ class EditBlockCoder(Coder):
                 block_message.append("- Encountered an unknown error type.\n"
                                      f"- error_context: {error_context}")
 
-            # Check if REPLACE content already exists
-            if content and updated in content:
-                # Skip "already exists" warning for empty REPLACE blocks (deletions)
-                if updated.strip():
-                    block_message.append(
-                        f"\nWarning: The REPLACE block content already exists in {path}.\n"
-                        "Please confirm if the SEARCH/REPLACE block is still needed."
-                    )
+            # Check if non-empty REPLACE content already exists
+            if content and updated.strip() and updated in content:
+                block_message.append(
+                    f"\nWarning: The REPLACE block content already exists in {path}.\n"
+                    f"Please confirm if the SEARCH/REPLACE block is still needed."
+                )
 
             # Add tips on how to fix
             block_message.append("\n### How to Fix\n")
@@ -468,10 +466,10 @@ def replace_most_similar_chunk(whole, original, updated):
             raise SearchReplaceImplementationError("Infinite loop risk: match_end did not advance past match_index.")                
         
         # Calculate match quality
-        similarity = calculate_text_similarity(remaining[match_index:match_end], original)
+        similarity_ratio = calculate_text_similarity(remaining[match_index:match_end], original)
                 
-        if similarity >= 0.95:  # Same threshold as Match_Threshold
-            matches.append((match_index + offset, match_end + offset, similarity))
+        if similarity_ratio >= 0.95:  # Same threshold as Match_Threshold
+            matches.append((match_index + offset, match_end + offset, similarity_ratio))
                 
         # Search in remaining text after this match
         remaining = remaining[match_end:]
@@ -561,6 +559,9 @@ def do_replace(fname, content, original, updated, fence=None):
         new_content = replace_most_similar_chunk(content, original, updated)
         if new_content is None:
             raise NoExactMatchError("No matching content found in file. Check that the SEARCH block exactly matches the file content with only minor allowable differences.")
+        # Allow empty REPLACE blocks (deletions) and no-change edits
+        if not updated.strip() or new_content == content:
+            return new_content
         return new_content
 
 
