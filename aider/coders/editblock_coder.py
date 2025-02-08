@@ -175,12 +175,12 @@ def prep(content):
 
 def replace_most_similar_chunk(whole, original, updated):
     """
-    Uses diff-match-patch to perform fuzzy matching for the search block in the file content.
+    Uses diff-match-patch to perform fuzzy matching and patching for the search block.
     
     The matching strategy:
-    1. Uses match_main to find best match, allowing matches anywhere in the file
-    2. Uses Match_Threshold=0.05 to require high accuracy (95%)
-    3. Rejects ambiguous matches that could indicate LLM transcription errors
+    1. Uses match_main to find best match location
+    2. Uses patch_make and patch_apply to perform accurate replacement
+    3. Requires 95% accuracy and rejects ambiguous matches
     
     Returns the new content with the matched region replaced by `updated`.
     Raises ValueError with diagnostic information if no sufficiently accurate match is found.
@@ -205,8 +205,14 @@ def replace_most_similar_chunk(whole, original, updated):
             "- Missing or altered punctuation\n"
             f"Search text was: {original!r}"
         )
+
+    # Create a patch to replace the matched content
+    patches = dmp.patch_make(whole, match_index, match_index + len(original), updated)
+    new_text, results = dmp.patch_apply(patches, whole)
+    if not all(results):
+        raise ValueError("Failed to apply patch - matched content may have unexpected format")
     
-    return whole[:match_index] + updated + whole[match_index + len(original):]
+    return new_text
 
 
 def strip_quoted_wrapping(res, fname=None, fence=DEFAULT_FENCE):
