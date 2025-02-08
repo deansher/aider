@@ -623,11 +623,3 @@ class TestUtils(unittest.TestCase):
         
 if __name__ == "__main__":
     unittest.main()
-    def test_diff_match_patch_significant_inaccuracy(self):
-        """Test that a significant inaccuracy, such as a misspelling, is rejected."""
-        whole = "def process_data(data, options):\n    return data.process(options)\n"
-        # Introduce a severe error: misspelling 'process' as 'proccess' and missing comma
-        part = "def proccess_data(data options):\n    return data.process(options)\n"
-        replace = "def process_data(data, options):\n    return data.transform(options)\n"
-        with self.assertRaises(ValueError):
-            eb.replace_most_similar_chunk(whole, part, replace)
