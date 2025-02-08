@@ -504,7 +504,7 @@ class TestUtils(unittest.TestCase):
     return True
 '''
 
-    def test_allows_minor_whitespace_differences(self):
+    def test_search_allows_minor_whitespace_differences(self):
         """Test that minor whitespace differences are allowed.
         
         The LLM often introduces small whitespace variations when transcribing code:
@@ -532,7 +532,7 @@ class TestUtils(unittest.TestCase):
         result = eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("check_permissions", result)
         
-    def test_allows_minor_comment_differences(self):
+    def test_search_allows_minor_comment_differences(self):
         """Test that minor comment differences are allowed.
         
         The LLM sometimes makes small errors when transcribing comments:
@@ -556,16 +556,8 @@ class TestUtils(unittest.TestCase):
         result = eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("check_permissions", result)
         
-    def test_rejects_content_changes(self):
-        """Test that actual code content changes are rejected.
-    
-        When the LLM makes mistakes in transcribing actual code content:
-        - Different variable names
-        - Different function signatures
-        - Different logic
-    
-        These should be rejected since they indicate the LLM may not accurately see the code.
-        """
+    def test_search_rejects_content_changes(self):
+        """Test that substantial code content SEARCH mismatches are rejected."""
         whole = self.REALISTIC_CODE
         # Change actual code content by inserting several lines
         part = self.REALISTIC_CODE.replace(
@@ -582,7 +574,7 @@ class TestUtils(unittest.TestCase):
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
         
-    def test_rejects_ambiguous_matches(self):
+    def test_search_rejects_ambiguous_matches(self):
         """Test that ambiguous matches are rejected.
         
         If a search block could match multiple places in the file:
