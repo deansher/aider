@@ -653,6 +653,14 @@ class TestUtils(unittest.TestCase):
         )
 
     def test_build_failed_edit_error_message_candidate_found(self):
+        """Test error message generation when a similar candidate is found.
+        
+        This test verifies that when a SEARCH block fails to match exactly but a similar
+        candidate is found, the error message includes:
+        1. The correct error type header
+        2. The similarity percentage
+        3. A unified diff showing the differences
+        """
         original = "def foo():\n    return 42\n"
         updated = "def foo():\n    return 43\n"
         # File content is almost the same as the original (extra space before 42) to trigger a candidate match.
@@ -683,6 +691,14 @@ class TestUtils(unittest.TestCase):
         self.assertNotIn("Warning:", message)
 
     def test_build_failed_edit_error_message_no_candidate(self):
+        """Test error message generation when no similar candidate is found.
+        
+        This test verifies that when a SEARCH block fails to match and no similar
+        content is found, the error message:
+        1. Uses the correct error type header
+        2. Indicates no similar content was found
+        3. Includes appropriate guidance
+        """
         original = "def foo():\n    return 42\n"
         updated = "def foo():\n    return 43\n"
         file_content = "completely different content with no similar candidate\n"
@@ -711,6 +727,13 @@ class TestUtils(unittest.TestCase):
         self.assertIn("Only resend fixed versions of the", message)
 
     def test_build_failed_edit_error_message_with_replace_exists_warning(self):
+        """Test error message generation when REPLACE content already exists.
+        
+        This test verifies that when the REPLACE block content already exists in the
+        target file, the error message includes:
+        1. The appropriate warning about duplicate content
+        2. Guidance about verifying if the change is still needed
+        """
         original = "def foo():\n    return 42\n"
         updated = "def foo():\n    return 43\n"
         # File content includes the updated block content to trigger the warning.
@@ -730,27 +753,6 @@ class TestUtils(unittest.TestCase):
             "error_type": "no_match",
             "error_context": "No successful do_replace result on any file."
         }]
-        passed = []
-        message = dummy._build_failed_edit_error_message(failed, passed)
-        self.assertIn(
-            "Warning: The REPLACE block content already exists in dummy.py.\nPlease confirm if the SEARCH/REPLACE block is still needed.",
-            message
-        )
-
-    def test_build_failed_edit_error_message_with_replace_exists_warning(self):
-        original = "def foo():\n    return 42\n"
-        updated = "def foo():\n    return 43\n"
-        # File content includes the updated block content to trigger the warning.
-        file_content = "def foo():\n    return 42\nadditional content\n" + updated + "\nmore content\n"
-        class FakeIO:
-            def read_text(self, fname):
-                return file_content
-        from aider.coders import editblock_coder as eb
-        dummy = eb.EditBlockCoder.__new__(eb.EditBlockCoder)
-        dummy.io = FakeIO()
-        dummy.fence = ("```", "```")
-        dummy.abs_root_path = lambda path: path
-        failed = [("dummy.py", original, updated)]
         passed = []
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(

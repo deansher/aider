@@ -120,6 +120,25 @@ class EditBlockCoder(Coder):
         return edits
 
     def apply_edits(self, edits):
+        """Apply a list of edits to the files.
+
+        This method applies the edits extracted by get_edits() to the files.
+        It handles various error cases and collects detailed error information.
+
+        Args:
+            edits: list[Edit] - List of (path, original, updated) tuples representing
+                  the edits to apply.
+
+        Raises:
+            EditBlockError: If any edits fail, with detailed error information.
+
+        The error information for each failed edit is a dictionary with:
+        - path: The file path that was targeted
+        - original: The SEARCH block content
+        - updated: The REPLACE block content 
+        - error_type: The type of error ("missing_filename", "no_match", "multiple_matches")
+        - error_context: Additional details about what went wrong
+        """
         failed = []
         passed = []
 
@@ -173,33 +192,37 @@ class EditBlockCoder(Coder):
                     "error_type": "multiple_matches",
                     "error_context": str(exc),
                 })
-                    "error_context": str(exc),
-                })
-
-            except NoExactMatchError as exc:
-                failed.append({
-                    "path": path,
-                    "original": original,
-                    "updated": updated,
-                    "error_type": "no_match",
-                    "error_context": str(exc),
-                })
-
-            except MultipleMatchesError as exc:
-                failed.append({
-                    "path": path,
-                    "original": original,
-                    "updated": updated,
-                    "error_type": "multiple_matches",
-                    "error_context": str(exc),
-                })
 
         if failed:
             raise EditBlockError(self._build_failed_edit_error_message(failed, passed))
 
     def _build_failed_edit_error_message(self, failed, passed):
-        """
-        Build a clear, structured markdown error message for each failing block.
+        """Build a clear, structured markdown error message for each failing block.
+
+        This method generates detailed error messages for failed SEARCH/REPLACE blocks.
+        It handles different error types with specific guidance for each:
+
+        Error Types:
+        - missing_filename: Path is missing or invalid
+        - no_match: SEARCH text didn't match file content
+        - multiple_matches: SEARCH text matched multiple locations
+
+        For no_match errors, it attempts to find similar content and shows:
+        - Similarity percentage
+        - Unified diff with closest matching content
+        - Warning if REPLACE content already exists
+
+        Args:
+            failed: List of failed edit dictionaries with:
+                   - path: Target file path
+                   - original: SEARCH block content
+                   - updated: REPLACE block content
+                   - error_type: Type of failure
+                   - error_context: Additional error details
+            passed: List of successful (path, original, updated) tuples
+
+        Returns:
+            str: A formatted markdown error message
         """
         messages = [
             "# SEARCH/REPLACE Block Errors",
@@ -219,7 +242,7 @@ class EditBlockCoder(Coder):
 
             # Start a new message section for this failing block
             block_message = []
-            block_message.append("## SEARCH/REPLACE Block Failed")
+            block_message.append(f"## SearchReplace{error_type.title()}: The {error_type} error occurred in {path}")
 
             # Show the entire failing SEARCH/REPLACE block
             block_message.append("### Offending SEARCH/REPLACE Block")
@@ -253,14 +276,22 @@ class EditBlockCoder(Coder):
                     diff_text = "".join(diff_lines)
                     block_message.append(
                         f"- The SEARCH text did not match exactly.\n"
-                        f"- Similarity: {similarity_percent:.0f}%\n"
-                        f"- Unified diff with a possibly related snippet:\n```\n{diff_text}\n```"
+                        f"- Detected similarity: {similarity_percent:.0f}%\n"
+                        f"- Unified diff between expected and candidate snippet:\n```\n{diff_text}\n```"
                     )
                 else:
-                    block_message.append("- The SEARCH text did not match any part of the file.")
+                    block_message.append("- The SEARCH text did not match any part of the file.\n"
+                                       "- No similar candidate snippet found.")
             else:
                 block_message.append("- Encountered an unknown error type.\n"
                                      f"- error_context: {error_context}")
+
+            # Check if REPLACE content already exists
+            if content and updated in content:
+                block_message.append(
+                    "\nWarning: The REPLACE block content already exists in {path}.\n"
+                    "Please confirm if the SEARCH/REPLACE block is still needed."
+                )
 
             # Add tips on how to fix
             block_message.append("### How to Fix")
