@@ -121,7 +121,10 @@ from hello import hello
 
 
 
-    system_reminder = ""
+    system_reminder = """IMPORTANT REMINDER: our "fence" characters vary
+from request to request. Right now they are: {fence[0]} and {fence[1]}.
+Use these when building SEARCH/REPLACE blocks.
+"""
 
     @property
     def task_instructions(self) -> str:
@@ -208,7 +211,7 @@ To make this change we need to modify `main.py` and make a new file
 
 Here are the *SEARCH/REPLACE* blocks:
 
-hello.py
+friendly/output/hello.py
 {fence[0]}python
 <<<<<<< SEARCH
 =======
@@ -219,7 +222,7 @@ def hello():
 >>>>>>> REPLACE
 {fence[1]}
 
-main.py
+app/main.py
 {fence[0]}python
 <<<<<<< SEARCH
 def hello():

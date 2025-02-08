@@ -128,7 +128,7 @@ class EditBlockCoder(Coder):
             path, original, updated = edit
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
-            header = f"## SearchReplaceNoExactMatch: The SEARCH block in {path} did not exactly match any content."
+            header = f"## You made a mistake in this SEARCH/REPLACE block in {path}."
             block_info = f"<<<<<<< SEARCH\n{original}=======\n{updated}>>>>>>> REPLACE"
             candidate = find_similar_lines(original, content)
             if candidate:
@@ -148,9 +148,9 @@ class EditBlockCoder(Coder):
             else:
                 detail = "No similar candidate snippet found."
             suggestion = (f"Suggested corrections for {path}:\n"
-                          "- Verify the SEARCH block exactly matches the file content (including whitespace, indentation, and punctuation).\n"
-                          "- Check for accidental extra or missing spaces.\n"
-                          "- Confirm that the file content has not been altered unexpectedly.")
+                          "- Look back in <brade:context>...</brade:context> for the original file content.\n"
+                          "- Verify the SEARCH block matches the file content verbatim\n"
+                          " (including whitespace, indentation, and punctuation).\n")
             warning = ""
             if updated in content and updated:
                 warning = (f"Warning: The REPLACE block content already exists in {path}.\n"
@@ -160,10 +160,20 @@ class EditBlockCoder(Coder):
         if passed:
             pblocks = "block" if len(passed) == 1 else "blocks"
             blocks_str = "block" if len(failed) == 1 else "blocks"
-            summary = f"\n# {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.\nOnly resend fixed versions of the {blocks_str} that failed."
-        note = ("Note: The SEARCH section must exactly match an existing block of lines including all whitespace, "
-                "comments, indentation, and formatting details.\n")
-        return f"# {len(failed)} SEARCH/REPLACE block(s) failed to match!\n" + "\n".join(messages) + "\n" + note + summary
+            summary = (
+            f"\n# {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.\n"
+            f"Only resend fixed versions of the {blocks_str} that failed."
+            )
+        note = (
+            "Note: The SEARCH section must exactly match an existing block of lines including "
+            "all whitespace, comments, indentation, and formatting details.\n"
+        )
+        return (
+            f"# {len(failed)} SEARCH/REPLACE block(s) failed to match!\n" 
+            f"{'\n'.join(messages)}\n"
+            f"{note}"
+            f"{summary}"
+        )
 
 
 def prep(content):
@@ -332,10 +342,9 @@ def replace_most_similar_chunk(whole, original, updated):
         raise ValueError(
             "SEARCH/REPLACE block failed: Multiple good matches found.\n"
             "The search text matches multiple locations in the file.\n"
-            "Please provide more context in the SEARCH block to ensure a unique match.\n"
+            "Please provide additional lines of context in the SEARCH block to ensure a unique match.\n"
             f"Search text was: {original!r}"
-        )
-    
+        )    
     match_index, match_end, _ = matches[0]
     return whole[:match_index] + updated + whole[match_end:]
 
@@ -412,11 +421,11 @@ separators = "|".join([HEAD, DIVIDER, UPDATED])
 split_re = re.compile(r"^((?:" + separators + r")[ ]*\n)", re.MULTILINE | re.DOTALL)
 
 
-missing_filename_err = (
-    "Missing or incorrect filename. The filename must be alone on the line"
+missing_file_path_err = (
+    "Missing or incorrect file path. The path must be alone on the line"
     " before the opening fence. If this search/replacement block modifies existing"
-    " content, then file path and name must exactly match an existing file."
-    " {fence[0]}"
+    " content, then the path must exactly match an existing file that is provided"
+    f" in <brade:context>...</brade:context>.\n"
 )
 
 
@@ -539,7 +548,7 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                     use_valid_fnames = valid_fnames
                 filename = find_filename(filename_line, use_valid_fnames)
                 if not filename:
-                    raise ValueError(missing_filename_err.format(fence=fence))
+                    raise ValueError(missing_file_path_err.format(fence=fence))
 
                 original_text = []
                 i += 1

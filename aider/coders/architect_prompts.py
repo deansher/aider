@@ -290,8 +290,8 @@ a fresh look at the details of the propose -- use your judgment. Stay within
 the intended scope of the proposal.
 
 Then write down a punchlist of changes you will have to make to implement the
-proposal. Use a short bullet point for each change, providing the file path
-and concisely describing the change.
+proposal. Use a short bullet point for each change, providing the complete
+relative path to the file and concisely describing the change.
 
 Then produce a SEARCH/REPLACE block for each change.
 
