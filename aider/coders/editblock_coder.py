@@ -173,6 +173,26 @@ class EditBlockCoder(Coder):
                     "error_type": "multiple_matches",
                     "error_context": str(exc),
                 })
+                    "error_context": str(exc),
+                })
+
+            except NoExactMatchError as exc:
+                failed.append({
+                    "path": path,
+                    "original": original,
+                    "updated": updated,
+                    "error_type": "no_match",
+                    "error_context": str(exc),
+                })
+
+            except MultipleMatchesError as exc:
+                failed.append({
+                    "path": path,
+                    "original": original,
+                    "updated": updated,
+                    "error_type": "multiple_matches",
+                    "error_context": str(exc),
+                })
 
         if failed:
             raise EditBlockError(self._build_failed_edit_error_message(failed, passed))
