@@ -371,7 +371,7 @@ class InputOutput:
                 os.path.relpath(fname, root) for fname in (abs_read_only_fnames or [])
             ]
             show = self.format_files_for_input(rel_fnames, rel_read_only_fnames)
-        show += prefix
+        show += f"WD: {os.getcwd()}\n{prefix}"
 
         inp = ""
         multiline_input = False
