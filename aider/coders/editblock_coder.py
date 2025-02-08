@@ -12,21 +12,24 @@ from ..dump import dump  # noqa: F401
 from .base_coder import Coder, EditBlockError
 from .editblock_prompts import EditBlockPrompts
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class MissingFilenameError(Exception):
     pass
+
 
 class NoExactMatchError(Exception):
     def __init__(self, candidate=None, message=""):
         super().__init__(message)
         self.candidate = candidate
 
+
 class MultipleMatchesError(Exception):
     pass
 
 
-import logging
-logger = logging.getLogger(__name__)
 # Get handlers from root logger to bypass its level filter
 for handler in logging.getLogger().handlers:
     logger.addHandler(handler)
@@ -116,36 +119,52 @@ class EditBlockCoder(Coder):
             path, original, updated = edit
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
-            new_content = do_replace(full_path, content, original, updated, self.fence)
-            if not new_content:
-                # try patching any of the other files in the chat
-                for full_path in self.abs_fnames:
-                    content = self.io.read_text(full_path)
-                    new_content = do_replace(full_path, content, original, updated, self.fence)
-                    if new_content:
-                        break
 
-            if new_content:
-                self.io.write_text(full_path, new_content)
-                passed.append(edit)
-            else:
-                # If do_replace failed, see if we can categorize the error:
-                err_text = str(e) if 'e' in locals() else ""
-                if "Multiple good matches found" in err_text:
-                    error_type = "multiple_matches"
-                elif "No valid file path" in err_text or "missing filename" in err_text:
-                    error_type = "missing_filename"
+            try:
+                new_content = do_replace(full_path, content, original, updated, self.fence)
+                if not new_content:
+                    # try patching any of the other files in the chat
+                    for alt_path in self.abs_fnames:
+                        alt_content = self.io.read_text(alt_path)
+                        new_content = do_replace(alt_path, alt_content, original, updated, self.fence)
+                        if new_content:
+                            full_path = alt_path
+                            break
+
+                if new_content:
+                    self.io.write_text(full_path, new_content)
+                    passed.append(edit)
                 else:
-                    error_type = "no_match"
+                    raise NoExactMatchError(
+                        message="No successful do_replace result on any file."
+                    )
 
-                failed_info = {
+            except MissingFilenameError as exc:
+                failed.append({
                     "path": path,
                     "original": original,
                     "updated": updated,
-                    "error_type": error_type,
-                    "error_context": err_text if err_text else None
-                }
-                failed.append(failed_info)
+                    "error_type": "missing_filename",
+                    "error_context": str(exc),
+                })
+
+            except NoExactMatchError as exc:
+                failed.append({
+                    "path": path,
+                    "original": original,
+                    "updated": updated,
+                    "error_type": "no_match",
+                    "error_context": str(exc),
+                })
+
+            except MultipleMatchesError as exc:
+                failed.append({
+                    "path": path,
+                    "original": original,
+                    "updated": updated,
+                    "error_type": "multiple_matches",
+                    "error_context": str(exc),
+                })
 
         if failed:
             raise EditBlockError(self._build_failed_edit_error_message(failed, passed))
@@ -400,24 +419,27 @@ def replace_most_similar_chunk(whole, original, updated):
     
     if not matches:
         logger.debug("SEARCH block not found in file content")
-        logger.debug(f"search_text:\n{original}\nwhole:\n{whole}")
-        raise ValueError(
-            "SEARCH/REPLACE block failed: No sufficiently accurate match found.\n"
-            "The search text may have transcription errors. Check for:\n"
-            "- Extra or missing spaces\n"
-            "- Different line breaks or indentation\n"
-            "- Missing or altered punctuation\n"
-            f"Search text was: {original!r}"
+        logger.debug(f"search_text:\\n{original}\\nwhole:\\n{whole}")
+        raise NoExactMatchError(
+            candidate=None,
+            message=(
+                "SEARCH/REPLACE block failed: No sufficiently accurate match found.\\n"
+                "The search text may have transcription errors. Check for:\\n"
+                "- Extra or missing spaces\\n"
+                "- Different line breaks or indentation\\n"
+                "- Missing or altered punctuation\\n"
+                f"Search text was: {original!r}"
+            )
         )
     
     if len(matches) > 1:
         logger.debug(f"Multiple matches found: {matches}")
-        raise ValueError(
-            "SEARCH/REPLACE block failed: Multiple good matches found.\n"
-            "The search text matches multiple locations in the file.\n"
-            "Please provide additional lines of context in the SEARCH block to ensure a unique match.\n"
+        raise MultipleMatchesError(
+            "SEARCH/REPLACE block failed: Multiple good matches found.\\n"
+            "The search text matches multiple locations in the file.\\n"
+            "Please provide additional lines of context in the SEARCH block to ensure a unique match.\\n"
             f"Search text was: {original!r}"
-        )    
+        )
     match_index, match_end, _ = matches[0]
     return whole[:match_index] + updated + whole[match_end:]
 
