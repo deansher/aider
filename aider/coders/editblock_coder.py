@@ -123,15 +123,32 @@ class EditBlockCoder(Coder):
             raise ValueError(self._build_failed_edit_error_message(failed, passed))
 
     def _build_failed_edit_error_message(self, failed, passed):
+        """
+        Build a clear, structured markdown error message for each failing block.
+        """
         messages = []
+
         for edit in failed:
             path, original, updated = edit
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
-            header = f"## You made a mistake in this SEARCH/REPLACE block in {path}."
-            block_info = f"<<<<<<< SEARCH\n{original}=======\n{updated}>>>>>>> REPLACE"
+
+            # Start a new message section for this failing block
+            block_message = []
+            block_message.append(f"## Error in `{path}`")
+
+            # Show the entire failing SEARCH/REPLACE block
+            block_message.append("### Offending SEARCH/REPLACE Block")
+            block_message.append(
+                f"{self.fence[0]}python\n"
+                f"<<<<<<< SEARCH\n{original}=======\n{updated}>>>>>>> REPLACE\n"
+                f"{self.fence[1]}"
+            )
+
+            # Explain why it failed
             candidate = find_similar_lines(original, content)
             if candidate:
+                # Show some similarity details
                 similarity_ratio = SequenceMatcher(None, original, candidate).ratio()
                 similarity_percent = similarity_ratio * 100
                 diff_lines = list(unified_diff(
@@ -141,38 +158,47 @@ class EditBlockCoder(Coder):
                     tofile="Candidate Snippet",
                 ))
                 diff_text = "".join(diff_lines)
-                detail = (f"Detected similarity: {similarity_percent:.0f}%)\n"
-                          f"Unified diff between expected and candidate snippet:\n{diff_text}\n"
-                          f"Did you mean to match these actual lines from {path}?\n"
-                          f"{self.fence[0]}\n{candidate}\n{self.fence[1]}")
+                block_message.append("### Why This Failed")
+                block_message.append(
+                    f"- The SEARCH text did not match exactly.\n"
+                    f"- Similarity: {similarity_percent:.0f}%\n"
+                    f"- Unified diff with a possibly related snippet:\n```\n{diff_text}\n```"
+                )
             else:
-                detail = "No similar candidate snippet found."
-            suggestion = (f"Suggested corrections for {path}:\n"
-                          "- Look back in <brade:context>...</brade:context> for the original file content.\n"
-                          "- Verify the SEARCH block matches the file content verbatim\n"
-                          " (including whitespace, indentation, and punctuation).\n")
-            warning = ""
-            if updated in content and updated:
-                warning = (f"Warning: The REPLACE block content already exists in {path}.\n"
-                           "Please confirm if the SEARCH/REPLACE block is still needed.")
-            messages.append("\n".join([header, block_info, detail, suggestion, warning]))
+                block_message.append("### Why This Failed")
+                block_message.append("- The SEARCH text did not match any part of the file.")
+            
+            # Add tips on how to fix
+            block_message.append("### How to Fix")
+            block_message.append(
+                f"- Double-check that the SEARCH block matches the file context verbatim.\n"
+                f"- Consider re-checking whitespace, indentation, or punctuation.\n"
+                f"- If the REPLACE block already exists in {path}, verify it's still necessary.\n"
+            )
+
+            messages.append("\n".join(block_message))
+
+        # Summaries
         summary = ""
         if passed:
             pblocks = "block" if len(passed) == 1 else "blocks"
             blocks_str = "block" if len(failed) == 1 else "blocks"
             summary = (
-            f"\n# {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.\n"
-            f"Only resend fixed versions of the {blocks_str} that failed."
+                f"\n# {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.\n"
+                f"Only resend fixed versions of the {blocks_str} that failed."
             )
+
         note = (
-            "Note: The SEARCH section must exactly match an existing block of lines including "
-            "all whitespace, comments, indentation, and formatting details.\n"
+            "Note: The SEARCH section must match existing content exactly, including whitespace,\n"
+            "indentation, and formatting.\n"
         )
+
         return (
-            f"# {len(failed)} SEARCH/REPLACE block(s) failed to match!\n" 
-            f"{'\n'.join(messages)}\n"
-            f"{note}"
-            f"{summary}"
+            f"# {len(failed)} SEARCH/REPLACE block(s) failed to match!\n"
+            + "\n\n".join(messages)
+            + "\n\n"
+            + note
+            + summary
         )
 
 
