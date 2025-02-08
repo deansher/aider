@@ -173,6 +173,29 @@ def prep(content):
     return content, lines
 
 
+def calculate_text_similarity(text1: str, text2: str) -> float:
+    """Calculate similarity between two text blocks using diff-match-patch.
+    
+    Uses Levenshtein distance normalized by the length of text2 to produce
+    a similarity score between 0 and 1, where:
+    - 1.0 means the texts are identical
+    - 0.0 means the texts are completely different
+    - Values in between indicate partial similarity
+    
+    Args:
+        text1: First text to compare
+        text2: Second text to compare (used as denominator for normalization)
+        
+    Returns:
+        float: Similarity score between 0 and 1
+    """
+    dmp = diff_match_patch.diff_match_patch()
+    diffs = dmp.diff_main(text1, text2)
+    dmp.diff_cleanupSemantic(diffs)
+    distance = dmp.diff_levenshtein(diffs)
+    return 1 - (distance / len(text2))
+
+
 def find_match_end(dmp, whole, match_index, original):
     """Find where a match ends in the whole text.
     
@@ -269,11 +292,7 @@ def replace_most_similar_chunk(whole, original, updated):
         match_end = find_match_end(dmp, remaining, match_index, original)
                 
         # Calculate match quality
-        match_text = remaining[match_index:match_end]
-        diffs = dmp.diff_main(match_text, original)
-        dmp.diff_cleanupSemantic(diffs)
-        distance = dmp.diff_levenshtein(diffs)
-        similarity = 1 - (distance / len(original))
+        similarity = calculate_text_similarity(remaining[match_index:match_end], original)
                 
         if similarity >= 0.95:  # Same threshold as Match_Threshold
             matches.append((match_index + offset, match_end + offset, similarity))
@@ -592,10 +611,7 @@ def find_similar_lines(search_text: str, content_text: str, threshold: float = 0
     if match_index == -1:
         return ""
     candidate = content_text[match_index: match_index + len(search_text)]
-    diffs = dmp.diff_main(candidate, search_text)
-    dmp.diff_cleanupSemantic(diffs)
-    distance = dmp.diff_levenshtein(diffs)
-    similarity = 1 - (distance / len(search_text))
+    similarity = calculate_text_similarity(candidate, search_text)
     if similarity < threshold:
         return ""
     return candidate
