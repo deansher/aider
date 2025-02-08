@@ -6,126 +6,126 @@
 #
 altair==5.5.0
     # via streamlit
-attrs==24.3.0
+attrs==25.1.0
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   jsonschema
     #   referencing
 blinker==1.9.0
     # via streamlit
-cachetools==5.5.0
+cachetools==5.5.1
     # via streamlit
-certifi==2024.12.14
+certifi==2025.1.31
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   requests
 charset-normalizer==3.4.1
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   requests
 click==8.1.8
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   streamlit
 gitdb==4.0.12
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   gitpython
 gitpython==3.1.44
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   streamlit
 idna==3.10
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   requests
 jinja2==3.1.5
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   altair
     #   pydeck
 jsonschema==4.23.0
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   altair
 jsonschema-specifications==2024.10.1
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   jsonschema
 markdown-it-py==3.0.0
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   rich
 markupsafe==3.0.2
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   jinja2
 mdurl==0.1.2
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   markdown-it-py
-narwhals==1.20.1
+narwhals==1.25.2
     # via altair
 numpy==1.26.4
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   pandas
     #   pydeck
     #   streamlit
 packaging==24.2
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   altair
     #   streamlit
 pandas==2.2.3
     # via streamlit
 pillow==11.1.0
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   streamlit
-protobuf==5.29.2
+protobuf==5.29.3
     # via streamlit
-pyarrow==18.1.0
+pyarrow==19.0.0
     # via streamlit
 pydeck==0.9.1
     # via streamlit
-pygments==2.18.0
+pygments==2.19.1
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   rich
 python-dateutil==2.9.0.post0
     # via pandas
-pytz==2024.2
+pytz==2025.1
     # via pandas
-referencing==0.35.1
+referencing==0.36.2
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   jsonschema
     #   jsonschema-specifications
 requests==2.32.3
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   streamlit
 rich==13.9.4
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   streamlit
 rpds-py==0.22.3
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   jsonschema
     #   referencing
 six==1.17.0
     # via python-dateutil
 smmap==5.0.2
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   gitdb
-streamlit==1.41.1
+streamlit==1.42.0
     # via -r requirements/requirements-browser.in
 tenacity==8.5.0
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   streamlit
 toml==0.10.2
     # via streamlit
@@ -133,14 +133,15 @@ tornado==6.4.2
     # via streamlit
 typing-extensions==4.12.2
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   altair
+    #   referencing
     #   streamlit
-tzdata==2024.2
+tzdata==2025.1
     # via pandas
 urllib3==2.3.0
     # via
-    #   -c /Users/deansher/Documents/pg/brade/requirements.txt
+    #   -c /Users/deansher/projects/brade/requirements.txt
     #   requests
 watchdog==4.0.2
     # via -r requirements/requirements-browser.in
