@@ -300,6 +300,10 @@ def replace_most_similar_chunk(whole, original, updated):
             break
                 
         match_end = find_match_end(dmp, remaining, match_index, original)
+        
+        # Safeguard against infinite loop
+        if match_end <= match_index:
+            raise ValueError("Infinite loop risk: match_end did not advance past match_index.")
                 
         # Calculate match quality
         similarity = calculate_text_similarity(remaining[match_index:match_end], original)
