@@ -178,12 +178,13 @@ def replace_most_similar_chunk(whole, original, updated):
     Uses diff-match-patch to perform fuzzy matching and patching for the search block.
     
     The matching strategy:
-    1. Uses match_main to find best match location
-    2. Uses diff analysis to find match end
-    3. Requires 95% accuracy and rejects ambiguous matches
+    1. Uses match_main to find all potential matches
+    2. Requires 95% accuracy and rejects ambiguous matches
+    3. Uses diff analysis to find match boundaries
     
     Returns the new content with the matched region replaced by `updated`.
-    Raises ValueError with diagnostic information if no sufficiently accurate match is found.
+    Raises ValueError with diagnostic information if no sufficiently accurate match is found
+    or if multiple good matches are found.
     """
     dmp = diff_match_patch.diff_match_patch()
     dmp.Match_Threshold = 0.05  # Require 95% accuracy
@@ -192,9 +193,41 @@ def replace_most_similar_chunk(whole, original, updated):
     if not original:
         logger.debug("SEARCH block is empty; appending REPLACE block to the end of the file")
         return whole + updated
+    
+    # Find all potential matches
+    matches = []
+    start_pos = 0
+    while True:
+        match_index = dmp.match_main(whole, original, start_pos)
+        if match_index == -1:
+            break
+            
+        # Find where this match ends
+        diffs = dmp.diff_main(whole[match_index:match_index + 2*len(original)], original)
+        dmp.diff_cleanupSemantic(diffs)
+        whole_chars = 0
+        last_equal_endpoint = 0
+        for op, text in diffs:
+            if op == 0:  # equal text
+                whole_chars += len(text)
+                last_equal_endpoint = whole_chars
+            elif op == -1:  # deletion text
+                whole_chars += len(text)
+        match_end = match_index + last_equal_endpoint
         
-    match_index = dmp.match_main(whole, original, 0)
-    if match_index == -1:
+        # Calculate match quality
+        match_text = whole[match_index:match_end]
+        diffs = dmp.diff_main(match_text, original)
+        dmp.diff_cleanupSemantic(diffs)
+        distance = dmp.diff_levenshtein(diffs)
+        similarity = 1 - (distance / len(original))
+        
+        if similarity >= 0.95:  # Same threshold as Match_Threshold
+            matches.append((match_index, match_end, similarity))
+            
+        start_pos = match_end
+    
+    if not matches:
         logger.debug("SEARCH block not found in file content")
         logger.debug(f"search_text:\n{original}\nwhole:\n{whole}")
         raise ValueError(
@@ -205,57 +238,17 @@ def replace_most_similar_chunk(whole, original, updated):
             "- Missing or altered punctuation\n"
             f"Search text was: {original!r}"
         )
-
-    # Find where the match ends in whole by walking through the diffs.
-    #
-    # Example of how this works:
-    # Consider:
-    #   whole = "x"*50 + "abcdefg" + "z"*50  # target file content
-    #   original = "x"*40 + "abd_efg" + "z"*40  # search text
-    #
-    # 1. match_main() finds best match location in whole:
-    #    - match_index = 10 gives best alignment:
-    #      whole:    "x"*10 + "x"*40 + "abcdefg" + "z"*50
-    #      original: -------- + "x"*40 + "abd_efg" + "z"*40
-    #    - Despite length differences, it finds match due to 0.05 threshold
-    #
-    # 2. diff_main() compares window of whole with original:
-    #    - Window starts at match_index = 10
-    #    - Window length is 2*len(original) = 174 chars
-    #    - Window contains: "x"*40 + "abcdefg" + "z"*50 + (next file content)
-    #    - Original: "x"*40 + "abd_efg" + "z"*40
-    #    - Returns these diffs:
-    #      [(0,  "x"*40 + "ab"), # eq: match
-    #       (-1, "c"),           # del: only in whole
-    #       (0, "d"),            # eq: match
-    #       (1, "_"),            # ins: only in original
-    #       (0, "efg" + "z"*40), # eq: match
-    #       (-1, "z"*10 + (next file content)), # del: only in whole
-    #
-    # 3. Walk through diffs tracking two positions:
-    #    - whole_chars: counts through whole's window
-    #    - last_equal_endpoint: number of matched chars of whole
-    #    - We count these characters of whole:
-    #      - "x"*40 + "ab" + "c" + "d" + "efg" + "z"*40
-    #
-    # 4. Final match_end = match_index + last_equal_endpoint
-    #    - Points to just after "z"*40 in whole
-    #    - Ignores remainder of whole, which doesn't match original
-    #    - Exactly captures the region that matches original
-
-    diffs = dmp.diff_main(whole[match_index:match_index + 2*len(original)], original)
-    dmp.diff_cleanupSemantic(diffs)
-    whole_chars = 0  # count of characters we move through in whole
-    last_equal_endpoint = 0  # track where the last equal text ends
-    for op, text in diffs:
-        if op == 0:  # equal text
-            whole_chars += len(text)
-            last_equal_endpoint = whole_chars
-        elif op == -1:  # deletion text
-            whole_chars += len(text)
-    match_end = match_index + last_equal_endpoint
     
-    # Replace the matched region with the updated content
+    if len(matches) > 1:
+        logger.debug(f"Multiple matches found: {matches}")
+        raise ValueError(
+            "SEARCH/REPLACE block failed: Multiple good matches found.\n"
+            "The search text matches multiple locations in the file.\n"
+            "Please provide more context in the SEARCH block to ensure a unique match.\n"
+            f"Search text was: {original!r}"
+        )
+    
+    match_index, match_end, _ = matches[0]
     return whole[:match_index] + updated + whole[match_end:]
 
 
