@@ -20,6 +20,14 @@ class MissingFilenameError(Exception):
     pass
 
 
+class SearchReplaceImplementationError(Exception):
+    pass
+
+
+class SearchReplaceBlockParseError(Exception):
+    pass
+
+
 class NoExactMatchError(Exception):
     def __init__(self, candidate=None, message=""):
         super().__init__(message)
@@ -400,13 +408,11 @@ def replace_most_similar_chunk(whole, original, updated):
         match_index = dmp.match_main(remaining, original, 0)
         if match_index == -1:
             break
-                
         match_end = find_match_end(dmp, remaining, match_index, original)
-        
         # Safeguard against infinite loop
         if match_end <= match_index:
-            raise ValueError("Infinite loop risk: match_end did not advance past match_index.")
-                
+            raise SearchReplaceImplementationError("Infinite loop risk: match_end did not advance past match_index.")                
+        
         # Calculate match quality
         similarity = calculate_text_similarity(remaining[match_index:match_end], original)
                 
@@ -499,8 +505,8 @@ def do_replace(fname, content, original, updated, fence=None):
         logger.debug(f"do_replace: replacing in {fname}")
         new_content = replace_most_similar_chunk(content, original, updated)
         if new_content is None:
-            raise ValueError("SEARCH/REPLACE block failed to match: similarity below threshold. Check that the SEARCH block exactly matches the file content with only minor allowable differences.")
-    return new_content
+            raise NoExactMatchError("No matching content found in file. Check that the SEARCH block exactly matches the file content with only minor allowable differences.")
+        return new_content
 
 
 HEAD = r"^<{5,9} SEARCH\s*$"
