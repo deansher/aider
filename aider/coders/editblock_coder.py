@@ -288,10 +288,12 @@ class EditBlockCoder(Coder):
 
             # Check if REPLACE content already exists
             if content and updated in content:
-                block_message.append(
-                    "\nWarning: The REPLACE block content already exists in {path}.\n"
-                    "Please confirm if the SEARCH/REPLACE block is still needed."
-                )
+                # Skip "already exists" warning for empty REPLACE blocks (deletions)
+                if updated.strip():
+                    block_message.append(
+                        f"\nWarning: The REPLACE block content already exists in {path}.\n"
+                        "Please confirm if the SEARCH/REPLACE block is still needed."
+                    )
 
             # Add tips on how to fix
             block_message.append("\n### How to Fix\n")
