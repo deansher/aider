@@ -355,15 +355,15 @@ def find_match_end(dmp, whole, match_index, original):
 def replace_most_similar_chunk(whole, original, updated):
     """
     Uses diff-match-patch to perform fuzzy matching and patching for the search block.
-    
+
     The matching strategy:
     1. Uses match_main to find all potential matches
     2. Requires 95% accuracy and rejects ambiguous matches
     3. Uses diff analysis to find match boundaries
-    
+
     Returns the new content with the matched region replaced by `updated`.
-    Raises ValueError with diagnostic information if no sufficiently accurate match is found
-    or if multiple good matches are found.
+    Raises NoExactMatchError if no sufficiently accurate match is found
+    or MultipleMatchesError if multiple good matches are found.
     """
     dmp = diff_match_patch.diff_match_patch()
     dmp.Match_Threshold = 0.05  # Require 95% accuracy
