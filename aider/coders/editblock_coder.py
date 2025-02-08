@@ -192,13 +192,13 @@ def replace_most_similar_chunk(whole, part, replace):
     if match_index == -1:
         raise ValueError(f"SEARCH/REPLACE block failed: No match found for search text: {search_text!r}")
     candidate = whole[match_index: match_index + len(search_text)]
-    logger.debug("SEARCH block hex (first 40 characters): %s", search_text[:40].encode("utf-8").hex())
-    logger.debug("Candidate block hex (first 40 characters): %s", candidate[:40].encode("utf-8").hex())
+    logger.info("SEARCH block hex (first 40 characters): %s", search_text[:40].encode("utf-8").hex())
+    logger.info("Candidate block hex (first 40 characters): %s", candidate[:40].encode("utf-8").hex())
     diffs = dmp.diff_main(candidate, search_text)
     dmp.diff_cleanupSemantic(diffs)
     distance = dmp.diff_levenshtein(diffs)
     similarity = 1 - (distance / len(search_text))
-    logger.debug(f"Match details: index={match_index}, candidate={candidate!r}, similarity={similarity:.2f}")
+    logger.info(f"Match details: index={match_index}, candidate={candidate!r}, similarity={similarity:.2f}")
     if similarity < SIMILARITY_THRESHOLD:
         raise ValueError(f"SEARCH/REPLACE block failed: Similarity {similarity:.2f} (threshold {SIMILARITY_THRESHOLD}) below cutoff. Candidate snippet: {candidate!r}")
     return whole[:match_index] + replace + whole[match_index + len(search_text):]
