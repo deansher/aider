@@ -784,6 +784,14 @@ class Coder:
         else:
             prompt_message = user_message
 
+        # Adjust reasoning level based on message prefix
+        if prompt_message.startswith("+"):
+            self.reasoning_effort_modifier = 1
+            prompt_message = prompt_message[1:].lstrip()
+        elif prompt_message.startswith("="):
+            self.reasoning_effort_modifier = -1
+            prompt_message = prompt_message[1:].lstrip()
+
         while prompt_message:
             self.reflected_message = None
             list(self.send_message(prompt_message))
