@@ -800,8 +800,12 @@ class Coder:
             self.reasoning_level_modifier = 1
             self.io.tool_output(f"Reasoning level modifier set to {self.reasoning_level_modifier}")
             prompt_message = prompt_message[1:].lstrip()
-        elif prompt_message.startswith("="):
+        elif prompt_message.startswith("-"):
             self.reasoning_level_modifier = -1
+            self.io.tool_output(f"Reasoning level modifier set to {self.reasoning_level_modifier}")
+            prompt_message = prompt_message[1:].lstrip()
+        elif prompt_message.startswith("="):
+            self.reasoning_level_modifier = 0
             self.io.tool_output(f"Reasoning level modifier set to {self.reasoning_level_modifier}")
             prompt_message = prompt_message[1:].lstrip()
 
