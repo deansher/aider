@@ -154,7 +154,6 @@ class EditBlockCoder(Coder):
                     "updated": updated,
                     "error_type": "missing_filename",
                     "error_context": str(exc),
-                    "error_context": str(exc),
                 })
 
             except NoExactMatchError as exc:
@@ -164,7 +163,6 @@ class EditBlockCoder(Coder):
                     "updated": updated,
                     "error_type": "no_match",
                     "error_context": str(exc),
-                    "error_context": str(exc),
                 })
 
             except MultipleMatchesError as exc:
@@ -173,7 +171,6 @@ class EditBlockCoder(Coder):
                     "original": original,
                     "updated": updated,
                     "error_type": "multiple_matches",
-                    "error_context": str(exc),
                     "error_context": str(exc),
                 })
 
@@ -529,7 +526,7 @@ missing_file_path_err = (
     "Missing or incorrect file path. The path must be alone on the line"
     " before the opening fence. If this search/replacement block modifies existing"
     " content, then the path must exactly match an existing file that is provided"
-    f" in <brade:context>...</brade:context>.\n"
+    " in <brade:context>...</brade:context>.\n"
 )
 
 
