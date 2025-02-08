@@ -784,6 +784,9 @@ class Coder:
         else:
             prompt_message = user_message
 
+        if prompt_message is None:
+            return
+
         # Adjust reasoning level based on message prefix
         if prompt_message.startswith("+"):
             self.reasoning_effort_modifier = 1
