@@ -1531,6 +1531,8 @@ class Coder:
                 reasoning_level = -2
             else:
                 reasoning_level = 0
+
+            reasoning_level += self.reasoning_effort_modifier
             hash_object, completion = send_completion(
                 model,
                 messages,
