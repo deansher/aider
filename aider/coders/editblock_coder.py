@@ -207,11 +207,9 @@ def replace_most_similar_chunk(whole, original, updated):
         )
 
     # Create a patch to replace the matched content
-    patches = dmp.patch_make(whole, match_index, match_index + len(original), updated)
-    new_text, results = dmp.patch_apply(patches, whole)
-    if not all(results):
-        raise ValueError("Failed to apply patch - matched content may have unexpected format")
-    
+    matched_text = whole[match_index:match_index + len(original)]
+    patches = dmp.patch_make(matched_text, updated)
+    new_text = whole[:match_index] + updated + whole[match_index + len(original):]
     return new_text
 
 
