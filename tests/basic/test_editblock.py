@@ -588,10 +588,10 @@ class TestUtils(unittest.TestCase):
         # Create content with two identical functions
         whole = self.REALISTIC_CODE + "\n\n" + self.REALISTIC_CODE
         # Search for just the function signature, which appears twice
-        part = "def validate_user(user_id: str, permissions: dict) -> bool:\n"
-        replace = "def check_permissions(user_id: str, permissions: dict) -> bool:\n"
-        
-        with self.assertRaises(ValueError) as cm:
+        part = "def validate_user(user_id: str, permissions: dict) -> bool:\\n"
+        replace = "def check_permissions(user_id: str, permissions: dict) -> bool:\\n"
+
+        with self.assertRaises(MultipleMatchesError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
 
