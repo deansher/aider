@@ -259,9 +259,9 @@ class _ModelConfigImpl(ModelConfig):
 
         Args:
             level: Integer reasoning level where:
-                   - 0 means default level
-                   - Negative values reduce level
-                   - Positive values increase level
+                   - 0 means default level (maps to "medium")
+                   - Negative values reduce level (-1 -> "low")
+                   - Positive values increase level (all map to "high")
                    Note: Float values will be truncated to integers.
 
         Returns:
