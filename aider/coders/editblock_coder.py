@@ -176,16 +176,21 @@ def prep(content):
 def calculate_text_similarity(text1: str, text2: str) -> float:
     """Calculate similarity between two text blocks using diff-match-patch.
     
-    Uses Levenshtein distance normalized by the length of text2 to produce
+    Uses Levenshtein distance normalized by max(len(text2), 2) to produce
     a similarity score between 0 and 1, where:
     - 1.0 means the texts are identical
     - 0.0 means the texts are completely different
     - Values in between indicate partial similarity
+        
+    For single-character differences (e.g. "a" vs "b"), the similarity
+    will be 0.5 since we use 2 as the minimum denominator. This helps
+    detect potential transcription errors in short strings while maintaining
+    our usual similarity thresholds for longer content.
     
     Args:
         text1: First text to compare
         text2: Second text to compare (used as denominator for normalization)
-        
+    
     Returns:
         float: Similarity score between 0 and 1
     """
