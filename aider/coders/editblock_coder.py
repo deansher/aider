@@ -13,6 +13,18 @@ from .base_coder import Coder, EditBlockError
 from .editblock_prompts import EditBlockPrompts
 
 
+class MissingFilenameError(Exception):
+    pass
+
+class NoExactMatchError(Exception):
+    def __init__(self, candidate=None, message=""):
+        super().__init__(message)
+        self.candidate = candidate
+
+class MultipleMatchesError(Exception):
+    pass
+
+
 import logging
 logger = logging.getLogger(__name__)
 # Get handlers from root logger to bypass its level filter
