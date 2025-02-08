@@ -601,6 +601,74 @@ def strip_filename(filename):
     return filename
 
 
+def check_marker_order(content):
+    """Validate that SEARCH/REPLACE markers appear in the correct order.
+    
+    This function checks that any SEARCH/REPLACE markers in the content appear in
+    the correct sequence: SEARCH → DIVIDER → REPLACE. It helps catch malformed
+    blocks early with clear error messages.
+    
+    Args:
+        content (str): The content to check for markers
+        
+    Raises:
+        ValueError: If markers are found out of order or incomplete, with details
+                  about the location and nature of the error
+    """
+    lines = content.splitlines()
+    head_pattern = re.compile(HEAD)
+    divider_pattern = re.compile(DIVIDER)
+    updated_pattern = re.compile(UPDATED)
+    
+    # Track state for each block
+    state = 0  # 0=expect SEARCH, 1=expect DIVIDER, 2=expect REPLACE
+    block_start_line = None
+    
+    for i, line in enumerate(lines, 1):
+        is_head = head_pattern.match(line.strip())
+        is_divider = divider_pattern.match(line.strip())
+        is_updated = updated_pattern.match(line.strip())
+        
+        if is_head and state == 0:
+            state = 1
+            block_start_line = i
+        elif is_head:
+            context = "\n".join(lines[max(0, i-3):min(len(lines), i+2)])
+            raise ValueError(
+                f"Found '<<<<<<< SEARCH' on line {i} but previous block was not complete:\n"
+                f"{context}\n"
+                f"Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
+            )
+        elif is_divider and state == 1:
+            state = 2
+        elif is_divider:
+            context = "\n".join(lines[max(0, i-3):min(len(lines), i+2)])
+            raise ValueError(
+                f"Found '=======' on line {i} but not preceded by SEARCH marker:\n"
+                f"{context}\n"
+                f"Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
+            )
+        elif is_updated and state == 2:
+            state = 0
+        elif is_updated:
+            context = "\n".join(lines[max(0, i-3):min(len(lines), i+2)])
+            raise ValueError(
+                f"Found '>>>>>>> REPLACE' on line {i} but not preceded by DIVIDER:\n"
+                f"{context}\n"
+                f"Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
+            )
+    
+    if state == 1:
+        raise ValueError(
+            f"Block starting at line {block_start_line} has SEARCH but is missing DIVIDER and REPLACE markers.\n"
+            "Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
+        )
+    elif state == 2:
+        raise ValueError(
+            f"Block starting at line {block_start_line} has SEARCH and DIVIDER but is missing REPLACE marker.\n"
+            "Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
+        )
+
 def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None):
     """Parse search/replace blocks from the content.
 
@@ -638,6 +706,8 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
         fence (tuple): Opening and closing fence markers
         valid_fnames (list): Combined list of editable and read-only filenames that can be edited
     """
+    # First validate overall marker ordering
+    check_marker_order(content)
     lines = content.splitlines(keepends=True)
     i = 0
 

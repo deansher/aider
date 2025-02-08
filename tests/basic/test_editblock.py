@@ -238,6 +238,50 @@ class TestUtils(unittest.TestCase):
             list(eb.find_original_update_blocks(edit))
         self.assertIn("must begin with a filename and a fence", str(cm.exception))
 
+        # Test out of order markers
+        edit = (
+            "foo.txt\n"
+            "```text\n"
+            "=======\n"
+            "Two\n"
+            "<<<<<<< SEARCH\n"
+            "Tooooo\n"
+            ">>>>>>> REPLACE\n"
+            "```"
+        )
+        with self.assertRaises(ValueError) as cm:
+            list(eb.find_original_update_blocks(edit))
+        self.assertIn("not preceded by SEARCH marker", str(cm.exception))
+
+        # Test incomplete block
+        edit = (
+            "foo.txt\n"
+            "```text\n"
+            "<<<<<<< SEARCH\n"
+            "Two\n"
+            "=======\n"
+            "```"
+        )
+        with self.assertRaises(ValueError) as cm:
+            list(eb.find_original_update_blocks(edit))
+        self.assertIn("missing REPLACE marker", str(cm.exception))
+
+        # Test duplicate SEARCH
+        edit = (
+            "foo.txt\n"
+            "```text\n"
+            "<<<<<<< SEARCH\n"
+            "Two\n"
+            "<<<<<<< SEARCH\n"
+            "=======\n"
+            "Tooooo\n"
+            ">>>>>>> REPLACE\n"
+            "```"
+        )
+        with self.assertRaises(ValueError) as cm:
+            list(eb.find_original_update_blocks(edit))
+        self.assertIn("previous block was not complete", str(cm.exception))
+
     def test_find_original_update_blocks_no_final_newline(self):
         edit = (
             "\n"
