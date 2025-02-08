@@ -23,7 +23,6 @@ logger.setLevel(logging.DEBUG)
 DEFAULT_FENCE = ("`" * 3, "`" * 3)
 
 # fuzzy matching tolerance using diff-match-patch
-SIMILARITY_THRESHOLD = 0.95
 
 
 class EditBlockCoder(Coder):
@@ -176,33 +175,38 @@ def prep(content):
 
 def replace_most_similar_chunk(whole, original, updated):
     """
-    Uses diff-match-patch to perform fuzzy matching for the search block (part) in the file content (whole).
-    This implementation leverages diff_match_patch.match_main to locate the best match for the search block,
-    then computes the similarity using diff_levenshtein.
+    Uses diff-match-patch to perform fuzzy matching for the search block in the file content.
     
-    Tolerates minor differences (e.g., extra spaces, slight punctuation differences) but rejects significant mismatches.
-    Returns the new content with the matched region replaced by `replace`.
-    Raises a ValueError with diagnostic information if the similarity falls below the threshold.
+    The matching strategy:
+    1. Uses match_main to find best match, allowing matches anywhere in the file
+    2. Uses Match_Threshold=0.05 to require high accuracy (95%)
+    3. Rejects ambiguous matches that could indicate LLM transcription errors
+    
+    Returns the new content with the matched region replaced by `updated`.
+    Raises ValueError with diagnostic information if no sufficiently accurate match is found.
     """
     dmp = diff_match_patch.diff_match_patch()
-    search_text = original
-    if not search_text:
+    dmp.Match_Threshold = 0.05  # Require 95% accuracy
+    dmp.Match_Distance = sys.maxsize  # Allow matches anywhere in file
+    
+    if not original:
         logger.debug("SEARCH block is empty; appending REPLACE block to the end of the file")
         return whole + updated
-    match_index = dmp.match_main(whole, search_text, 0)
+        
+    match_index = dmp.match_main(whole, original, 0)
     if match_index == -1:
         logger.debug("SEARCH block not found in file content")
-        logger.debug(f"search_text:\n{search_text}\nwhole:\n{whole}")
-        raise ValueError(f"SEARCH/REPLACE block failed: No match found for search text: {search_text!r}")
-    candidate = whole[match_index: match_index + len(search_text)]
-    diffs = dmp.diff_main(candidate, search_text)
-    dmp.diff_cleanupSemantic(diffs)
-    distance = dmp.diff_levenshtein(diffs)
-    similarity = 1 - (distance / len(search_text))
-    logger.debug(f"Match details: index={match_index}, candidate={candidate!r}, similarity={similarity:.2f}")
-    if similarity < SIMILARITY_THRESHOLD:
-        raise ValueError(f"SEARCH/REPLACE block failed: Similarity {similarity:.2f} (threshold {SIMILARITY_THRESHOLD}) below cutoff. Candidate snippet: {candidate!r}")
-    return whole[:match_index] + updated + whole[match_index + len(search_text):]
+        logger.debug(f"search_text:\n{original}\nwhole:\n{whole}")
+        raise ValueError(
+            "SEARCH/REPLACE block failed: No sufficiently accurate match found.\n"
+            "The search text may have transcription errors. Check for:\n"
+            "- Extra or missing spaces\n"
+            "- Different line breaks or indentation\n"
+            "- Missing or altered punctuation\n"
+            f"Search text was: {original!r}"
+        )
+    
+    return whole[:match_index] + updated + whole[match_index + len(original):]
 
 
 def strip_quoted_wrapping(res, fname=None, fence=DEFAULT_FENCE):

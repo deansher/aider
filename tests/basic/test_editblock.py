@@ -478,16 +478,16 @@ class TestUtils(unittest.TestCase):
         )
 
     def test_diff_match_patch_minor_inaccuracy(self):
-        """Test that even minor differences trigger a failure when similarity falls below 0.95.
+        """Test that even minor differences trigger a failure when accuracy is below 95%.
         
-        This test verifies that our strict matching requirement (similarity >= 0.95) is enforced:
-        1. We use a search block with a missing comma, which produces similarity ≈ 0.92
-        2. Since 0.92 < 0.95 (our threshold), this should raise a ValueError
+        This test verifies that our strict matching requirement is enforced:
+        1. We use a search block with a missing comma and a misspelling
+        2. Since this produces accuracy below 95%, it should raise a ValueError
         3. This enforces our design decision that even minor transcription errors should fail
         """
         # Target content in file
         whole = "def process_data(data, options):\n    return data.process(options)\n"
-        # Search block with missing comma - similarity will be about 0.92
+        # Search block with missing comma and misspelling
         part = "def process_data(data options):\n    return data.procced(options)\n"
         # Replacement content (not used since match should fail)
         replace = "def process_data(data, options):\n    return data.transform(options)\n"
@@ -495,6 +495,7 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
+        self.assertIn("transcription errors", str(cm.exception))
 
     def test_build_failed_edit_error_message_candidate_found(self):
         original = "def foo():\n    return 42\n"
