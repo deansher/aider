@@ -213,12 +213,16 @@ def replace_most_similar_chunk(whole, original, updated):
     #   whole = "x"*50 + "abcdefg" + "z"*50  # target file content
     #   original = "x"*40 + "abd_efg" + "z"*40  # search text
     #
-    # 1. match_main() finds best match, returns index of "abcdefg" in whole
-    #    - match_index points to first 'a'
+    # 1. match_main() finds best match location in whole:
+    #    - match_index = 20 gives best alignment:
+    #      whole:    "x"*20 + "x"*30 + "abcdefg" + "z"*50
+    #      original: -------- + "x"*40 + "abd_efg" + "z"*40
     #    - Despite length differences, it finds match due to 0.05 threshold
     #
     # 2. diff_main() compares window of whole with original:
-    #    - Window: "abcdefg" + "z"*93  (2*len(original) chars starting at match_index)
+    #    - Window starts at match_index = 20
+    #    - Window length is 2*len(original) = 174 chars
+    #    - Window contains: "x"*30 + "abcdefg" + "z"*50 + (next file content)
     #    - Original: "x"*40 + "abd_efg" + "z"*40
     #    - Returns these diffs:
     #      [(1, "x"*40),       # ins: only in original
