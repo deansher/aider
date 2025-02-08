@@ -281,7 +281,7 @@ class EditBlockCoder(Coder):
                     )
                 else:
                     block_message.append("- The SEARCH text did not match any part of the file.\n"
-                                       "- No similar candidate snippet found.")
+                                         "- No similar candidate snippet found.")
             else:
                 block_message.append("- Encountered an unknown error type.\n"
                                      f"- error_context: {error_context}")
@@ -289,16 +289,15 @@ class EditBlockCoder(Coder):
             # Check if REPLACE content already exists
             if content and updated in content:
                 block_message.append(
-                    "\nWarning: The REPLACE block content already exists in {path}.\n"
+                    r"\nWarning: The REPLACE block content already exists in {path}.\n"
                     "Please confirm if the SEARCH/REPLACE block is still needed."
                 )
 
             # Add tips on how to fix
             block_message.append("\n### How to Fix\n")
             fixes = [
-                "- Double-check that the SEARCH block matches the file context verbatim.",
-                "- Consider re-checking whitespace, indentation, or punctuation.",
-                f"- If the REPLACE block already exists in {path}, verify it's still necessary."
+                "- Revise your SEARCH block to precisely match the latest file content in <brade:context>.",
+                "- Carefully reproduce whitespace, indentation, comments and other details character for character.",
             ]
             if error_type == "multiple_matches":
                 fixes.insert(0, "- Provide additional lines of context to uniquely identify the intended match.")
@@ -322,8 +321,7 @@ class EditBlockCoder(Coder):
         )
 
         return (
-            f"# {len(failed)} SEARCH/REPLACE block(s) failed to match!\n"
-            + "\n\n".join(messages)
+            "\n\n".join(messages)
             + "\n\n"
             + note
             + summary
