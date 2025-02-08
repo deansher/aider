@@ -1006,7 +1006,7 @@ MODEL_SETTINGS = [
         "o1",
         "architect",
         weak_model_name="gpt-4o",
-        editor_model_name="gpt-4o",
+        editor_model_name="o1",
         editor_edit_format="editor-diff",
         use_repo_map=True,
         reminder="user",
