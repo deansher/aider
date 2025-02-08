@@ -570,8 +570,8 @@ class TestUtils(unittest.TestCase):
             "\n"
         )
         replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
-        
-        with self.assertRaises(ValueError) as cm:
+
+        with self.assertRaises(eb.NoExactMatchError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
         
