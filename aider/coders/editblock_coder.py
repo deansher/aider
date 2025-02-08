@@ -147,6 +147,7 @@ class EditBlockCoder(Coder):
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
 
+            logger.debug(f"apply_edits: about to call do_replace with self.fence={self.fence}")
             try:
                 new_content = do_replace(full_path, content, original, updated, fence=self.fence)
                 if not new_content:
@@ -533,7 +534,7 @@ def strip_quoted_wrapping(res, fname=None, fence=DEFAULT_FENCE):
 
 
 def do_replace(fname, content, original, updated, fence=None):
-    logger.debug(f"do_replace: {fname}\nSEARCH:\n{original}\nREPLACE:\n{updated}")
+    logger.debug(f"do_replace: {fname}\nSEARCH:\n{original}\nREPLACE:\n{updated}\nfence={fence}")
     original = strip_quoted_wrapping(original, fname, fence)
     updated = strip_quoted_wrapping(updated, fname, fence)
     logger.debug("do_replace: stripped original and updated content")
