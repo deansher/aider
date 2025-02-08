@@ -264,20 +264,20 @@ def replace_most_similar_chunk(whole, original, updated):
         match_index = dmp.match_main(whole, original, start_pos)
         if match_index == -1:
             break
-            
+                
         match_end = find_match_end(dmp, whole, match_index, original)
-        
+            
         # Calculate match quality
         match_text = whole[match_index:match_end]
         diffs = dmp.diff_main(match_text, original)
         dmp.diff_cleanupSemantic(diffs)
         distance = dmp.diff_levenshtein(diffs)
         similarity = 1 - (distance / len(original))
-        
+            
         if similarity >= 0.95:  # Same threshold as Match_Threshold
             matches.append((match_index, match_end, similarity))
-            
-        start_pos = match_end
+                
+        start_pos = match_end + 1
     
     if not matches:
         logger.debug("SEARCH block not found in file content")
