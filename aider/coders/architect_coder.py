@@ -351,13 +351,14 @@ class ArchitectCoder(Coder):
         """
         architect_response = self.partial_response_content
 
+        model_to_use = self.main_model.editor_model or self.main_model
         architect_response_codes = analyze_assistant_response(
             possible_architect_responses,
             (
                 "Which one of the following choices best characterizes the assistant"
                 " response shown below?"
             ),
-            self.main_model,  # Use architect's model config to analyze architect's response
+            model_to_use,  # Use editor model if available, otherwise fallback to main model
             architect_response,
         )
 
