@@ -225,10 +225,10 @@ class EditBlockCoder(Coder):
             str: A formatted markdown error message
         """
         messages = [
-            "# SEARCH/REPLACE Block Errors",
+            f"# {len(failed)} SEARCH/REPLACE block(s) failed to match!",
             "",
-            f"{len(failed)} SEARCH/REPLACE block(s) failed to match. Resubmit corrected versions",
             f"The other {len(passed)} block(s) were applied successfully. Do not resubmit those.",
+            ""
         ]
 
         for item in failed:
@@ -242,10 +242,10 @@ class EditBlockCoder(Coder):
 
             # Start a new message section for this failing block
             block_message = []
-            block_message.append(f"## SearchReplace{error_type.title()}: The {error_type} error occurred in {path}")
+            block_message.append(f"## SearchReplace{error_type.title()}: The {error_type} error occurred in {path}\n")
 
             # Show the entire failing SEARCH/REPLACE block
-            block_message.append("### Offending SEARCH/REPLACE Block")
+            block_message.append("\n### Offending SEARCH/REPLACE Block\n")
             block_message.append(
                 f"{self.fence[0]}python\n"
                 f"<<<<<<< SEARCH\n{original}=======\n{updated}>>>>>>> REPLACE\n"
@@ -253,10 +253,9 @@ class EditBlockCoder(Coder):
             )
 
             # Explain why it failed
-            block_message.append("### Why This Failed")
+            block_message.append("\n### Why This Failed\n")
             if error_type == "multiple_matches":
                 block_message.append("- The SEARCH text matched multiple places in the file.\n"
-                                     "- Provide additional lines of context to uniquely identify the intended match.\n"
                                      f"- error_context: {error_context}")
             elif error_type == "missing_filename":
                 block_message.append("- The path is missing or invalid.\n"
@@ -294,12 +293,15 @@ class EditBlockCoder(Coder):
                 )
 
             # Add tips on how to fix
-            block_message.append("### How to Fix")
-            block_message.append(
-                f"- Double-check that the SEARCH block matches the file context verbatim.\n"
-                f"- Consider re-checking whitespace, indentation, or punctuation.\n"
-                f"- If the REPLACE block already exists in {path}, verify it's still necessary.\n"
-            )
+            block_message.append("\n### How to Fix\n")
+            fixes = [
+                "- Double-check that the SEARCH block matches the file context verbatim.",
+                "- Consider re-checking whitespace, indentation, or punctuation.",
+                f"- If the REPLACE block already exists in {path}, verify it's still necessary."
+            ]
+            if error_type == "multiple_matches":
+                fixes.insert(0, "- Provide additional lines of context to uniquely identify the intended match.")
+            block_message.extend(fixes)
 
             messages.append("\n".join(block_message))
 

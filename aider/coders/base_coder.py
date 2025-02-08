@@ -2032,7 +2032,7 @@ class Coder:
             self.apply_edits(edits)
         except EditBlockError as ebe:
             self.num_malformed_responses += 1
-            self.io.tool_error(ebe.markdown_message)
+            self.io.tool_output(ebe.markdown_message)
             self.reflected_message = ebe.markdown_message
         except ValueError as err:
             self.num_malformed_responses += 1
