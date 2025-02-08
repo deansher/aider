@@ -138,6 +138,7 @@ class Coder:
     suggest_shell_commands = True
     ignore_mentions = None
     chat_language = None
+    parent_coder = None
 
     @classmethod
     def create(
