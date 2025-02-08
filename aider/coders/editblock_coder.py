@@ -286,8 +286,25 @@ class EditBlockCoder(Coder):
                 block_message.append("- Encountered an unknown error type.\n"
                                      f"- error_context: {error_context}")
 
-            # Check if non-empty REPLACE content already exists
-            if content and updated.strip() and updated in content:
+            def _should_warn_about_existing(updated_text):
+                """Check if we should warn about REPLACE content already existing.
+                
+                Only warns if the REPLACE content:
+                - Has at least 3 non-empty lines
+                - Has at least 30 total characters in non-empty lines
+                """
+                if not updated_text or not updated_text.strip():
+                    return False
+                    
+                lines = [line for line in updated_text.splitlines() if line.strip()]
+                if len(lines) < 3:
+                    return False
+                    
+                total_chars = sum(len(line.strip()) for line in lines)
+                return total_chars >= 30
+
+            # Check if substantial REPLACE content already exists
+            if content and _should_warn_about_existing(updated):
                 block_message.append(
                     f"\nWarning: The REPLACE block content already exists in {path}.\n"
                     f"Please confirm if the SEARCH/REPLACE block is still needed."
