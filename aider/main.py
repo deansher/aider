@@ -667,8 +667,8 @@ def main(argv=None, input=None, output=None, force_git_root=None, return_coder=F
             logger.debug("Only Anthropic API key present, selecting Claude 3.5 Sonnet as default model")
             args.model = "claude-3-5-sonnet-20241022"
         else:
-            logger.debug("Using o3-mini as default model")
-            args.model = "o3-mini"
+            logger.debug("Using o1 as default model")
+            args.model = "o1"
 
     main_model = models.get_model_config(
         args.model,

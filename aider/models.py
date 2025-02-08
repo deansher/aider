@@ -485,8 +485,8 @@ class _OpenAiReasoningConfigImpl(_ModelConfigImpl):
 
         Args:
             level: Integer reasoning level where:
-                   - 0 means default level (maps to "high")
-                   - Negative values reduce level (-1 -> "medium", <= -2 -> "low")
+                   - 0 means default level (maps to "medium")
+                   - Negative values reduce level (all map to "low")
                    - Positive values increase level (all map to "high")
                    Note: Float values will be truncated to integers.
 
@@ -494,11 +494,11 @@ class _OpenAiReasoningConfigImpl(_ModelConfigImpl):
             A dict mapping "reasoning_effort" to "low", "medium", or "high"
         """
         level_int = int(level)
-        if level_int <= -2:
+        if level_int < 0:
             effort = "low"
-        elif level_int == -1:
-            effort = "medium" 
-        else:  # level_int >= 0
+        elif level_int == 0:
+            effort = "medium"
+        else:  # level_int > 0
             effort = "high"
         return {"reasoning_effort": effort}
 
@@ -999,6 +999,20 @@ MODEL_SETTINGS = [
         use_system_prompt=False,
         use_temperature=False,
         streaming=True,
+        is_reasoning_model=True,
+        model_config_class=_OpenAiReasoningConfigImpl,
+    ),
+    ModelSettings(
+        "o1",
+        "architect",
+        weak_model_name="gpt-4o",
+        editor_model_name="gpt-4o",
+        editor_edit_format="editor-diff",
+        use_repo_map=True,
+        reminder="user",
+        use_system_prompt=False,
+        use_temperature=False,
+        streaming=False,
         is_reasoning_model=True,
         model_config_class=_OpenAiReasoningConfigImpl,
     ),
