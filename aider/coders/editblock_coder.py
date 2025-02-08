@@ -117,7 +117,14 @@ class EditBlockCoder(Coder):
                 self.io.write_text(full_path, new_content)
                 passed.append(edit)
             else:
-                failed.append(edit)
+                failed_info = {
+                    "path": path,
+                    "original": original,
+                    "updated": updated,
+                    "error_type": "no_match",  # or a default error
+                    "error_context": None
+                }
+                failed.append(failed_info)
 
         if failed:
             raise ValueError(self._build_failed_edit_error_message(failed, passed))
@@ -128,8 +135,10 @@ class EditBlockCoder(Coder):
         """
         messages = []
 
-        for edit in failed:
-            path, original, updated = edit
+        for item in failed:
+            path = item["path"]
+            original = item["original"]
+            updated = item["updated"]
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
 
