@@ -192,12 +192,13 @@ def calculate_text_similarity(text1: str, text2: str) -> float:
     # Handle empty string cases
     if text2 == "":
         return 1.0 if text1 == "" else 0.0
-        
+            
     dmp = diff_match_patch.diff_match_patch()
     diffs = dmp.diff_main(text1, text2)
     dmp.diff_cleanupSemantic(diffs)
     distance = dmp.diff_levenshtein(diffs)
-    return 1 - (distance / len(text2))
+    # Scale by max(len(text2), 2) to give single-character differences a similarity of 0.5
+    return 1 - (distance / max(len(text2), 2))
 
 
 def find_match_end(dmp, whole, match_index, original):
