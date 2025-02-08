@@ -558,21 +558,23 @@ class TestUtils(unittest.TestCase):
         
     def test_rejects_content_changes(self):
         """Test that actual code content changes are rejected.
-        
+    
         When the LLM makes mistakes in transcribing actual code content:
         - Different variable names
         - Different function signatures
         - Different logic
-        
+    
         These should be rejected since they indicate the LLM may not accurately see the code.
         """
         whole = self.REALISTIC_CODE
-        # Change actual code content:
-        # - Different parameter name
-        # - Different return type
+        # Change actual code content by inserting several lines
         part = self.REALISTIC_CODE.replace(
-            "def validate_user(user_id: str, permissions: dict) -> bool:",
-            "def validate_user(uid: str, permissions: dict) -> None:"
+            "    # Check each required permission\n",
+            "    # Check each required permission\n"
+            "    # First validate input types\n"
+            "    if not isinstance(user_id, str):\n"
+            "        raise TypeError('user_id must be a string')\n"
+            "\n"
         )
         replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
         
