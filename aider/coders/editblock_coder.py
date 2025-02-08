@@ -9,7 +9,7 @@ from pathlib import Path
 from aider import utils
 
 from ..dump import dump  # noqa: F401
-from .base_coder import Coder
+from .base_coder import Coder, EditBlockError
 from .editblock_prompts import EditBlockPrompts
 
 

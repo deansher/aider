@@ -50,6 +50,12 @@ class FinishReasonLength(Exception):
     pass
 
 
+class EditBlockError(Exception):
+    def __init__(self, markdown_message: str):
+        super().__init__(markdown_message)
+        self.markdown_message = markdown_message
+
+
 def wrap_fence(name):
     return f"<{name}>", f"</{name}>"
 
@@ -2024,6 +2030,10 @@ class Coder:
             edits = self.prepare_to_edit(edits)
             edited = set(edit[0] for edit in edits)
             self.apply_edits(edits)
+        except EditBlockError as ebe:
+            self.num_malformed_responses += 1
+            self.io.tool_error(ebe.markdown_message)
+            self.reflected_message = ebe.markdown_message
         except ValueError as err:
             self.num_malformed_responses += 1
 
