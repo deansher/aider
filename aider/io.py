@@ -708,17 +708,15 @@ class InputOutput:
 
     def format_files_for_input(self, rel_fnames, rel_read_only_fnames):
         output = []
-        
+
         read_only_files = sorted(rel_read_only_fnames or [])
         if read_only_files:
             output.append("▸ Readonly Files:")
             output.extend(read_only_files)
-            output.append("")
-            
+
         editable_files = sorted(fname for fname in rel_fnames if fname not in rel_read_only_fnames)
         if editable_files:
             output.append("▸ Editable Files:")
             output.extend(editable_files)
-            output.append("")
-            
+
         return "\n".join(output)
