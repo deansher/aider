@@ -188,7 +188,42 @@ def find_match_end(dmp, whole, match_index, original):
     Returns:
         int: The index where this match ends
     """
-    diffs = dmp.diff_main(whole[match_index:match_index + 2*len(original)], original)
+    # Example of how this works:
+    # Consider:
+    #   whole = "x"*50 + "abcdefg" + "z"*50  # target file content
+    #   original = "x"*40 + "abd_efg" + "z"*40  # search text
+    #
+    # 1. match_main() finds best match location in whole:
+    #    - match_index = 10 gives best alignment:
+    #      whole:    "x"*10 + "x"*40 + "abcdefg" + "z"*50
+    #      original: -------- + "x"*40 + "abd_efg" + "z"*40
+    #    - Despite length differences, it finds match due to 0.05 threshold
+    #
+    # 2. diff_main() compares window of whole with original:
+    #    - Window starts at match_index = 10
+    #    - Window length is 2*len(original) = 174 chars
+    #    - Window contains: "x"*40 + "abcdefg" + "z"*50 + (next file content)
+    #    - Original: "x"*40 + "abd_efg" + "z"*40
+    #    - Returns these diffs:
+    #      [(0,  "x"*40 + "ab"), # eq: match
+    #       (-1, "c"),           # del: only in whole
+    #       (0, "d"),            # eq: match
+    #       (1, "_"),            # ins: only in original
+    #       (0, "efg" + "z"*40), # eq: match
+    #       (-1, "z"*10 + (next file content)), # del: only in whole
+    #
+    # 3. Walk through diffs tracking two positions:
+    #    - whole_chars: counts through whole's window
+    #    - last_equal_endpoint: number of matched chars of whole
+    #    - We count these characters of whole:
+    #      - "x"*40 + "ab" + "c" + "d" + "efg" + "z"*40
+    #
+    # 4. Final match_end = match_index + last_equal_endpoint
+    #    - Points to just after "z"*40 in whole
+    #    - Ignores remainder of whole, which doesn't match original
+    #    - Exactly captures the region that matches original
+
+    diffs = dmp.diff_main(whole[match_index:match_index + 2 * len(original)], original)
     dmp.diff_cleanupSemantic(diffs)
     whole_chars = 0
     last_equal_endpoint = 0
@@ -199,6 +234,7 @@ def find_match_end(dmp, whole, match_index, original):
         elif op == -1:  # deletion text
             whole_chars += len(text)
     return match_index + last_equal_endpoint
+
 
 def replace_most_similar_chunk(whole, original, updated):
     """
