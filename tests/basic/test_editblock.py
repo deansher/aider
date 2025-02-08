@@ -525,34 +525,101 @@ class TestUtils(unittest.TestCase):
         # Verify second occurrence was not changed
         self.assertIn("validate_user", result.split("check_permissions")[1])
     
-    def test_diff_match_patch_minor_inaccuracy(self):
-        """Test that even minor differences trigger a failure when accuracy is below 95%.
+    def test_allows_minor_whitespace_differences(self):
+        """Test that minor whitespace differences are allowed.
         
-        This test verifies that our strict matching requirement is enforced:
-        1. We use a search block with a missing comma and a misspelling
-        2. Since this produces accuracy below 95%, it should raise a ValueError
-        3. This enforces our design decision that even minor transcription errors should fail
+        The LLM often introduces small whitespace variations when transcribing code:
+        - Extra spaces around operators
+        - Different line breaks in long lines
+        - Slightly different indentation
+        
+        These should still match as long as they don't change the code's meaning.
         """
-        # Target content in file
         whole = self.REALISTIC_CODE
-        # Search block with missing comma and misspelling
-        part = self.REALISTIC_CODE.replace("permissions, dict", "permissions dict")
-        # Replacement content (not used since match should fail)
+        # Introduce typical LLM whitespace variations:
+        # - Extra space after function name
+        # - Extra newline in docstring
+        # - Extra space in type hint
+        part = self.REALISTIC_CODE.replace(
+            "def validate_user(user_id: str,",
+            "def validate_user (user_id:  str,"
+        ).replace(
+            "Args:\n",
+            "Args:\n\n"
+        )
+        replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
+        
+        # Should succeed since differences are just whitespace
+        result = eb.replace_most_similar_chunk(whole, part, replace)
+        self.assertIn("check_permissions", result)
+        
+    def test_allows_minor_comment_differences(self):
+        """Test that minor comment differences are allowed.
+        
+        The LLM sometimes makes small errors when transcribing comments:
+        - Missing periods at end
+        - Different line wrapping
+        - Slightly different wording
+        
+        These should still match since they don't affect the code's behavior.
+        """
+        whole = self.REALISTIC_CODE
+        # Introduce typical LLM comment variations:
+        # - Missing period in docstring
+        # - Different line wrapping
+        part = self.REALISTIC_CODE.replace(
+            "Returns:\n        True if user has all required permissions, False otherwise",
+            "Returns:\n        True if user has all required permissions,\n        False otherwise."
+        )
+        replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
+        
+        # Should succeed since differences are just in comments
+        result = eb.replace_most_similar_chunk(whole, part, replace)
+        self.assertIn("check_permissions", result)
+        
+    def test_rejects_content_changes(self):
+        """Test that actual code content changes are rejected.
+        
+        When the LLM makes mistakes in transcribing actual code content:
+        - Different variable names
+        - Different function signatures
+        - Different logic
+        
+        These should be rejected since they indicate the LLM may not accurately see the code.
+        """
+        whole = self.REALISTIC_CODE
+        # Change actual code content:
+        # - Different parameter name
+        # - Different return type
+        part = self.REALISTIC_CODE.replace(
+            "def validate_user(user_id: str, permissions: dict) -> bool:",
+            "def validate_user(uid: str, permissions: dict) -> None:"
+        )
         replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
         
         with self.assertRaises(ValueError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
-        self.assertIn("transcription errors", str(cm.exception))
-    
-    def test_diff_match_patch_significant_inaccuracy(self):
-        """Test that a significant inaccuracy, such as a misspelling, is rejected."""
-        whole = self.REALISTIC_CODE
-        # Introduce a severe error: misspelling 'validate' as 'vallidate'
-        part = self.REALISTIC_CODE.replace("validate_user", "vallidate_user")
-        replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
-        with self.assertRaises(ValueError):
+        
+    def test_rejects_ambiguous_matches(self):
+        """Test that ambiguous matches are rejected.
+        
+        If a search block could match multiple places in the file:
+        - Common helper function
+        - Repeated boilerplate
+        - Generic error handling
+        
+        These should be rejected since we can't be sure which match the LLM intended.
+        """
+        # Create content with two identical functions
+        whole = self.REALISTIC_CODE + "\n\n" + self.REALISTIC_CODE
+        # Search for just the function signature, which appears twice
+        part = "def validate_user(user_id: str, permissions: dict) -> bool:\n"
+        replace = "def check_permissions(user_id: str, permissions: dict) -> bool:\n"
+        
+        with self.assertRaises(ValueError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
+        self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
 
     def test_build_failed_edit_error_message_candidate_found(self):
         original = "def foo():\n    return 42\n"
