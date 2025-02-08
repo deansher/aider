@@ -142,18 +142,25 @@ class EditBlockCoder(Coder):
         """
         Build a clear, structured markdown error message for each failing block.
         """
-        messages = []
+        messages = [
+            "# SEARCH/REPLACE Block Errors",
+            "",
+            f"{len(failed)} SEARCH/REPLACE block(s) failed to match. Resubmit corrected versions",
+            f"The other {len(passed)} block(s) were applied successfully. Do not resubmit those.",
+        ]
 
         for item in failed:
             path = item["path"]
             original = item["original"]
             updated = item["updated"]
+            error_type = item.get("error_type", "no_match")
+            error_context = item.get("error_context", None)
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
 
             # Start a new message section for this failing block
             block_message = []
-            block_message.append(f"## Error in `{path}`")
+            block_message.append("## SEARCH/REPLACE Block Failed")
 
             # Show the entire failing SEARCH/REPLACE block
             block_message.append("### Offending SEARCH/REPLACE Block")
@@ -164,28 +171,38 @@ class EditBlockCoder(Coder):
             )
 
             # Explain why it failed
-            candidate = find_similar_lines(original, content)
-            if candidate:
-                # Show some similarity details
-                similarity_ratio = SequenceMatcher(None, original, candidate).ratio()
-                similarity_percent = similarity_ratio * 100
-                diff_lines = list(unified_diff(
-                    original.splitlines(keepends=True),
-                    candidate.splitlines(keepends=True),
-                    fromfile="Expected SEARCH",
-                    tofile="Candidate Snippet",
-                ))
-                diff_text = "".join(diff_lines)
-                block_message.append("### Why This Failed")
-                block_message.append(
-                    f"- The SEARCH text did not match exactly.\n"
-                    f"- Similarity: {similarity_percent:.0f}%\n"
-                    f"- Unified diff with a possibly related snippet:\n```\n{diff_text}\n```"
-                )
+            block_message.append("### Why This Failed")
+            if error_type == "multiple_matches":
+                block_message.append("- The SEARCH text matched multiple places in the file.\n"
+                                     "- Provide additional lines of context to uniquely identify the intended match.\n"
+                                     f"- error_context: {error_context}")
+            elif error_type == "missing_filename":
+                block_message.append("- The path is missing or invalid.\n"
+                                     "- Make sure the file path is listed above the fence and spells a valid filename.\n"
+                                     f"- error_context: {error_context}")
+            elif error_type == "no_match":
+                candidate = find_similar_lines(original, content)
+                if candidate:
+                    similarity_ratio = SequenceMatcher(None, original, candidate).ratio()
+                    similarity_percent = similarity_ratio * 100
+                    diff_lines = list(unified_diff(
+                        original.splitlines(keepends=True),
+                        candidate.splitlines(keepends=True),
+                        fromfile="Expected SEARCH",
+                        tofile="Candidate Snippet",
+                    ))
+                    diff_text = "".join(diff_lines)
+                    block_message.append(
+                        f"- The SEARCH text did not match exactly.\n"
+                        f"- Similarity: {similarity_percent:.0f}%\n"
+                        f"- Unified diff with a possibly related snippet:\n```\n{diff_text}\n```"
+                    )
+                else:
+                    block_message.append("- The SEARCH text did not match any part of the file.")
             else:
-                block_message.append("### Why This Failed")
-                block_message.append("- The SEARCH text did not match any part of the file.")
-            
+                block_message.append("- Encountered an unknown error type.\n"
+                                     f"- error_context: {error_context}")
+
             # Add tips on how to fix
             block_message.append("### How to Fix")
             block_message.append(
