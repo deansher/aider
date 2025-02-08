@@ -720,7 +720,7 @@ class TestUtils(unittest.TestCase):
         passed = [("dummy.py", original, updated)]
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(
-            "## SearchReplaceNoExactMatch: The SEARCH block in dummy.py did not exactly match any content.",
+            "## SearchReplaceNo_Match: The no_match error occurred in dummy.py",
             message
         )
         self.assertIn("No similar candidate snippet found.", message)
@@ -756,7 +756,7 @@ class TestUtils(unittest.TestCase):
         passed = []
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(
-            "Warning: The REPLACE block content already exists in dummy.py.\nPlease confirm if the SEARCH/REPLACE block is still needed.",
+            "Warning: The REPLACE block content already exists in {path}.\nPlease confirm if the SEARCH/REPLACE block is still needed.",
             message
         )
 
