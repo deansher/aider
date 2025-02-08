@@ -214,43 +214,35 @@ def replace_most_similar_chunk(whole, original, updated):
     #   original = "x"*40 + "abd_efg" + "z"*40  # search text
     #
     # 1. match_main() finds best match location in whole:
-    #    - match_index = 20 gives best alignment:
-    #      whole:    "x"*20 + "x"*30 + "abcdefg" + "z"*50
+    #    - match_index = 10 gives best alignment:
+    #      whole:    "x"*10 + "x"*40 + "abcdefg" + "z"*50
     #      original: -------- + "x"*40 + "abd_efg" + "z"*40
     #    - Despite length differences, it finds match due to 0.05 threshold
     #
     # 2. diff_main() compares window of whole with original:
-    #    - Window starts at match_index = 20
+    #    - Window starts at match_index = 10
     #    - Window length is 2*len(original) = 174 chars
-    #    - Window contains: "x"*30 + "abcdefg" + "z"*50 + (next file content)
+    #    - Window contains: "x"*40 + "abcdefg" + "z"*50 + (next file content)
     #    - Original: "x"*40 + "abd_efg" + "z"*40
     #    - Returns these diffs:
-    #      [(1, "x"*40),       # ins: only in original
-    #       (0, "ab"),         # eq: match
-    #       (-1, "c"),         # del: only in whole
-    #       (0, "d"),          # eq: match
-    #       (1, "_"),          # ins: only in original
-    #       (0, "efg"),        # eq: match
-    #       (-1, "z"*93),      # del: only in whole
-    #       (1, "z"*40)]       # ins: only in original
+    #      [(0,  "x"*40 + "ab"), # eq: match
+    #       (-1, "c"),           # del: only in whole
+    #       (0, "d"),            # eq: match
+    #       (1, "_"),            # ins: only in original
+    #       (0, "efg" + "z"*40), # eq: match
+    #       (-1, "z"*10 + (next file content)), # del: only in whole
     #
     # 3. Walk through diffs tracking two positions:
     #    - whole_chars: counts through whole's window
-    #    - last_equal_endpoint: marks end of last equal text
-    #    For each diff:
-    #    - (1, "x"*40): skip insertions
-    #    - (0, "ab"): whole_chars += 2, last_equal_endpoint = 2
-    #    - (-1, "c"): whole_chars += 1
-    #    - (0, "d"): whole_chars += 1, last_equal_endpoint = 4
-    #    - (1, "_"): skip insertions
-    #    - (0, "efg"): whole_chars += 3, last_equal_endpoint = 7
-    #    - (-1, "z"*93): whole_chars += 93 (but ignored for endpoint)
-    #    - (1, "z"*40): skip insertions
+    #    - last_equal_endpoint: number of matched chars of whole
+    #    - We count these characters of whole:
+    #      - "x"*40 + "ab" + "c" + "d" + "efg" + "z"*40
     #
     # 4. Final match_end = match_index + last_equal_endpoint
-    #    - Points to just after "efg" in whole
-    #    - Ignores trailing "z"*93 deletion
+    #    - Points to just after "z"*40 in whole
+    #    - Ignores remainder of whole, which doesn't match original
     #    - Exactly captures the region that matches original
+    
     diffs = dmp.diff_main(whole[match_index:match_index + 2*len(original)], original)
     dmp.diff_cleanupSemantic(diffs)
     whole_chars = 0  # count of characters we move through in whole
