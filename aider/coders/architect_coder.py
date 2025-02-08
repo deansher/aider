@@ -411,6 +411,7 @@ class ArchitectCoder(Coder):
         editor_coder = self.create_coder(
             edit_format=self.main_model.editor_edit_format,
             main_model=editor_model_config,
+            parent_coder=self,
         )
         # Give editor_coder the conversation so far
         editor_coder.cur_messages = editor_coder.cur_messages + exchange.get_messages()
@@ -456,7 +457,7 @@ class ArchitectCoder(Coder):
         - Cost tracking is only updated on successful execution
         """
         self.io.tool_output("\nLooking over my changes ...")
-        reviewer_coder = self.create_coder("ask")
+        reviewer_coder = self.create_coder("ask", parent_coder=self)
         # Instead of mutating cur_messages, create new extended copy
         reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_messages()
         

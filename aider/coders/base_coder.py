@@ -295,6 +295,11 @@ class Coder:
 
         return lines
 
+    def get_reasoning_level_modifier(self):
+        if self.parent_coder:
+            return self.parent_coder.get_reasoning_level_modifier()
+        return self.reasoning_level_modifier
+
     def __init__(
         self,
         main_model,
@@ -329,7 +334,7 @@ class Coder:
         chat_language=None,
     ):
         self.chat_language = chat_language
-        self.reasoning_effort_modifier = 0
+        self.reasoning_level_modifier = 0
         self.commit_before_message = []
         self.aider_commit_hashes = set()
         self.rejected_urls = set()
@@ -789,10 +794,12 @@ class Coder:
 
         # Adjust reasoning level based on message prefix
         if prompt_message.startswith("+"):
-            self.reasoning_effort_modifier = 1
+            self.reasoning_level_modifier = 1
+            self.io.tool_output(f"Reasoning level modifier set to {self.reasoning_level_modifier}")
             prompt_message = prompt_message[1:].lstrip()
         elif prompt_message.startswith("="):
-            self.reasoning_effort_modifier = -1
+            self.reasoning_level_modifier = -1
+            self.io.tool_output(f"Reasoning level modifier set to {self.reasoning_level_modifier}")
             prompt_message = prompt_message[1:].lstrip()
 
         while prompt_message:
@@ -1531,7 +1538,7 @@ class Coder:
 
             extra = model.extra_params.copy() if model.extra_params else {}
             reasoning_level = 0
-            reasoning_level += self.reasoning_effort_modifier
+            reasoning_level += self.get_reasoning_level_modifier()
             hash_object, completion = send_completion(
                 model,
                 messages,
