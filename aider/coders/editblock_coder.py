@@ -173,6 +173,33 @@ def prep(content):
     return content, lines
 
 
+def find_match_end(dmp, whole, match_index, original):
+    """Find where a match ends in the whole text.
+    
+    Uses diff-match-patch to analyze differences and find the endpoint of a match,
+    taking into account potential insertions and deletions.
+    
+    Args:
+        dmp: diff_match_patch instance to use
+        whole: The complete text being searched
+        match_index: Starting index of the match
+        original: The pattern being matched
+        
+    Returns:
+        int: The index where this match ends
+    """
+    diffs = dmp.diff_main(whole[match_index:match_index + 2*len(original)], original)
+    dmp.diff_cleanupSemantic(diffs)
+    whole_chars = 0
+    last_equal_endpoint = 0
+    for op, text in diffs:
+        if op == 0:  # equal text
+            whole_chars += len(text)
+            last_equal_endpoint = whole_chars
+        elif op == -1:  # deletion text
+            whole_chars += len(text)
+    return match_index + last_equal_endpoint
+
 def replace_most_similar_chunk(whole, original, updated):
     """
     Uses diff-match-patch to perform fuzzy matching and patching for the search block.
@@ -202,18 +229,7 @@ def replace_most_similar_chunk(whole, original, updated):
         if match_index == -1:
             break
             
-        # Find where this match ends
-        diffs = dmp.diff_main(whole[match_index:match_index + 2*len(original)], original)
-        dmp.diff_cleanupSemantic(diffs)
-        whole_chars = 0
-        last_equal_endpoint = 0
-        for op, text in diffs:
-            if op == 0:  # equal text
-                whole_chars += len(text)
-                last_equal_endpoint = whole_chars
-            elif op == -1:  # deletion text
-                whole_chars += len(text)
-        match_end = match_index + last_equal_endpoint
+        match_end = find_match_end(dmp, whole, match_index, original)
         
         # Calculate match quality
         match_text = whole[match_index:match_end]
