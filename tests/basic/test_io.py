@@ -105,6 +105,38 @@ class TestInputOutput(unittest.TestCase):
             autocompleter = AutoCompleter(root, rel_fnames, addable_rel_fnames, commands, "utf-8")
             self.assertEqual(autocompleter.words, set(rel_fnames))
 
+    def test_format_files_for_input(self):
+        """Test that format_files_for_input correctly formats file lists with headers."""
+        io = InputOutput()
+        
+        # Test with no files
+        result = io.format_files_for_input([], [])
+        self.assertEqual(result, "")
+        
+        # Test with only editable files
+        result = io.format_files_for_input(["file1.py", "file2.py"], [])
+        self.assertEqual(result, "Editable Files:\nfile1.py\nfile2.py\n")
+        
+        # Test with only read-only files
+        result = io.format_files_for_input([], ["readonly1.py", "readonly2.py"])
+        self.assertEqual(result, "Readonly Files:\nreadonly1.py\nreadonly2.py\n")
+        
+        # Test with both types of files
+        result = io.format_files_for_input(
+            ["file1.py", "file2.py", "readonly1.py"],
+            ["readonly1.py", "readonly2.py"]
+        )
+        expected = (
+            "Readonly Files:\n"
+            "readonly1.py\n"
+            "readonly2.py\n"
+            "\n"
+            "Editable Files:\n"
+            "file1.py\n"
+            "file2.py\n"
+        )
+        self.assertEqual(result, expected)
+
     @patch("builtins.input", return_value="test input")
     def test_get_input_is_a_directory_error(self, mock_input):
         io = InputOutput(pretty=False)  # Windows tests throw UnicodeDecodeError
