@@ -61,23 +61,23 @@ Correspondingly update tests.
 
 ## Tasks
 
-### ( ) Integrate diff‐match‐patch into editblock_coder.py
+### (✔︎) Integrate diff‐match‐patch into editblock_coder.py
 
-- ( ) Replace the existing homegrown fuzzy matching in replace_most_similar_chunk with diff‐match‐patch based matching.
-- ( ) Configure matching tolerances so that:
+- (✔︎) Replace the existing homegrown fuzzy matching in replace_most_similar_chunk with diff‐match‐patch based matching.
+- (✔︎) Configure matching tolerances so that:
   - Minor differences (extra spaces, inconsistent line breaks, slight punctuation variations) are tolerated.
   - Significant mismatches are rejected.
   - Ambiguous or non-unique matches are flagged as failures.
-- ( ) Update error handling to provide clear feedback when no match is found.
+- (✔︎) Update error handling to provide clear feedback when no match is found.
 
-### ( ) Update and Expand Unit Tests
+### (✔︎) Update and Expand Unit Tests
 
-- ( ) Revise tests in tests/basic/test_editblock.py to reflect the new matching behavior.
-- ( ) Add tests for:
+- (✔︎) Revise tests in tests/basic/test_editblock.py to reflect the new matching behavior.
+- (✔︎) Add tests for:
   - Tolerance of minor inaccuracies.
   - Rejection of significant mismatches.
   - Detection of ambiguous matches.
-- ( ) Confirm that error messages clearly identify match failures.
+- (✔︎) Confirm that error messages clearly identify match failures.
 
 ### ( ) Enhance Feedback and Dialog Logging
 
@@ -86,8 +86,7 @@ Correspondingly update tests.
 
 ### ( ) Code Cleanup and Documentation
 
-- ( ) Remove obsolete heuristics and matching hacks.
-- ( ) Add inline documentation in editblock_coder.py on diff‐match‐patch integration and tolerance settings.
-- ( ) Update overall project documentation to describe the new matching mechanism.
+- (✔︎) Remove obsolete heuristics and matching hacks.
+- (✔︎) Add inline documentation in editblock_coder.py on diff‐match‐patch integration and tolerance settings.
+- (✔︎) Update overall project documentation to describe the new matching mechanism.
 
-## Tasks
