@@ -148,12 +148,12 @@ class EditBlockCoder(Coder):
             content = self.io.read_text(full_path)
 
             try:
-                new_content = do_replace(full_path, content, original, updated, self.fence)
+                new_content = do_replace(full_path, content, original, updated, fence=self.fence)
                 if not new_content:
                     # try patching any of the other files in the chat
                     for alt_path in self.abs_fnames:
                         alt_content = self.io.read_text(alt_path)
-                        new_content = do_replace(alt_path, alt_content, original, updated, self.fence)
+                        new_content = do_replace(alt_path, alt_content, original, updated, fence=self.fence)
                         if new_content:
                             full_path = alt_path
                             break
