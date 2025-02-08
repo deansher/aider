@@ -328,6 +328,7 @@ class ArchitectCoder(Coder):
             cache_prompts=False,
             num_cache_warming_pings=0,
             edit_format=edit_format,
+            parent_coder=self,
         )
 
         # Update with any passed kwargs

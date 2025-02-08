@@ -296,7 +296,7 @@ class Coder:
         return lines
 
     def get_reasoning_level_modifier(self):
-        if self.parent_coder:
+        if hasattr(self, 'parent_coder') and self.parent_coder:
             return self.parent_coder.get_reasoning_level_modifier()
         return self.reasoning_level_modifier
 
@@ -332,9 +332,11 @@ class Coder:
         num_cache_warming_pings=0,
         suggest_shell_commands=True,
         chat_language=None,
+        parent_coder=None,
     ):
         self.chat_language = chat_language
         self.reasoning_level_modifier = 0
+        self.parent_coder = parent_coder
         self.commit_before_message = []
         self.aider_commit_hashes = set()
         self.rejected_urls = set()
