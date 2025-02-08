@@ -351,7 +351,7 @@ class _ModelConfigImpl(ModelConfig):
         if not self.editor_model_name or self.editor_model_name == self.name:
             self.editor_model = self
         else:
-            self.editor_model = ModelConfig(
+            self.editor_model = get_model_config(
                 self.editor_model_name,
                 editor_model=False,
             )
