@@ -3,6 +3,7 @@
 import tempfile
 import unittest
 from pathlib import Path
+import diff_match_patch
 
 from aider.coders import Coder
 from aider.coders import editblock_coder as eb
