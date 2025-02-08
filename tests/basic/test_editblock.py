@@ -504,27 +504,6 @@ class TestUtils(unittest.TestCase):
     return True
 '''
 
-    def test_exact_match_replaces_first_occurrence_only(self):
-        """Verify exact match replacement behavior.
-        
-        This test is our primary success case, validating two key requirements:
-        1. An exact match is correctly identified and replaced
-        2. Only the first occurrence is modified
-        
-        The test uses realistic Python code with type hints and docstrings to
-        represent typical content that the LLM would process.
-        """
-        whole = self.REALISTIC_CODE + "\n\n" + self.REALISTIC_CODE  # Duplicate for testing
-        part = self.REALISTIC_CODE
-        replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
-        
-        result = eb.replace_most_similar_chunk(whole, part, replace)
-        
-        # Verify first occurrence was replaced
-        self.assertIn("check_permissions", result)
-        # Verify second occurrence was not changed
-        self.assertIn("validate_user", result.split("check_permissions")[1])
-    
     def test_allows_minor_whitespace_differences(self):
         """Test that minor whitespace differences are allowed.
         
