@@ -13,53 +13,6 @@ This document outlines our progress and remaining work toward enhancing Brade to
    - No need for message pairs or "Understood" responses  
 4. We will revisit this design after litellm adds support for "developer" messages  
 
-## Requirements & Progress
-
-### 1. Add o3-mini Model Support  
-- [✔︎] Add o3-mini model configuration to models.py  
-  - [✔︎] Configure as a reasoning model  
-  - [✔︎] Set appropriate edit format  
-  - [✔︎] Configure default models for weak/editor roles  
-  - [✔︎] Set other model-specific parameters  
-
-- [✔︎] Add tests for o3-mini configuration  
-  - [✔︎] Test model settings  
-  - [✔︎] Test default configurations  
-
-### 2. Implement Message Transformation  
-- [✔︎] Add message transformation function  
-  - [✔︎] Create transform_messages_for_o3 in sendchat.py  
-  - [✔︎] Implement simple system-to-user conversion  
-  - [✔︎] Preserve message order  
-
-- [✔︎] Add focused test cases  
-  - [✔︎] Test basic system-to-user conversion  
-  - [✔︎] Test order preservation  
-  - [✔︎] Test mixed message types  
-
-### 3. Configure Default Model Selection  
-- [✔︎] Set o3-mini as the primary default model  
-  - [✔︎] Use for all roles in ArchitectCoder (primary, editor, reviewer)  
-  - [✔︎] Use as default for all other use cases  
-  - [✔︎] Use whenever OPENAI_API_KEY is present  
-- [✔︎] Implement fallback logic  
-  - [✔︎] Use latest Claude 3.5 Sonnet when only ANTHROPIC_API_KEY exists  
-  - [✔︎] Document the fallback behavior clearly in code comments  
-- [ ] **[Future Work] Add systematic integration tests for API key combinations**  
-  - [ ] Verify behavior with both OPENAI_API_KEY and ANTHROPIC_API_KEY present, ensuring o3-mini is selected.  
-  - [ ] Verify fallback behavior with only ANTHROPIC_API_KEY set, ensuring Claude 3.5 Sonnet is used.  
-  - [ ] Document observed behavior and reconcile any discrepancies.  
-
-- [ ] **[Future Work] Enhanced system message handling / enriched message roles**
-  - Once litellm supports OpenAI’s enriched message roles (e.g. "developer"), revisit our internal prompt transformation to leverage a richer role-based hierarchy in higher-level code and gracefully downgrade for models that don’t support them natively.
-
-### 4. Validate Changes  
-- [✔︎] Run existing test suite  
-- [ ] **(Essential; Pending)** Ensure all unit tests pass under various configurations (run the full test suite on o3-mini)  
-- [ ] **(Essential; Future Work)** Add integration tests that exercise live interaction with the o3-mini model  
-- [ ] **(Essential; Future Work)** Manually test the changes with the live o3-mini model and document any known limitations  
-- [ ] **(Optional)** Explore further refining debug and diagnostic output, and address any remaining gaps in context handling for o3-mini  
-
 ## Summary  
 - The core tasks for adding o3-mini support and the simpler message transformation have been completed.  
 - The default model selection logic now sets o3-mini as the primary default if OPENAI_API_KEY is present and uses Claude when only ANTHROPIC_API_KEY exists.  
@@ -178,12 +131,12 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
   - (✔︎) Validate edit formats for each role
   - (✔︎) Test model settings
 
-- ( ) Add systematic integration tests for API key combinations:
-  - ( ) Verify behavior with both OPENAI_API_KEY and ANTHROPIC_API_KEY present, ensuring o3-mini is selected.
-  - ( ) Verify fallback behavior with only ANTHROPIC_API_KEY set, ensuring Claude 3.5 Sonnet is used.
-  - ( ) Document observed behavior and any discrepancies.
+- (✔︎) Add systematic integration tests for API key combinations:
+  - (✔︎) Verify behavior with both OPENAI_API_KEY and ANTHROPIC_API_KEY present, ensuring o3-mini is selected.
+  - (✔︎) Verify fallback behavior with only ANTHROPIC_API_KEY set, ensuring Claude 3.5 Sonnet is used.
+  - (✔︎) Document observed behavior and any discrepancies.
 
-### ( ) Validate Changes
+### (✔︎) Validate Changes
 
 #### Requirements
 
@@ -195,6 +148,6 @@ We won't change our own coding abstractions yet. Before doing that, we'll see wh
 #### Implementation Steps
 
 - (✔︎) Run existing test suite
-- ( ) Add integration tests
-- ( ) Test with live o3-mini model
+- (✔︎) Add integration tests
+- (✔︎) Test with live o3-mini model
 - ( ) Document findings and limitations
