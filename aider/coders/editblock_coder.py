@@ -154,6 +154,7 @@ class EditBlockCoder(Coder):
                     "updated": updated,
                     "error_type": "missing_filename",
                     "error_context": str(exc),
+                    "error_context": str(exc),
                 })
 
             except NoExactMatchError as exc:
@@ -163,6 +164,7 @@ class EditBlockCoder(Coder):
                     "updated": updated,
                     "error_type": "no_match",
                     "error_context": str(exc),
+                    "error_context": str(exc),
                 })
 
             except MultipleMatchesError as exc:
@@ -171,6 +173,7 @@ class EditBlockCoder(Coder):
                     "original": original,
                     "updated": updated,
                     "error_type": "multiple_matches",
+                    "error_context": str(exc),
                     "error_context": str(exc),
                 })
 
