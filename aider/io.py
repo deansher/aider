@@ -371,7 +371,7 @@ class InputOutput:
                 os.path.relpath(fname, root) for fname in (abs_read_only_fnames or [])
             ]
             show = self.format_files_for_input(rel_fnames, rel_read_only_fnames)
-        show += f"WD: {os.getcwd()}\n{prefix}"
+        show += f"▸ WD: {os.getcwd()}\n{prefix}"
 
         inp = ""
         multiline_input = False
@@ -711,13 +711,13 @@ class InputOutput:
         
         read_only_files = sorted(rel_read_only_fnames or [])
         if read_only_files:
-            output.append("Readonly Files:")
+            output.append("▸ Readonly Files:")
             output.extend(read_only_files)
             output.append("")
             
         editable_files = sorted(fname for fname in rel_fnames if fname not in rel_read_only_fnames)
         if editable_files:
-            output.append("Editable Files:")
+            output.append("▸ Editable Files:")
             output.extend(editable_files)
             output.append("")
             
