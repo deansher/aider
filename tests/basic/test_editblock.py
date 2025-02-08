@@ -665,7 +665,13 @@ class TestUtils(unittest.TestCase):
         dummy.io = FakeIO()
         dummy.fence = ("```", "```")
         dummy.abs_root_path = lambda path: path
-        failed = [("dummy.py", original, updated)]
+        failed = [{
+            "path": "dummy.py",
+            "original": original,
+            "updated": updated,
+            "error_type": "no_match",
+            "error_context": "No successful do_replace result on any file."
+        }]
         passed = []
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(
@@ -688,7 +694,13 @@ class TestUtils(unittest.TestCase):
         dummy.io = FakeIO()
         dummy.fence = ("```", "```")
         dummy.abs_root_path = lambda path: path
-        failed = [("dummy.py", original, updated)]
+        failed = [{
+            "path": "dummy.py",
+            "original": original,
+            "updated": updated,
+            "error_type": "no_match",
+            "error_context": "No successful do_replace result on any file."
+        }]
         passed = [("dummy.py", original, updated)]
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(
@@ -697,6 +709,33 @@ class TestUtils(unittest.TestCase):
         )
         self.assertIn("No similar candidate snippet found.", message)
         self.assertIn("Only resend fixed versions of the", message)
+
+    def test_build_failed_edit_error_message_with_replace_exists_warning(self):
+        original = "def foo():\n    return 42\n"
+        updated = "def foo():\n    return 43\n"
+        # File content includes the updated block content to trigger the warning.
+        file_content = "def foo():\n    return 42\nadditional content\n" + updated + "\nmore content\n"
+        class FakeIO:
+            def read_text(self, fname):
+                return file_content
+        from aider.coders import editblock_coder as eb
+        dummy = eb.EditBlockCoder.__new__(eb.EditBlockCoder)
+        dummy.io = FakeIO()
+        dummy.fence = ("```", "```")
+        dummy.abs_root_path = lambda path: path
+        failed = [{
+            "path": "dummy.py",
+            "original": original,
+            "updated": updated,
+            "error_type": "no_match",
+            "error_context": "No successful do_replace result on any file."
+        }]
+        passed = []
+        message = dummy._build_failed_edit_error_message(failed, passed)
+        self.assertIn(
+            "Warning: The REPLACE block content already exists in dummy.py.\nPlease confirm if the SEARCH/REPLACE block is still needed.",
+            message
+        )
 
     def test_build_failed_edit_error_message_with_replace_exists_warning(self):
         original = "def foo():\n    return 42\n"
