@@ -189,6 +189,10 @@ def calculate_text_similarity(text1: str, text2: str) -> float:
     Returns:
         float: Similarity score between 0 and 1
     """
+    # Handle empty string cases
+    if text2 == "":
+        return 1.0 if text1 == "" else 0.0
+        
     dmp = diff_match_patch.diff_match_patch()
     diffs = dmp.diff_main(text1, text2)
     dmp.diff_cleanupSemantic(diffs)
