@@ -352,18 +352,26 @@ class InputOutput:
         commands,
         abs_read_only_fnames=None,
         edit_format=None,
+        reasoning_level_modifier=0,
     ):
         self.rule()
 
         rel_fnames = list(rel_fnames)
+        prefix = ""
+        if reasoning_level_modifier == -1:
+            prefix = "-brade> "
+        elif reasoning_level_modifier == 1:
+            prefix = "+brade> "
+        else:
+            prefix = "brade> "
+
         show = ""
         if rel_fnames:
             rel_read_only_fnames = [
                 os.path.relpath(fname, root) for fname in (abs_read_only_fnames or [])
             ]
             show = self.format_files_for_input(rel_fnames, rel_read_only_fnames)
-        show += "brade"
-        show += "> "
+        show += prefix
 
         inp = ""
         multiline_input = False

@@ -765,6 +765,7 @@ class Coder:
             self.commands,
             self.abs_read_only_fnames,
             edit_format=edit_format,
+            reasoning_level_modifier=self.reasoning_level_modifier,
         )
 
     def preproc_user_input(self, inp):
