@@ -181,6 +181,22 @@ class TestUtils(unittest.TestCase):
             '    main()\n'
         ))])
 
+    def test_do_replace_new_file(self):
+        """Test that do_replace correctly handles new file creation with empty SEARCH block."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            new_file = Path(tmpdir) / "new_file.txt"
+            content = "Hello, World!\n"
+            
+            # Test creating new file
+            result = eb.do_replace(new_file, None, "", content)
+            self.assertEqual(result, content)
+            
+            # Verify file was created with correct content
+            self.assertTrue(new_file.exists())
+            with open(new_file) as f:
+                written_content = f.read()
+            self.assertEqual(written_content, content)
+
     def test_find_original_update_blocks_validation(self):
         # Test missing filename
         edit = (

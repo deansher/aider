@@ -544,7 +544,7 @@ def do_replace(fname, content, original, updated, fence=None):
     if not fname.exists() and not original.strip():
         logger.debug(f"do_replace: creating new file {fname}")
         fname.touch()
-        content = ""
+        return updated
 
     if content is None:
         logger.debug(f"do_replace: content is None for {fname}")
@@ -554,6 +554,7 @@ def do_replace(fname, content, original, updated, fence=None):
         # append to existing file, or start a new file
         logger.debug(f"do_replace: appending to {fname}")
         new_content = content + updated
+        return new_content
     else:
         logger.debug(f"do_replace: replacing in {fname}")
         new_content = replace_most_similar_chunk(content, original, updated)
