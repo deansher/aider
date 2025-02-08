@@ -136,7 +136,7 @@ class EditBlockCoder(Coder):
                 failed.append(failed_info)
 
         if failed:
-            raise ValueError(self._build_failed_edit_error_message(failed, passed))
+            raise EditBlockError(self._build_failed_edit_error_message(failed, passed))
 
     def _build_failed_edit_error_message(self, failed, passed):
         """
