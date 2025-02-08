@@ -477,6 +477,54 @@ class TestUtils(unittest.TestCase):
             ],
         )
 
+    REALISTIC_CODE = '''def validate_user(user_id: str, permissions: dict) -> bool:
+    """Check if user has required permissions.
+    
+    Args:
+        user_id: Unique identifier for the user
+        permissions: Dict mapping permission names to boolean values
+        
+    Returns:
+        True if user has all required permissions, False otherwise
+    """
+    if not isinstance(permissions, dict):
+        raise TypeError("permissions must be a dict")
+        
+    required = {
+        "read": True,
+        "write": True,
+        "admin": False
+    }
+    
+    # Check each required permission
+    for perm_name, perm_required in required.items():
+        if perm_required and not permissions.get(perm_name, False):
+            return False
+            
+    return True
+'''
+
+    def test_exact_match_replaces_first_occurrence_only(self):
+        """Verify exact match replacement behavior.
+        
+        This test is our primary success case, validating two key requirements:
+        1. An exact match is correctly identified and replaced
+        2. Only the first occurrence is modified
+        
+        The test uses realistic Python code with type hints and docstrings to
+        represent typical content that the LLM would process.
+        """
+        whole = self.REALISTIC_CODE + "\n\n" + self.REALISTIC_CODE  # Duplicate for testing
+        part = self.REALISTIC_CODE
+        replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
+        
+        result = eb.replace_most_similar_chunk(whole, part, replace)
+        
+        # Verify first occurrence was replaced
+        self.assertIn("check_permissions", result)
+        # Verify second occurrence was not changed
+        self.assertIn("validate_user", result.split("check_permissions")[1])
+    
     def test_diff_match_patch_minor_inaccuracy(self):
         """Test that even minor differences trigger a failure when accuracy is below 95%.
         
@@ -486,16 +534,25 @@ class TestUtils(unittest.TestCase):
         3. This enforces our design decision that even minor transcription errors should fail
         """
         # Target content in file
-        whole = "def process_data(data, options):\n    return data.process(options)\n"
+        whole = self.REALISTIC_CODE
         # Search block with missing comma and misspelling
-        part = "def process_data(data options):\n    return data.procced(options)\n"
+        part = self.REALISTIC_CODE.replace("permissions, dict", "permissions dict")
         # Replacement content (not used since match should fail)
-        replace = "def process_data(data, options):\n    return data.transform(options)\n"
+        replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
         
         with self.assertRaises(ValueError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
         self.assertIn("transcription errors", str(cm.exception))
+    
+    def test_diff_match_patch_significant_inaccuracy(self):
+        """Test that a significant inaccuracy, such as a misspelling, is rejected."""
+        whole = self.REALISTIC_CODE
+        # Introduce a severe error: misspelling 'validate' as 'vallidate'
+        part = self.REALISTIC_CODE.replace("validate_user", "vallidate_user")
+        replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
+        with self.assertRaises(ValueError):
+            eb.replace_most_similar_chunk(whole, part, replace)
 
     def test_build_failed_edit_error_message_candidate_found(self):
         original = "def foo():\n    return 42\n"
