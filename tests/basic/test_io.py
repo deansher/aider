@@ -115,11 +115,11 @@ class TestInputOutput(unittest.TestCase):
         
         # Test with only editable files
         result = io.format_files_for_input(["file1.py", "file2.py"], [])
-        self.assertEqual(result, "Editable Files:\nfile1.py\nfile2.py\n")
+        self.assertEqual(result, "▸ Editable Files:\nfile1.py\nfile2.py\n")
         
         # Test with only read-only files
         result = io.format_files_for_input([], ["readonly1.py", "readonly2.py"])
-        self.assertEqual(result, "Readonly Files:\nreadonly1.py\nreadonly2.py\n")
+        self.assertEqual(result, "▸ Readonly Files:\nreadonly1.py\nreadonly2.py\n")
         
         # Test with both types of files
         result = io.format_files_for_input(
@@ -127,11 +127,11 @@ class TestInputOutput(unittest.TestCase):
             ["readonly1.py", "readonly2.py"]
         )
         expected = (
-            "Readonly Files:\n"
+            "▸ Readonly Files:\n"
             "readonly1.py\n"
             "readonly2.py\n"
             "\n"
-            "Editable Files:\n"
+            "▸ Editable Files:\n"
             "file1.py\n"
             "file2.py\n"
         )
