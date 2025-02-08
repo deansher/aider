@@ -223,7 +223,7 @@ class TestUtils(unittest.TestCase):
         )
         with self.assertRaises(ValueError) as cm:
             list(eb.find_original_update_blocks(edit))
-        self.assertIn("Expected `>>>>>>> REPLACE` or `=======`", str(cm.exception))
+        self.assertIn("Block starting at line 3 has SEARCH and DIVIDER but is missing REPLACE marker", str(cm.exception))
 
         # Test missing fence
         edit = (

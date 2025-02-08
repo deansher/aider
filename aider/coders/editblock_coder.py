@@ -289,7 +289,7 @@ class EditBlockCoder(Coder):
             # Check if REPLACE content already exists
             if content and updated in content:
                 block_message.append(
-                    r"\nWarning: The REPLACE block content already exists in {path}.\n"
+                    "\nWarning: The REPLACE block content already exists in {path}.\n"
                     "Please confirm if the SEARCH/REPLACE block is still needed."
                 )
 
