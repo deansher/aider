@@ -188,7 +188,7 @@ class TestUtils(unittest.TestCase):
             content = "Hello, World!\n"
             
             # Test creating new file
-            result = eb.do_replace(new_file, None, "", content)
+            result = eb.do_replace(new_file, None, "", content, fence=eb.DEFAULT_FENCE)
             self.assertEqual(result, content)
             
             # Verify file was created with correct content
