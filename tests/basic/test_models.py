@@ -76,7 +76,7 @@ class TestModels(unittest.TestCase):
         model = get_model_config("o3-mini")
         
         # Test default level (0)
-        self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "high"})
+        self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "medium"})
         
         # Test reduced levels
         self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "medium"})
