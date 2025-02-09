@@ -181,21 +181,32 @@ class TestUtils(unittest.TestCase):
             '    main()\n'
         ))])
 
-    def test_do_replace_new_file(self):
-        """Test that do_replace correctly handles new file creation with empty SEARCH block."""
+    def test_new_file_creation(self):
+        """Test that EditBlockCoder correctly creates new files through its normal flow."""
         with tempfile.TemporaryDirectory() as tmpdir:
+            # Set up EditBlockCoder instance
             new_file = Path(tmpdir) / "new_file.txt"
-            content = "Hello, World!\n"
+            coder = Coder.create(self.GPT35, "diff", io=InputOutput(), fnames=[])
             
-            # Test creating new file
-            result = eb.do_replace(new_file, None, "", content, fence=eb.DEFAULT_FENCE)
-            self.assertEqual(result, content)
+            # Simulate assistant response with new file block
+            coder.partial_response_content = (
+                f"{new_file}\n"
+                "```text\n"
+                "<<<<<<< SEARCH\n"
+                "=======\n"
+                "Hello, World!\n"
+                ">>>>>>> REPLACE\n"
+                "```\n"
+            )
+            coder.partial_response_function_call = dict()
+            
+            # Process the edit through normal flow
+            edits = coder.get_edits()
+            coder.apply_edits(edits)
             
             # Verify file was created with correct content
             self.assertTrue(new_file.exists())
-            with open(new_file) as f:
-                written_content = f.read()
-            self.assertEqual(written_content, content)
+            self.assertEqual(new_file.read_text(), "Hello, World!\n")
 
     def test_find_original_update_blocks_validation(self):
         # Test missing filename
