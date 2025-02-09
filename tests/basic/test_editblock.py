@@ -7,6 +7,7 @@ import diff_match_patch
 
 from aider.coders import Coder
 from aider.coders import editblock_coder as eb
+from aider.coders.editblock_coder import SearchReplaceBlockParseError
 from aider.io import InputOutput
 from aider.models import _ModelConfigImpl
 
