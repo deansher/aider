@@ -715,6 +715,8 @@ class InputOutput:
         if read_only_files:
             output.append("▸ Readonly Files:")
             output.extend(read_only_files)
+            if any(fname for fname in rel_fnames if fname not in rel_read_only_fnames):
+                output.append("")  # Extra newline before editable files
 
         editable_files = sorted(fname for fname in rel_fnames if fname not in rel_read_only_fnames)
         if editable_files:
