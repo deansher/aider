@@ -795,7 +795,7 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                         f"Found a {HEAD} on line {i}"
                     )
                 if i < 2 or not lines[i - 1].startswith(fence[0]):
-                    raise ValueError(
+                    raise SearchReplaceBlockParseError(
                         "Each SEARCH/REPLACE block must begin with a filename and a fence.\n"
                         f"""Expected "{fence[0]}" at the start of line {i - 1}, but got this:\n"""
                         f"{lines[i - 1]!r}\n"
