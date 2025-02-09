@@ -721,4 +721,7 @@ class InputOutput:
             output.append("▸ Editable Files:")
             output.extend(editable_files)
 
-        return "\n".join(output)
+        result = "\n".join(output)
+        if result:
+            result += "\n"
+        return result
