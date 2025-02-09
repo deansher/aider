@@ -119,8 +119,6 @@ from hello import hello
         ),
     ]
 
-
-
     system_reminder = """IMPORTANT REMINDER: our "fence" characters vary
 from request to request. Right now they are: {fence[0]} and {fence[1]}.
 Use these when building SEARCH/REPLACE blocks.

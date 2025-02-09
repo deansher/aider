@@ -31,7 +31,9 @@ def get_versions_supporting_python38_or_lower(package_name):
                         f"Compatible with Python 3.8 (spec: {requires_python})"
                     )
             except ValueError:
-                print(f"Invalid requires_python specifier for version {release}: {requires_python}")
+                print(
+                    f"Invalid requires_python specifier for version {release}: {requires_python}"
+                )
 
     return compatible_versions
 

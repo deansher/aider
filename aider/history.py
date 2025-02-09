@@ -22,7 +22,9 @@ class ChatSummary:
     """
 
     def __init__(
-        self, models: Optional[models.ModelConfig | list[models.ModelConfig]] = None, max_tokens: int = 1024
+        self,
+        models: Optional[models.ModelConfig | list[models.ModelConfig]] = None,
+        max_tokens: int = 1024,
     ) -> None:
         """Initialize a ChatSummary instance.
 
@@ -69,7 +71,9 @@ class ChatSummary:
             sized.append((tokens, msg))
         return sized
 
-    def summarize(self, messages: list[ChatMessage], recursion_depth: int = 0) -> list[ChatMessage]:
+    def summarize(
+        self, messages: list[ChatMessage], recursion_depth: int = 0
+    ) -> list[ChatMessage]:
         """Summarize messages as necessary to fit within token limit.
 
         This method uses a divide-and-conquer approach to summarize chat history:

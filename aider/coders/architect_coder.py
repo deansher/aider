@@ -28,6 +28,7 @@ class ArchitectPhase(Enum):
         STEP2_IMPLEMENT: The implementation phase messages
         STEP3_REVIEW: The architect's review of changes
     """
+
     STEP1_PROPOSE = "step1_propose"
     STEP2_IMPLEMENT = "step2_implement"
     STEP3_REVIEW = "step3_review"
@@ -52,7 +53,10 @@ class ArchitectExchange:
         """
         self.architect_prompts = architect_prompts
         self._phase_messages: list[tuple[ArchitectPhase, ChatMessage]] = [
-            (ArchitectPhase.STEP1_PROPOSE, {"role": "assistant", "content": architect_response})
+            (
+                ArchitectPhase.STEP1_PROPOSE,
+                {"role": "assistant", "content": architect_response},
+            )
         ]
 
     @property
@@ -395,7 +399,9 @@ class ArchitectCoder(Coder):
             self.review_changes(exchange)
         self.record_exchange(exchange)
 
-    def execute_changes(self, exchange: ArchitectExchange, is_plan_change: bool) -> None:
+    def execute_changes(
+        self, exchange: ArchitectExchange, is_plan_change: bool
+    ) -> None:
         """Run the editor coder to implement changes proposed by the architect.
 
         Args:
@@ -439,7 +445,7 @@ class ArchitectCoder(Coder):
                 extra={
                     "editor_model": editor_model_config.name,
                     "edit_format": self.main_model.editor_edit_format,
-                }
+                },
             )
             self.io.tool_error(
                 f"Editor coder failed ({editor_model_config.name}, {self.main_model.editor_edit_format}): {str(e)}"
@@ -465,25 +471,32 @@ class ArchitectCoder(Coder):
             parent_coder=self,
         )
         # Instead of mutating cur_messages, create new extended copy
-        reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_messages()
+        reviewer_coder.cur_messages = (
+            reviewer_coder.cur_messages + exchange.get_messages()
+        )
         try:
             reviewer_prompt = exchange.append_reviewer_prompt()
             if reviewer_prompt is not None:
                 reviewer_coder.run(with_message=reviewer_prompt, preproc=False)
                 self.total_cost += reviewer_coder.total_cost
-                exchange.append_reviewer_response(reviewer_coder.partial_response_content)
+                exchange.append_reviewer_response(
+                    reviewer_coder.partial_response_content
+                )
         except litellm.BadRequestError as e:
             logger.error(
                 "Review step failed with BadRequestError",
                 extra={
                     "error": str(e),
                     "message_count": len(reviewer_coder.cur_messages),
-                    "message_roles": [msg["role"] for msg in reviewer_coder.cur_messages],
+                    "message_roles": [
+                        msg["role"] for msg in reviewer_coder.cur_messages
+                    ],
                     "null_content_messages": [
-                        i for i, msg in enumerate(reviewer_coder.cur_messages)
+                        i
+                        for i, msg in enumerate(reviewer_coder.cur_messages)
                         if msg.get("content") is None
                     ],
-                }
+                },
             )
             self.io.tool_error(f"Reviewer failed with API error: {str(e)}")
             exchange.append_reviewer_response(None)
@@ -494,12 +507,12 @@ class ArchitectCoder(Coder):
 
     def record_exchange(self, exchange: ArchitectExchange) -> None:
         """Record the architect's proposal, review, and a confirmation message.
-        
+
         To maintain proper encapsulation, we retain:
         1. The architect's high-level proposal (Step 1)
         2. The architect's review of changes (Step 3)
         3. A confirmation message
-        
+
         We drop implementation details (Step 2) to avoid exposing them in future interactions.
 
         Args:
@@ -510,9 +523,13 @@ class ArchitectCoder(Coder):
         step1_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)
         step3_messages = exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)
         transition_messages = [
-            ChatMessage(role="user", content=self.architect_prompts.IMPLEMENTATION_COMPLETE),
+            ChatMessage(
+                role="user", content=self.architect_prompts.IMPLEMENTATION_COMPLETE
+            ),
             ChatMessage(role="assistant", content=self.architect_prompts.REVIEW_BEGINS),
         ]
-        self.cur_messages = self.cur_messages + step1_messages + transition_messages + step3_messages
+        self.cur_messages = (
+            self.cur_messages + step1_messages + transition_messages + step3_messages
+        )
         self.move_back_cur_messages(self.architect_prompts.changes_committed_message)
         self.partial_response_content = ""  # Clear to prevent redundant message

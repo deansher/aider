@@ -104,7 +104,9 @@ class LangfuseTracer:
         # Use environment variables as fallback
         self.public_key = config.public_key or os.getenv("LANGFUSE_PUBLIC_KEY")
         self.secret_key = config.secret_key or os.getenv("LANGFUSE_SECRET_KEY")
-        self.host = config.host or os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
+        self.host = config.host or os.getenv(
+            "LANGFUSE_HOST", "https://cloud.langfuse.com"
+        )
 
         if not self.public_key or not self.secret_key:
             raise LangfuseConfigError(
@@ -121,7 +123,9 @@ class LangfuseTracer:
                 host=self.host,
             )
         except Exception as e:
-            raise LangfuseConfigError(f"Failed to initialize Langfuse client: {e}") from e
+            raise LangfuseConfigError(
+                f"Failed to initialize Langfuse client: {e}"
+            ) from e
 
     def _default_error_handler(self, e: Exception) -> None:
         """Default error handler that logs errors.
@@ -176,7 +180,9 @@ class LangfuseTracer:
             try:
                 yield generation
             except Exception as e:
-                logger.error("Error in generation trace '%s': %s", name, str(e), exc_info=True)
+                logger.error(
+                    "Error in generation trace '%s': %s", name, str(e), exc_info=True
+                )
                 generation.end(level=ObservationLevel.ERROR, status_message=str(e))
                 raise
             finally:

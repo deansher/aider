@@ -139,7 +139,9 @@ Quote!
 
         # Set the partial response content with the updated content
         # With path/to/ prepended onto the filename
-        coder.partial_response_content = f"path/to/{sample_file}\n```\nUpdated content\n```"
+        coder.partial_response_content = (
+            f"path/to/{sample_file}\n```\nUpdated content\n```"
+        )
 
         # Call update_files method
         edited_files = coder.apply_updates()
@@ -326,7 +328,9 @@ after b
         files = [file1]
 
         # Initialize the Coder object with the mocked IO and mocked repo
-        coder = Coder.create(self.GPT35, "whole", io=InputOutput(), fnames=files, stream=False)
+        coder = Coder.create(
+            self.GPT35, "whole", io=InputOutput(), fnames=files, stream=False
+        )
 
         # no trailing newline so the response content below doesn't add ANOTHER newline
         new_content = "new\ntwo\nthree"

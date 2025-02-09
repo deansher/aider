@@ -98,15 +98,16 @@ ANTHROPIC_MODELS = [ln.strip() for ln in ANTHROPIC_MODELS.splitlines() if ln.str
 @dataclass
 class ModelSettings:
     """Declarative defaults for model configurations.
-    
+
     This class holds static configuration values that serve as defaults when creating
     ModelConfig instances. These settings are typically defined in the MODEL_SETTINGS
     list and used by get_model_config() to initialize configurations.
-    
+
     Each field here corresponds to a configuration option that can be customized in
     an active ModelConfig instance. The values here provide sensible defaults that
     can be overridden through ModelConfig parameters.
     """
+
     name: str
     edit_format: str = "whole"
     weak_model_name: Optional[str] = None
@@ -116,7 +117,9 @@ class ModelSettings:
     lazy: bool = False
     reminder: str = "user"
     examples_as_sys_msg: bool = False
-    extra_params: Optional[dict] = None  # OpenAI-compatible parameters and provider-specific parameters that litellm will pass through
+    extra_params: Optional[dict] = (
+        None  # OpenAI-compatible parameters and provider-specific parameters that litellm will pass through
+    )
     extra_headers: Optional[dict] = None  # Headers to pass to the provider via litellm
     cache_control: bool = False
     caches_by_default: bool = False
@@ -131,11 +134,12 @@ class ModelSettings:
 
 class ModelConfig:
     """Public interface for model configuration.
-    
+
     This class defines the core interface that all model configurations must provide.
     It specifies the essential properties and methods needed by the rest of the system,
     without exposing implementation details.
     """
+
     name: str
     edit_format: str
     weak_model_name: str | None
@@ -145,7 +149,9 @@ class ModelConfig:
     lazy: bool
     reminder: str | None
     examples_as_sys_msg: bool
-    extra_params: dict | None  # OpenAI-compatible parameters and provider-specific parameters
+    extra_params: (
+        dict | None
+    )  # OpenAI-compatible parameters and provider-specific parameters
     extra_headers: dict | None
     cache_control: bool
     caches_by_default: bool
@@ -156,8 +162,8 @@ class ModelConfig:
     editor_edit_format: str | None
     is_reasoning_model: bool
     max_chat_history_tokens: int
-    weak_model: 'ModelConfig'
-    editor_model: 'ModelConfig'
+    weak_model: "ModelConfig"
+    editor_model: "ModelConfig"
     info: dict
 
     @property
@@ -181,23 +187,25 @@ class ModelConfig:
         """Get dimensions of an image."""
         raise NotImplementedError
 
-    def commit_message_models(self) -> list['ModelConfig']:
+    def commit_message_models(self) -> list["ModelConfig"]:
         """Get models to use for commit messages."""
         raise NotImplementedError
 
 
 class _ModelConfigImpl(ModelConfig):
     """Internal implementation of model configuration.
-    
+
     This class provides configuration state and behavior for language models.
     It inherits default values from ModelSettings and implements the ModelConfig
     interface. The configuration remains active and mutable after creation,
     allowing runtime adjustments when needed.
     """
 
-    def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
+    def __init__(
+        self, model, weak_model=None, editor_model=None, editor_edit_format=None
+    ):
         """Initialize a model configuration instance.
-        
+
         Args:
             model: Name of the model
             weak_model: Optional weak model name or False to disable
@@ -205,7 +213,9 @@ class _ModelConfigImpl(ModelConfig):
             editor_edit_format: Optional editor edit format
         """
         logger = logging.getLogger(__name__)
-        logger.debug("ModelConfig.__init__: model=%s class=%s", model, self.__class__.__dict__)
+        logger.debug(
+            "ModelConfig.__init__: model=%s class=%s", model, self.__class__.__dict__
+        )
 
         # Initialize with default values
         self.name = model
@@ -242,7 +252,11 @@ class _ModelConfigImpl(ModelConfig):
         self.max_chat_history_tokens = max_chat_history_tokens(max_input_tokens)
 
         self.configure_model_settings(model)
-        logger.debug("ModelConfig.__init__: model=%s use_temperature=%s", model, self.use_temperature)
+        logger.debug(
+            "ModelConfig.__init__: model=%s use_temperature=%s",
+            model,
+            self.use_temperature,
+        )
 
         if weak_model is False:
             self.weak_model_name = None
@@ -472,12 +486,15 @@ class _ModelConfigImpl(ModelConfig):
 
 class _OpenAiReasoningConfigImpl(_ModelConfigImpl):
     """A ModelConfig implementation for OpenAI reasoning models.
-    
+
     This class extends _ModelConfigImpl to provide specialized behavior for models
-    that support reasoning effort levels while maintaining compatibility with the 
+    that support reasoning effort levels while maintaining compatibility with the
     ModelConfig interface.
     """
-    def __init__(self, model, weak_model=None, editor_model=None, editor_edit_format=None):
+
+    def __init__(
+        self, model, weak_model=None, editor_model=None, editor_edit_format=None
+    ):
         # Call parent class init first to set up base configuration
         super().__init__(model, weak_model, editor_model, editor_edit_format)
 
@@ -1085,9 +1102,7 @@ MODEL_SETTINGS = [
 ]
 
 
-model_info_url = (
-    "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
-)
+model_info_url = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
 
 
 def get_model_flexible(model, content):
@@ -1104,20 +1119,22 @@ def get_model_flexible(model, content):
     return dict()
 
 
-def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit_format=None):
+def get_model_config(
+    model: str, weak_model=None, editor_model=None, editor_edit_format=None
+):
     """Get a model configuration instance with optional customization.
-    
+
     This factory function bridges between ModelSettings defaults and ModelConfig instances:
     1. Finds appropriate default settings from MODEL_SETTINGS
     2. Creates appropriate ModelConfig class (base or specialized)
     3. Applies any customization parameters
-    
+
     Args:
         model: Name of the model to create
         weak_model: Optional weak model name or False to disable
-        editor_model: Optional editor model name or False to disable  
+        editor_model: Optional editor model name or False to disable
         editor_edit_format: Optional editor edit format
-        
+
     Returns:
         ModelConfig: An instance of ModelConfig or appropriate subclass, configured
                     with defaults from ModelSettings and any provided customizations
@@ -1127,8 +1144,10 @@ def get_model_config(model: str, weak_model=None, editor_model=None, editor_edit
         if model == ms.name:
             # Create instance of model_config_class if specified, otherwise use default implementation
             config_class = ms.model_config_class or _ModelConfigImpl
-            config = config_class(model, weak_model=weak_model, editor_model=editor_model)
-            
+            config = config_class(
+                model, weak_model=weak_model, editor_model=editor_model
+            )
+
             # Complete initialization
             config.get_weak_model(weak_model)
             config.get_editor_model(editor_model, editor_edit_format)
@@ -1156,7 +1175,9 @@ def get_model_info(model):
         if use_cache:
             current_time = time.time()
             cache_age = (
-                current_time - cache_file.stat().st_mtime if cache_file.exists() else float("inf")
+                current_time - cache_file.stat().st_mtime
+                if cache_file.exists()
+                else float("inf")
             )
 
             if cache_age < 60 * 60 * 24:
@@ -1207,14 +1228,17 @@ def register_models(model_settings_fnames):
             for model_settings_dict in model_settings_list:
                 model_settings = ModelSettings(**model_settings_dict)
                 existing_model_settings = next(
-                    (ms for ms in MODEL_SETTINGS if ms.name == model_settings.name), None
+                    (ms for ms in MODEL_SETTINGS if ms.name == model_settings.name),
+                    None,
                 )
 
                 if existing_model_settings:
                     MODEL_SETTINGS.remove(existing_model_settings)
                 MODEL_SETTINGS.append(model_settings)
         except Exception as e:
-            raise Exception(f"Error loading model settings from {model_settings_fname}: {e}")
+            raise Exception(
+                f"Error loading model settings from {model_settings_fname}: {e}"
+            )
         files_loaded.append(model_settings_fname)
 
     return files_loaded
@@ -1286,7 +1310,9 @@ def sanity_check_model(io, model):
 
     elif not model.keys_in_environment:
         show = True
-        io.tool_warning(f"Warning for {model}: Unknown which environment variables are required.")
+        io.tool_warning(
+            f"Warning for {model}: Unknown which environment variables are required."
+        )
 
     if not model.info:
         show = True

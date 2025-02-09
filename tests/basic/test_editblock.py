@@ -14,31 +14,31 @@ from aider.models import _ModelConfigImpl
 
 class TestUtils(unittest.TestCase):
     """Test suite for editblock_coder.py focusing on key behaviors.
-    
+
     Our testing strategy focuses on three essential aspects:
-    
+
     1. Success Cases:
        - Verify that exact matches work correctly
        - Confirm only first occurrence is replaced
        - Test with representative real-world content
-    
+
     2. Failure Cases:
        - Verify that similarity below 0.95 triggers failure
        - Test with realistic transcription errors
        - Confirm even minor differences fail
-    
+
     3. Parsing Tests:
        - Verify filename extraction and validation
        - Test edit block parsing and validation
        - Confirm proper handling of edge cases
-    
+
     Design Decision:
     We intentionally use raw diff-match-patch with a strict 0.95 similarity threshold.
     Any case that produces similarity below 0.95 (even when differences are just
     whitespace) raises a ValueError. This enforces our requirement that the LLM must
     be highly accurate in its transcription of existing code.
     """
-    
+
     def setUp(self):
         self.GPT35 = _ModelConfigImpl("gpt-3.5-turbo")
 
@@ -75,7 +75,9 @@ class TestUtils(unittest.TestCase):
 
         # Test with strippable characters
         self.assertEqual(eb.find_filename("#file1.py:", valid_fnames), "file1.py")
-        self.assertEqual(eb.find_filename("`dir/file2.py`", valid_fnames), "dir/file2.py")
+        self.assertEqual(
+            eb.find_filename("`dir/file2.py`", valid_fnames), "dir/file2.py"
+        )
 
         # Test no matches
         self.assertIsNone(eb.find_filename("nonexistent.py", valid_fnames))
@@ -83,14 +85,16 @@ class TestUtils(unittest.TestCase):
 
         # Test without valid_fnames
         self.assertEqual(eb.find_filename("newfile.py", None), "newfile.py")
-        self.assertEqual(eb.find_filename("path/to/newfile.py", None), "path/to/newfile.py")
+        self.assertEqual(
+            eb.find_filename("path/to/newfile.py", None), "path/to/newfile.py"
+        )
         self.assertIsNone(eb.find_filename("invalid", None))  # No extension
 
     def test_strip_quoted_wrapping(self):
-        input_text = (
-            "filename.ext\n```\nWe just want this content\nNot the filename and triple quotes\n```"
+        input_text = "filename.ext\n```\nWe just want this content\nNot the filename and triple quotes\n```"
+        expected_output = (
+            "We just want this content\nNot the filename and triple quotes\n"
         )
-        expected_output = "We just want this content\nNot the filename and triple quotes\n"
         result = eb.strip_quoted_wrapping(input_text, "filename.ext")
         self.assertEqual(result, expected_output)
 
@@ -125,14 +129,20 @@ class TestUtils(unittest.TestCase):
             "Hope you like it!\n"
         )
         edits = list(eb.find_original_update_blocks(edit))
-        self.assertEqual(edits, [("foo.txt", 
-            "def calculate_total(numbers):\n"
-            "    total = 0\n"
-            "    for num in numbers:\n"
-            "        total += num\n"
-            "    return total\n",
-            "def calculate_total(numbers):\n"
-            "    return sum(numbers)\n")])
+        self.assertEqual(
+            edits,
+            [
+                (
+                    "foo.txt",
+                    "def calculate_total(numbers):\n"
+                    "    total = 0\n"
+                    "    for num in numbers:\n"
+                    "        total += num\n"
+                    "    return total\n",
+                    "def calculate_total(numbers):\n" "    return sum(numbers)\n",
+                )
+            ],
+        )
 
     def test_find_original_update_blocks_shell_commands(self):
         edit = (
@@ -158,29 +168,38 @@ class TestUtils(unittest.TestCase):
 
     def test_find_original_update_blocks_new_file(self):
         edit = (
-            '\nCreate a new file:\n\n'
-            'path/to/new_module.py\n'
-            '```text\n'
-            '<<<<<<< SEARCH\n'
-            '=======\n'
-            'def main():\n'
+            "\nCreate a new file:\n\n"
+            "path/to/new_module.py\n"
+            "```text\n"
+            "<<<<<<< SEARCH\n"
+            "=======\n"
+            "def main():\n"
             '    """Print a friendly greeting."""\n'
             '    print("Welcome to the application!")\n'
-            '    return 0\n\n'
+            "    return 0\n\n"
             'if __name__ == "__main__":\n'
-            '    main()\n'
-            '>>>>>>> REPLACE\n'
-            '```\n'
+            "    main()\n"
+            ">>>>>>> REPLACE\n"
+            "```\n"
         )
         edits = list(eb.find_original_update_blocks(edit))
-        self.assertEqual(edits, [("path/to/new_module.py", "", (
-            'def main():\n'
-            '    """Print a friendly greeting."""\n'
-            '    print("Welcome to the application!")\n'
-            '    return 0\n\n'
-            'if __name__ == "__main__":\n'
-            '    main()\n'
-        ))])
+        self.assertEqual(
+            edits,
+            [
+                (
+                    "path/to/new_module.py",
+                    "",
+                    (
+                        "def main():\n"
+                        '    """Print a friendly greeting."""\n'
+                        '    print("Welcome to the application!")\n'
+                        "    return 0\n\n"
+                        'if __name__ == "__main__":\n'
+                        "    main()\n"
+                    ),
+                )
+            ],
+        )
 
     def test_new_file_creation(self):
         """Test that EditBlockCoder correctly creates new files through its normal flow."""
@@ -188,7 +207,7 @@ class TestUtils(unittest.TestCase):
             # Set up EditBlockCoder instance
             new_file = Path(tmpdir) / "new_file.txt"
             coder = Coder.create(self.GPT35, "diff", io=InputOutput(), fnames=[])
-            
+
             # Simulate assistant response with new file block
             coder.partial_response_content = (
                 f"{new_file}\n"
@@ -200,11 +219,11 @@ class TestUtils(unittest.TestCase):
                 "```\n"
             )
             coder.partial_response_function_call = dict()
-            
+
             # Process the edit through normal flow
             edits = coder.get_edits()
             coder.apply_edits(edits)
-            
+
             # Verify file was created with correct content
             self.assertTrue(new_file.exists())
             self.assertEqual(new_file.read_text(), "Hello, World!\n")
@@ -225,17 +244,13 @@ class TestUtils(unittest.TestCase):
         self.assertIn("filename", str(cm.exception))
 
         # Test unclosed block
-        edit = (
-            "foo.txt\n"
-            "```text\n"
-            "<<<<<<< SEARCH\n"
-            "Two\n"
-            "=======\n"
-            "Tooooo\n"
-        )
+        edit = "foo.txt\n" "```text\n" "<<<<<<< SEARCH\n" "Two\n" "=======\n" "Tooooo\n"
         with self.assertRaises(SearchReplaceBlockParseError) as cm:
             list(eb.find_original_update_blocks(edit))
-        self.assertIn("Block starting at line 3 has SEARCH and DIVIDER but is missing REPLACE marker", str(cm.exception))
+        self.assertIn(
+            "Block starting at line 3 has SEARCH and DIVIDER but is missing REPLACE marker",
+            str(cm.exception),
+        )
 
         # Test missing fence
         edit = (
@@ -266,14 +281,7 @@ class TestUtils(unittest.TestCase):
         self.assertIn("not preceded by SEARCH marker", str(cm.exception))
 
         # Test incomplete block
-        edit = (
-            "foo.txt\n"
-            "```text\n"
-            "<<<<<<< SEARCH\n"
-            "Two\n"
-            "=======\n"
-            "```"
-        )
+        edit = "foo.txt\n" "```text\n" "<<<<<<< SEARCH\n" "Two\n" "=======\n" "```"
         with self.assertRaises(SearchReplaceBlockParseError) as cm:
             list(eb.find_original_update_blocks(edit))
         self.assertIn("missing REPLACE marker", str(cm.exception))
@@ -300,34 +308,34 @@ class TestUtils(unittest.TestCase):
             "aider/coder.py\n"
             "```python\n"
             "<<<<<<< SEARCH\n"
-            "            self.console.print(\"[red]^C again to quit\")\n"
+            '            self.console.print("[red]^C again to quit")\n'
             "=======\n"
-            "            self.io.tool_error(\"^C again to quit\")\n"
+            '            self.io.tool_error("^C again to quit")\n'
             ">>>>>>> REPLACE\n"
             "```\n\n"
             "aider/coder.py\n"
             "```python\n"
             "<<<<<<< SEARCH\n"
-            "            self.io.tool_error(\"Malformed ORIGINAL/UPDATE blocks, retrying...\")\n"
+            '            self.io.tool_error("Malformed ORIGINAL/UPDATE blocks, retrying...")\n'
             "            self.io.tool_error(err)\n"
             "=======\n"
-            "            self.io.tool_error(\"Malformed ORIGINAL/UPDATE blocks, retrying...\")\n"
+            '            self.io.tool_error("Malformed ORIGINAL/UPDATE blocks, retrying...")\n'
             "            self.io.tool_error(str(err))\n"
             ">>>>>>> REPLACE\n\n"
             "aider/coder.py\n"
             "```python\n"
             "<<<<<<< SEARCH\n"
-            "            self.console.print(\"[red]Unable to get commit message from gpt-3.5-turbo. Use /commit to try again.\\n\")\n"
+            '            self.console.print("[red]Unable to get commit message from gpt-3.5-turbo. Use /commit to try again.\\n")\n'
             "=======\n"
-            "            self.io.tool_error(\"Unable to get commit message from gpt-3.5-turbo. Use /commit to try again.\")\n"
+            '            self.io.tool_error("Unable to get commit message from gpt-3.5-turbo. Use /commit to try again.")\n'
             ">>>>>>> REPLACE\n"
             "```\n\n"
             "aider/coder.py\n"
             "```python\n"
             "<<<<<<< SEARCH\n"
-            "            self.console.print(\"[red]Skipped commit.\")\n"
+            '            self.console.print("[red]Skipped commit.")\n'
             "=======\n"
-            "            self.io.tool_error(\"Skipped commit.\")\n"
+            '            self.io.tool_error("Skipped commit.")\n'
             ">>>>>>> REPLACE\n"
             "```"
         )
@@ -356,23 +364,24 @@ class TestUtils(unittest.TestCase):
             "<<<<<<< SEARCH\n"
             "    def test_check_for_ctags_success(self):\n"
             '        with patch("subprocess.run") as mock_run:\n'
-            '            mock_run.return_value = CompletedProcess(args=["ctags", "--version"], returncode=0, stdout=\'\'\'{' + "\n"
+            '            mock_run.return_value = CompletedProcess(args=["ctags", "--version"], returncode=0, stdout=\'\'\'{'
+            + "\n"
             '  "_type": "tag",\n'
             '  "name": "status",\n'
             '  "path": "aider/main.py",\n'
             '  "pattern": "/^    status = main()$/",\n'
             '  "kind": "variable"\n'
-            '}\'\'\')\n'
+            "}''')\n"
             "=======\n"
             "    def test_check_for_ctags_success(self):\n"
             '        with patch("subprocess.check_output") as mock_check_output:\n'
-            '            mock_check_output.return_value = \'\'\'{' + "\n"
+            "            mock_check_output.return_value = '''{" + "\n"
             '  "_type": "tag",\n'
             '  "name": "status",\n'
             '  "path": "aider/main.py",\n'
             '  "pattern": "/^    status = main()$/",\n'
             '  "kind": "variable"\n'
-            '}\'\'\'\n'
+            "}'''\n"
             ">>>>>>> REPLACE\n"
             "```\n\n"
             "These changes replace the `subprocess.run` patches with `subprocess.check_output` "
@@ -381,11 +390,11 @@ class TestUtils(unittest.TestCase):
 
     def test_exact_match_replaces_first_occurrence_only(self):
         """Verify exact match replacement behavior.
-        
+
         This test is our primary success case, validating two key requirements:
         1. An exact match is correctly identified and replaced
         2. Only the first occurrence is modified
-        
+
         The test uses realistic Python code with type hints and docstrings to
         represent typical content that the LLM would process.
         """
@@ -399,24 +408,20 @@ class TestUtils(unittest.TestCase):
         )
         part = "def validate_user(user_id: str) -> bool:\n    return check_permissions(user_id)\n"
         replace = "def validate_user(user_id: str) -> bool:\n    return is_authorized(user_id)\n"
-        
+
         result = eb.replace_most_similar_chunk(whole, part, replace)
-        
+
         # Verify first occurrence was replaced
         self.assertIn("return is_authorized(user_id)", result)
         # Verify second occurrence was not changed
         self.assertIn("return True  # Duplicate for testing", result)
-        
+
     def test_full_edit(self):
         # Create a few temporary files
         _, file1 = tempfile.mkstemp()
 
         with open(file1, "w", encoding="utf-8") as f:
-            f.write(
-                "one\n"
-                "two\n"
-                "three\n"
-            )
+            f.write("one\n" "two\n" "three\n")
 
         files = [file1]
 
@@ -444,22 +449,13 @@ class TestUtils(unittest.TestCase):
         coder.run(with_message="hi")
 
         content = Path(file1).read_text(encoding="utf-8")
-        self.assertEqual(
-            content,
-            "one\n"
-            "new\n"
-            "three\n"
-        )
+        self.assertEqual(content, "one\n" "new\n" "three\n")
 
     def test_full_edit_dry_run(self):
         # Create a few temporary files
         _, file1 = tempfile.mkstemp()
 
-        orig_content = (
-            "one\n"
-            "two\n"
-            "three\n"
-        )
+        orig_content = "one\n" "two\n" "three\n"
 
         with open(file1, "w", encoding="utf-8") as f:
             f.write(orig_content)
@@ -481,7 +477,7 @@ class TestUtils(unittest.TestCase):
                 f"{Path(file1).name}\n"
                 "<<<<<<< SEARCH\n"
                 "two\n"
-                "=======\n" 
+                "=======\n"
                 "new\n"
                 ">>>>>>> REPLACE\n\n"
             )
@@ -541,7 +537,9 @@ class TestUtils(unittest.TestCase):
             "Hope you like it!\n"
         )
 
-        edits = list(eb.find_original_update_blocks(edit, valid_fnames=["path/to/a/file1.txt"]))
+        edits = list(
+            eb.find_original_update_blocks(edit, valid_fnames=["path/to/a/file1.txt"])
+        )
         self.assertEqual(
             edits,
             [
@@ -579,12 +577,12 @@ class TestUtils(unittest.TestCase):
 
     def test_search_allows_minor_whitespace_differences(self):
         """Test that minor whitespace differences are allowed.
-        
+
         The LLM often introduces small whitespace variations when transcribing code:
         - Extra spaces around operators
         - Different line breaks in long lines
         - Slightly different indentation
-        
+
         These should still match as long as they don't change the code's meaning.
         """
         whole = self.REALISTIC_CODE
@@ -593,26 +591,22 @@ class TestUtils(unittest.TestCase):
         # - Extra newline in docstring
         # - Extra space in type hint
         part = self.REALISTIC_CODE.replace(
-            "def validate_user(user_id: str,",
-            "def validate_user (user_id:  str,"
-        ).replace(
-            "Args:\n",
-            "Args:\n\n"
-        )
+            "def validate_user(user_id: str,", "def validate_user (user_id:  str,"
+        ).replace("Args:\n", "Args:\n\n")
         replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
-        
+
         # Should succeed since differences are just whitespace
         result = eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("check_permissions", result)
-        
+
     def test_search_allows_minor_comment_differences(self):
         """Test that minor comment differences are allowed.
-        
+
         The LLM sometimes makes small errors when transcribing comments:
         - Missing periods at end
         - Different line wrapping
         - Slightly different wording
-        
+
         These should still match since they don't affect the code's behavior.
         """
         whole = self.REALISTIC_CODE
@@ -621,14 +615,14 @@ class TestUtils(unittest.TestCase):
         # - Different line wrapping
         part = self.REALISTIC_CODE.replace(
             "Returns:\n        True if user has all required permissions, False otherwise",
-            "Returns:\n        True if user has all required permissions,\n        False otherwise."
+            "Returns:\n        True if user has all required permissions,\n        False otherwise.",
         )
         replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
-        
+
         # Should succeed since differences are just in comments
         result = eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("check_permissions", result)
-        
+
     def test_search_rejects_content_changes(self):
         """Test that substantial code content SEARCH mismatches are rejected."""
         whole = self.REALISTIC_CODE
@@ -639,22 +633,22 @@ class TestUtils(unittest.TestCase):
             "    # First validate input types\n"
             "    if not isinstance(user_id, str):\n"
             "        raise TypeError('user_id must be a string')\n"
-            "\n"
+            "\n",
         )
         replace = self.REALISTIC_CODE.replace("validate_user", "check_permissions")
 
         with self.assertRaises(eb.NoExactMatchError) as cm:
             eb.replace_most_similar_chunk(whole, part, replace)
         self.assertIn("SEARCH/REPLACE block failed", str(cm.exception))
-        
+
     def test_search_rejects_ambiguous_matches(self):
         """Test that ambiguous matches are rejected.
-    
+
         If a search block could match multiple places in the file:
         - Common helper function
         - Repeated boilerplate
         - Generic error handling
-    
+
         These should be rejected since we can't be sure which match the LLM intended.
         """
         # Create content with two identical functions
@@ -669,7 +663,7 @@ class TestUtils(unittest.TestCase):
 
     def test_find_match_end(self):
         """Test the find_match_end function.
-        
+
         This test verifies that find_match_end correctly identifies where a match ends
         in various scenarios including:
         - Basic exact matches
@@ -678,55 +672,51 @@ class TestUtils(unittest.TestCase):
         - Edge cases like empty strings
         """
         dmp = diff_match_patch.diff_match_patch()
-        
+
         # Test basic exact match
         whole = "prefix abc suffix"
         match_index = 7  # start of "abc"
         original = "abc"
         self.assertEqual(
-            eb.find_match_end(dmp, whole, match_index, original),
-            10  # end of "abc"
+            eb.find_match_end(dmp, whole, match_index, original), 10  # end of "abc"
         )
-        
+
         # Test match with deletion right after
         whole = "prefix abcsuffix"  # missing space
         match_index = 7
         original = "abc "  # note trailing space
         self.assertEqual(
             eb.find_match_end(dmp, whole, match_index, original),
-            10  # still end of "abc"
+            10,  # still end of "abc"
         )
-        
+
         # Test match with insertion right after
         whole = "prefix abc  suffix"  # extra space
         match_index = 7
         original = "abc"
         self.assertEqual(
-            eb.find_match_end(dmp, whole, match_index, original),
-            10  # end of "abc"
+            eb.find_match_end(dmp, whole, match_index, original), 10  # end of "abc"
         )
-        
+
         # Test match at start
         whole = "abc suffix"
         match_index = 0
         original = "abc"
         self.assertEqual(
-            eb.find_match_end(dmp, whole, match_index, original),
-            3  # length of "abc"
+            eb.find_match_end(dmp, whole, match_index, original), 3  # length of "abc"
         )
-        
+
         # Test match at end
         whole = "prefix abc"
         match_index = 7
         original = "abc"
         self.assertEqual(
-            eb.find_match_end(dmp, whole, match_index, original),
-            10  # end of string
+            eb.find_match_end(dmp, whole, match_index, original), 10  # end of string
         )
 
     def test_build_failed_edit_error_message_candidate_found(self):
         """Test error message generation when a similar candidate is found.
-        
+
         This test verifies that when a SEARCH block fails to match exactly but a similar
         candidate is found, the error message includes:
         1. The correct error type header
@@ -737,26 +727,30 @@ class TestUtils(unittest.TestCase):
         updated = "def foo():\n    return 43\n"
         # File content is almost the same as the original (extra space before 42) to trigger a candidate match.
         file_content = "def foo():\n    return  42\n"
+
         class FakeIO:
             def read_text(self, fname):
                 return file_content
+
         from aider.coders import editblock_coder as eb
+
         dummy = eb.EditBlockCoder.__new__(eb.EditBlockCoder)
         dummy.io = FakeIO()
         dummy.fence = ("```", "```")
         dummy.abs_root_path = lambda path: path
-        failed = [{
-            "path": "dummy.py",
-            "original": original,
-            "updated": updated,
-            "error_type": "no_match",
-            "error_context": "No successful do_replace result on any file."
-        }]
+        failed = [
+            {
+                "path": "dummy.py",
+                "original": original,
+                "updated": updated,
+                "error_type": "no_match",
+                "error_context": "No successful do_replace result on any file.",
+            }
+        ]
         passed = []
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(
-            "## SearchReplaceNo_Match: The no_match error occurred in dummy.py",
-            message
+            "## SearchReplaceNo_Match: The no_match error occurred in dummy.py", message
         )
         self.assertIn("Detected similarity:", message)
         self.assertIn("Unified diff between expected and candidate snippet:", message)
@@ -764,7 +758,7 @@ class TestUtils(unittest.TestCase):
 
     def test_build_failed_edit_error_message_no_candidate(self):
         """Test error message generation when no similar candidate is found.
-        
+
         This test verifies that when a SEARCH block fails to match and no similar
         content is found, the error message:
         1. Uses the correct error type header
@@ -774,33 +768,37 @@ class TestUtils(unittest.TestCase):
         original = "def foo():\n    return 42\n"
         updated = "def foo():\n    return 43\n"
         file_content = "completely different content with no similar candidate\n"
+
         class FakeIO:
             def read_text(self, fname):
                 return file_content
+
         from aider.coders import editblock_coder as eb
+
         dummy = eb.EditBlockCoder.__new__(eb.EditBlockCoder)
         dummy.io = FakeIO()
         dummy.fence = ("```", "```")
         dummy.abs_root_path = lambda path: path
-        failed = [{
-            "path": "dummy.py",
-            "original": original,
-            "updated": updated,
-            "error_type": "no_match",
-            "error_context": "No successful do_replace result on any file."
-        }]
+        failed = [
+            {
+                "path": "dummy.py",
+                "original": original,
+                "updated": updated,
+                "error_type": "no_match",
+                "error_context": "No successful do_replace result on any file.",
+            }
+        ]
         passed = [("dummy.py", original, updated)]
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(
-            "## SearchReplaceNo_Match: The no_match error occurred in dummy.py",
-            message
+            "## SearchReplaceNo_Match: The no_match error occurred in dummy.py", message
         )
         self.assertIn("No similar candidate snippet found.", message)
         self.assertIn("Only resend fixed versions of the", message)
 
     def test_build_failed_edit_error_message_with_replace_exists_warning(self):
         """Test error message generation when REPLACE content already exists.
-        
+
         This test verifies that when the REPLACE block content already exists in the
         target file, the error message includes:
         1. The appropriate warning about duplicate content
@@ -829,33 +827,43 @@ class TestUtils(unittest.TestCase):
         transform_field(key, value)
 """
         # File content includes the updated block content to trigger the warning
-        file_content = "def foo():\n    return 42\nadditional content\n" + updated + "\nmore content\n"
+        file_content = (
+            "def foo():\n    return 42\nadditional content\n"
+            + updated
+            + "\nmore content\n"
+        )
+
         class FakeIO:
             def read_text(self, fname):
                 return file_content
+
         from aider.coders import editblock_coder as eb
+
         dummy = eb.EditBlockCoder.__new__(eb.EditBlockCoder)
         dummy.io = FakeIO()
         dummy.fence = ("```", "```")
         dummy.abs_root_path = lambda path: path
-        failed = [{
-            "path": "dummy.py",
-            "original": original,
-            "updated": updated,
-            "error_type": "no_match",
-            "error_context": "No successful do_replace result on any file."
-        }]
+        failed = [
+            {
+                "path": "dummy.py",
+                "original": original,
+                "updated": updated,
+                "error_type": "no_match",
+                "error_context": "No successful do_replace result on any file.",
+            }
+        ]
         passed = []
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(
             "Warning: The REPLACE block content already exists in dummy.py.\nPlease confirm if the SEARCH/REPLACE block is still needed.",
-            message
+            message,
         )
-        
+
     def test_calculate_text_similarity_exact_match(self):
         """Test that identical texts have similarity 1.0."""
         text = "def validate_user(user_id: str) -> bool:\n    return check_permissions(user_id)\n"
         from aider.coders import editblock_coder as eb
+
         self.assertEqual(eb.calculate_text_similarity(text, text), 1.0)
 
     def test_calculate_text_similarity_whitespace_variations(self):
@@ -863,6 +871,7 @@ class TestUtils(unittest.TestCase):
         text1 = "def validate_user(user_id: str) -> bool:\n    return check_permissions(user_id)\n"
         text2 = "def validate_user (user_id:  str) -> bool:\n    return check_permissions(user_id)\n"
         from aider.coders import editblock_coder as eb
+
         self.assertGreater(eb.calculate_text_similarity(text1, text2), 0.95)
 
     def test_calculate_text_similarity_minor_differences(self):
@@ -870,6 +879,7 @@ class TestUtils(unittest.TestCase):
         text1 = "def process_data(data: dict) -> None:\n    # Process the input data\n    result = transform(data)\n"
         text2 = "def process_data(data: dict) -> None:\n    # Process input data\n    result = transform(data)\n"
         from aider.coders import editblock_coder as eb
+
         self.assertGreater(eb.calculate_text_similarity(text1, text2), 0.95)
 
     def test_calculate_text_similarity_major_differences(self):
@@ -877,11 +887,13 @@ class TestUtils(unittest.TestCase):
         text1 = "def process_data(data: dict) -> None:\n    result = transform(data)\n"
         text2 = "def validate_input(data: dict) -> bool:\n    return is_valid(data)\n"
         from aider.coders import editblock_coder as eb
+
         self.assertLess(eb.calculate_text_similarity(text1, text2), 0.5)
 
     def test_calculate_text_similarity_edge_cases(self):
         """Test edge cases like empty strings."""
         from aider.coders import editblock_coder as eb
+
         # Empty strings
         self.assertEqual(eb.calculate_text_similarity("", ""), 1.0)
         self.assertEqual(eb.calculate_text_similarity("some text", ""), 0.0)
@@ -889,6 +901,7 @@ class TestUtils(unittest.TestCase):
         # Single character differences
         self.assertGreater(eb.calculate_text_similarity("a", "b"), 0.0)
         self.assertEqual(eb.calculate_text_similarity("a", "a"), 1.0)
-        
+
+
 if __name__ == "__main__":
     unittest.main()

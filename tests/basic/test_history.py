@@ -57,7 +57,9 @@ class TestChatSummary(TestCase):
 
     def test_summarize(self):
         messages = [{"role": "user", "content": f"Message {i}"} for i in range(10)]
-        messages.extend([{"role": "assistant", "content": f"Response {i}"} for i in range(10)])
+        messages.extend(
+            [{"role": "assistant", "content": f"Response {i}"} for i in range(10)]
+        )
 
         with mock.patch.object(
             self.chat_summary,

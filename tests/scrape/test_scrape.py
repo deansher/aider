@@ -21,7 +21,9 @@ class TestScrape(unittest.TestCase):
         scraper_verify = Scraper(
             print_error=MagicMock(), playwright_available=True, verify_ssl=True
         )
-        result_verify = scrape_with_retries(scraper_verify, "https://self-signed.badssl.com")
+        result_verify = scrape_with_retries(
+            scraper_verify, "https://self-signed.badssl.com"
+        )
         self.assertIsNone(result_verify)
         scraper_verify.print_error.assert_called()
 
@@ -29,7 +31,9 @@ class TestScrape(unittest.TestCase):
         scraper_no_verify = Scraper(
             print_error=MagicMock(), playwright_available=True, verify_ssl=False
         )
-        result_no_verify = scrape_with_retries(scraper_no_verify, "https://self-signed.badssl.com")
+        result_no_verify = scrape_with_retries(
+            scraper_no_verify, "https://self-signed.badssl.com"
+        )
         self.assertIsNotNone(result_no_verify)
         self.assertIn("self-signed", result_no_verify)
         scraper_no_verify.print_error.assert_not_called()
@@ -141,7 +145,9 @@ class TestScrape(unittest.TestCase):
 
         # Mock the scrape_with_playwright method
         plain_text = "This is plain text content."
-        scraper.scrape_with_playwright = MagicMock(return_value=(plain_text, "text/plain"))
+        scraper.scrape_with_playwright = MagicMock(
+            return_value=(plain_text, "text/plain")
+        )
 
         # Call the scrape method
         result = scraper.scrape("https://example.com")
@@ -154,8 +160,12 @@ class TestScrape(unittest.TestCase):
         scraper = Scraper(print_error=MagicMock(), playwright_available=True)
 
         # Mock the scrape_with_playwright method
-        html_content = "<html><body><h1>Test</h1><p>This is HTML content.</p></body></html>"
-        scraper.scrape_with_playwright = MagicMock(return_value=(html_content, "text/html"))
+        html_content = (
+            "<html><body><h1>Test</h1><p>This is HTML content.</p></body></html>"
+        )
+        scraper.scrape_with_playwright = MagicMock(
+            return_value=(html_content, "text/html")
+        )
 
         # Mock the html_to_markdown method
         expected_markdown = "# Test\n\nThis is HTML content."

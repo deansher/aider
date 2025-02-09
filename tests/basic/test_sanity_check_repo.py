@@ -124,7 +124,9 @@ def test_git_index_version_greater_than_2(create_repo, mock_io):
     mock_io.tool_output.assert_any_call(
         "You may be able to convert your repo: git update-index --index-version=2"
     )
-    mock_io.tool_output.assert_any_call("Or run brade --no-git to proceed without using git.")
+    mock_io.tool_output.assert_any_call(
+        "Or run brade --no-git to proceed without using git."
+    )
     mock_io.tool_output.assert_any_call("https://github.com/Aider-AI/aider/issues/211")
 
 
@@ -143,7 +145,9 @@ def test_bare_repository(create_repo, mock_io, tmp_path):
     assert result is False
 
     # Assert that the appropriate error message was logged
-    mock_io.tool_error.assert_called_with("The git repo does not seem to have a working tree?")
+    mock_io.tool_error.assert_called_with(
+        "The git repo does not seem to have a working tree?"
+    )
     mock_io.tool_output.assert_not_called()
 
 
@@ -163,7 +167,9 @@ def test_sanity_check_repo_with_corrupt_repo(create_repo, mock_io):
     assert result is False
 
     # Assert that the appropriate error messages were logged
-    mock_io.tool_error.assert_called_with("Unable to read git repository, it may be corrupt?")
+    mock_io.tool_error.assert_called_with(
+        "Unable to read git repository, it may be corrupt?"
+    )
     mock_io.tool_output.assert_called_with(str(git_error))
 
 

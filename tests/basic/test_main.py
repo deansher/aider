@@ -114,7 +114,11 @@ class TestMain(TestCase):
 
         Path(".aider.conf.yml").write_text("auto-commits: false\n")
         with patch("aider.coders.Coder.create") as MockCoder:
-            main(["--yes", "--no-show-model-warnings"], input=DummyInput(), output=DummyOutput())
+            main(
+                ["--yes", "--no-show-model-warnings"],
+                input=DummyInput(),
+                output=DummyOutput(),
+            )
             _, kwargs = MockCoder.call_args
             assert kwargs["auto_commits"] is False
 
@@ -177,7 +181,10 @@ class TestMain(TestCase):
         with patch("aider.coders.Coder.create") as MockCoder:
             # --yes will just ok the git repo without blocking on input
             # following calls to main will see the new repo already
-            main(["--no-auto-commits", "--yes", "--no-show-model-warnings"], input=DummyInput())
+            main(
+                ["--no-auto-commits", "--yes", "--no-show-model-warnings"],
+                input=DummyInput(),
+            )
             _, kwargs = MockCoder.call_args
             assert kwargs["auto_commits"] is False
 
@@ -227,7 +234,15 @@ class TestMain(TestCase):
             named_env.write_text("A=named")
 
             with patch("pathlib.Path.home", return_value=fake_home):
-                main(["--yes", "--exit", "--env-file", str(named_env), "--no-show-model-warnings"])
+                main(
+                    [
+                        "--yes",
+                        "--exit",
+                        "--env-file",
+                        str(named_env),
+                        "--no-show-model-warnings",
+                    ]
+                )
 
             self.assertEqual(os.environ["A"], "named")
             self.assertEqual(os.environ["B"], "cwd")
@@ -244,11 +259,18 @@ class TestMain(TestCase):
         with patch("aider.coders.Coder.create") as MockCoder:
             MockCoder.return_value.run = MagicMock()
             main(
-                ["--yes", "--message-file", message_file_path, "--no-show-model-warnings"],
+                [
+                    "--yes",
+                    "--message-file",
+                    message_file_path,
+                    "--no-show-model-warnings",
+                ],
                 input=DummyInput(),
                 output=DummyOutput(),
             )
-            MockCoder.return_value.run.assert_called_once_with(with_message=message_file_content)
+            MockCoder.return_value.run.assert_called_once_with(
+                with_message=message_file_content
+            )
 
         os.remove(message_file_path)
 
@@ -265,7 +287,15 @@ class TestMain(TestCase):
 
                     MockSend.side_effect = side_effect
 
-                    main(["--yes", fname, "--encoding", "iso-8859-15", "--no-show-model-warnings"])
+                    main(
+                        [
+                            "--yes",
+                            fname,
+                            "--encoding",
+                            "iso-8859-15",
+                            "--no-show-model-warnings",
+                        ]
+                    )
 
     def test_main_exit_calls_version_check(self):
         with GitTemporaryDirectory():
@@ -389,7 +419,11 @@ class TestMain(TestCase):
     def test_false_vals_in_env_file(self):
         self.create_env_file(".env", "AIDER_SHOW_DIFFS=off")
         with patch("aider.coders.Coder.create") as MockCoder:
-            main(["--no-git", "--no-show-model-warnings"], input=DummyInput(), output=DummyOutput())
+            main(
+                ["--no-git", "--no-show-model-warnings"],
+                input=DummyInput(),
+                output=DummyOutput(),
+            )
             MockCoder.assert_called_once()
             _, kwargs = MockCoder.call_args
             self.assertEqual(kwargs["show_diffs"], False)
@@ -397,7 +431,11 @@ class TestMain(TestCase):
     def test_true_vals_in_env_file(self):
         self.create_env_file(".env", "AIDER_SHOW_DIFFS=on")
         with patch("aider.coders.Coder.create") as MockCoder:
-            main(["--no-git", "--no-show-model-warnings"], input=DummyInput(), output=DummyOutput())
+            main(
+                ["--no-git", "--no-show-model-warnings"],
+                input=DummyInput(),
+                output=DummyOutput(),
+            )
             MockCoder.assert_called_once()
             _, kwargs = MockCoder.call_args
             self.assertEqual(kwargs["show_diffs"], True)
@@ -433,7 +471,9 @@ class TestMain(TestCase):
                 MockLinter.assert_called_once()
                 called_arg = MockLinter.call_args[0][0]
                 self.assertTrue(called_arg.endswith("dirty_file.py"))
-                self.assertFalse(called_arg.endswith(f"subdir{os.path.sep}dirty_file.py"))
+                self.assertFalse(
+                    called_arg.endswith(f"subdir{os.path.sep}dirty_file.py")
+                )
 
     def test_verbose_mode_lists_env_vars(self):
         self.create_env_file(".env", "AIDER_DARK_MODE=on")
@@ -485,7 +525,13 @@ class TestMain(TestCase):
             ):
                 # Test loading from specified config file
                 main(
-                    ["--yes", "--exit", "--config", str(named_config), "--no-show-model-warnings"],
+                    [
+                        "--yes",
+                        "--exit",
+                        "--config",
+                        str(named_config),
+                        "--no-show-model-warnings",
+                    ],
                     input=DummyInput(),
                     output=DummyOutput(),
                 )
@@ -501,7 +547,9 @@ class TestMain(TestCase):
                 )
                 _, kwargs = MockCoder.call_args
                 print("kwargs:", kwargs)  # Add this line for debugging
-                self.assertIn("main_model", kwargs, "main_model key not found in kwargs")
+                self.assertIn(
+                    "main_model", kwargs, "main_model key not found in kwargs"
+                )
                 self.assertEqual(kwargs["main_model"].name, "gpt-4-32k")
                 self.assertEqual(kwargs["map_tokens"], 4096)
 
@@ -587,7 +635,13 @@ class TestMain(TestCase):
         try:
             with GitTemporaryDirectory():
                 coder = main(
-                    ["--read", external_file_path, "--exit", "--yes", "--no-show-model-warnings"],
+                    [
+                        "--read",
+                        external_file_path,
+                        "--exit",
+                        "--yes",
+                        "--no-show-model-warnings",
+                    ],
                     input=DummyInput(),
                     output=DummyOutput(),
                     return_coder=True,
@@ -631,7 +685,13 @@ class TestMain(TestCase):
                 MockRepoMap.return_value = mock_repo_map
 
                 main(
-                    ["--sonnet", "--cache-prompts", "--exit", "--yes", "--no-show-model-warnings"],
+                    [
+                        "--sonnet",
+                        "--cache-prompts",
+                        "--exit",
+                        "--yes",
+                        "--no-show-model-warnings",
+                    ],
                     input=DummyInput(),
                     output=DummyOutput(),
                 )
@@ -645,7 +705,13 @@ class TestMain(TestCase):
     def test_sonnet_and_cache_prompts_options(self):
         with GitTemporaryDirectory():
             coder = main(
-                ["--sonnet", "--cache-prompts", "--exit", "--yes", "--no-show-model-warnings"],
+                [
+                    "--sonnet",
+                    "--cache-prompts",
+                    "--exit",
+                    "--yes",
+                    "--no-show-model-warnings",
+                ],
                 input=DummyInput(),
                 output=DummyOutput(),
                 return_coder=True,
@@ -656,12 +722,14 @@ class TestMain(TestCase):
     def test_default_model_selection_both_keys(self):
         """Test that o3-mini is selected when both API keys are present."""
         with GitTemporaryDirectory():
-            with patch.dict('os.environ', {
-                'OPENAI_API_KEY': 'test_key',
-                'ANTHROPIC_API_KEY': 'test_key'
-            }, clear=True):
+            with patch.dict(
+                "os.environ",
+                {"OPENAI_API_KEY": "test_key", "ANTHROPIC_API_KEY": "test_key"},
+                clear=True,
+            ):
                 # First verify args.model starts as None
                 from aider.main import get_parser
+
                 parser = get_parser([], None)
                 args = parser.parse_args([])
                 self.assertIsNone(args.model)
@@ -680,11 +748,14 @@ class TestMain(TestCase):
             # Configure logging to show debug messages
             logging.basicConfig(level=logging.DEBUG)
 
-            with patch('pathlib.Path.home', return_value=Path(self.homedir_obj.name)), \
-                 patch.dict('os.environ', {
-                    'OPENAI_API_KEY': '',
-                    'ANTHROPIC_API_KEY': 'test_key'
-                }, clear=True):
+            with (
+                patch("pathlib.Path.home", return_value=Path(self.homedir_obj.name)),
+                patch.dict(
+                    "os.environ",
+                    {"OPENAI_API_KEY": "", "ANTHROPIC_API_KEY": "test_key"},
+                    clear=True,
+                ),
+            ):
                 coder = main(
                     ["--exit", "--yes", "--no-show-model-warnings"],
                     input=DummyInput(),
@@ -696,7 +767,13 @@ class TestMain(TestCase):
     def test_4o_and_cache_options(self):
         with GitTemporaryDirectory():
             coder = main(
-                ["--4o", "--cache-prompts", "--exit", "--yes", "--no-show-model-warnings"],
+                [
+                    "--4o",
+                    "--cache-prompts",
+                    "--exit",
+                    "--yes",
+                    "--no-show-model-warnings",
+                ],
                 input=DummyInput(),
                 output=DummyOutput(),
                 return_coder=True,
@@ -746,7 +823,12 @@ class TestMain(TestCase):
     def test_suggest_shell_commands_disabled(self):
         with GitTemporaryDirectory():
             coder = main(
-                ["--no-suggest-shell-commands", "--exit", "--yes", "--no-show-model-warnings"],
+                [
+                    "--no-suggest-shell-commands",
+                    "--exit",
+                    "--yes",
+                    "--no-show-model-warnings",
+                ],
                 input=DummyInput(),
                 output=DummyOutput(),
                 return_coder=True,
@@ -756,7 +838,12 @@ class TestMain(TestCase):
     def test_suggest_shell_commands_enabled(self):
         with GitTemporaryDirectory():
             coder = main(
-                ["--suggest-shell-commands", "--exit", "--yes", "--no-show-model-warnings"],
+                [
+                    "--suggest-shell-commands",
+                    "--exit",
+                    "--yes",
+                    "--no-show-model-warnings",
+                ],
                 input=DummyInput(),
                 output=DummyOutput(),
                 return_coder=True,
@@ -766,7 +853,13 @@ class TestMain(TestCase):
     def test_chat_language_spanish(self):
         with GitTemporaryDirectory():
             coder = main(
-                ["--chat-language", "Spanish", "--exit", "--yes", "--no-show-model-warnings"],
+                [
+                    "--chat-language",
+                    "Spanish",
+                    "--exit",
+                    "--yes",
+                    "--no-show-model-warnings",
+                ],
                 input=DummyInput(),
                 output=DummyOutput(),
                 return_coder=True,
@@ -776,7 +869,9 @@ class TestMain(TestCase):
 
     @patch("git.Repo.init")
     def test_main_exit_with_git_command_not_found(self, mock_git_init):
-        mock_git_init.side_effect = git.exc.GitCommandNotFound("git", "Command 'git' not found")
+        mock_git_init.side_effect = git.exc.GitCommandNotFound(
+            "git", "Command 'git' not found"
+        )
 
         try:
             result = main(
@@ -788,4 +883,6 @@ class TestMain(TestCase):
             self.fail(f"main() raised an unexpected exception: {e}")
 
         self.assertIsNone(result, "main() should return None when called with --exit")
+
+
 import pytest

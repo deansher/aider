@@ -41,7 +41,9 @@ def plot_timing(df):
             zorder=zorder + 1,
             **edge,
         )
-        ax.bar_label(rects, padding=4, labels=[f"{v:.1f}s" for v in grouped[fmt]], size=6)
+        ax.bar_label(
+            rects, padding=4, labels=[f"{v:.1f}s" for v in grouped[fmt]], size=6
+        )
 
     ax.set_xticks([p + 0.5 * width for p in pos])
     ax.set_xticklabels(models)
@@ -52,7 +54,9 @@ def plot_timing(df):
         title="Edit Format",
         loc="upper left",
     )
-    ax.set_ylim(top=max(grouped.max()) * 1.1)  # Set y-axis limit to 10% more than the max value
+    ax.set_ylim(
+        top=max(grouped.max()) * 1.1
+    )  # Set y-axis limit to 10% more than the max value
 
     plt.tight_layout()
     plt.savefig("tmp_timing.svg")
@@ -109,7 +113,9 @@ def plot_outcomes(df, repeats, repeat_hi, repeat_lo, repeat_avg):
                 **edge,
             )
             if zorder == 2:
-                ax.bar_label(rects, padding=4, labels=[f"{v:.0f}%" for v in df[fmt]], size=6)
+                ax.bar_label(
+                    rects, padding=4, labels=[f"{v:.0f}%" for v in df[fmt]], size=6
+                )
 
     if len(repeats):
         ax.errorbar(
@@ -247,7 +253,9 @@ def plot_outcomes_claude(df):
             **edge,
         )
         if zorder == 2:
-            ax.bar_label(rects, padding=4, labels=[f"{v:.0f}%" for v in df.iloc[:, 1]], size=6)
+            ax.bar_label(
+                rects, padding=4, labels=[f"{v:.0f}%" for v in df.iloc[:, 1]], size=6
+            )
 
     ax.set_xticks([p + 0.5 * width for p in pos])
 
@@ -378,7 +386,9 @@ def plot_refactoring(df):
             )
 
             if zorder == 2:
-                ax.bar_label(rects, padding=4, labels=[f"{v:.0f}%" for v in df[fmt]], size=6)
+                ax.bar_label(
+                    rects, padding=4, labels=[f"{v:.0f}%" for v in df[fmt]], size=6
+                )
 
     ax.set_xticks([p + 0 * width for p in pos])
 

@@ -80,8 +80,9 @@ ENVIRONMENT_CONTEXT_SECTION = (
 TASK_INSTRUCTIONS_SECTION = "<brade:task_instructions>...</brade:task_instructions>"
 TASK_EXAMPLES_SECTION = "<brade:task_examples>...</brade:task_examples>"
 
-BRADE_PERSONA_PROMPT = BRADE_PERSONA_PROMPT = \
-    f"""Brade, you are a skilled AI software engineer collaborating with me,
+BRADE_PERSONA_PROMPT = (
+    BRADE_PERSONA_PROMPT
+) = f"""Brade, you are a skilled AI software engineer collaborating with me,
 a human programmer, in the Brade terminal application. When speaking to me, your partner, please 
 write in well-formatted markdown. (Important: use ASCII characters for markdown syntax
 such as bullets, instead of typographic characters.)
@@ -400,9 +401,7 @@ def format_brade_messages(
     project_parts.append(wrap_brade_xml("readonly_files", files_xml))
     files_xml = format_file_section(editable_text_files)
     project_parts.append(wrap_brade_xml("editable_files", files_xml))
-    project_context = wrap_brade_xml(
-        "project_context", "".join(project_parts)
-    )
+    project_context = wrap_brade_xml("project_context", "".join(project_parts))
 
     # Build environment context
     environment_context = wrap_brade_xml(

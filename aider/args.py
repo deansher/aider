@@ -25,6 +25,7 @@ DEFAULT_MODEL_HELP = (
     "o3-mini otherwise"
 )
 
+
 def get_parser(default_config_files, git_root):
     parser = configargparse.ArgumentParser(
         description="aider is AI pair programming in your terminal",
@@ -53,7 +54,7 @@ def get_parser(default_config_files, git_root):
         "--model",
         metavar="MODEL",
         help="Specify the model to use for the main chat. If not specified, defaults to: "
-             + DEFAULT_MODEL_HELP,
+        + DEFAULT_MODEL_HELP,
     )
     opus_model = "claude-3-opus-20240229"
     group.add_argument(
@@ -296,10 +297,14 @@ def get_parser(default_config_files, git_root):
     ##########
     group = parser.add_argument_group("History Files")
     default_input_history_file = (
-        os.path.join(git_root, ".aider.input.history") if git_root else ".aider.input.history"
+        os.path.join(git_root, ".aider.input.history")
+        if git_root
+        else ".aider.input.history"
     )
     default_chat_history_file = (
-        os.path.join(git_root, ".aider.chat.history.md") if git_root else ".aider.chat.history.md"
+        os.path.join(git_root, ".aider.chat.history.md")
+        if git_root
+        else ".aider.chat.history.md"
     )
     group.add_argument(
         "--input-history-file",

@@ -13,7 +13,9 @@ def setup_file_logging():
     # The handler can handle debug logs if they're passed to it
     file_handler.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     file_handler.setFormatter(formatter)
 
     # Set the root logger to INFO level so it blocks debug messages by default

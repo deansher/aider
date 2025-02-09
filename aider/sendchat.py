@@ -58,7 +58,9 @@ def transform_messages_for_anthropic(messages):
             if isinstance(content, list):
                 # For messages containing images, extract text portions
                 text_parts = [
-                    item["text"] for item in content if isinstance(item, dict) and "text" in item
+                    item["text"]
+                    for item in content
+                    if isinstance(item, dict) and "text" in item
                 ]
                 combined_content.extend(text_parts)
             else:
@@ -83,7 +85,9 @@ def transform_messages_for_anthropic(messages):
         if isinstance(msg["content"], list):
             # For messages containing images, extract and join text portions
             text_parts = [
-                item["text"] for item in msg["content"] if isinstance(item, dict) and "text" in item
+                item["text"]
+                for item in msg["content"]
+                if isinstance(item, dict) and "text" in item
             ]
             msg = dict(msg)  # Make a copy to avoid modifying the original
             msg["content"] = " ".join(text_parts) if text_parts else ""
@@ -96,7 +100,7 @@ def transform_messages_for_anthropic(messages):
 
 def transform_messages_for_o3(messages):
     """Transform message sequences for o3 models.
-    
+
     Simple conversion of system messages to user messages, preserving order.
     No special handling or message combining needed.
     """
@@ -160,8 +164,13 @@ def send_completion(
     purpose="send-completion",
 ):
     logger.debug("send_completion input messages: %s", messages)
-    logger.debug("send_completion input kwargs: model=%s temperature=%s reasoning_level=%s extra_params=%s",
-                 model_config.name, temperature, reasoning_level, extra_params)
+    logger.debug(
+        "send_completion input kwargs: model=%s temperature=%s reasoning_level=%s extra_params=%s",
+        model_config.name,
+        temperature,
+        reasoning_level,
+        extra_params,
+    )
     """
     Send a completion request to the language model and handle the response.
 
@@ -292,9 +301,7 @@ def send_completion(
 
 @observe(as_type="generation", capture_output=False)
 def _send_completion_to_litellm(
-    model_config: ModelConfig,
-    purpose="(unlabeled)",
-    **litellm_kwargs
+    model_config: ModelConfig, purpose="(unlabeled)", **litellm_kwargs
 ):
     """
     Send a completion request to the language model and handle the response.
@@ -330,7 +337,7 @@ def _send_completion_to_litellm(
         "input": litellm_kwargs["messages"],
         "metadata": {
             "parameters": litellm_kwargs,
-        }
+        },
     }
     langfuse_context.update_current_observation(**langfuse_params)
 
@@ -364,7 +371,9 @@ def _send_completion_to_litellm(
         # Add cost information if available
         if hasattr(res.usage, "total_cost"):
             usage["total_cost"] = res.usage.total_cost
-        elif hasattr(res.usage, "completion_cost") and hasattr(res.usage, "prompt_cost"):
+        elif hasattr(res.usage, "completion_cost") and hasattr(
+            res.usage, "prompt_cost"
+        ):
             usage["input_cost"] = res.usage.prompt_cost
             usage["output_cost"] = res.usage.completion_cost
 
@@ -373,7 +382,9 @@ def _send_completion_to_litellm(
     else:
         # Handle case where response has text but no choices
         if not hasattr(res, "choices"):
-            error_message = f"Response from {model_config.name} has no choices attribute"
+            error_message = (
+                f"Response from {model_config.name} has no choices attribute"
+            )
             logger.error(error_message + "\nResponse: " + str(res))
             raise InvalidResponseError(error_message)
 
@@ -443,9 +454,7 @@ def analyze_assistant_response(
             # Include previous error in retry attempts
             prompt += "\n\n# Previous Error\n\n"
             prompt += f"You previously responded with this: {previous_response}\n\n"
-            prompt += (
-                f"That response gave the following error:\n{previous_error}\n\nPlease try again."
-            )
+            prompt += f"That response gave the following error:\n{previous_error}\n\nPlease try again."
 
         prompt += "\n\n# Assistant's Response\n\n" + response_text
 
@@ -468,11 +477,15 @@ def analyze_assistant_response(
             previous_error = str(e)
             if attempt == max_retries - 1:  # Last attempt
                 raise  # Re-raise the last error if all retries failed
-            logger.warning(f"Invalid choices response (attempt {attempt + 1}): {previous_error}")
+            logger.warning(
+                f"Invalid choices response (attempt {attempt + 1}): {previous_error}"
+            )
 
 
 @lazy_litellm_retry_decorator
-def simple_send_with_retries(model_config: ModelConfig, messages, extra_params=None, purpose="send with retries"):
+def simple_send_with_retries(
+    model_config: ModelConfig, messages, extra_params=None, purpose="send with retries"
+):
     """
     Send a completion request with retries on various error conditions.
 

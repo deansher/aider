@@ -10,7 +10,11 @@ import psutil
 
 def run_cmd(command, verbose=False, error_print=None):
     try:
-        if sys.stdin.isatty() and hasattr(pexpect, "spawn") and platform.system() != "Windows":
+        if (
+            sys.stdin.isatty()
+            and hasattr(pexpect, "spawn")
+            and platform.system() != "Windows"
+        ):
             return run_cmd_pexpect(command, verbose)
 
         return run_cmd_subprocess(command, verbose)

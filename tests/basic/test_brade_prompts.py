@@ -112,7 +112,7 @@ def test_context_and_task_placement() -> None:
 
     system_msg = messages[0]
     assert system_msg["role"] == "system"
-    
+
     # Check structure of system message
     system_content = system_msg["content"]
     sections = [
@@ -140,12 +140,16 @@ def test_context_and_task_placement() -> None:
         "Example response",
         "</brade:task_examples>",
     ]
-    
+
     last_pos = 0
     for section in sections:
         pos = system_content.find(section, last_pos)
-        assert pos != -1, f"Missing section {section!r} in system message:\n{system_content}"
-        assert pos >= last_pos, f"Section {section!r} out of order in system message:\n{system_content}"
+        assert (
+            pos != -1
+        ), f"Missing section {section!r} in system message:\n{system_content}"
+        assert (
+            pos >= last_pos
+        ), f"Section {section!r} out of order in system message:\n{system_content}"
         last_pos = pos
 
     # Verify user message is clean
@@ -182,7 +186,10 @@ def test_unsupported_context_placement() -> None:
     """Tests that unsupported context placement values raise exceptions."""
 
     # Test with INITIAL_USER_MESSAGE (not yet supported)
-    with pytest.raises(ValueError, match="Only FINAL_USER_MESSAGE or SYSTEM_MESSAGE are supported at this time"):
+    with pytest.raises(
+        ValueError,
+        match="Only FINAL_USER_MESSAGE or SYSTEM_MESSAGE are supported at this time",
+    ):
         format_brade_messages(
             system_prompt="Test system prompt",
             task_instructions="Test instructions",
@@ -242,9 +249,15 @@ def test_element_locations() -> None:
     assert "<brade:context>" in system_msg, "Context should be in system message"
     assert repo_map in system_msg, "Repo map should be in system message"
     assert platform_info in system_msg, "Platform info should be in system message"
-    assert "<brade:task_examples>" in system_msg, "Task examples should be in system message"
-    assert "Example request" in system_msg, "Example content should be in system message"
-    assert "<brade:task_instructions>" in system_msg, "Task instructions should be in system message"
+    assert (
+        "<brade:task_examples>" in system_msg
+    ), "Task examples should be in system message"
+    assert (
+        "Example request" in system_msg
+    ), "Example content should be in system message"
+    assert (
+        "<brade:task_instructions>" in system_msg
+    ), "Task instructions should be in system message"
 
     # Verify user message is clean
     final_msg = messages[-1]["content"]
@@ -495,27 +508,41 @@ def test_append_positions() -> None:
 
     # Verify final user message
     final_msg = messages[-1]["content"]
-    assert "<brade:task_instructions>" in final_msg, "Task instructions should be in final message"
+    assert (
+        "<brade:task_instructions>" in final_msg
+    ), "Task instructions should be in final message"
     assert "Test message" in final_msg, "User message should be in final message"
-    assert "<brade:task_examples>" in final_msg, "Task examples should be in final message"
+    assert (
+        "<brade:task_examples>" in final_msg
+    ), "Task examples should be in final message"
     # Check order by finding tags at start of lines
     import re
-    task_instr_match = re.search(r'^\s*<brade:task_instructions>\s*$', final_msg, re.MULTILINE)
-    assert task_instr_match is not None, "Could not find <task_instructions> tag in:\n" + final_msg
+
+    task_instr_match = re.search(
+        r"^\s*<brade:task_instructions>\s*$", final_msg, re.MULTILINE
+    )
+    assert task_instr_match is not None, (
+        "Could not find <task_instructions> tag in:\n" + final_msg
+    )
     task_instr_pos = task_instr_match.start()
 
     user_msg_pos = final_msg.find("Test message")
     assert user_msg_pos != -1, "Could not find user message in:\n" + final_msg
 
-    task_ex_match = re.search(r'^\s*<brade:task_examples>\s*$', final_msg, re.MULTILINE)
-    assert task_ex_match is not None, "Could not find <task_examples> tag in:\n" + final_msg
+    task_ex_match = re.search(r"^\s*<brade:task_examples>\s*$", final_msg, re.MULTILINE)
+    assert task_ex_match is not None, (
+        "Could not find <task_examples> tag in:\n" + final_msg
+    )
     task_ex_pos = task_ex_match.start()
 
-    assert task_instr_pos < user_msg_pos < task_ex_pos, "Elements should be in correct order. Got this:\n" + final_msg
+    assert task_instr_pos < user_msg_pos < task_ex_pos, (
+        "Elements should be in correct order. Got this:\n" + final_msg
+    )
 
 
 def test_basic_message_structure(
-    sample_done_messages: list[dict[str, str]], sample_cur_messages: list[dict[str, str]]
+    sample_done_messages: list[dict[str, str]],
+    sample_cur_messages: list[dict[str, str]],
 ) -> None:
     """Tests that format_brade_messages returns correctly structured message list.
 
@@ -593,8 +620,12 @@ def test_format_task_examples() -> None:
     result = format_task_examples(examples)
 
     # Check XML structure
-    assert "<brade:task_examples>" in result, f"Expected task_examples tag in:\n{result}"
-    assert "</brade:task_examples>" in result, f"Expected closing task_examples tag in:\n{result}"
+    assert (
+        "<brade:task_examples>" in result
+    ), f"Expected task_examples tag in:\n{result}"
+    assert (
+        "</brade:task_examples>" in result
+    ), f"Expected closing task_examples tag in:\n{result}"
     assert "<brade:example>" in result, f"Expected example tag in:\n{result}"
     assert "</brade:example>" in result, f"Expected closing example tag in:\n{result}"
 
@@ -651,17 +682,27 @@ def test_wrap_brade_xml() -> None:
 
     # Test non-empty content
     result = wrap_brade_xml("test", "content")
-    assert result == "<brade:test>\ncontent\n</brade:test>\n", f"Unexpected result: {result}"
+    assert (
+        result == "<brade:test>\ncontent\n</brade:test>\n"
+    ), f"Unexpected result: {result}"
     result = wrap_brade_xml("test", "line1\nline2")
-    assert result == "<brade:test>\nline1\nline2\n</brade:test>\n", f"Unexpected result: {result}"
+    assert (
+        result == "<brade:test>\nline1\nline2\n</brade:test>\n"
+    ), f"Unexpected result: {result}"
 
     # Test mixed content and whitespace
     result = wrap_brade_xml("test", "content  \n  ")
-    assert result == "<brade:test>\ncontent  \n  \n</brade:test>\n", f"Unexpected result: {result}"
+    assert (
+        result == "<brade:test>\ncontent  \n  \n</brade:test>\n"
+    ), f"Unexpected result: {result}"
     result = wrap_brade_xml("test", "  \ncontent\n  ")
-    assert result == "<brade:test>\n  \ncontent\n  \n</brade:test>\n", f"Unexpected result: {result}"
+    assert (
+        result == "<brade:test>\n  \ncontent\n  \n</brade:test>\n"
+    ), f"Unexpected result: {result}"
     result = wrap_brade_xml("test", "\n  content  \n")
-    assert result == "<brade:test>\n\n  content  \n</brade:test>\n", f"Unexpected result: {result}"
+    assert (
+        result == "<brade:test>\n\n  content  \n</brade:test>\n"
+    ), f"Unexpected result: {result}"
 
 
 def test_message_combination() -> None:
@@ -948,7 +989,7 @@ def test_malformed_input_errors() -> None:
 
     # Test invalid file content type
     with pytest.raises(TypeError):
-        format_brade_messages( 
+        format_brade_messages(
             system_prompt="Test prompt",
             task_instructions="Test instructions",
             done_messages=[],

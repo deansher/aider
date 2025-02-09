@@ -5,7 +5,11 @@
 
 from llm_multiple_choice import ChoiceManager
 
-from aider.brade_prompts import BRADE_PERSONA_PROMPT, CONTEXT_SECTION, THIS_MESSAGE_IS_FROM_APP
+from aider.brade_prompts import (
+    BRADE_PERSONA_PROMPT,
+    CONTEXT_SECTION,
+    THIS_MESSAGE_IS_FROM_APP,
+)
 
 from .base_prompts import CoderPrompts
 
@@ -79,9 +83,9 @@ Here are a couple examples to illustrate:
 """
 
 _quoted_response_options = (
-    "> " + "\n> ".join(
-        (_step1_ways_to_respond + _propose_changes_instructions).split("\n")
-    ) + "\n"
+    "> "
+    + "\n> ".join((_step1_ways_to_respond + _propose_changes_instructions).split("\n"))
+    + "\n"
 )
 
 # Define the choice manager for analyzing architect responses
@@ -134,6 +138,7 @@ If you are wrong, it's easy for the user to answer "No" to the assistant's (not 
 """
 )
 
+
 class ArchitectPrompts(CoderPrompts):
     """Prompts and configuration for the architect workflow.
 
@@ -154,8 +159,12 @@ class ArchitectPrompts(CoderPrompts):
     # 2. Lead to confusing conversations between the assistant and their human partner
     # 3. Make it harder to reason about and debug the system
 
-    IMPLEMENTATION_COMPLETE = "Your subordinate AI software engineer has completed the implementation."
-    REVIEW_BEGINS = "I will now review their implementation to ensure it meets our requirements."
+    IMPLEMENTATION_COMPLETE = (
+        "Your subordinate AI software engineer has completed the implementation."
+    )
+    REVIEW_BEGINS = (
+        "I will now review their implementation to ensure it meets our requirements."
+    )
 
     def __init__(self, main_model, editor_model):
         """Initialize ArchitectPrompts with models for architect and editor roles.
@@ -167,7 +176,6 @@ class ArchitectPrompts(CoderPrompts):
         super().__init__()
         self.main_model = main_model
         self.editor_model = editor_model
-
 
     @property
     def main_system_core(self) -> str:
@@ -210,11 +218,11 @@ Finally, you'll review engineering assistant's changes to make sure:
 - There aren't any unintended consequences
 - The code is clean, correct, and expressive
 """
-    )
+        )
 
     def _get_thinking_instructions(self) -> str:
         """Get simple thinking instructions for non-reasoning models.
-        
+
         Note: Applicable only to non-reasoning models.
         """
         return """# Think Step-by-Step
@@ -230,7 +238,7 @@ Then, provide a clear and direct response.
         The surrounding code only drives Step 1 -- remaining steps are driven by the architect
         itself using subordinate Coder instances. So these task instructions are only used for Step 1.
 
-        We adapt these instructions for reasoning versus non-reasoning models based on 
+        We adapt these instructions for reasoning versus non-reasoning models based on
         self.main_model.is_reasoning_model.
         """
 
@@ -299,15 +307,19 @@ When you've finished all the SEARCH/REPLACE blocks:
         prompt = ""
 
         prompt += f"{THIS_MESSAGE_IS_FROM_APP}\n"
-        prompt += """Review the latest versions of the affected project files to ensure that:
+        prompt += (
+            """Review the latest versions of the affected project files to ensure that:
 - The approved change proposal was implemented fully, correctly, and well.
 - The latest project files are now in a solid working state.
 
 You can see the most recent approved change proposal in our chat history, above.
 
-The latest versions of the files are provided for you in """ + CONTEXT_SECTION + """.
+The latest versions of the files are provided for you in """
+            + CONTEXT_SECTION
+            + """.
 Read with a fresh, skeptical eye.
 """
+        )
 
         # Add # Reasoning heading if we are *not* dealing with a "reasoning" model
         if not self.main_model.is_reasoning_model:

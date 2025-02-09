@@ -417,7 +417,9 @@ def diff_lines(search_text, replace_text):
     dmp = diff_match_patch()
     dmp.Diff_Timeout = 5
     # dmp.Diff_EditCost = 16
-    search_lines, replace_lines, mapping = dmp.diff_linesToChars(search_text, replace_text)
+    search_lines, replace_lines, mapping = dmp.diff_linesToChars(
+        search_text, replace_text
+    )
 
     diff_lines = dmp.diff_main(search_lines, replace_lines, None)
     dmp.diff_cleanupSemantic(diff_lines)
@@ -732,14 +734,18 @@ def main(dnames):
     # Sort directories by decreasing number of 'pass' results
     pass_counts = {
         dname: sum(
-            res == "pass" for dname_result, _, res in all_results if str(dname) == str(dname_result)
+            res == "pass"
+            for dname_result, _, res in all_results
+            if str(dname) == str(dname_result)
         )
         for dname in directories
     }
     directories.sort(key=lambda dname: pass_counts[dname], reverse=True)
 
     # Create a results matrix
-    results_matrix = {dname: {method: "" for method in methods} for dname in directories}
+    results_matrix = {
+        dname: {method: "" for method in methods} for dname in directories
+    }
 
     # Populate the results matrix
     for dname, method, res in all_results:

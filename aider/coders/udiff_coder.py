@@ -38,9 +38,7 @@ The diff needs to apply to a unique set of lines in {path}!
 {original}```
 """
 
-other_hunks_applied = (
-    "Note: some hunks did apply successfully. See the updated source code shown above.\n\n"
-)
+other_hunks_applied = "Note: some hunks did apply successfully. See the updated source code shown above.\n\n"
 
 
 class UnifiedDiffCoder(Coder):
@@ -95,7 +93,9 @@ class UnifiedDiffCoder(Coder):
             except SearchTextNotUnique:
                 errors.append(
                     not_unique_error.format(
-                        path=path, original=original, num_lines=len(original.splitlines())
+                        path=path,
+                        original=original,
+                        num_lines=len(original.splitlines()),
                     )
                 )
                 continue
@@ -103,7 +103,9 @@ class UnifiedDiffCoder(Coder):
             if not content:
                 errors.append(
                     no_match_error.format(
-                        path=path, original=original, num_lines=len(original.splitlines())
+                        path=path,
+                        original=original,
+                        num_lines=len(original.splitlines()),
                     )
                 )
                 continue
@@ -234,7 +236,9 @@ def make_new_lines_explicit(content, hunk):
     if len(new_before) < len(before) * 0.66:
         return hunk
 
-    new_hunk = difflib.unified_diff(new_before, after, n=max(len(new_before), len(after)))
+    new_hunk = difflib.unified_diff(
+        new_before, after, n=max(len(new_before), len(after))
+    )
     new_hunk = list(new_hunk)[3:]
 
     return new_hunk
@@ -242,7 +246,8 @@ def make_new_lines_explicit(content, hunk):
 
 def cleanup_pure_whitespace_lines(lines):
     res = [
-        line if line.strip() else line[-(len(line) - len(line.rstrip("\r\n")))] for line in lines
+        line if line.strip() else line[-(len(line) - len(line.rstrip("\r\n")))]
+        for line in lines
     ]
     return res
 

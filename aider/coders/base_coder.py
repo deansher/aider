@@ -19,7 +19,11 @@ from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import ClassVar
 
-from aider.brade_prompts import ElementLocation, PromptElementPlacement, PromptElementPosition
+from aider.brade_prompts import (
+    ElementLocation,
+    PromptElementPlacement,
+    PromptElementPosition,
+)
 
 from langfuse.decorators import langfuse_context, observe
 
@@ -192,7 +196,9 @@ class Coder:
                 and use_done_messages
                 and summarize_from_coder
             ):
-                use_done_messages = from_coder.summarizer.summarize_all(use_done_messages)
+                use_done_messages = from_coder.summarizer.summarize_all(
+                    use_done_messages
+                )
                 io.tool_output(
                     "Summarized old chat messages because we switched between incompatible edit"
                     " formats."
@@ -226,7 +232,6 @@ class Coder:
         new_coder = Coder.create(from_coder=self, **kwargs)
         new_coder.ignore_mentions = self.ignore_mentions
         return new_coder
-
 
     def get_announcements(self):
         lines = []
@@ -303,7 +308,7 @@ class Coder:
         return lines
 
     def get_reasoning_level_modifier(self):
-        if hasattr(self, 'parent_coder') and self.parent_coder:
+        if hasattr(self, "parent_coder") and self.parent_coder:
             return self.parent_coder.get_reasoning_level_modifier()
         return self.reasoning_level_modifier
 
@@ -457,7 +462,9 @@ class Coder:
                 if os.path.exists(abs_fname):
                     self.abs_read_only_fnames.add(abs_fname)
                 else:
-                    self.io.tool_warning(f"Error: Read-only file {fname} does not exist. Skipping.")
+                    self.io.tool_warning(
+                        f"Error: Read-only file {fname} does not exist. Skipping."
+                    )
 
         if map_tokens is None:
             use_repo_map = main_model.use_repo_map
@@ -604,7 +611,10 @@ class Coder:
         lines = all_content.splitlines()
         good = False
         for fence_open, fence_close in self.fences:
-            if any(line.startswith(fence_open) or line.startswith(fence_close) for line in lines):
+            if any(
+                line.startswith(fence_open) or line.startswith(fence_close)
+                for line in lines
+            ):
                 continue
             good = True
             break
@@ -761,9 +771,13 @@ class Coder:
 
     def get_input(self):
         inchat_files = self.get_inchat_relative_files()
-        read_only_files = [self.get_rel_fname(fname) for fname in self.abs_read_only_fnames]
+        read_only_files = [
+            self.get_rel_fname(fname) for fname in self.abs_read_only_fnames
+        ]
         all_files = sorted(set(inchat_files + read_only_files))
-        edit_format = "" if self.edit_format == self.main_model.edit_format else self.edit_format
+        edit_format = (
+            "" if self.edit_format == self.main_model.edit_format else self.edit_format
+        )
         return self.io.get_input(
             self.root,
             all_files,
@@ -805,15 +819,21 @@ class Coder:
         # Adjust reasoning level based on message prefix
         if prompt_message.startswith("+"):
             self.reasoning_level_modifier = 1
-            self.io.tool_output(f"Reasoning level modifier set to {self.reasoning_level_modifier}")
+            self.io.tool_output(
+                f"Reasoning level modifier set to {self.reasoning_level_modifier}"
+            )
             prompt_message = prompt_message[1:].lstrip()
         elif prompt_message.startswith("-"):
             self.reasoning_level_modifier = -1
-            self.io.tool_output(f"Reasoning level modifier set to {self.reasoning_level_modifier}")
+            self.io.tool_output(
+                f"Reasoning level modifier set to {self.reasoning_level_modifier}"
+            )
             prompt_message = prompt_message[1:].lstrip()
         elif prompt_message.startswith("="):
             self.reasoning_level_modifier = 0
-            self.io.tool_output(f"Reasoning level modifier set to {self.reasoning_level_modifier}")
+            self.io.tool_output(
+                f"Reasoning level modifier set to {self.reasoning_level_modifier}"
+            )
             prompt_message = prompt_message[1:].lstrip()
 
         while prompt_message:
@@ -824,12 +844,16 @@ class Coder:
                 break
 
             if self.num_reflections >= self.max_reflections:
-                self.io.tool_warning(f"Only {self.max_reflections} reflections allowed, stopping.")
+                self.io.tool_warning(
+                    f"Only {self.max_reflections} reflections allowed, stopping."
+                )
                 return
 
             self.num_reflections += 1
             prompt_message = self.reflected_message
-        langfuse_context.update_current_observation(output=self.partial_response_content)
+        langfuse_context.update_current_observation(
+            output=self.partial_response_content
+        )
 
     def check_for_urls(self, inp):
         url_pattern = re.compile(r"(https?://[^\s/$.?#].[^\s]*[^\s,.])")
@@ -869,7 +893,9 @@ class Coder:
                 sumio_description = "same as Coder.io"
             else:
                 sumio_description = "unique"
-            self.io.tool_output(f"summarize_start: self.summarizer.io is {sumio_description}")
+            self.io.tool_output(
+                f"summarize_start: self.summarizer.io is {sumio_description}"
+            )
         if not self.summarizer.too_big(self.done_messages):
             return
 
@@ -883,7 +909,9 @@ class Coder:
 
     def summarize_worker(self):
         try:
-            self.summarized_done_messages = self.summarizer.summarize(self.done_messages)
+            self.summarized_done_messages = self.summarizer.summarize(
+                self.done_messages
+            )
         except ValueError as err:
             self.io.tool_warning(err.args[0])
 
@@ -987,9 +1015,7 @@ class Coder:
 
         if self.test_cmd:
             if self.auto_test:
-                platform_text += (
-                    "- The user's pre-commit runs this test command, don't suggest running them: "
-                )
+                platform_text += "- The user's pre-commit runs this test command, don't suggest running them: "
             else:
                 platform_text += "- The user prefers this test command: "
             platform_text += self.test_cmd + "\n"
@@ -1002,10 +1028,16 @@ class Coder:
         platform_text = self.get_platform_info()
 
         if self.suggest_shell_commands:
-            shell_cmd_prompt = self.gpt_prompts.shell_cmd_prompt.format(platform=platform_text)
-            shell_cmd_reminder = self.gpt_prompts.shell_cmd_reminder.format(platform=platform_text)
+            shell_cmd_prompt = self.gpt_prompts.shell_cmd_prompt.format(
+                platform=platform_text
+            )
+            shell_cmd_reminder = self.gpt_prompts.shell_cmd_reminder.format(
+                platform=platform_text
+            )
         else:
-            shell_cmd_prompt = self.gpt_prompts.no_shell_cmd_prompt.format(platform=platform_text)
+            shell_cmd_prompt = self.gpt_prompts.no_shell_cmd_prompt.format(
+                platform=platform_text
+            )
             shell_cmd_reminder = self.gpt_prompts.no_shell_cmd_reminder.format(
                 platform=platform_text
             )
@@ -1065,7 +1097,9 @@ class Coder:
                 ) or getattr(completion.usage, "cache_read_input_tokens", 0)
 
                 if self.verbose:
-                    self.io.tool_output(f"Warmed {format_tokens(cache_hit_tokens)} cached tokens.")
+                    self.io.tool_output(
+                        f"Warmed {format_tokens(cache_hit_tokens)} cached tokens."
+                    )
 
         self.cache_warming_thread = threading.Timer(0, warm_cache_worker)
         self.cache_warming_thread.daemon = True
@@ -1113,7 +1147,9 @@ class Coder:
             if not is_image_file(fname):
                 editable_text_files.append((self.get_rel_fname(fname), content))
 
-        image_files = self.get_image_files_content() if self.main_model.accepts_images else None
+        image_files = (
+            self.get_image_files_content() if self.main_model.accepts_images else None
+        )
 
         # Get repository map if available
         repo_map = self.get_repo_map()
@@ -1142,7 +1178,9 @@ class Coder:
             ]
 
         return format_brade_messages(
-            system_prompt=self.format_prompt(prompts.main_system_core if prompts else ""),
+            system_prompt=self.format_prompt(
+                prompts.main_system_core if prompts else ""
+            ),
             task_instructions=task_instructions,
             done_messages=self.done_messages,
             cur_messages=self.cur_messages,
@@ -1155,19 +1193,19 @@ class Coder:
             task_instructions_reminder=task_instructions_reminder,
             context_location=ElementLocation(
                 placement=PromptElementPlacement.SYSTEM_MESSAGE,
-                position=PromptElementPosition.APPEND
+                position=PromptElementPosition.APPEND,
             ),
             task_instructions_location=ElementLocation(
                 placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-                position=PromptElementPosition.APPEND
+                position=PromptElementPosition.APPEND,
             ),
             task_examples_location=ElementLocation(
                 placement=PromptElementPlacement.FINAL_USER_MESSAGE,
-                position=PromptElementPosition.APPEND
+                position=PromptElementPosition.APPEND,
             ),
             task_instructions_reminder_location=ElementLocation(
                 placement=PromptElementPlacement.SYSTEM_MESSAGE,
-                position=PromptElementPosition.PREPEND
+                position=PromptElementPosition.PREPEND,
             ),
         )
 
@@ -1248,7 +1286,9 @@ class Coder:
             while True:
                 try:
                     yield from self.send(
-                        prompt_messages, functions=self.functions, purpose="new user message"
+                        prompt_messages,
+                        functions=self.functions,
+                        purpose="new user message",
                     )
                     break
                 except retry_exceptions() as err:
@@ -1289,7 +1329,9 @@ class Coder:
                         )
                 except Exception as err:
                     self.io.tool_error(f"Unexpected error: {err}")
-                    lines = traceback.format_exception(type(err), err, err.__traceback__)
+                    lines = traceback.format_exception(
+                        type(err), err, err.__traceback__
+                    )
                     self.io.tool_error("".join(lines))
                     return
         finally:
@@ -1298,7 +1340,9 @@ class Coder:
                 self.mdstream = None
 
             self.partial_response_content = self.get_multi_response_content(True)
-            langfuse_context.update_current_observation(output=self.partial_response_content)
+            langfuse_context.update_current_observation(
+                output=self.partial_response_content
+            )
             self.multi_response_content = ""
 
         self.io.tool_output()
@@ -1339,7 +1383,9 @@ class Coder:
             self.aider_edited_files.update(edited)
             saved_message = self.auto_commit(edited)
 
-            if not saved_message and hasattr(self.gpt_prompts, "files_content_gpt_edits_no_repo"):
+            if not saved_message and hasattr(
+                self.gpt_prompts, "files_content_gpt_edits_no_repo"
+            ):
                 saved_message = self.gpt_prompts.files_content_gpt_edits_no_repo
 
             self.move_back_cur_messages(saved_message)
@@ -1424,7 +1470,9 @@ class Coder:
         res.append("Token counts below are approximate.")
         res.append("")
         res.append(f"Input tokens: ~{input_tokens:,} of {max_input_tokens:,}{inp_err}")
-        res.append(f"Output tokens: ~{output_tokens:,} of {max_output_tokens:,}{out_err}")
+        res.append(
+            f"Output tokens: ~{output_tokens:,} of {max_output_tokens:,}{out_err}"
+        )
         res.append(f"Total tokens: ~{total_tokens:,} of {max_input_tokens:,}{tot_err}")
 
         if output_tokens >= max_output_tokens:
@@ -1468,7 +1516,9 @@ class Coder:
 
     def update_cur_messages(self):
         if self.partial_response_content:
-            self.cur_messages += [dict(role="assistant", content=self.partial_response_content)]
+            self.cur_messages += [
+                dict(role="assistant", content=self.partial_response_content)
+            ]
         if self.partial_response_function_call:
             self.cur_messages += [
                 dict(
@@ -1501,7 +1551,13 @@ class Coder:
             fname = os.path.basename(rel_fname)
 
             # Don't add basenames that could be plain words like "run" or "make"
-            if "/" in fname or "\\" in fname or "." in fname or "_" in fname or "-" in fname:
+            if (
+                "/" in fname
+                or "\\" in fname
+                or "." in fname
+                or "_" in fname
+                or "-" in fname
+            ):
                 if fname not in fname_to_rel_fnames:
                     fname_to_rel_fnames[fname] = []
                 fname_to_rel_fnames[fname].append(rel_fname)
@@ -1523,7 +1579,9 @@ class Coder:
         added_fnames = []
         group = ConfirmGroup(new_mentions)
         for rel_fname in sorted(new_mentions):
-            if self.io.confirm_ask(f"Add {rel_fname} to the chat?", group=group, allow_never=True):
+            if self.io.confirm_ask(
+                f"Add {rel_fname} to the chat?", group=group, allow_never=True
+            ):
                 self.add_rel_fname(rel_fname)
                 added_fnames.append(rel_fname)
             else:
@@ -1671,9 +1729,9 @@ class Coder:
                     sys.stdout.write(text)
                 except UnicodeEncodeError:
                     # Safely encode and decode the text
-                    safe_text = text.encode(sys.stdout.encoding, errors="backslashreplace").decode(
-                        sys.stdout.encoding
-                    )
+                    safe_text = text.encode(
+                        sys.stdout.encoding, errors="backslashreplace"
+                    ).decode(sys.stdout.encoding)
                     sys.stdout.write(safe_text)
                 sys.stdout.flush()
                 yield text
@@ -1694,10 +1752,12 @@ class Coder:
         if completion and hasattr(completion, "usage") and completion.usage is not None:
             prompt_tokens = completion.usage.prompt_tokens
             completion_tokens = completion.usage.completion_tokens
-            cache_hit_tokens = getattr(completion.usage, "prompt_cache_hit_tokens", 0) or getattr(
-                completion.usage, "cache_read_input_tokens", 0
+            cache_hit_tokens = getattr(
+                completion.usage, "prompt_cache_hit_tokens", 0
+            ) or getattr(completion.usage, "cache_read_input_tokens", 0)
+            cache_write_tokens = getattr(
+                completion.usage, "cache_creation_input_tokens", 0
             )
-            cache_write_tokens = getattr(completion.usage, "cache_creation_input_tokens", 0)
 
             if hasattr(completion.usage, "cache_read_input_tokens") or hasattr(
                 completion.usage, "cache_creation_input_tokens"
@@ -1710,7 +1770,9 @@ class Coder:
 
         else:
             prompt_tokens = self.main_model.token_count(messages)
-            completion_tokens = self.main_model.token_count(self.partial_response_content)
+            completion_tokens = self.main_model.token_count(
+                self.partial_response_content
+            )
             self.message_tokens_sent += prompt_tokens
 
         self.message_tokens_received += completion_tokens
@@ -1746,7 +1808,9 @@ class Coder:
         if input_cost_per_token_cache_hit:
             # must be deepseek
             cost += input_cost_per_token_cache_hit * cache_hit_tokens
-            cost += (prompt_tokens - input_cost_per_token_cache_hit) * input_cost_per_token
+            cost += (
+                prompt_tokens - input_cost_per_token_cache_hit
+            ) * input_cost_per_token
         else:
             # hard code the anthropic adjustments, no-ops for other models since cache_x_tokens==0
             cost += cache_write_tokens * input_cost_per_token * 1.25
@@ -1832,7 +1896,9 @@ class Coder:
     def get_addable_relative_files(self):
         all_files = set(self.get_all_relative_files())
         inchat_files = set(self.get_inchat_relative_files())
-        read_only_files = set(self.get_rel_fname(fname) for fname in self.abs_read_only_fnames)
+        read_only_files = set(
+            self.get_rel_fname(fname) for fname in self.abs_read_only_fnames
+        )
         return all_files - inchat_files - read_only_files
 
     def check_for_dirty_commit(self, path):
@@ -2166,7 +2232,9 @@ class Coder:
         if not self.commit_before_message:
             return
         if self.commit_before_message[-1] != self.repo.get_head_commit_sha():
-            self.io.tool_output("You can use /undo to undo and discard each aider commit.")
+            self.io.tool_output(
+                "You can use /undo to undo and discard each aider commit."
+            )
 
     def dirty_commit(self):
         if not self.need_commit_before_edits:

@@ -1,7 +1,11 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from aider.coders.architect_coder import ArchitectCoder, ArchitectExchange, ArchitectPhase
+from aider.coders.architect_coder import (
+    ArchitectCoder,
+    ArchitectExchange,
+    ArchitectPhase,
+)
 from aider.coders.architect_prompts import ArchitectPrompts
 from aider.io import InputOutput
 from aider.models import _ModelConfigImpl
@@ -18,7 +22,9 @@ class TestArchitectExchange(unittest.TestCase):
             editor_model=self.model.editor_model,
         )
         self.architect_response = "Here's my proposal for changes..."
-        self.exchange = ArchitectExchange(self.architect_prompts, self.architect_response)
+        self.exchange = ArchitectExchange(
+            self.architect_prompts, self.architect_response
+        )
 
     def test_init(self):
         """Test initialization with architect response."""
@@ -63,7 +69,9 @@ class TestArchitectExchange(unittest.TestCase):
     def test_append_reviewer_prompt(self):
         """Test appending reviewer prompt."""
         review_prompt = "Please review changes..."
-        self.architect_prompts.get_review_changes_prompt = MagicMock(return_value=review_prompt)
+        self.architect_prompts.get_review_changes_prompt = MagicMock(
+            return_value=review_prompt
+        )
 
         prompt = self.exchange.append_reviewer_prompt()
         self.assertEqual(prompt, review_prompt)
@@ -120,36 +128,63 @@ class TestArchitectExchange(unittest.TestCase):
     def test_phase_transitions(self):
         """Test that messages are tagged with correct phases through a complete exchange."""
         # Start with proposal phase
-        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1)
-        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 0)
-        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 0)
+        self.assertEqual(
+            len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1
+        )
+        self.assertEqual(
+            len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 0
+        )
+        self.assertEqual(
+            len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 0
+        )
 
         # Transition to implementation phase
         self.exchange.append_editor_prompt(is_plan_change=False)
         self.exchange.append_editor_response("Changes made")
-        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1)
-        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 2)
-        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 0)
+        self.assertEqual(
+            len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1
+        )
+        self.assertEqual(
+            len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 2
+        )
+        self.assertEqual(
+            len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 0
+        )
 
         # Transition to review phase
         self.exchange.append_reviewer_prompt()
         self.exchange.append_reviewer_response("Review complete")
-        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1)
-        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 2)
-        self.assertEqual(len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 2)
+        self.assertEqual(
+            len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1
+        )
+        self.assertEqual(
+            len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 2
+        )
+        self.assertEqual(
+            len(self.exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 2
+        )
 
     def test_empty_exchange(self):
         """Test behavior with minimal messages in the exchange."""
         # Create exchange with just the initial proposal
         minimal_exchange = ArchitectExchange(self.architect_prompts, "Minimal proposal")
-        
+
         # Verify phase counts
-        self.assertEqual(len(minimal_exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1)
-        self.assertEqual(len(minimal_exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)), 0)
-        self.assertEqual(len(minimal_exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 0)
+        self.assertEqual(
+            len(minimal_exchange.get_messages_by_phase(ArchitectPhase.STEP1_PROPOSE)), 1
+        )
+        self.assertEqual(
+            len(minimal_exchange.get_messages_by_phase(ArchitectPhase.STEP2_IMPLEMENT)),
+            0,
+        )
+        self.assertEqual(
+            len(minimal_exchange.get_messages_by_phase(ArchitectPhase.STEP3_REVIEW)), 0
+        )
 
         # Verify message content
-        self.assertEqual(minimal_exchange.get_messages()[0]["content"], "Minimal proposal")
+        self.assertEqual(
+            minimal_exchange.get_messages()[0]["content"], "Minimal proposal"
+        )
 
 
 class TestArchitectCoder(unittest.TestCase):
@@ -178,7 +213,9 @@ class TestArchitectCoder(unittest.TestCase):
 
     def test_process_architect_change_proposal(self):
         """Test processing architect's change proposal."""
-        exchange = ArchitectExchange(self.coder.architect_prompts, "Here's my proposal...")
+        exchange = ArchitectExchange(
+            self.coder.architect_prompts, "Here's my proposal..."
+        )
 
         # Mock user declining changes
         self.io.confirm_ask = MagicMock(return_value=False)
@@ -198,7 +235,9 @@ class TestArchitectCoder(unittest.TestCase):
 
     def test_execute_changes(self):
         """Test executing changes via editor coder."""
-        exchange = ArchitectExchange(self.coder.architect_prompts, "Here's my proposal...")
+        exchange = ArchitectExchange(
+            self.coder.architect_prompts, "Here's my proposal..."
+        )
         editor_response = "Changes implemented..."
 
         # Mock editor coder
@@ -225,7 +264,9 @@ class TestArchitectCoder(unittest.TestCase):
 
     def test_review_changes(self):
         """Test reviewing changes via reviewer coder."""
-        exchange = ArchitectExchange(self.coder.architect_prompts, "Here's my proposal...")
+        exchange = ArchitectExchange(
+            self.coder.architect_prompts, "Here's my proposal..."
+        )
         exchange.append_editor_prompt(is_plan_change=False)
         exchange.append_editor_response("Changes implemented...")
         reviewer_response = "Changes look good..."
@@ -251,7 +292,7 @@ class TestArchitectCoder(unittest.TestCase):
 
     def test_record_exchange(self):
         """Test recording a completed exchange.
-        
+
         This test verifies that:
         1. Only Step 1 (proposal) and Step 3 (review) messages are retained
         2. Step 2 (implementation) messages are properly excluded
@@ -259,7 +300,9 @@ class TestArchitectCoder(unittest.TestCase):
         4. Implementation details don't leak into future exchanges
         """
         # Create an exchange with all three steps
-        exchange = ArchitectExchange(self.coder.architect_prompts, "Here's my proposal...")
+        exchange = ArchitectExchange(
+            self.coder.architect_prompts, "Here's my proposal..."
+        )
         exchange.append_editor_prompt(is_plan_change=False)
         exchange.append_editor_response("Changes implemented...")
         exchange.append_reviewer_prompt()
@@ -288,16 +331,25 @@ class TestArchitectCoder(unittest.TestCase):
 
         # Verify transition messages were inserted
         transition_messages = [
-            {"role": "user", "content": self.coder.architect_prompts.IMPLEMENTATION_COMPLETE},
-            {"role": "assistant", "content": self.coder.architect_prompts.REVIEW_BEGINS},
+            {
+                "role": "user",
+                "content": self.coder.architect_prompts.IMPLEMENTATION_COMPLETE,
+            },
+            {
+                "role": "assistant",
+                "content": self.coder.architect_prompts.REVIEW_BEGINS,
+            },
         ]
         for msg in transition_messages:
             self.assertIn(msg, recorded_messages)
 
         # Verify commit message was added
         self.assertIn(
-            {"role": "user", "content": self.coder.architect_prompts.changes_committed_message},
-            recorded_messages
+            {
+                "role": "user",
+                "content": self.coder.architect_prompts.changes_committed_message,
+            },
+            recorded_messages,
         )
 
         # Verify cur_messages was cleared after move_back_cur_messages

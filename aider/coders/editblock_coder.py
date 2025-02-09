@@ -13,6 +13,7 @@ from .base_coder import Coder, EditBlockError
 from .editblock_prompts import EditBlockPrompts
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,13 +27,14 @@ class SearchReplaceImplementationError(Exception):
 
 class SearchReplaceBlockParseError(Exception):
     """Raised when a SEARCH/REPLACE block has syntax or validation errors.
-    
+
     This includes:
     - Missing or incorrect file path
     - Missing or incorrect fence markers
     - Incorrect marker order (SEARCH/DIVIDER/REPLACE)
     - Other syntax/format violations
     """
+
     pass
 
 
@@ -132,16 +134,21 @@ class EditBlockCoder(Coder):
             # Extract path from error message if available
             path = None
             lines = str(exc).splitlines()
-            if lines and not any(marker in lines[0] for marker in ["<<<<<<< SEARCH", "=======", ">>>>>>> REPLACE"]):
+            if lines and not any(
+                marker in lines[0]
+                for marker in ["<<<<<<< SEARCH", "=======", ">>>>>>> REPLACE"]
+            ):
                 path = strip_filename(lines[0])
 
-            failed = [{
-                "path": path,
-                "original": "",
-                "updated": "",
-                "error_type": "parse_error",
-                "error_context": str(exc)
-            }]
+            failed = [
+                {
+                    "path": path,
+                    "original": "",
+                    "updated": "",
+                    "error_type": "parse_error",
+                    "error_context": str(exc),
+                }
+            ]
             raise EditBlockError(self._build_failed_edit_error_message(failed, []))
 
     def apply_edits(self, edits):
@@ -160,7 +167,7 @@ class EditBlockCoder(Coder):
         The error information for each failed edit is a dictionary with:
         - path: The file path that was targeted
         - original: The SEARCH block content
-        - updated: The REPLACE block content 
+        - updated: The REPLACE block content
         - error_type: The type of error ("missing_filename", "no_match", "multiple_matches")
         - error_context: Additional details about what went wrong
         """
@@ -172,14 +179,20 @@ class EditBlockCoder(Coder):
             full_path = self.abs_root_path(path)
             content = self.io.read_text(full_path)
 
-            logger.debug(f"apply_edits: about to call do_replace with self.fence={self.fence}")
+            logger.debug(
+                f"apply_edits: about to call do_replace with self.fence={self.fence}"
+            )
             try:
-                new_content = do_replace(full_path, content, original, updated, fence=self.fence)
+                new_content = do_replace(
+                    full_path, content, original, updated, fence=self.fence
+                )
                 if not new_content:
                     # try patching any of the other files in the chat
                     for alt_path in self.abs_fnames:
                         alt_content = self.io.read_text(alt_path)
-                        new_content = do_replace(alt_path, alt_content, original, updated, fence=self.fence)
+                        new_content = do_replace(
+                            alt_path, alt_content, original, updated, fence=self.fence
+                        )
                         if new_content:
                             full_path = alt_path
                             break
@@ -193,31 +206,37 @@ class EditBlockCoder(Coder):
                     )
 
             except MissingFilenameError as exc:
-                failed.append({
-                    "path": path,
-                    "original": original,
-                    "updated": updated,
-                    "error_type": "missing_filename",
-                    "error_context": str(exc),
-                })
+                failed.append(
+                    {
+                        "path": path,
+                        "original": original,
+                        "updated": updated,
+                        "error_type": "missing_filename",
+                        "error_context": str(exc),
+                    }
+                )
 
             except NoExactMatchError as exc:
-                failed.append({
-                    "path": path,
-                    "original": original,
-                    "updated": updated,
-                    "error_type": "no_match",
-                    "error_context": str(exc),
-                })
+                failed.append(
+                    {
+                        "path": path,
+                        "original": original,
+                        "updated": updated,
+                        "error_type": "no_match",
+                        "error_context": str(exc),
+                    }
+                )
 
             except MultipleMatchesError as exc:
-                failed.append({
-                    "path": path,
-                    "original": original,
-                    "updated": updated,
-                    "error_type": "multiple_matches",
-                    "error_context": str(exc),
-                })
+                failed.append(
+                    {
+                        "path": path,
+                        "original": original,
+                        "updated": updated,
+                        "error_type": "multiple_matches",
+                        "error_context": str(exc),
+                    }
+                )
 
         if failed:
             raise EditBlockError(self._build_failed_edit_error_message(failed, passed))
@@ -254,7 +273,7 @@ class EditBlockCoder(Coder):
             f"# {len(failed)} SEARCH/REPLACE block(s) failed to match!",
             "",
             f"The other {len(passed)} block(s) were applied successfully. Do not resubmit those.",
-            ""
+            "",
         ]
 
         for item in failed:
@@ -268,7 +287,9 @@ class EditBlockCoder(Coder):
 
             # Start a new message section for this failing block
             block_message = []
-            block_message.append(f"## SearchReplace{error_type.title()}: The {error_type} error occurred in {path}\n")
+            block_message.append(
+                f"## SearchReplace{error_type.title()}: The {error_type} error occurred in {path}\n"
+            )
 
             # Show the entire failing SEARCH/REPLACE block
             block_message.append("\n### Offending SEARCH/REPLACE Block\n")
@@ -281,23 +302,31 @@ class EditBlockCoder(Coder):
             # Explain why it failed
             block_message.append("\n### Why This Failed\n")
             if error_type == "multiple_matches":
-                block_message.append("- The SEARCH text matched multiple places in the file.\n"
-                                     f"- error_context: {error_context}")
+                block_message.append(
+                    "- The SEARCH text matched multiple places in the file.\n"
+                    f"- error_context: {error_context}"
+                )
             elif error_type == "missing_filename":
-                block_message.append("- The path is missing or invalid.\n"
-                                     "- Make sure the file path is listed above the fence and spells a valid filename.\n"
-                                     f"- error_context: {error_context}")
+                block_message.append(
+                    "- The path is missing or invalid.\n"
+                    "- Make sure the file path is listed above the fence and spells a valid filename.\n"
+                    f"- error_context: {error_context}"
+                )
             elif error_type == "no_match":
                 candidate = find_similar_lines(original, content)
                 if candidate:
-                    similarity_ratio = SequenceMatcher(None, original, candidate).ratio()
+                    similarity_ratio = SequenceMatcher(
+                        None, original, candidate
+                    ).ratio()
                     similarity_percent = similarity_ratio * 100
-                    diff_lines = list(unified_diff(
-                        original.splitlines(keepends=True),
-                        candidate.splitlines(keepends=True),
-                        fromfile="Expected SEARCH",
-                        tofile="Candidate Snippet",
-                    ))
+                    diff_lines = list(
+                        unified_diff(
+                            original.splitlines(keepends=True),
+                            candidate.splitlines(keepends=True),
+                            fromfile="Expected SEARCH",
+                            tofile="Candidate Snippet",
+                        )
+                    )
                     diff_text = "".join(diff_lines)
                     block_message.append(
                         f"- The SEARCH text did not match exactly.\n"
@@ -305,15 +334,19 @@ class EditBlockCoder(Coder):
                         f"- Unified diff between expected and candidate snippet:\n```\n{diff_text}\n```"
                     )
                 else:
-                    block_message.append("- The SEARCH text did not match any part of the file.\n"
-                                         "- No similar candidate snippet found.")
+                    block_message.append(
+                        "- The SEARCH text did not match any part of the file.\n"
+                        "- No similar candidate snippet found."
+                    )
             else:
-                block_message.append("- Encountered an unknown error type.\n"
-                                     f"- error_context: {error_context}")
+                block_message.append(
+                    "- Encountered an unknown error type.\n"
+                    f"- error_context: {error_context}"
+                )
 
             def _should_warn_about_existing(updated_text):
                 """Check if we should warn about REPLACE content already existing.
-                
+
                 Only warns if the REPLACE content has 10 or more non-empty lines.
                 This threshold helps avoid warnings about common code patterns
                 like exception handling blocks while still catching substantial
@@ -321,7 +354,7 @@ class EditBlockCoder(Coder):
                 """
                 if not updated_text or not updated_text.strip():
                     return False
-                    
+
                 lines = [line for line in updated_text.splitlines() if line.strip()]
                 return len(lines) >= 10
 
@@ -339,7 +372,10 @@ class EditBlockCoder(Coder):
                 "- Carefully reproduce whitespace, indentation, comments and other details character for character.",
             ]
             if error_type == "multiple_matches":
-                fixes.insert(0, "- Provide additional lines of context to uniquely identify the intended match.")
+                fixes.insert(
+                    0,
+                    "- Provide additional lines of context to uniquely identify the intended match.",
+                )
             block_message.extend(fixes)
 
             messages.append("\n".join(block_message))
@@ -359,12 +395,7 @@ class EditBlockCoder(Coder):
             "indentation, and formatting.\n"
         )
 
-        return (
-            "\n\n".join(messages)
-            + "\n\n"
-            + note
-            + summary
-        )
+        return "\n\n".join(messages) + "\n\n" + note + summary
 
 
 def prep(content):
@@ -376,29 +407,29 @@ def prep(content):
 
 def calculate_text_similarity(text1: str, text2: str) -> float:
     """Calculate similarity between two text blocks using diff-match-patch.
-    
+
     Uses Levenshtein distance normalized by max(len(text2), 2) to produce
     a similarity score between 0 and 1, where:
     - 1.0 means the texts are identical
     - 0.0 means the texts are completely different
     - Values in between indicate partial similarity
-        
+
     For single-character differences (e.g. "a" vs "b"), the similarity
     will be 0.5 since we use 2 as the minimum denominator. This helps
     detect potential transcription errors in short strings while maintaining
     our usual similarity thresholds for longer content.
-    
+
     Args:
         text1: First text to compare
         text2: Second text to compare (used as denominator for normalization)
-    
+
     Returns:
         float: Similarity score between 0 and 1
     """
     # Handle empty string cases
     if text2 == "":
         return 1.0 if text1 == "" else 0.0
-            
+
     dmp = diff_match_patch.diff_match_patch()
     diffs = dmp.diff_main(text1, text2)
     dmp.diff_cleanupSemantic(diffs)
@@ -409,16 +440,16 @@ def calculate_text_similarity(text1: str, text2: str) -> float:
 
 def find_match_end(dmp, whole, match_index, original):
     """Find where a match ends in the whole text.
-    
+
     Uses diff-match-patch to analyze differences and find the endpoint of a match,
     taking into account potential insertions and deletions.
-    
+
     Args:
         dmp: diff_match_patch instance to use
         whole: The complete text being searched
         match_index: Starting index of the match
         original: The pattern being matched
-        
+
     Returns:
         int: The index where this match ends
     """
@@ -457,7 +488,9 @@ def find_match_end(dmp, whole, match_index, original):
     #    - Ignores remainder of whole, which doesn't match original
     #    - Exactly captures the region that matches original
 
-    diffs = dmp.diff_main(whole[match_index:match_index + 2 * len(original)], original)
+    diffs = dmp.diff_main(
+        whole[match_index : match_index + 2 * len(original)], original
+    )
     dmp.diff_cleanupSemantic(diffs)
     whole_chars = 0
     last_equal_endpoint = 0
@@ -486,11 +519,13 @@ def replace_most_similar_chunk(whole, original, updated):
     dmp = diff_match_patch.diff_match_patch()
     dmp.Match_Threshold = 0.05  # Require 95% accuracy
     dmp.Match_Distance = sys.maxsize  # Allow matches anywhere in file
-    
+
     if not original:
-        logger.debug("SEARCH block is empty; appending REPLACE block to the end of the file")
+        logger.debug(
+            "SEARCH block is empty; appending REPLACE block to the end of the file"
+        )
         return whole + updated
-    
+
     # Find all potential matches
     matches = []
     remaining = whole
@@ -502,18 +537,22 @@ def replace_most_similar_chunk(whole, original, updated):
         match_end = find_match_end(dmp, remaining, match_index, original)
         # Safeguard against infinite loop
         if match_end <= match_index:
-            raise SearchReplaceImplementationError("Infinite loop risk: match_end did not advance past match_index.")                
-        
+            raise SearchReplaceImplementationError(
+                "Infinite loop risk: match_end did not advance past match_index."
+            )
+
         # Calculate match quality
-        similarity_ratio = calculate_text_similarity(remaining[match_index:match_end], original)
-                
+        similarity_ratio = calculate_text_similarity(
+            remaining[match_index:match_end], original
+        )
+
         if similarity_ratio >= 0.95:  # Same threshold as Match_Threshold
             matches.append((match_index + offset, match_end + offset, similarity_ratio))
-                
+
         # Search in remaining text after this match
         remaining = remaining[match_end:]
         offset += match_end
-    
+
     if not matches:
         logger.debug("SEARCH block not found in file content")
         logger.debug(f"search_text:\\n{original}\\nwhole:\\n{whole}")
@@ -526,9 +565,9 @@ def replace_most_similar_chunk(whole, original, updated):
                 "- Different line breaks or indentation\\n"
                 "- Missing or altered punctuation\\n"
                 f"Search text was: {original!r}"
-            )
+            ),
         )
-    
+
     if len(matches) > 1:
         logger.debug(f"Multiple matches found: {matches}")
         raise MultipleMatchesError(
@@ -571,7 +610,9 @@ def strip_quoted_wrapping(res, fname=None, fence=DEFAULT_FENCE):
 
 
 def do_replace(fname, content, original, updated, fence=None):
-    logger.debug(f"do_replace: {fname}\nSEARCH:\n{original}\nREPLACE:\n{updated}\nfence={fence}")
+    logger.debug(
+        f"do_replace: {fname}\nSEARCH:\n{original}\nREPLACE:\n{updated}\nfence={fence}"
+    )
     original = strip_quoted_wrapping(original, fname, fence)
     updated = strip_quoted_wrapping(updated, fname, fence)
     logger.debug("do_replace: stripped original and updated content")
@@ -597,7 +638,9 @@ def do_replace(fname, content, original, updated, fence=None):
         logger.debug(f"do_replace: replacing in {fname}")
         new_content = replace_most_similar_chunk(content, original, updated)
         if new_content is None:
-            raise NoExactMatchError("No matching content found in file. Check that the SEARCH block exactly matches the file content with only minor allowable differences.")
+            raise NoExactMatchError(
+                "No matching content found in file. Check that the SEARCH block exactly matches the file content with only minor allowable differences."
+            )
         # Allow empty REPLACE blocks (deletions) and no-change edits
         if not updated.strip() or new_content == content:
             return new_content
@@ -645,14 +688,14 @@ def strip_filename(filename):
 
 def check_marker_order(content):
     """Validate that SEARCH/REPLACE markers appear in the correct order.
-    
+
     This function checks that any SEARCH/REPLACE markers in the content appear in
     the correct sequence: SEARCH → DIVIDER → REPLACE. It helps catch malformed
     blocks early with clear error messages.
-    
+
     Args:
         content (str): The content to check for markers
-        
+
     Raises:
         ValueError: If markers are found out of order or incomplete, with details
                   about the location and nature of the error
@@ -661,21 +704,21 @@ def check_marker_order(content):
     head_pattern = re.compile(HEAD)
     divider_pattern = re.compile(DIVIDER)
     updated_pattern = re.compile(UPDATED)
-    
+
     # Track state for each block
     state = 0  # 0=expect SEARCH, 1=expect DIVIDER, 2=expect REPLACE
     block_start_line = None
-    
+
     for i, line in enumerate(lines, 1):
         is_head = head_pattern.match(line.strip())
         is_divider = divider_pattern.match(line.strip())
         is_updated = updated_pattern.match(line.strip())
-        
+
         if is_head and state == 0:
             state = 1
             block_start_line = i
         elif is_head:
-            context = "\n".join(lines[max(0, i-3):min(len(lines), i+2)])
+            context = "\n".join(lines[max(0, i - 3) : min(len(lines), i + 2)])
             raise SearchReplaceBlockParseError(
                 f"Found '<<<<<<< SEARCH' on line {i} but previous block was not complete:\n"
                 f"{context}\n"
@@ -684,7 +727,7 @@ def check_marker_order(content):
         elif is_divider and state == 1:
             state = 2
         elif is_divider:
-            context = "\n".join(lines[max(0, i-3):min(len(lines), i+2)])
+            context = "\n".join(lines[max(0, i - 3) : min(len(lines), i + 2)])
             raise SearchReplaceBlockParseError(
                 f"Found '=======' on line {i} but not preceded by SEARCH marker:\n"
                 f"{context}\n"
@@ -693,13 +736,13 @@ def check_marker_order(content):
         elif is_updated and state == 2:
             state = 0
         elif is_updated:
-            context = "\n".join(lines[max(0, i-3):min(len(lines), i+2)])
+            context = "\n".join(lines[max(0, i - 3) : min(len(lines), i + 2)])
             raise SearchReplaceBlockParseError(
                 f"Found '>>>>>>> REPLACE' on line {i} but not preceded by DIVIDER:\n"
                 f"{context}\n"
                 f"Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
             )
-    
+
     if state == 1:
         raise SearchReplaceBlockParseError(
             f"Block starting at line {block_start_line} has SEARCH but is missing DIVIDER and REPLACE markers.\n"
@@ -710,6 +753,7 @@ def check_marker_order(content):
             f"Block starting at line {block_start_line} has SEARCH and DIVIDER but is missing REPLACE marker.\n"
             "Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
         )
+
 
 def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None):
     """Parse search/replace blocks from the content.
@@ -775,9 +819,14 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
             "```csh",
             "```tcsh",
         ]
-        next_is_editblock = i + 1 < len(lines) and head_pattern.match(lines[i + 1].strip())
+        next_is_editblock = i + 1 < len(lines) and head_pattern.match(
+            lines[i + 1].strip()
+        )
 
-        if any(line.strip().startswith(start) for start in shell_starts) and not next_is_editblock:
+        if (
+            any(line.strip().startswith(start) for start in shell_starts)
+            and not next_is_editblock
+        ):
             shell_content = []
             i += 1
             while i < len(lines) and not lines[i].strip().startswith("```"):
@@ -807,14 +856,18 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                 filename_line = lines[i - 2]
                 if not strip_filename(filename_line) and i >= 3:
                     filename_line = lines[i - 3]
-                is_new_file = i + 1 < len(lines) and divider_pattern.match(lines[i + 1].strip())
+                is_new_file = i + 1 < len(lines) and divider_pattern.match(
+                    lines[i + 1].strip()
+                )
                 if is_new_file:
                     use_valid_fnames = None
                 else:
                     use_valid_fnames = valid_fnames
                 filename = find_filename(filename_line, use_valid_fnames)
                 if not filename:
-                    raise SearchReplaceBlockParseError(missing_file_path_err.format(fence=fence))
+                    raise SearchReplaceBlockParseError(
+                        missing_file_path_err.format(fence=fence)
+                    )
 
                 original_text = []
                 i += 1
@@ -838,7 +891,9 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                     updated_pattern.match(lines[i].strip())
                     or divider_pattern.match(lines[i].strip())
                 ):
-                    raise SearchReplaceBlockParseError(f"Expected `{UPDATED_ERR}` or `{DIVIDER_ERR}`")
+                    raise SearchReplaceBlockParseError(
+                        f"Expected `{UPDATED_ERR}` or `{DIVIDER_ERR}`"
+                    )
 
                 yield filename, "".join(original_text), "".join(updated_text)
 
@@ -889,7 +944,9 @@ def find_filename(line, valid_fnames):
     return None
 
 
-def find_similar_lines(search_text: str, content_text: str, threshold: float = 0.6) -> str:
+def find_similar_lines(
+    search_text: str, content_text: str, threshold: float = 0.6
+) -> str:
     """
     Use diff-match-patch to locate a candidate snippet in content_text that is similar
     to search_text. Returns the candidate snippet if the similarity is above the threshold,
@@ -899,7 +956,7 @@ def find_similar_lines(search_text: str, content_text: str, threshold: float = 0
     match_index = dmp.match_main(content_text, search_text, 0)
     if match_index == -1:
         return ""
-    candidate = content_text[match_index: match_index + len(search_text)]
+    candidate = content_text[match_index : match_index + len(search_text)]
     similarity = calculate_text_similarity(candidate, search_text)
     if similarity < threshold:
         return ""

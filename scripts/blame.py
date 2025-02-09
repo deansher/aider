@@ -45,7 +45,14 @@ def blame(start_tag, end_tag=None):
 
     end_date = get_tag_date(end_tag if end_tag else "HEAD")
 
-    return all_file_counts, grand_total, total_lines, aider_total, aider_percentage, end_date
+    return (
+        all_file_counts,
+        grand_total,
+        total_lines,
+        aider_total,
+        aider_percentage,
+        end_date,
+    )
 
 
 def get_all_commit_hashes_between_tags(start_tag, end_tag=None):
@@ -86,9 +93,14 @@ def process_all_tags_since(start_tag):
     results = []
     for i in tqdm(range(len(tags) - 1), desc="Processing tags"):
         start_tag, end_tag = tags[i], tags[i + 1]
-        all_file_counts, grand_total, total_lines, aider_total, aider_percentage, end_date = blame(
-            start_tag, end_tag
-        )
+        (
+            all_file_counts,
+            grand_total,
+            total_lines,
+            aider_total,
+            aider_percentage,
+            end_date,
+        ) = blame(start_tag, end_tag)
         results.append(
             {
                 "start_tag": start_tag,
@@ -120,7 +132,9 @@ def get_latest_version_tag():
 def main():
     parser = argparse.ArgumentParser(description="Get aider/non-aider blame stats")
     parser.add_argument("start_tag", nargs="?", help="The tag to start from (optional)")
-    parser.add_argument("--end-tag", help="The tag to end at (default: HEAD)", default=None)
+    parser.add_argument(
+        "--end-tag", help="The tag to end at (default: HEAD)", default=None
+    )
     parser.add_argument(
         "--all-since",
         action="store_true",
@@ -144,9 +158,14 @@ def main():
         results = process_all_tags_since(args.start_tag)
         yaml_output = yaml.dump(results, sort_keys=True)
     else:
-        all_file_counts, grand_total, total_lines, aider_total, aider_percentage, end_date = blame(
-            args.start_tag, args.end_tag
-        )
+        (
+            all_file_counts,
+            grand_total,
+            total_lines,
+            aider_total,
+            aider_percentage,
+            end_date,
+        ) = blame(args.start_tag, args.end_tag)
 
         result = {
             "start_tag": args.start_tag,
@@ -155,7 +174,9 @@ def main():
             "file_counts": all_file_counts,
             "grand_total": {
                 author: count
-                for author, count in sorted(grand_total.items(), key=itemgetter(1), reverse=True)
+                for author, count in sorted(
+                    grand_total.items(), key=itemgetter(1), reverse=True
+                )
             },
             "total_lines": total_lines,
             "aider_total": aider_total,
@@ -208,7 +229,8 @@ def get_all_tags_since(start_tag):
     filtered_tags = [
         tag
         for tag in all_tags
-        if semver.Version.is_valid(tag[1:]) and semver.Version.parse(tag[1:]) >= start_version
+        if semver.Version.is_valid(tag[1:])
+        and semver.Version.parse(tag[1:]) >= start_version
     ]
     return [tag for tag in filtered_tags if tag.endswith(".0")]
 

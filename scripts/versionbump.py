@@ -11,7 +11,9 @@ from packaging import version
 
 
 def check_cog_pyproject():
-    result = subprocess.run(["cog", "--check", "pyproject.toml"], capture_output=True, text=True)
+    result = subprocess.run(
+        ["cog", "--check", "pyproject.toml"], capture_output=True, text=True
+    )
 
     if result.returncode != 0:
         print("Error: cog --check pyproject.toml failed, updating.")
@@ -23,7 +25,9 @@ def main():
     parser = argparse.ArgumentParser(description="Bump version")
     parser.add_argument("new_version", help="New version in x.y.z format")
     parser.add_argument(
-        "--dry-run", action="store_true", help="Print each step without actually executing them"
+        "--dry-run",
+        action="store_true",
+        help="Print each step without actually executing them",
     )
 
     # Function to check if we are on the main branch
@@ -57,13 +61,19 @@ def main():
         print(f"Origin main commit hash: {origin_main}")
         if local_main != origin_main:
             local_date = subprocess.run(
-                ["git", "show", "-s", "--format=%ci", "main"], capture_output=True, text=True
+                ["git", "show", "-s", "--format=%ci", "main"],
+                capture_output=True,
+                text=True,
             ).stdout.strip()
             origin_date = subprocess.run(
-                ["git", "show", "-s", "--format=%ci", "origin/main"], capture_output=True, text=True
+                ["git", "show", "-s", "--format=%ci", "origin/main"],
+                capture_output=True,
+                text=True,
             ).stdout.strip()
             local_date = datetime.datetime.strptime(local_date, "%Y-%m-%d %H:%M:%S %z")
-            origin_date = datetime.datetime.strptime(origin_date, "%Y-%m-%d %H:%M:%S %z")
+            origin_date = datetime.datetime.strptime(
+                origin_date, "%Y-%m-%d %H:%M:%S %z"
+            )
             if local_date < origin_date:
                 print(
                     "Error: The local main branch is behind origin/main. Please pull the latest"
@@ -105,7 +115,9 @@ def main():
 
     with open("aider/__init__.py", "r") as f:
         content = f.read()
-    updated_content = re.sub(r'__version__ = ".+?"', f'__version__ = "{new_version}"', content)
+    updated_content = re.sub(
+        r'__version__ = ".+?"', f'__version__ = "{new_version}"', content
+    )
 
     print("Updating aider/__init__.py with new version:")
     print(updated_content)

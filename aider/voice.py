@@ -12,7 +12,8 @@ from aider.llm import litellm
 from .dump import dump  # noqa: F401
 
 warnings.filterwarnings(
-    "ignore", message="Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work"
+    "ignore",
+    message="Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work",
 )
 
 from pydub import AudioSegment  # noqa
@@ -84,7 +85,9 @@ class Voice:
             return
         except SoundDeviceError as e:
             print(f"Error: {e}")
-            print("Please ensure you have a working audio input device connected and try again.")
+            print(
+                "Please ensure you have a working audio input device connected and try again."
+            )
             return
 
     def raw_record_and_transcribe(self, history, language):
@@ -93,7 +96,9 @@ class Voice:
         temp_wav = tempfile.mktemp(suffix=".wav")
 
         try:
-            sample_rate = int(self.sd.query_devices(None, "input")["default_samplerate"])
+            sample_rate = int(
+                self.sd.query_devices(None, "input")["default_samplerate"]
+            )
         except (TypeError, ValueError):
             sample_rate = 16000  # fallback to 16kHz if unable to query device
         except self.sd.PortAudioError:
@@ -104,12 +109,16 @@ class Voice:
         self.start_time = time.time()
 
         try:
-            with self.sd.InputStream(samplerate=sample_rate, channels=1, callback=self.callback):
+            with self.sd.InputStream(
+                samplerate=sample_rate, channels=1, callback=self.callback
+            ):
                 prompt(self.get_prompt, refresh_interval=0.1)
         except self.sd.PortAudioError as err:
             raise SoundDeviceError(f"Error accessing audio input device: {err}")
 
-        with sf.SoundFile(temp_wav, mode="x", samplerate=sample_rate, channels=1) as file:
+        with sf.SoundFile(
+            temp_wav, mode="x", samplerate=sample_rate, channels=1
+        ) as file:
             while not self.q.empty():
                 file.write(self.q.get())
 

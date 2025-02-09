@@ -53,12 +53,12 @@ class TestModels(unittest.TestCase):
         # Test reasoning model gets _OpenAiReasoningConfigImpl
         model = get_model_config("o3-mini")
         self.assertIsInstance(model, _OpenAiReasoningConfigImpl)
-        
+
         # Test non-reasoning model gets _ModelConfigImpl
         model = get_model_config("gpt-4")
         self.assertIsInstance(model, _ModelConfigImpl)
         self.assertNotIsInstance(model, _OpenAiReasoningConfigImpl)
-        
+
         # Test unknown model gets _ModelConfigImpl
         model = get_model_config("unknown-model")
         self.assertIsInstance(model, _ModelConfigImpl)
@@ -73,35 +73,37 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.map_reasoning_level(1), {})
 
         # Test reasoning model returns correct mappings
-        model = get_model_config("o3-mini")  # Using o3-mini as an example reasoning model
-    
+        model = get_model_config(
+            "o3-mini"
+        )  # Using o3-mini as an example reasoning model
+
         # Test default reasoning level (0)
         self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "medium"})
-        
+
         # Test reduced levels
-        self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "medium"})
+        self.assertEqual(model.map_reasoning_level(-1), {"reasoning_effort": "low"})
         self.assertEqual(model.map_reasoning_level(-2), {"reasoning_effort": "low"})
         self.assertEqual(model.map_reasoning_level(-3), {"reasoning_effort": "low"})
-        
+
         # Test increased levels
         self.assertEqual(model.map_reasoning_level(1), {"reasoning_effort": "high"})
         self.assertEqual(model.map_reasoning_level(2), {"reasoning_effort": "high"})
-        
+
         # Test float values are truncated
         self.assertEqual(model.map_reasoning_level(1.7), {"reasoning_effort": "high"})
-        self.assertEqual(model.map_reasoning_level(-1.7), {"reasoning_effort": "medium"})
+        self.assertEqual(model.map_reasoning_level(-1.7), {"reasoning_effort": "low"})
 
     def test_model_creation(self):
         # Test base model creation
         model = get_model_config("gpt-4")
         self.assertIsInstance(model, ModelConfig)
         self.assertEqual(model.name, "gpt-4")
-        
+
         # Test _OpenAiReasoningConfigImpl creation
         model = get_model_config("o3-mini")
         self.assertIsInstance(model, _OpenAiReasoningConfigImpl)
         self.assertEqual(model.name, "o3-mini")
-        
+
         # Test model with weak model
         model = get_model_config("gpt-4", weak_model="gpt-3.5-turbo")
         self.assertIsInstance(model, ModelConfig)
@@ -152,8 +154,12 @@ class TestModels(unittest.TestCase):
             result
         )  # Should return True because there's a problem with the editor model
         mock_io.tool_warning.assert_called_with(ANY)  # Ensure a warning was issued
-        self.assertGreaterEqual(mock_io.tool_warning.call_count, 1)  # Expect at least one warning
-        warning_messages = [call.args[0] for call in mock_io.tool_warning.call_args_list]
+        self.assertGreaterEqual(
+            mock_io.tool_warning.call_count, 1
+        )  # Expect at least one warning
+        warning_messages = [
+            call.args[0] for call in mock_io.tool_warning.call_args_list
+        ]
         self.assertTrue(
             any("bogus-model" in msg for msg in warning_messages)
         )  # Check that one of the warnings mentions the bogus model
@@ -164,8 +170,12 @@ class TestModels(unittest.TestCase):
 
         result = sanity_check_models(mock_io, main_model)
 
-        self.assertTrue(result)  # Should return True because there's a problem with the editor model
-        warning_messages = [call.args[0] for call in mock_io.tool_warning.call_args_list]
+        self.assertTrue(
+            result
+        )  # Should return True because there's a problem with the editor model
+        warning_messages = [
+            call.args[0] for call in mock_io.tool_warning.call_args_list
+        ]
         self.assertTrue(
             any("bogus-model" in msg for msg in warning_messages)
         )  # Check that one of the warnings mentions the bogus model

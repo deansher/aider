@@ -68,7 +68,11 @@ class WholeFileCoder(Coder):
                     # Did gpt prepend a bogus dir? It especially likes to
                     # include the path/to prefix from the one-shot example in
                     # the prompt.
-                    if fname and fname not in chat_files and Path(fname).name in chat_files:
+                    if (
+                        fname
+                        and fname not in chat_files
+                        and Path(fname).name in chat_files
+                    ):
                         fname = Path(fname).name
                 if not fname:  # blank line? or ``` was on first line i==0
                     if saw_fname:

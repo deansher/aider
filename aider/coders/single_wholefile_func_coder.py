@@ -44,7 +44,9 @@ class SingleWholeFileFunctionCoder(Coder):
                 dict(role="assistant", content=self.gpt_prompts.redacted_edit_message)
             ]
         else:
-            self.cur_messages += [dict(role="assistant", content=self.partial_response_content)]
+            self.cur_messages += [
+                dict(role="assistant", content=self.partial_response_content)
+            ]
 
     def render_incremental_response(self, final=False):
         res = ""

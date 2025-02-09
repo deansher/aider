@@ -58,7 +58,9 @@ class EditBlockFunctionCoder(Coder):
     ]
 
     def __init__(self, code_format, *args, **kwargs):
-        raise RuntimeError("Deprecated, needs to be refactored to support get_edits/apply_edits")
+        raise RuntimeError(
+            "Deprecated, needs to be refactored to support get_edits/apply_edits"
+        )
         self.code_format = code_format
 
         if code_format == "string":
@@ -74,12 +76,12 @@ class EditBlockFunctionCoder(Coder):
                 description="New content to replace the `original_lines` with",
             )
 
-            self.functions[0]["parameters"]["properties"]["edits"]["items"]["properties"][
-                "original_lines"
-            ] = original_lines
-            self.functions[0]["parameters"]["properties"]["edits"]["items"]["properties"][
-                "updated_lines"
-            ] = updated_lines
+            self.functions[0]["parameters"]["properties"]["edits"]["items"][
+                "properties"
+            ]["original_lines"] = original_lines
+            self.functions[0]["parameters"]["properties"]["edits"]["items"][
+                "properties"
+            ]["updated_lines"] = updated_lines
 
         self.gpt_prompts = EditBlockFunctionPrompts()
         super().__init__(*args, **kwargs)
@@ -96,7 +98,9 @@ class EditBlockFunctionCoder(Coder):
         name = self.partial_response_function_call.get("name")
 
         if name and name != "replace_lines":
-            raise ValueError(f'Unknown function_call name="{name}", use name="replace_lines"')
+            raise ValueError(
+                f'Unknown function_call name="{name}", use name="replace_lines"'
+            )
 
         args = self.parse_partial_args()
         if not args:

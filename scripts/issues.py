@@ -34,7 +34,10 @@ REPO_OWNER = "Aider-AI"
 REPO_NAME = "aider"
 TOKEN = os.getenv("GITHUB_TOKEN")
 
-headers = {"Authorization": f"token {TOKEN}", "Accept": "application/vnd.github.v3+json"}
+headers = {
+    "Authorization": f"token {TOKEN}",
+    "Accept": "application/vnd.github.v3+json",
+}
 
 
 def get_issues(state="open"):
@@ -73,7 +76,9 @@ def group_issues_by_subject(issues):
     grouped_issues = defaultdict(list)
     pattern = r"Uncaught .+ in .+ line \d+"
     for issue in issues:
-        if re.search(pattern, issue["title"]) and not has_been_reopened(issue["number"]):
+        if re.search(pattern, issue["title"]) and not has_been_reopened(
+            issue["number"]
+        ):
             subject = issue["title"]
             grouped_issues[subject].append(issue)
     return grouped_issues
@@ -94,10 +99,10 @@ def find_oldest_issue(subject, all_issues):
 
 
 def comment_and_close_duplicate(issue, oldest_issue):
-    comment_url = (
-        f"{GITHUB_API_URL}/repos/{REPO_OWNER}/{REPO_NAME}/issues/{issue['number']}/comments"
+    comment_url = f"{GITHUB_API_URL}/repos/{REPO_OWNER}/{REPO_NAME}/issues/{issue['number']}/comments"
+    close_url = (
+        f"{GITHUB_API_URL}/repos/{REPO_OWNER}/{REPO_NAME}/issues/{issue['number']}"
     )
-    close_url = f"{GITHUB_API_URL}/repos/{REPO_OWNER}/{REPO_NAME}/issues/{issue['number']}"
 
     comment_body = DUPLICATE_COMMENT.format(oldest_issue_number=oldest_issue["number"])
 
@@ -115,12 +120,16 @@ def comment_and_close_duplicate(issue, oldest_issue):
 def main():
     parser = argparse.ArgumentParser(description="Handle duplicate GitHub issues")
     parser.add_argument(
-        "--yes", action="store_true", help="Automatically close duplicates without prompting"
+        "--yes",
+        action="store_true",
+        help="Automatically close duplicates without prompting",
     )
     args = parser.parse_args()
 
     if not TOKEN:
-        print("Error: Missing GITHUB_TOKEN environment variable. Please check your .env file.")
+        print(
+            "Error: Missing GITHUB_TOKEN environment variable. Please check your .env file."
+        )
         return
 
     all_issues = get_issues("all")
@@ -142,7 +151,9 @@ def main():
         print(f"Open issues: {len(issues)}")
         sorted_issues = sorted(issues, key=lambda x: x["number"], reverse=True)
         for issue in sorted_issues:
-            print(f"  - #{issue['number']}: {issue['comments']} comments {issue['html_url']}")
+            print(
+                f"  - #{issue['number']}: {issue['comments']} comments {issue['html_url']}"
+            )
 
         print(
             f"Oldest issue: #{oldest_issue['number']}: {oldest_issue['comments']} comments"
@@ -151,7 +162,9 @@ def main():
 
         if not args.yes:
             # Confirmation prompt
-            confirm = input("Do you want to comment and close duplicate issues? (y/n): ")
+            confirm = input(
+                "Do you want to comment and close duplicate issues? (y/n): "
+            )
             if confirm.lower() != "y":
                 print("Skipping this group of issues.")
                 continue

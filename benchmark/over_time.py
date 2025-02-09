@@ -59,7 +59,9 @@ def plot_over_time(yaml_file):
     rc("font", **{"family": "sans-serif", "sans-serif": ["Helvetica"], "size": 10})
     plt.rcParams["text.color"] = "#444444"
 
-    fig, ax = plt.subplots(figsize=(12, 6))  # Increase figure size for better visibility
+    fig, ax = plt.subplots(
+        figsize=(12, 6)
+    )  # Increase figure size for better visibility
 
     print("Debug: Figure created. Plotting data...")
     ax.grid(axis="y", zorder=0, lw=0.2)
@@ -70,9 +72,13 @@ def plot_over_time(yaml_file):
     colors = [get_model_color(model) for model in models]
 
     # Separate data points by color
-    purple_points = [(d, r) for d, r, c in zip(dates, pass_rates, colors) if c == "purple"]
+    purple_points = [
+        (d, r) for d, r, c in zip(dates, pass_rates, colors) if c == "purple"
+    ]
     red_points = [(d, r) for d, r, c in zip(dates, pass_rates, colors) if c == "red"]
-    green_points = [(d, r) for d, r, c in zip(dates, pass_rates, colors) if c == "green"]
+    green_points = [
+        (d, r) for d, r, c in zip(dates, pass_rates, colors) if c == "green"
+    ]
 
     # Plot lines for purple, red, and green points
     if purple_points:
@@ -100,11 +106,15 @@ def plot_over_time(yaml_file):
 
     ax.set_xlabel("Model release date", fontsize=18, color="#555")
     ax.set_ylabel(
-        "Aider code editing benchmark,\npercent completed correctly", fontsize=18, color="#555"
+        "Aider code editing benchmark,\npercent completed correctly",
+        fontsize=18,
+        color="#555",
     )
     ax.set_title("LLM code editing skill by model release date", fontsize=20)
     ax.set_ylim(0, 100)  # Adjust y-axis limit to accommodate higher values
-    plt.xticks(fontsize=14, rotation=45, ha="right")  # Rotate x-axis labels for better readability
+    plt.xticks(
+        fontsize=14, rotation=45, ha="right"
+    )  # Rotate x-axis labels for better readability
     plt.tight_layout(pad=3.0)
 
     print("Debug: Saving figures...")

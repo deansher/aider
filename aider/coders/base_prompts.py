@@ -51,15 +51,21 @@ class CoderPrompts(ABC):
     files_content_gpt_edits_no_repo = THIS_MESSAGE_IS_FROM_APP + "We updated the files."
 
     files_content_gpt_no_edits = (
-        THIS_MESSAGE_IS_FROM_APP + "I didn't see any properly formatted edits in your reply?!"
+        THIS_MESSAGE_IS_FROM_APP
+        + "I didn't see any properly formatted edits in your reply?!"
     )
 
-    files_content_local_edits = THIS_MESSAGE_IS_FROM_APP + "Your partner edited the files themself."
+    files_content_local_edits = (
+        THIS_MESSAGE_IS_FROM_APP + "Your partner edited the files themself."
+    )
 
-    lazy_prompt = THIS_MESSAGE_IS_FROM_APP + """You are diligent and tireless!
+    lazy_prompt = (
+        THIS_MESSAGE_IS_FROM_APP
+        + """You are diligent and tireless!
 You NEVER leave comments describing code without implementing it!
 You always COMPLETELY IMPLEMENT the needed code!
 """
+    )
 
     example_messages = []
 
@@ -105,7 +111,8 @@ If you need to edit any of these files, ask me to *add them to the chat* first."
     )
 
     read_only_files_prefix = (
-        THIS_MESSAGE_IS_FROM_APP + """Here are some READ ONLY files, provided for your reference.
+        THIS_MESSAGE_IS_FROM_APP
+        + """Here are some READ ONLY files, provided for your reference.
 Do not edit these files!"""
     )
     shell_cmd_prompt = ""

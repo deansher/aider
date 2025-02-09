@@ -22,7 +22,11 @@ class TestInputOutput(unittest.TestCase):
         commands = MagicMock()
         commands.get_commands.return_value = ["/help", "/add", "/drop"]
         commands.matching_commands.side_effect = lambda inp: (
-            [cmd for cmd in commands.get_commands() if cmd.startswith(inp.strip().split()[0])],
+            [
+                cmd
+                for cmd in commands.get_commands()
+                if cmd.startswith(inp.strip().split()[0])
+            ],
             inp.strip().split()[0],
             " ".join(inp.strip().split()[1:]),
         )
@@ -78,7 +82,9 @@ class TestInputOutput(unittest.TestCase):
         rel_fnames = ["non_existent_file.txt"]
         addable_rel_fnames = []
         commands = None
-        autocompleter = AutoCompleter(root, rel_fnames, addable_rel_fnames, commands, "utf-8")
+        autocompleter = AutoCompleter(
+            root, rel_fnames, addable_rel_fnames, commands, "utf-8"
+        )
         self.assertEqual(autocompleter.words, set(rel_fnames))
 
     def test_autocompleter_with_unicode_file(self):
@@ -88,43 +94,52 @@ class TestInputOutput(unittest.TestCase):
             rel_fnames = [fname]
             addable_rel_fnames = []
             commands = None
-            autocompleter = AutoCompleter(root, rel_fnames, addable_rel_fnames, commands, "utf-8")
+            autocompleter = AutoCompleter(
+                root, rel_fnames, addable_rel_fnames, commands, "utf-8"
+            )
             self.assertEqual(autocompleter.words, set(rel_fnames))
 
             Path(fname).write_text("def hello(): pass\n")
-            autocompleter = AutoCompleter(root, rel_fnames, addable_rel_fnames, commands, "utf-8")
+            autocompleter = AutoCompleter(
+                root, rel_fnames, addable_rel_fnames, commands, "utf-8"
+            )
             autocompleter.tokenize()
             dump(autocompleter.words)
-            self.assertEqual(autocompleter.words, set(rel_fnames + [("hello", "`hello`")]))
+            self.assertEqual(
+                autocompleter.words, set(rel_fnames + [("hello", "`hello`")])
+            )
 
             encoding = "utf-16"
-            some_content_which_will_error_if_read_with_encoding_utf8 = "ÅÍÎÏ".encode(encoding)
+            some_content_which_will_error_if_read_with_encoding_utf8 = "ÅÍÎÏ".encode(
+                encoding
+            )
             with open(fname, "wb") as f:
                 f.write(some_content_which_will_error_if_read_with_encoding_utf8)
 
-            autocompleter = AutoCompleter(root, rel_fnames, addable_rel_fnames, commands, "utf-8")
+            autocompleter = AutoCompleter(
+                root, rel_fnames, addable_rel_fnames, commands, "utf-8"
+            )
             self.assertEqual(autocompleter.words, set(rel_fnames))
 
     def test_format_files_for_input(self):
         """Test that format_files_for_input correctly formats file lists with headers."""
         io = InputOutput()
-        
+
         # Test with no files
         result = io.format_files_for_input([], [])
         self.assertEqual(result, "")
-        
+
         # Test with only editable files
         result = io.format_files_for_input(["file1.py", "file2.py"], [])
         self.assertEqual(result, "▸ Editable Files:\nfile1.py\nfile2.py\n")
-        
+
         # Test with only read-only files
         result = io.format_files_for_input([], ["readonly1.py", "readonly2.py"])
         self.assertEqual(result, "▸ Readonly Files:\nreadonly1.py\nreadonly2.py\n")
-        
+
         # Test with both types of files
         result = io.format_files_for_input(
-            ["file1.py", "file2.py", "readonly1.py"],
-            ["readonly1.py", "readonly2.py"]
+            ["file1.py", "file2.py", "readonly1.py"], ["readonly1.py", "readonly2.py"]
         )
         expected = (
             "▸ Readonly Files:\n"
@@ -218,7 +233,9 @@ class TestInputOutput(unittest.TestCase):
         # Test case 5: explicit_yes_required=True, should not offer 'All' option
         group.preference = None
         mock_input.return_value = "y"
-        result = io.confirm_ask("Are you sure?", group=group, explicit_yes_required=True)
+        result = io.confirm_ask(
+            "Are you sure?", group=group, explicit_yes_required=True
+        )
         self.assertTrue(result)
         self.assertIsNone(group.preference)
         mock_input.assert_called_once()
@@ -271,14 +288,18 @@ class TestInputOutput(unittest.TestCase):
         # Test with subject parameter
         mock_input.reset_mock()
         mock_input.side_effect = ["d"]
-        result = io.confirm_ask("Confirm action?", subject="Subject Text", allow_never=True)
+        result = io.confirm_ask(
+            "Confirm action?", subject="Subject Text", allow_never=True
+        )
         self.assertFalse(result)
         mock_input.assert_called_once()
         self.assertIn(("Confirm action?", "Subject Text"), io.never_prompts)
 
         # Subsequent call with the same question and subject
         mock_input.reset_mock()
-        result = io.confirm_ask("Confirm action?", subject="Subject Text", allow_never=True)
+        result = io.confirm_ask(
+            "Confirm action?", subject="Subject Text", allow_never=True
+        )
         self.assertFalse(result)
         mock_input.assert_not_called()
 

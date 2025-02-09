@@ -93,9 +93,12 @@ your partner why they discarded the edits.
 """
 )
 
-added_files = THIS_MESSAGE_IS_FROM_APP + """Your partner added these files to the chat: {fnames}
+added_files = (
+    THIS_MESSAGE_IS_FROM_APP
+    + """Your partner added these files to the chat: {fnames}
 Tell them if you need additional files.
 """
+)
 
 run_output = """I ran this command:
 

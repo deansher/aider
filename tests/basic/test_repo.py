@@ -130,7 +130,9 @@ class TestRepo(unittest.TestCase):
         self.assertEqual(mock_send.call_args_list[1][0][0], model2)
 
         # Check that the content of the messages is the same for both calls
-        self.assertEqual(mock_send.call_args_list[0][0][1], mock_send.call_args_list[1][0][1])
+        self.assertEqual(
+            mock_send.call_args_list[0][0][1], mock_send.call_args_list[1][0][1]
+        )
 
         # Optionally, you can still dump the call args if needed for debugging
         dump(mock_send.call_args_list)
@@ -162,7 +164,9 @@ class TestRepo(unittest.TestCase):
         mock_send.return_value = "Custom commit message"
         custom_prompt = "Generate a commit message in the style of Shakespeare"
 
-        repo = GitRepo(InputOutput(), None, None, models=[self.GPT35], commit_prompt=custom_prompt)
+        repo = GitRepo(
+            InputOutput(), None, None, models=[self.GPT35], commit_prompt=custom_prompt
+        )
         result = repo.get_commit_message("dummy diff", "dummy context")
 
         self.assertEqual(result, "Custom commit message")
@@ -227,10 +231,17 @@ class TestRepo(unittest.TestCase):
         # Initialize a git repository in the temporary directory and set user name and email
         repo = git.Repo.init(tempdir)
         repo.config_writer().set_value("user", "name", "Test User").release()
-        repo.config_writer().set_value("user", "email", "testuser@example.com").release()
+        repo.config_writer().set_value(
+            "user", "email", "testuser@example.com"
+        ).release()
 
         # Create three empty files and add them to the git repository
-        filenames = ["README.md", "subdir/fänny.md", "systemüber/blick.md", 'file"with"quotes.txt']
+        filenames = [
+            "README.md",
+            "subdir/fänny.md",
+            "systemüber/blick.md",
+            'file"with"quotes.txt',
+        ]
         created_files = []
         for filename in filenames:
             file_path = tempdir / filename

@@ -31,7 +31,9 @@ class TestSendChat(unittest.TestCase):
 
     @patch("litellm.completion")
     @patch("builtins.print")
-    def test_simple_send_with_retries_rate_limit_error(self, mock_print, mock_completion):
+    def test_simple_send_with_retries_rate_limit_error(
+        self, mock_print, mock_completion
+    ):
         # Create a successful mock response for the second attempt
         success_response = MagicMock()
         success_response.choices = [MagicMock()]
@@ -54,7 +56,7 @@ class TestSendChat(unittest.TestCase):
             model_config=self.test_model,
             messages=[{"role": "user", "content": "message"}],
             extra_params=None,
-            purpose="send with retries"
+            purpose="send with retries",
         )
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
@@ -111,7 +113,9 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
     @patch("litellm.completion")
     @patch("builtins.print")
-    def test_simple_send_with_retries_connection_error(self, mock_print, mock_completion):
+    def test_simple_send_with_retries_connection_error(
+        self, mock_print, mock_completion
+    ):
         # Create a successful mock response for the second attempt
         success_response = MagicMock()
         success_response.choices = [MagicMock()]
@@ -129,14 +133,16 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             model_config=self.test_model,
             messages=[{"role": "user", "content": "message"}],
             extra_params=None,
-            purpose="send with retries"
+            purpose="send with retries",
         )
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
 
     @patch("litellm.completion")
     @patch("builtins.print")
-    def test_simple_send_with_retries_invalid_response(self, mock_print, mock_completion):
+    def test_simple_send_with_retries_invalid_response(
+        self, mock_print, mock_completion
+    ):
         # Create a successful mock response for the second attempt
         success_response = MagicMock()
         success_response.choices = [MagicMock()]
@@ -159,7 +165,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             model_config=self.test_model,
             messages=["message"],
             extra_params=None,
-            purpose="send with retries"
+            purpose="send with retries",
         )
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
@@ -184,7 +190,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             model_config=self.test_model,
             messages=["message"],
             extra_params=None,
-            purpose="send with retries"
+            purpose="send with retries",
         )
         self.assertEqual(result, "Success response")
         mock_print.assert_called_once()
@@ -210,7 +216,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
                 temperature=0,
                 extra_params=None,
                 purpose="test completion",
-                reasoning_level=0
+                reasoning_level=0,
             )
 
         self.assertEqual(context.exception.status_code, 400)
@@ -235,8 +241,10 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         transformed = transform_messages_for_o3(messages)
         self.assertEqual(len(transformed), 2)
         self.assertTrue(all(msg["role"] == "user" for msg in transformed))
-        self.assertEqual([msg["content"] for msg in transformed],
-                         [msg["content"] for msg in messages])
+        self.assertEqual(
+            [msg["content"] for msg in transformed],
+            [msg["content"] for msg in messages],
+        )
 
         # Test order preservation with mixed message types
         messages = [
@@ -251,8 +259,10 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         self.assertEqual(transformed[1]["role"], "user")  # was user
         self.assertEqual(transformed[2]["role"], "user")  # was system
         self.assertEqual(transformed[3]["role"], "assistant")  # unchanged
-        self.assertEqual([msg["content"] for msg in transformed],
-                         [msg["content"] for msg in messages])
+        self.assertEqual(
+            [msg["content"] for msg in transformed],
+            [msg["content"] for msg in messages],
+        )
 
     @patch("litellm.completion")
     @patch("builtins.print")
@@ -277,7 +287,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
                 temperature=0,
                 extra_params=None,
                 purpose="test completion",
-                reasoning_level=0
+                reasoning_level=0,
             )
 
         self.assertIn("has no choices attribute", str(context.exception))
@@ -305,7 +315,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
                 temperature=0,
                 extra_params=None,
                 purpose="test completion",
-                reasoning_level=0
+                reasoning_level=0,
             )
 
         self.assertIn("empty choices list", str(context.exception))
@@ -332,7 +342,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             temperature=0.7,
             extra_params=None,
             purpose="test completion",
-            reasoning_level=0
+            reasoning_level=0,
         )
 
         # Verify temperature was not passed to litellm
@@ -354,15 +364,12 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         model = _ModelConfigImpl("gpt-4")
         model.extra_params = {
             "response_format": {"type": "model_default"},
-            "api_version": "2024-01"
+            "api_version": "2024-01",
         }
         model.extra_headers = {"anthropic-version": "2024-01-beta"}
 
         # Call with extra params that should override model params
-        extra_params = {
-            "response_format": {"type": "runtime_override"},
-            "seed": 42
-        }
+        extra_params = {"response_format": {"type": "runtime_override"}, "seed": 42}
 
         _hash, completion = send_completion(
             model_config=model,
@@ -372,30 +379,32 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             temperature=0,
             extra_params=extra_params,
             purpose="test completion",
-            reasoning_level=0
+            reasoning_level=0,
         )
 
         # Verify parameter layering
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
-        
+
         # Extra params should override model params
         self.assertEqual(kwargs["response_format"], {"type": "runtime_override"})
-        
+
         # Model params should be preserved when not overridden
         self.assertEqual(kwargs["api_version"], "2024-01")
-        
+
         # Headers should be preserved
         self.assertEqual(kwargs["extra_headers"], {"anthropic-version": "2024-01-beta"})
-        
+
         # Extra params should override model extra params
         self.assertEqual(kwargs.get("response_format"), {"type": "runtime_override"})
-        
+
         # Model extra params should be preserved when not overridden
         self.assertEqual(kwargs.get("api_version"), "2024-01")
-        
+
         # Extra headers should be preserved
-        self.assertEqual(kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"})
+        self.assertEqual(
+            kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"}
+        )
 
         # Verify parameter layering
         mock_completion.assert_called_once()
@@ -417,7 +426,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Call with extra params that should NOT override reasoning level
         extra_params = {"reasoning_effort": "medium"}
-        
+
         # reasoning_level should take precedence over both model.extra_params and extra_params
         _hash, completion = send_completion(
             model_config=model,
@@ -427,7 +436,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             temperature=0,
             extra_params=extra_params,
             purpose="test completion",
-            reasoning_level=1
+            reasoning_level=1,
         )
 
         # Verify reasoning_level took precedence
@@ -442,15 +451,12 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         model = _ModelConfigImpl("test-model")
         model.extra_params = {
             "response_format": {"type": "model_default"},
-            "api_version": "2024-01"
+            "api_version": "2024-01",
         }
         model.extra_headers = {"anthropic-version": "2024-01-beta"}
 
         # Call with extra params that should override model params
-        extra_params = {
-            "response_format": {"type": "runtime_override"},
-            "seed": 42
-        }
+        extra_params = {"response_format": {"type": "runtime_override"}, "seed": 42}
 
         # Create a successful mock response
         success_response = MagicMock()
@@ -467,21 +473,23 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             temperature=0,
             extra_params=extra_params,
             purpose="test completion",
-            reasoning_level=0
+            reasoning_level=0,
         )
 
         # Verify parameter layering
         mock_completion.assert_called_once()
         kwargs = mock_completion.call_args.kwargs
-        
+
         # Extra params should override model extra params
         self.assertEqual(kwargs.get("response_format"), {"type": "runtime_override"})
-        
+
         # Model extra params should be preserved when not overridden
         self.assertEqual(kwargs.get("api_version"), "2024-01")
-        
+
         # Extra headers should be preserved
-        self.assertEqual(kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"})
+        self.assertEqual(
+            kwargs.get("extra_headers"), {"anthropic-version": "2024-01-beta"}
+        )
 
     @patch("litellm.completion")
     def test_send_completion_reasoning_parameter_precedence(self, mock_completion):
@@ -492,14 +500,14 @@ class TestAnalyzeChatSituation(unittest.TestCase):
 
         # Call with extra params that should NOT override reasoning level
         extra_params = {"reasoning_effort": "medium"}
-        
+
         # Create a successful mock response
         success_response = MagicMock()
         success_response.choices = [MagicMock()]
         success_response.choices[0].message.content = "Success response"
         success_response.status_code = 200
         mock_completion.return_value = success_response
-        
+
         # reasoning_level should take precedence over both model.extra_params and extra_params
         _hash, completion = send_completion(
             model_config=model,
@@ -509,7 +517,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             temperature=0,
             extra_params=extra_params,
             purpose="test completion",
-            reasoning_level=1
+            reasoning_level=1,
         )
 
         # Verify reasoning_level took precedence
@@ -526,7 +534,7 @@ class TestAnalyzeChatSituation(unittest.TestCase):
             "stream": True,
             "temperature": 0.7,
             "max_tokens": 100,
-            "custom_param": "value"
+            "custom_param": "value",
         }
 
         # Create a successful mock response
@@ -537,11 +545,12 @@ class TestAnalyzeChatSituation(unittest.TestCase):
         mock_completion.return_value = success_response
 
         from aider.sendchat import _send_completion_to_litellm
+
         _send_completion_to_litellm(
             model_config=model,
             messages=messages,
             purpose="test kwargs",
-            **custom_kwargs
+            **custom_kwargs,
         )
 
         # Verify all kwargs were passed through

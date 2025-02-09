@@ -26,7 +26,9 @@ def get_python_info():
 
 
 def get_os_info():
-    return f"OS: {platform.system()} {platform.release()} ({platform.architecture()[0]})"
+    return (
+        f"OS: {platform.system()} {platform.release()} ({platform.architecture()[0]})"
+    )
 
 
 def get_git_info():
@@ -55,7 +57,13 @@ def report_github_issue(issue_text, title=None, confirm=True):
     git_info = get_git_info() + "\n"
 
     system_info = (
-        version_info + python_version + platform_info + python_info + os_info + git_info + "\n"
+        version_info
+        + python_version
+        + platform_info
+        + python_info
+        + os_info
+        + git_info
+        + "\n"
     )
 
     issue_text = system_info + issue_text

@@ -71,9 +71,7 @@ class TestCommands(TestCase):
             mock_copy.assert_called_once_with("Second assistant message")
 
             # Assert that tool_output was called with the expected preview
-            expected_preview = (
-                "Copied last assistant message to clipboard. Preview: Second assistant message"
-            )
+            expected_preview = "Copied last assistant message to clipboard. Preview: Second assistant message"
             mock_tool_output.assert_any_call(expected_preview)
 
     def test_cmd_copy_with_cur_messages(self):
@@ -84,11 +82,17 @@ class TestCommands(TestCase):
 
         # Add messages to done_messages and cur_messages
         coder.done_messages = [
-            {"role": "assistant", "content": "First assistant message in done_messages"},
+            {
+                "role": "assistant",
+                "content": "First assistant message in done_messages",
+            },
             {"role": "user", "content": "User message in done_messages"},
         ]
         coder.cur_messages = [
-            {"role": "assistant", "content": "Latest assistant message in cur_messages"},
+            {
+                "role": "assistant",
+                "content": "Latest assistant message in cur_messages",
+            },
         ]
 
         # Mock pyperclip.copy and io.tool_output
@@ -100,7 +104,9 @@ class TestCommands(TestCase):
             commands.cmd_copy("")
 
             # Assert pyperclip.copy was called with the last assistant message in cur_messages
-            mock_copy.assert_called_once_with("Latest assistant message in cur_messages")
+            mock_copy.assert_called_once_with(
+                "Latest assistant message in cur_messages"
+            )
 
             # Assert that tool_output was called with the expected preview
             expected_preview = (
@@ -121,7 +127,9 @@ class TestCommands(TestCase):
         with mock.patch.object(io, "tool_error") as mock_tool_error:
             commands.cmd_copy("")
             # Assert tool_error was called indicating no assistant messages
-            mock_tool_error.assert_called_once_with("No assistant messages found to copy.")
+            mock_tool_error.assert_called_once_with(
+                "No assistant messages found to copy."
+            )
 
     def test_cmd_copy_pyperclip_exception(self):
         io = InputOutput(pretty=False, yes=True)
@@ -135,14 +143,17 @@ class TestCommands(TestCase):
         # Mock pyperclip.copy to raise an exception
         with (
             mock.patch(
-                "pyperclip.copy", side_effect=pyperclip.PyperclipException("Clipboard error")
+                "pyperclip.copy",
+                side_effect=pyperclip.PyperclipException("Clipboard error"),
             ),
             mock.patch.object(io, "tool_error") as mock_tool_error,
         ):
             commands.cmd_copy("")
 
             # Assert that tool_error was called with the clipboard error message
-            mock_tool_error.assert_called_once_with("Failed to copy to clipboard: Clipboard error")
+            mock_tool_error.assert_called_once_with(
+                "Failed to copy to clipboard: Clipboard error"
+            )
 
     def test_cmd_add_bad_glob(self):
         # https://github.com/Aider-AI/aider/issues/293
@@ -233,7 +244,9 @@ class TestCommands(TestCase):
         # Check if the files have been added to the chat session
         self.assertIn(str(Path("test_dir/test_file1.txt").resolve()), coder.abs_fnames)
         self.assertIn(str(Path("test_dir/test_file2.txt").resolve()), coder.abs_fnames)
-        self.assertIn(str(Path("test_dir/another_dir/test_file.txt").resolve()), coder.abs_fnames)
+        self.assertIn(
+            str(Path("test_dir/another_dir/test_file.txt").resolve()), coder.abs_fnames
+        )
 
         commands.cmd_drop("test_dir/another_dir")
         self.assertIn(str(Path("test_dir/test_file1.txt").resolve()), coder.abs_fnames)
@@ -354,10 +367,16 @@ class TestCommands(TestCase):
     def test_cmd_add_from_subdir(self):
         repo = git.Repo.init()
         repo.config_writer().set_value("user", "name", "Test User").release()
-        repo.config_writer().set_value("user", "email", "testuser@example.com").release()
+        repo.config_writer().set_value(
+            "user", "email", "testuser@example.com"
+        ).release()
 
         # Create three empty files and add them to the git repository
-        filenames = ["one.py", Path("subdir") / "two.py", Path("anotherdir") / "three.py"]
+        filenames = [
+            "one.py",
+            Path("subdir") / "two.py",
+            Path("anotherdir") / "three.py",
+        ]
         for filename in filenames:
             file_path = Path(filename)
             file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -501,7 +520,9 @@ class TestCommands(TestCase):
             io = InputOutput(pretty=False, yes=False)
             from aider.coders import Coder
 
-            coder = Coder.create(_ModelConfigImpl("claude-3-5-sonnet-20240620"), None, io)
+            coder = Coder.create(
+                _ModelConfigImpl("claude-3-5-sonnet-20240620"), None, io
+            )
             print(coder.get_announcements())
             commands = Commands(io, coder)
 
@@ -524,7 +545,9 @@ class TestCommands(TestCase):
             io.tool_output = original_tool_output
 
             # Check if the output includes repository map information
-            repo_map_line = next((line for line in output_lines if "repository map" in line), None)
+            repo_map_line = next(
+                (line for line in output_lines if "repository map" in line), None
+            )
             self.assertIsNotNone(
                 repo_map_line, "Repository map information not found in the output"
             )
@@ -685,7 +708,11 @@ class TestCommands(TestCase):
 
             # Create a directory structure with files
             (Path(repo_dir) / "subdir").mkdir()
-            test_files = ["test_file1.txt", "subdir/test_file2.txt", "subdir/other_file.txt"]
+            test_files = [
+                "test_file1.txt",
+                "subdir/test_file2.txt",
+                "subdir/other_file.txt",
+            ]
             for file_name in test_files:
                 file_path = Path(repo_dir) / file_name
                 file_path.write_text(f"Content of {file_name}")
@@ -732,7 +759,9 @@ class TestCommands(TestCase):
 
         fname = "file.txt"
         encoding = "utf-16"
-        some_content_which_will_error_if_read_with_encoding_utf8 = "ÅÍÎÏ".encode(encoding)
+        some_content_which_will_error_if_read_with_encoding_utf8 = "ÅÍÎÏ".encode(
+            encoding
+        )
         with open(fname, "wb") as f:
             f.write(some_content_which_will_error_if_read_with_encoding_utf8)
 
@@ -768,7 +797,10 @@ class TestCommands(TestCase):
 
             # It's not in the repo, should not do anything
             self.assertFalse(
-                any(os.path.samefile(str(test_file.resolve()), fname) for fname in coder.abs_fnames)
+                any(
+                    os.path.samefile(str(test_file.resolve()), fname)
+                    for fname in coder.abs_fnames
+                )
             )
             self.assertTrue(
                 any(
@@ -786,7 +818,10 @@ class TestCommands(TestCase):
 
             # Verify it's now in abs_fnames and not in abs_read_only_fnames
             self.assertTrue(
-                any(os.path.samefile(str(test_file.resolve()), fname) for fname in coder.abs_fnames)
+                any(
+                    os.path.samefile(str(test_file.resolve()), fname)
+                    for fname in coder.abs_fnames
+                )
             )
             self.assertFalse(
                 any(
@@ -1220,7 +1255,9 @@ class TestCommands(TestCase):
             repo.git.commit("-m", "Add test_file.py")
 
             # Modify the file to make it dirty
-            file_path.write_text("def hello():\n    print('Hello, World!')\n\n# Dirty line\n")
+            file_path.write_text(
+                "def hello():\n    print('Hello, World!')\n\n# Dirty line\n"
+            )
 
             # Mock the linter.lint method
             with mock.patch.object(coder.linter, "lint") as mock_lint:
