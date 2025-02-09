@@ -129,8 +129,14 @@ class EditBlockCoder(Coder):
             return edits
 
         except SearchReplaceBlockParseError as exc:
+            # Extract path from error message if available
+            path = None
+            lines = str(exc).splitlines()
+            if lines and not any(marker in lines[0] for marker in ["<<<<<<< SEARCH", "=======", ">>>>>>> REPLACE"]):
+                path = strip_filename(lines[0])
+
             failed = [{
-                "path": None,  # Path unknown for parse errors
+                "path": path,
                 "original": "",
                 "updated": "",
                 "error_type": "parse_error",
@@ -790,7 +796,7 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
         if head_pattern.match(line.strip()):
             try:
                 if i < 2:
-                    raise ValueError(
+                    raise SearchReplaceBlockParseError(
                         "Each SEARCH/REPLACE block must begin with a filename and a fence; "
                         f"Found a {HEAD} on line {i}"
                     )
@@ -839,9 +845,9 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
 
                 yield filename, "".join(original_text), "".join(updated_text)
 
-            except ValueError as e:
+            except SearchReplaceBlockParseError as e:
                 processed = "".join(lines[: i + 1])
-                err = e.args[0]
+                err = str(e)
                 raise SearchReplaceBlockParseError(f"{processed}\n^^^ {err}")
 
         i += 1
