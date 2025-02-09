@@ -314,19 +314,16 @@ class EditBlockCoder(Coder):
             def _should_warn_about_existing(updated_text):
                 """Check if we should warn about REPLACE content already existing.
                 
-                Only warns if the REPLACE content:
-                - Has at least 3 non-empty lines
-                - Has at least 30 total characters in non-empty lines
+                Only warns if the REPLACE content has 10 or more non-empty lines.
+                This threshold helps avoid warnings about common code patterns
+                like exception handling blocks while still catching substantial
+                duplicated sections.
                 """
                 if not updated_text or not updated_text.strip():
                     return False
                     
                 lines = [line for line in updated_text.splitlines() if line.strip()]
-                if len(lines) < 3:
-                    return False
-                    
-                total_chars = sum(len(line.strip()) for line in lines)
-                return total_chars >= 30
+                return len(lines) >= 10
 
             # Check if substantial REPLACE content already exists
             if content and _should_warn_about_existing(updated):
