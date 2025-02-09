@@ -219,7 +219,7 @@ class TestUtils(unittest.TestCase):
             ">>>>>>> REPLACE\n"
             "```"
         )
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(SearchReplaceBlockParseError) as cm:
             list(eb.find_original_update_blocks(edit))
         self.assertIn("filename", str(cm.exception))
 
