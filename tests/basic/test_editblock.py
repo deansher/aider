@@ -233,7 +233,7 @@ class TestUtils(unittest.TestCase):
             "=======\n"
             "Tooooo\n"
         )
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(SearchReplaceBlockParseError) as cm:
             list(eb.find_original_update_blocks(edit))
         self.assertIn("Block starting at line 3 has SEARCH and DIVIDER but is missing REPLACE marker", str(cm.exception))
 
@@ -246,7 +246,7 @@ class TestUtils(unittest.TestCase):
             "Tooooo\n"
             ">>>>>>> REPLACE\n"
         )
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(SearchReplaceBlockParseError) as cm:
             list(eb.find_original_update_blocks(edit))
         self.assertIn("must begin with a filename and a fence", str(cm.exception))
 
@@ -261,7 +261,7 @@ class TestUtils(unittest.TestCase):
             ">>>>>>> REPLACE\n"
             "```"
         )
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(SearchReplaceBlockParseError) as cm:
             list(eb.find_original_update_blocks(edit))
         self.assertIn("not preceded by SEARCH marker", str(cm.exception))
 
@@ -274,7 +274,7 @@ class TestUtils(unittest.TestCase):
             "=======\n"
             "```"
         )
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(SearchReplaceBlockParseError) as cm:
             list(eb.find_original_update_blocks(edit))
         self.assertIn("missing REPLACE marker", str(cm.exception))
 
@@ -290,7 +290,7 @@ class TestUtils(unittest.TestCase):
             ">>>>>>> REPLACE\n"
             "```"
         )
-        with self.assertRaises(ValueError) as cm:
+        with self.assertRaises(SearchReplaceBlockParseError) as cm:
             list(eb.find_original_update_blocks(edit))
         self.assertIn("previous block was not complete", str(cm.exception))
 
