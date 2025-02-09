@@ -25,6 +25,14 @@ class SearchReplaceImplementationError(Exception):
 
 
 class SearchReplaceBlockParseError(Exception):
+    """Raised when a SEARCH/REPLACE block has syntax or validation errors.
+    
+    This includes:
+    - Missing or incorrect file path
+    - Missing or incorrect fence markers
+    - Incorrect marker order (SEARCH/DIVIDER/REPLACE)
+    - Other syntax/format violations
+    """
     pass
 
 
@@ -105,19 +113,30 @@ class EditBlockCoder(Coder):
             for fname in self.abs_read_only_fnames:
                 valid_fnames.append(self.get_rel_fname(fname))
 
-        # might raise ValueError for malformed ORIG/UPD blocks
-        edits = list(
-            find_original_update_blocks(
-                content,
-                self.fence,
-                valid_fnames,
+        try:
+            # Parse the edit blocks
+            edits = list(
+                find_original_update_blocks(
+                    content,
+                    self.fence,
+                    valid_fnames,
+                )
             )
-        )
 
-        self.shell_commands += [edit[1] for edit in edits if edit[0] is None]
-        edits = [edit for edit in edits if edit[0] is not None]
+            self.shell_commands += [edit[1] for edit in edits if edit[0] is None]
+            edits = [edit for edit in edits if edit[0] is not None]
 
-        return edits
+            return edits
+
+        except SearchReplaceBlockParseError as exc:
+            failed = [{
+                "path": None,  # Path unknown for parse errors
+                "original": "",
+                "updated": "",
+                "error_type": "parse_error",
+                "error_context": str(exc)
+            }]
+            raise EditBlockError(self._build_failed_edit_error_message(failed, []))
 
     def apply_edits(self, edits):
         """Apply a list of edits to the files.
@@ -654,7 +673,7 @@ def check_marker_order(content):
             block_start_line = i
         elif is_head:
             context = "\n".join(lines[max(0, i-3):min(len(lines), i+2)])
-            raise ValueError(
+            raise SearchReplaceBlockParseError(
                 f"Found '<<<<<<< SEARCH' on line {i} but previous block was not complete:\n"
                 f"{context}\n"
                 f"Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
@@ -663,7 +682,7 @@ def check_marker_order(content):
             state = 2
         elif is_divider:
             context = "\n".join(lines[max(0, i-3):min(len(lines), i+2)])
-            raise ValueError(
+            raise SearchReplaceBlockParseError(
                 f"Found '=======' on line {i} but not preceded by SEARCH marker:\n"
                 f"{context}\n"
                 f"Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
@@ -672,19 +691,19 @@ def check_marker_order(content):
             state = 0
         elif is_updated:
             context = "\n".join(lines[max(0, i-3):min(len(lines), i+2)])
-            raise ValueError(
+            raise SearchReplaceBlockParseError(
                 f"Found '>>>>>>> REPLACE' on line {i} but not preceded by DIVIDER:\n"
                 f"{context}\n"
                 f"Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
             )
     
     if state == 1:
-        raise ValueError(
+        raise SearchReplaceBlockParseError(
             f"Block starting at line {block_start_line} has SEARCH but is missing DIVIDER and REPLACE markers.\n"
             "Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
         )
     elif state == 2:
-        raise ValueError(
+        raise SearchReplaceBlockParseError(
             f"Block starting at line {block_start_line} has SEARCH and DIVIDER but is missing REPLACE marker.\n"
             "Each block must have exactly one SEARCH, DIVIDER, and REPLACE marker in that order."
         )
@@ -792,7 +811,7 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                     use_valid_fnames = valid_fnames
                 filename = find_filename(filename_line, use_valid_fnames)
                 if not filename:
-                    raise ValueError(missing_file_path_err.format(fence=fence))
+                    raise SearchReplaceBlockParseError(missing_file_path_err.format(fence=fence))
 
                 original_text = []
                 i += 1
@@ -801,7 +820,7 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                     i += 1
 
                 if i >= len(lines) or not divider_pattern.match(lines[i].strip()):
-                    raise ValueError(f"Expected `{DIVIDER_ERR}`")
+                    raise SearchReplaceBlockParseError(f"Expected `{DIVIDER_ERR}`")
 
                 updated_text = []
                 i += 1
@@ -816,14 +835,14 @@ def find_original_update_blocks(content, fence=DEFAULT_FENCE, valid_fnames=None)
                     updated_pattern.match(lines[i].strip())
                     or divider_pattern.match(lines[i].strip())
                 ):
-                    raise ValueError(f"Expected `{UPDATED_ERR}` or `{DIVIDER_ERR}`")
+                    raise SearchReplaceBlockParseError(f"Expected `{UPDATED_ERR}` or `{DIVIDER_ERR}`")
 
                 yield filename, "".join(original_text), "".join(updated_text)
 
             except ValueError as e:
                 processed = "".join(lines[: i + 1])
                 err = e.args[0]
-                raise ValueError(f"{processed}\n^^^ {err}")
+                raise SearchReplaceBlockParseError(f"{processed}\n^^^ {err}")
 
         i += 1
 
