@@ -848,10 +848,10 @@ class TestUtils(unittest.TestCase):
         passed = []
         message = dummy._build_failed_edit_error_message(failed, passed)
         self.assertIn(
-            "Warning: The REPLACE block content already exists in {path}.\nPlease confirm if the SEARCH/REPLACE block is still needed.",
+            "Warning: The REPLACE block content already exists in dummy.py.\nPlease confirm if the SEARCH/REPLACE block is still needed.",
             message
         )
-
+        
     def test_calculate_text_similarity_exact_match(self):
         """Test that identical texts have similarity 1.0."""
         text = "def validate_user(user_id: str) -> bool:\n    return check_permissions(user_id)\n"
