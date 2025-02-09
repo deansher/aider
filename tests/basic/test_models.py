@@ -72,10 +72,10 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.map_reasoning_level(-1), {})
         self.assertEqual(model.map_reasoning_level(1), {})
 
-        # Test _OpenAiReasoningConfigImpl returns correct mappings
-        model = get_model_config("o3-mini")
-        
-        # Test default level (0)
+        # Test reasoning model returns correct mappings
+        model = get_model_config("o3-mini")  # Using o3-mini as an example reasoning model
+    
+        # Test default reasoning level (0)
         self.assertEqual(model.map_reasoning_level(0), {"reasoning_effort": "medium"})
         
         # Test reduced levels
