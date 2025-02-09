@@ -795,8 +795,28 @@ class TestUtils(unittest.TestCase):
         2. Guidance about verifying if the change is still needed
         """
         original = "def foo():\n    return 42\n"
-        updated = "def foo():\n    return 43\n"
-        # File content includes the updated block content to trigger the warning.
+        updated = """def process_data(data: dict) -> None:
+    '''Process input data with careful validation.
+    
+    Args:
+        data: The input dictionary to process
+        
+    Raises:
+        ValueError: If data is invalid
+        RuntimeError: If processing fails
+    '''
+    if not isinstance(data, dict):
+        raise TypeError("data must be dict")
+        
+    if not data:
+        raise ValueError("data cannot be empty")
+        
+    # Process each field
+    for key, value in data.items():
+        validate_field(key, value)
+        transform_field(key, value)
+"""
+        # File content includes the updated block content to trigger the warning
         file_content = "def foo():\n    return 42\nadditional content\n" + updated + "\nmore content\n"
         class FakeIO:
             def read_text(self, fname):
