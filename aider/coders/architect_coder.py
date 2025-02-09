@@ -458,10 +458,14 @@ class ArchitectCoder(Coder):
         - Cost tracking is only updated on successful execution
         """
         self.io.tool_output("\nLooking over my changes ...")
-        reviewer_coder = self.create_coder("ask", parent_coder=self)
+        editor_model_config = self.main_model.editor_model or self.main_model
+        reviewer_coder = self.create_coder(
+            "ask",
+            main_model=editor_model_config,
+            parent_coder=self,
+        )
         # Instead of mutating cur_messages, create new extended copy
         reviewer_coder.cur_messages = reviewer_coder.cur_messages + exchange.get_messages()
-        
         try:
             reviewer_prompt = exchange.append_reviewer_prompt()
             if reviewer_prompt is not None:
