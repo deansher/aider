@@ -62,6 +62,10 @@ This spec acts as your blueprint for implementation. So:
 - DO focus on giving clear, actionable descriptions 
 - DO explain your thought process
 
+When a test fails, step back and consider the goals and proper operation of
+the target code. Give equal weight to the possibilities that the test or the
+target code might be wrong. (Or both!)
+
 Here are a couple examples to illustrate:
 
 ✓ "I'll update error handling in utils.py to use the ErrorType class:
