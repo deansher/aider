@@ -145,7 +145,6 @@ class TestInputOutput(unittest.TestCase):
             "▸ Readonly Files:\n"
             "readonly1.py\n"
             "readonly2.py\n"
-            "\n"
             "▸ Editable Files:\n"
             "file1.py\n"
             "file2.py\n"
