@@ -375,12 +375,12 @@ class EditBlockCoder(Coder):
                 fixes = [
                     "- Add more lines of context around your SEARCH block to uniquely identify the intended match.",
                     "- Include distinctive nearby code, comments, or blank lines that only appear near your target.",
-                    "- If needed, split your change into multiple blocks that each match uniquely.",
                 ]
             elif error_type == "missing_filename":
                 fixes = [
                     "- Ensure the file path appears alone on the line before the opening fence.",
-                    "- Check that the path exactly matches a file provided in <brade:context>.",
+                    ("- Check that the path exactly matches a file provided in <brade:context>. "
+                     "  If the file you want to edit is not provided, ask for it."),
                     "- For new files, make sure the path includes a valid file extension.",
                 ]
             elif error_type == "no_match":
@@ -389,12 +389,13 @@ class EditBlockCoder(Coder):
                     "- Match whitespace, indentation, and comments precisely.",
                     "- If you see a similarity percentage, check the diff for small discrepancies.",
                     "- If the file content has changed, update your SEARCH block to match.",
+                    "- Consider breaking your change into smaller, simpler edits.",
                 ]
             else:
                 fixes = [
+                    "- I have no specific advice for this error type.",
                     "- Review the error details carefully.",
                     "- Check that your SEARCH/REPLACE block follows the required format.",
-                    "- Consider breaking your change into smaller, simpler edits.",
                 ]
             block_message.extend(fixes)
 
