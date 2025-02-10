@@ -385,6 +385,10 @@ class GitRepo:
         return self.normalize_path(path) in tracked_files
 
     def abs_root_path(self, path):
+        if path is None:
+            logger.exception("abs_root_path received None path")
+            raise ValueError("abs_root_path received None path")
+
         res = Path(self.root) / path
         return utils.safe_abs_path(res)
 

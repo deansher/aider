@@ -554,7 +554,14 @@ class Coder:
 
         Returns:
             str: An absolute filesystem path anchored to the project root
+
+        Raises:
+            ValueError: If path is None
         """
+        if path is None:
+            logger.exception("abs_root_path received None path")
+            raise ValueError("abs_root_path received None path")
+
         key = path
         if key in self.abs_root_path_cache:
             return self.abs_root_path_cache[key]

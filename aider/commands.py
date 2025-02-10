@@ -766,49 +766,53 @@ class Commands:
                     self.io.tool_error(f"Error creating file {fname}: {e}")
 
         for matched_file in sorted(all_matched_files):
-            abs_file_path = self.coder.abs_root_path(matched_file)
+            try:
+                abs_file_path = self.coder.abs_root_path(matched_file)
 
-            if not abs_file_path.startswith(self.coder.root) and not is_image_file(
-                matched_file
-            ):
-                self.io.tool_error(
-                    f"Can not add {abs_file_path}, which is not within {self.coder.root}"
-                )
-                continue
-
-            if abs_file_path in self.coder.abs_fnames:
-                self.io.tool_error(
-                    f"{matched_file} is already in the chat as an editable file"
-                )
-                continue
-            elif abs_file_path in self.coder.abs_read_only_fnames:
-                if self.coder.repo and self.coder.repo.path_in_repo(matched_file):
-                    self.coder.abs_read_only_fnames.remove(abs_file_path)
-                    self.coder.abs_fnames.add(abs_file_path)
-                    self.io.tool_output(
-                        f"Moved {matched_file} from read-only to editable files in the chat"
-                    )
-                else:
-                    self.io.tool_error(
-                        f"Cannot add {matched_file} as it's not part of the repository"
-                    )
-            else:
-                if (
-                    is_image_file(matched_file)
-                    and not self.coder.main_model.accepts_images
+                if not abs_file_path.startswith(self.coder.root) and not is_image_file(
+                    matched_file
                 ):
                     self.io.tool_error(
-                        f"Cannot add image file {matched_file} as the"
-                        f" {self.coder.main_model.name} does not support images."
+                        f"Can not add {abs_file_path}, which is not within {self.coder.root}"
                     )
                     continue
-                content = self.io.read_text(abs_file_path)
-                if content is None:
-                    self.io.tool_error(f"Unable to read {matched_file}")
+
+                if abs_file_path in self.coder.abs_fnames:
+                    self.io.tool_error(
+                        f"{matched_file} is already in the chat as an editable file"
+                    )
+                    continue
+                elif abs_file_path in self.coder.abs_read_only_fnames:
+                    if self.coder.repo and self.coder.repo.path_in_repo(matched_file):
+                        self.coder.abs_read_only_fnames.remove(abs_file_path)
+                        self.coder.abs_fnames.add(abs_file_path)
+                        self.io.tool_output(
+                            f"Moved {matched_file} from read-only to editable files in the chat"
+                        )
+                    else:
+                        self.io.tool_error(
+                            f"Cannot add {matched_file} as it's not part of the repository"
+                        )
                 else:
-                    self.coder.abs_fnames.add(abs_file_path)
-                    self.io.tool_output(f"Added {matched_file} to the chat")
-                    self.coder.check_added_files()
+                    if (
+                        is_image_file(matched_file)
+                        and not self.coder.main_model.accepts_images
+                    ):
+                        self.io.tool_error(
+                            f"Cannot add image file {matched_file} as the"
+                            f" {self.coder.main_model.name} does not support images."
+                        )
+                        continue
+                    content = self.io.read_text(abs_file_path)
+                    if content is None:
+                        self.io.tool_error(f"Unable to read {matched_file}")
+                    else:
+                        self.coder.abs_fnames.add(abs_file_path)
+                        self.io.tool_output(f"Added {matched_file} to the chat")
+                        self.coder.check_added_files()
+            except ValueError as e:
+                logger.exception("Error in cmd_add with abs_root_path")
+                self.io.tool_error(f"Error processing {matched_file}: {str(e)}")
 
     def completions_drop(self):
         files = self.coder.get_inchat_relative_files()
