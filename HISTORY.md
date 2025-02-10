@@ -1,6 +1,15 @@
 
 # Release history
 
+### brade-v1.1.0
+
+- Added support for OpenAI reasoning models.
+- Your input lines can now start with
+   "+" to move to a high reasoning level
+   "=" to move to the default reasoning level
+   "-" to move to a low reasoning level
+- Extensively iterated on prompts.
+
 ### brade-v1.0.3
 
 - Prompt improvements aimed at narrower SEARCH/REPLACE blocks.
