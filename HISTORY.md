@@ -1,6 +1,11 @@
 
 # Release history
 
+### brade-v1.1.2
+
+- Explicitly prompted the editing model that if you only approve plan changes, it
+  should only change the plan and not the code.
+
 ### brade-v1.1.1
 
 - Bug fixes
