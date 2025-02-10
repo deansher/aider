@@ -371,17 +371,31 @@ class EditBlockCoder(Coder):
 
             # Add tips on how to fix
             block_message.append("\n### How to Fix\n")
-            fixes = [
-                "- Revise your SEARCH block to precisely match the latest file content in <brade:context>.",
-                "- Carefully reproduce whitespace, indentation, comments and other details character for character.",
-                "- If the file content has changed since the SEARCH block was written, update the SEARCH block.",
-                "- It may help to make your change with multiple, smaller SEARCH/REPLACE blocks.",
-            ]
             if error_type == "multiple_matches":
-                fixes.insert(
-                    0,
-                    "- Provide additional lines of context to uniquely identify the intended match.",
-                )
+                fixes = [
+                    "- Add more lines of context around your SEARCH block to uniquely identify the intended match.",
+                    "- Include distinctive nearby code, comments, or blank lines that only appear near your target.",
+                    "- If needed, split your change into multiple blocks that each match uniquely.",
+                ]
+            elif error_type == "missing_filename":
+                fixes = [
+                    "- Ensure the file path appears alone on the line before the opening fence.",
+                    "- Check that the path exactly matches a file provided in <brade:context>.",
+                    "- For new files, make sure the path includes a valid file extension.",
+                ]
+            elif error_type == "no_match":
+                fixes = [
+                    "- Copy the exact content from the latest file version in <brade:context>.",
+                    "- Match whitespace, indentation, and comments precisely.",
+                    "- If you see a similarity percentage, check the diff for small discrepancies.",
+                    "- If the file content has changed, update your SEARCH block to match.",
+                ]
+            else:
+                fixes = [
+                    "- Review the error details carefully.",
+                    "- Check that your SEARCH/REPLACE block follows the required format.",
+                    "- Consider breaking your change into smaller, simpler edits.",
+                ]
             block_message.extend(fixes)
 
             messages.append("\n".join(block_message))
