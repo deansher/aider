@@ -96,6 +96,61 @@ class EditBlockCoder(Coder):
     edit_format = "diff"
     gpt_prompts = EditBlockPrompts()
 
+    # Maps error types to their explanations and fix suggestions
+    ERROR_TYPE_DETAILS = {
+        "multiple_matches": {
+            "why_failed": [
+                "- The SEARCH text matched multiple places in the file.",
+                "- This means we can't be sure which occurrence you want to modify.",
+            ],
+            "how_to_fix": [
+                "- Add more lines of context around your SEARCH block to uniquely identify the intended match.",
+                "- Include distinctive nearby code, comments, or blank lines that only appear near your target.",
+                "- Look for unique function signatures, class definitions, or comments that can anchor your selection.",
+                "- If modifying similar code blocks, make your SEARCH more specific to the intended block.",
+            ],
+        },
+        "missing_filename": {
+            "why_failed": [
+                "- The path is missing or invalid.",
+                "- Make sure the file path is listed above the fence and spells a valid filename.",
+                "- This will also happen if you try to edit a file that is not provided in <brade:context>...</brade:context>.",
+            ],
+            "how_to_fix": [
+                "- Ensure the file path appears alone on the line before the opening fence.",
+                "- Check that the path exactly matches a file provided in <brade:context>.",
+                "- If the file you want to edit is not provided, ask for it.",
+                "- For new files, make sure the path includes a valid file extension.",
+                "- Double-check for typos in the filename and path.",
+            ],
+        },
+        "no_match": {
+            "why_failed": [
+                "- The SEARCH text did not match exactly.",
+                "- This usually means there are small differences between your SEARCH block and the file content.",
+            ],
+            "how_to_fix": [
+                "- Copy the exact content from the latest file version in <brade:context>.",
+                "- Match whitespace, indentation, and comments precisely.",
+                "- If you see a similarity percentage, check the diff for small discrepancies.",
+                "- If the file content has changed, update your SEARCH block to match.",
+                "- Consider breaking your change into smaller, simpler edits.",
+            ],
+        },
+        "parse_error": {
+            "why_failed": [
+                "- The SEARCH/REPLACE block format is incorrect.",
+                "- This could be missing markers, wrong order, or invalid syntax.",
+            ],
+            "how_to_fix": [
+                "- Ensure each block has exactly one SEARCH, DIVIDER, and REPLACE marker in that order.",
+                "- Check that markers are spelled correctly: <<<<<<< SEARCH, =======, >>>>>>> REPLACE",
+                "- Verify the file path is on its own line before the opening fence.",
+                "- Make sure the code fence markers (```) are properly placed.",
+            ],
+        },
+    }
+
     def get_edits(self):
         """Extract edit blocks from the LLM response.
 
@@ -301,20 +356,19 @@ class EditBlockCoder(Coder):
 
             # Explain why it failed
             block_message.append("\n### Why This Failed\n")
-            if error_type == "multiple_matches":
-                block_message.append(
-                    "- The SEARCH text matched multiple places in the file.\n"
-                    f"- error_context: {error_context}"
-                )
-            elif error_type == "missing_filename":
-                block_message.append(
-                    "- The path is missing or invalid.\n"
-                    "- Make sure the file path is listed above the fence and spells a valid filename.\n"
-                    "- This will also happen if you try to edit a file that is not provided\n"
-                    "  in <brade:context>...</brade:context>.\n"
-                    f"- error_context: {error_context}"
-                )
-            elif error_type == "no_match":
+            error_details = self.ERROR_TYPE_DETAILS.get(error_type, {
+                "why_failed": [
+                    "- Encountered an unknown error type.",
+                    f"- error_context: {error_context}",
+                ],
+                "how_to_fix": [
+                    "- Review the error details carefully.",
+                    "- Check that your SEARCH/REPLACE block follows the required format.",
+                    "- If the problem persists, please report this as a potential bug.",
+                ],
+            })
+            
+            if error_type == "no_match":
                 candidate = find_similar_lines(original, content)
                 if candidate:
                     similarity_ratio = SequenceMatcher(
@@ -330,21 +384,18 @@ class EditBlockCoder(Coder):
                         )
                     )
                     diff_text = "".join(diff_lines)
-                    block_message.append(
-                        "- The SEARCH text did not match exactly.\n"
-                        f"- Detected similarity: {similarity_percent:.0f}%\n"
-                        f"- Here's a diff to help you diagnose this:\n```\n{diff_text}\n```"
-                    )
+                    block_message.extend([
+                        *error_details["why_failed"],
+                        f"- Detected similarity: {similarity_percent:.0f}%",
+                        f"- Here's a diff to help you diagnose this:\n```\n{diff_text}\n```",
+                    ])
                 else:
-                    block_message.append(
-                        "- The SEARCH text did not match any part of the file.\n"
-                        "- No sufficiently similar candidate snippet found."
-                    )
+                    block_message.extend([
+                        *error_details["why_failed"],
+                        "- No sufficiently similar candidate snippet found.",
+                    ])
             else:
-                block_message.append(
-                    "- Encountered an unknown error type.\n"
-                    f"- error_context: {error_context}"
-                )
+                block_message.extend(error_details["why_failed"])
 
             def _should_warn_about_existing(updated_text):
                 """Check if we should warn about REPLACE content already existing.
@@ -371,33 +422,18 @@ class EditBlockCoder(Coder):
 
             # Add tips on how to fix
             block_message.append("\n### How to Fix\n")
-            if error_type == "multiple_matches":
-                fixes = [
-                    "- Add more lines of context around your SEARCH block to uniquely identify the intended match.",
-                    "- Include distinctive nearby code, comments, or blank lines that only appear near your target.",
-                ]
-            elif error_type == "missing_filename":
-                fixes = [
-                    "- Ensure the file path appears alone on the line before the opening fence.",
-                    ("- Check that the path exactly matches a file provided in <brade:context>. "
-                     "  If the file you want to edit is not provided, ask for it."),
-                    "- For new files, make sure the path includes a valid file extension.",
-                ]
-            elif error_type == "no_match":
-                fixes = [
-                    "- Copy the exact content from the latest file version in <brade:context>.",
-                    "- Match whitespace, indentation, and comments precisely.",
-                    "- If you see a similarity percentage, check the diff for small discrepancies.",
-                    "- If the file content has changed, update your SEARCH block to match.",
-                    "- Consider breaking your change into smaller, simpler edits.",
-                ]
-            else:
-                fixes = [
-                    "- I have no specific advice for this error type.",
+            error_details = self.ERROR_TYPE_DETAILS.get(error_type, {
+                "why_failed": [
+                    "- Encountered an unknown error type.",
+                    f"- error_context: {error_context}",
+                ],
+                "how_to_fix": [
                     "- Review the error details carefully.",
                     "- Check that your SEARCH/REPLACE block follows the required format.",
-                ]
-            block_message.extend(fixes)
+                    "- If the problem persists, please report this as a potential bug.",
+                ],
+            })
+            block_message.extend(error_details["how_to_fix"])
 
             messages.append("\n".join(block_message))
 
