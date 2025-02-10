@@ -753,7 +753,7 @@ class TestUtils(unittest.TestCase):
             "## SearchReplaceNo_Match: The no_match error occurred in dummy.py", message
         )
         self.assertIn("Detected similarity:", message)
-        self.assertIn("Unified diff between expected and candidate snippet:", message)
+        self.assertIn("Here's a diff to help you diagnose this:", message)
         self.assertNotIn("Warning:", message)
 
     def test_build_failed_edit_error_message_no_candidate(self):
@@ -793,7 +793,7 @@ class TestUtils(unittest.TestCase):
         self.assertIn(
             "## SearchReplaceNo_Match: The no_match error occurred in dummy.py", message
         )
-        self.assertIn("No similar candidate snippet found.", message)
+        self.assertIn("No sufficiently similar candidate snippet found.", message)
         self.assertIn("Only resend fixed versions of the", message)
 
     def test_build_failed_edit_error_message_with_replace_exists_warning(self):
