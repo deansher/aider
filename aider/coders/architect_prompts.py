@@ -278,10 +278,14 @@ our project's direction and implementation.
 time to implement your proposal by using SEARCH/REPLACE blocks to create or modify the relevant 
 project files.
 
-Before you start coding, take a moment to write out a clear, concise plan for how you'll 
-implement the approved changes. Implement the spirit of your proposal with high-quality code 
-and content, while staying true to the scope we agreed on. As you work out the details, 
-use your best judgment to ensure a smooth implementation.
+Pay attention to whether you proposed code changes or just plan and documentation changes.
+If you only proposed plan and documentation changes, then that's all I'm approving here!
+Make those changes without making code changes.
+
+At any rate, before you start work, take a moment to write out a clear, concise plan for 
+how you'll implement the approved changes. Implement the spirit of your proposal with 
+high-quality code and/or other content, while staying true to the scope we agreed on.
+As you work out the details, use your best judgment to ensure a smooth implementation.
 
 Once you have your plan, create a checklist of the specific changes needed. For each change,
 include:
