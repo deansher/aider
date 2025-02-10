@@ -323,8 +323,8 @@ class EditBlockCoder(Coder):
                         unified_diff(
                             original.splitlines(keepends=True),
                             candidate.splitlines(keepends=True),
-                            fromfile="Expected SEARCH",
-                            tofile="Candidate Snippet",
+                            fromfile="your SEARCH block",
+                            tofile="closest match in file content",
                         )
                     )
                     diff_text = "".join(diff_lines)
