@@ -1,6 +1,10 @@
 
 # Release history
 
+### brade-v1.1.1
+
+- Bug fixes
+
 ### brade-v1.1.0
 
 - Added support for OpenAI reasoning models.
@@ -9,6 +13,7 @@
    "=" to move to the default reasoning level
    "-" to move to a low reasoning level
 - Extensively iterated on prompts.
+- Now using the `diff-match-patch` library to improve search/replace block matching.
 
 ### brade-v1.0.3
 
