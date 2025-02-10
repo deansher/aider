@@ -310,6 +310,8 @@ class EditBlockCoder(Coder):
                 block_message.append(
                     "- The path is missing or invalid.\n"
                     "- Make sure the file path is listed above the fence and spells a valid filename.\n"
+                    "- This will also happen if you try to edit a file that is not provided\n"
+                    "  in <brade:context>...</brade:context>.\n"
                     f"- error_context: {error_context}"
                 )
             elif error_type == "no_match":
@@ -329,14 +331,14 @@ class EditBlockCoder(Coder):
                     )
                     diff_text = "".join(diff_lines)
                     block_message.append(
-                        f"- The SEARCH text did not match exactly.\n"
+                        "- The SEARCH text did not match exactly.\n"
                         f"- Detected similarity: {similarity_percent:.0f}%\n"
-                        f"- Unified diff between expected and candidate snippet:\n```\n{diff_text}\n```"
+                        f"- Here's a diff to help you diagnose this:\n```\n{diff_text}\n```"
                     )
                 else:
                     block_message.append(
                         "- The SEARCH text did not match any part of the file.\n"
-                        "- No similar candidate snippet found."
+                        "- No sufficiently similar candidate snippet found."
                     )
             else:
                 block_message.append(
@@ -364,6 +366,7 @@ class EditBlockCoder(Coder):
                     f"\nWarning: The REPLACE block content already exists in {path}.\n"
                     "Please confirm if the SEARCH/REPLACE block is still needed.\n"
                     "If it is not needed after all, then you can just leave this one out."
+                    "But if you are deliberately duplicating existing content, then you can ignore this warning."
                 )
 
             # Add tips on how to fix
@@ -371,6 +374,8 @@ class EditBlockCoder(Coder):
             fixes = [
                 "- Revise your SEARCH block to precisely match the latest file content in <brade:context>.",
                 "- Carefully reproduce whitespace, indentation, comments and other details character for character.",
+                "- If the file content has changed since the SEARCH block was written, update the SEARCH block.",
+                "- It may help to make your change with multiple, smaller SEARCH/REPLACE blocks.",
             ]
             if error_type == "multiple_matches":
                 fixes.insert(
