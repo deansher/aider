@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 import re
 import subprocess
@@ -23,6 +24,9 @@ from aider.scrape import Scraper, install_playwright
 from aider.utils import is_image_file
 
 from .dump import dump  # noqa: F401
+
+
+logger = logging.getLogger(__name__)
 
 
 class SwitchCoder(Exception):
