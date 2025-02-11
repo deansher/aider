@@ -343,19 +343,20 @@ class EditBlockCoder(Coder):
             # Start a new message section for this failing block
             block_message = []
             block_message.append(
-                f"## SearchReplace{error_type.title()}: The {error_type} error occurred in {path}\n"
+                f"## SearchReplace{error_type.title()}: The {error_type} error occurred in {path}"
             )
 
             # Show the entire failing SEARCH/REPLACE block
-            block_message.append("\n### Offending SEARCH/REPLACE Block\n")
+            block_message.append("### Offending SEARCH/REPLACE Block")
             block_message.append(
+                f"{path}\n"
                 f"{self.fence[0]}python\n"
                 f"<<<<<<< SEARCH\n{original}=======\n{updated}>>>>>>> REPLACE\n"
                 f"{self.fence[1]}"
             )
 
             # Explain why it failed
-            block_message.append("\n### Why This Failed\n")
+            block_message.append("### Why This Failed")
             error_details = self.ERROR_TYPE_DETAILS.get(error_type, {
                 "why_failed": [
                     "- Encountered an unknown error type.",
@@ -391,8 +392,9 @@ class EditBlockCoder(Coder):
                     ])
                 else:
                     block_message.extend([
-                        *error_details["why_failed"],
-                        "- No sufficiently similar candidate snippet found.",
+                        "- The SEARCH text did not match any content in the file.",
+                        "- The differences appear to be substantial, or the content may not exist in this file.",
+                        "- Double-check that you're searching in the correct file and that the content exists.",
                     ])
             else:
                 block_message.extend(error_details["why_failed"])
@@ -416,12 +418,12 @@ class EditBlockCoder(Coder):
                 block_message.append(
                     f"\nWarning: The REPLACE block content already exists in {path}.\n"
                     "Please confirm if the SEARCH/REPLACE block is still needed.\n"
-                    "If it is not needed after all, then you can just leave this one out."
+                    "If it is not needed after all, then you can just leave this one out.\n"
                     "But if you are deliberately duplicating existing content, then you can ignore this warning."
                 )
 
             # Add tips on how to fix
-            block_message.append("\n### How to Fix\n")
+            block_message.append("### How to Fix")
             error_details = self.ERROR_TYPE_DETAILS.get(error_type, {
                 "why_failed": [
                     "- Encountered an unknown error type.",
@@ -435,24 +437,31 @@ class EditBlockCoder(Coder):
             })
             block_message.extend(error_details["how_to_fix"])
 
-            messages.append("\n".join(block_message))
+            messages.append("\n\n".join(block_message))
 
         # Summaries
-        summary = ""
+        summary = []
         if passed:
             pblocks = "block" if len(passed) == 1 else "blocks"
             blocks_str = "block" if len(failed) == 1 else "blocks"
-            summary = (
-                f"\n# {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.\n"
-                f"Only resend fixed versions of the {blocks_str} that failed."
-            )
+            summary.extend([
+                f"# {len(passed)} SEARCH/REPLACE {pblocks} were applied successfully.",
+                f"Only resend fixed versions of the {blocks_str} that failed.",
+            ])
+            # Track successful edits by file
+            successful_files = {}
+            for p, _, _ in passed:
+                successful_files[p] = successful_files.get(p, 0) + 1
+            for path, count in successful_files.items():
+                blocks = "block" if count == 1 else "blocks"
+                summary.append(f"Applied {count} {blocks} to {path}")
 
         note = (
             "Note: The SEARCH section must match existing content exactly, including whitespace,\n"
-            "indentation, and formatting.\n"
+            "indentation, and formatting."
         )
 
-        return "\n\n".join(messages) + "\n\n" + note + summary
+        return "\n\n".join(messages + [""] + ([note] if failed else []) + summary)
 
 
 def prep(content):
