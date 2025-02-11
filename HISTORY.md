@@ -3,6 +3,12 @@
 
 ### brade-v1.1.2
 
+- Now providing fairly complete information to the review coder about SEARCH/REPLACE
+  blocks that were applied and any failures remaining on our last attempt. Should solve
+  the problem of the reviewer being confused after retries.
+
+### brade-v1.1.2
+
 - Explicitly prompted the editing model that if you only approve plan changes, it
   should only change the plan and not the code.
 
