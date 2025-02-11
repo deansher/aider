@@ -605,17 +605,21 @@ class TestUtils(unittest.TestCase):
         def mock_send(*args, **kwargs):
             coder.partial_response_content = (
                 f"{Path(file1).name}\n"
+                "```python\n"
                 "<<<<<<< SEARCH\n"
                 "two\n"
                 "=======\n"
                 "new\n"
-                ">>>>>>> REPLACE\n\n"
+                ">>>>>>> REPLACE\n"
+                "```\n\n"
                 f"{Path(file2).name}\n"
+                "```python\n"
                 "<<<<<<< SEARCH\n"
                 "does not exist\n"
                 "=======\n"
                 "will fail\n"
                 ">>>>>>> REPLACE\n"
+                "```\n"
             )
             coder.partial_response_function_call = dict()
             return []
@@ -665,12 +669,12 @@ class TestUtils(unittest.TestCase):
             },
         ]
 
-        # Verify final outcome shows only the last successful change
+        # Verify final outcome shows all successful changes in order
         final_outcome = coder.get_final_editor_outcome()
         self.assertIn("Here are all the changes that were successfully applied:", final_outcome)
         self.assertIn("two\n", final_outcome)  # Original content
-        self.assertIn("newer\n", final_outcome)  # Final state
-        self.assertNotIn("new\n", final_outcome)  # Intermediate state
+        self.assertIn("new\n", final_outcome)  # First change
+        self.assertIn("newer\n", final_outcome)  # Second change
 
     def test_find_original_update_blocks_multiple_same_file(self):
         edit = (
@@ -973,7 +977,7 @@ class TestUtils(unittest.TestCase):
         self.assertIn(
             "## SearchReplaceNo_Match: The no_match error occurred in dummy.py", message
         )
-        self.assertIn("No sufficiently similar candidate snippet found.", message)
+        self.assertIn("The differences appear to be substantial, or the content may not exist in this file.", message)
         self.assertIn("Only resend fixed versions of the", message)
 
     def test_build_failed_edit_error_message_with_replace_exists_warning(self):
