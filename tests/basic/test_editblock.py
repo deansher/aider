@@ -565,6 +565,113 @@ class TestUtils(unittest.TestCase):
         self.assertIn("two\n", final_outcome)
         self.assertIn("new\n", final_outcome)
 
+    def test_get_final_outcome_no_changes(self):
+        """Test that get_final_editor_outcome() correctly reports when no changes were made."""
+        # Create a temporary file
+        _, file1 = tempfile.mkstemp()
+        with open(file1, "w", encoding="utf-8") as f:
+            f.write("test content\n")
+
+        # Initialize coder with the file
+        coder = Coder.create(self.GPT35, "diff", io=InputOutput(), fnames=[file1])
+
+        # Run with no changes
+        coder.run(with_message="hi")
+
+        # Verify outcome indicates no changes
+        final_outcome = coder.get_final_editor_outcome()
+        self.assertEqual(final_outcome, "No changes were applied")
+
+    def test_get_final_outcome_partial_failures(self):
+        """Test that get_final_editor_outcome() shows only successful changes."""
+        # Create test files
+        _, file1 = tempfile.mkstemp()
+        _, file2 = tempfile.mkstemp()
+        with open(file1, "w", encoding="utf-8") as f:
+            f.write("one\ntwo\nthree\n")
+        with open(file2, "w", encoding="utf-8") as f:
+            f.write("alpha\nbeta\ngamma\n")
+
+        # Initialize coder
+        coder = Coder.create(
+            self.GPT35,
+            "diff",
+            io=InputOutput(dry_run=True),
+            fnames=[file1, file2],
+            dry_run=True,
+        )
+
+        # Mock a response with one success and one failure
+        def mock_send(*args, **kwargs):
+            coder.partial_response_content = (
+                f"{Path(file1).name}\n"
+                "<<<<<<< SEARCH\n"
+                "two\n"
+                "=======\n"
+                "new\n"
+                ">>>>>>> REPLACE\n\n"
+                f"{Path(file2).name}\n"
+                "<<<<<<< SEARCH\n"
+                "does not exist\n"
+                "=======\n"
+                "will fail\n"
+                ">>>>>>> REPLACE\n"
+            )
+            coder.partial_response_function_call = dict()
+            return []
+
+        coder.send = mock_send
+
+        # Run the coder
+        coder.run(with_message="hi")
+
+        # Verify final outcome shows only the successful change
+        final_outcome = coder.get_final_editor_outcome()
+        self.assertIn("Here are all the changes that were successfully applied:", final_outcome)
+        self.assertIn("two\n", final_outcome)
+        self.assertIn("new\n", final_outcome)
+        self.assertNotIn("does not exist", final_outcome)
+        self.assertNotIn("will fail", final_outcome)
+
+    def test_repeated_edit_attempts(self):
+        """Test that get_final_editor_outcome() shows only final successful changes."""
+        # Create a test file
+        _, file1 = tempfile.mkstemp()
+        with open(file1, "w", encoding="utf-8") as f:
+            f.write("one\ntwo\nthree\n")
+
+        # Initialize coder
+        coder = Coder.create(
+            self.GPT35,
+            "diff",
+            io=InputOutput(dry_run=True),
+            fnames=[file1],
+            dry_run=True,
+        )
+
+        # Track multiple attempts on the same block
+        coder.applied_changes = [
+            {
+                "path": Path(file1).name,
+                "original": "two\n",
+                "updated": "new\n",
+                "retry_attempt": 0,
+            },
+            {
+                "path": Path(file1).name,
+                "original": "new\n",
+                "updated": "newer\n",
+                "retry_attempt": 1,
+            },
+        ]
+
+        # Verify final outcome shows only the last successful change
+        final_outcome = coder.get_final_editor_outcome()
+        self.assertIn("Here are all the changes that were successfully applied:", final_outcome)
+        self.assertIn("two\n", final_outcome)  # Original content
+        self.assertIn("newer\n", final_outcome)  # Final state
+        self.assertNotIn("new\n", final_outcome)  # Intermediate state
+
     def test_find_original_update_blocks_multiple_same_file(self):
         edit = (
             "\nHere's the change:\n\n"
