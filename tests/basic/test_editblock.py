@@ -228,6 +228,73 @@ class TestUtils(unittest.TestCase):
             self.assertTrue(new_file.exists())
             self.assertEqual(new_file.read_text(), "Hello, World!\n")
 
+            # Verify final outcome shows the file creation
+            final_outcome = coder.get_final_editor_outcome()
+            self.assertIn("Here are all the changes that were successfully applied:", final_outcome)
+            self.assertIn("Hello, World!", final_outcome)
+
+    def test_get_final_outcome_no_changes(self):
+        """Test that get_final_editor_outcome() correctly reports when no changes were made."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Set up EditBlockCoder instance
+            file1 = Path(tmpdir) / "file1.txt"
+            with open(file1, "w", encoding="utf-8") as f:
+                f.write("original content\n")
+
+            coder = Coder.create(self.GPT35, "diff", io=InputOutput(), fnames=[str(file1)])
+
+            # Run with no changes
+            coder.run(with_message="hi")
+
+            # Verify final outcome indicates no changes
+            final_outcome = coder.get_final_editor_outcome()
+            self.assertIn("No changes were applied", final_outcome)
+
+    def test_get_final_outcome_partial_failures(self):
+        """Test that get_final_editor_outcome() correctly reports both successes and failures."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Set up test files
+            file1 = Path(tmpdir) / "file1.txt"
+            with open(file1, "w", encoding="utf-8") as f:
+                f.write("one\ntwo\nthree\n")
+
+            coder = Coder.create(self.GPT35, "diff", io=InputOutput(), fnames=[str(file1)])
+
+            # Simulate one successful and one failed edit
+            coder.partial_response_content = (
+                f"{file1}\n"
+                "```text\n"
+                "<<<<<<< SEARCH\n"
+                "two\n"
+                "=======\n"
+                "new\n"
+                ">>>>>>> REPLACE\n"
+                "```\n\n"
+                f"{file1}\n"
+                "```text\n"
+                "<<<<<<< SEARCH\n"
+                "does not exist\n"
+                "=======\n"
+                "will fail\n"
+                ">>>>>>> REPLACE\n"
+                "```\n"
+            )
+            coder.partial_response_function_call = dict()
+
+            # Process the edits
+            edits = coder.get_edits()
+            try:
+                coder.apply_edits(edits)
+            except EditBlockError:
+                pass  # Expected due to the failing block
+
+            # Verify final outcome shows both success and failure
+            final_outcome = coder.get_final_editor_outcome()
+            self.assertIn("Here are all the changes that were successfully applied:", final_outcome)
+            self.assertIn("two\n", final_outcome)  # Successful edit
+            self.assertIn("new\n", final_outcome)  # Successful edit
+            self.assertIn("1 SEARCH/REPLACE block(s) failed to match", final_outcome)
+
     def test_find_original_update_blocks_validation(self):
         # Test missing filename
         edit = (
@@ -451,7 +518,7 @@ class TestUtils(unittest.TestCase):
         content = Path(file1).read_text(encoding="utf-8")
         self.assertEqual(content, "one\n" "new\n" "three\n")
 
-    def test_full_edit_dry_run(self):
+    def test_full_edit(self):
         # Create a few temporary files
         _, file1 = tempfile.mkstemp()
 
@@ -491,6 +558,12 @@ class TestUtils(unittest.TestCase):
 
         content = Path(file1).read_text(encoding="utf-8")
         self.assertEqual(content, orig_content)
+
+        # Verify final outcome shows the edit would have been made
+        final_outcome = coder.get_final_editor_outcome()
+        self.assertIn("Here are all the changes that were successfully applied:", final_outcome)
+        self.assertIn("two\n", final_outcome)
+        self.assertIn("new\n", final_outcome)
 
     def test_find_original_update_blocks_multiple_same_file(self):
         edit = (
