@@ -206,6 +206,10 @@ class EditBlockCoder(Coder):
             ]
             raise EditBlockError(self._build_failed_edit_error_message(failed, []))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.applied_changes = []  # Track successful changes
+
     def apply_edits(self, edits):
         """Apply a list of edits to the files.
 
@@ -255,6 +259,13 @@ class EditBlockCoder(Coder):
                 if new_content:
                     self.io.write_text(full_path, new_content)
                     passed.append(edit)
+                    # Track successful changes
+                    self.applied_changes.append({
+                        "path": path,
+                        "original": original,
+                        "updated": updated,
+                        "retry_attempt": len(self.applied_changes),
+                    })
                 else:
                     raise NoExactMatchError(
                         message="No successful do_replace result on any file."
@@ -295,6 +306,47 @@ class EditBlockCoder(Coder):
 
         if failed:
             raise EditBlockError(self._build_failed_edit_error_message(failed, passed))
+
+    def build_final_response(self):
+        """Build a response summarizing all changes that were successfully applied.
+
+        Returns:
+            str: A message describing all changes made, including retries and lint fixes.
+        """
+        if not self.applied_changes:
+            return None
+
+        response = ["Here are all the changes that were successfully applied:\n"]
+        
+        # Group changes by file
+        changes_by_file = {}
+        for change in self.applied_changes:
+            path = change["path"]
+            if path not in changes_by_file:
+                changes_by_file[path] = []
+            changes_by_file[path].append(change)
+
+        # Build blocks for each file's changes
+        for path, changes in changes_by_file.items():
+            for change in changes:
+                response.extend([
+                    f"\n{path}",
+                    f"{self.fence[0]}python",
+                    "<<<<<<< SEARCH",
+                    change["original"],
+                    "=======",
+                    change["updated"],
+                    ">>>>>>> REPLACE",
+                    f"{self.fence[1]}\n",
+                ])
+
+        return "".join(response)
+
+    def run(self, with_message=None, preproc=True):
+        """Override run to use build_final_response for the final message."""
+        super().run(with_message, preproc)
+        if self.applied_changes:
+            self.partial_response_content = self.build_final_response()
 
     def _build_failed_edit_error_message(self, failed, passed):
         """Build a clear, structured markdown error message for each failing block.

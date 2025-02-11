@@ -438,7 +438,13 @@ class ArchitectCoder(Coder):
                 self.abs_fnames.update(editor_coder.abs_fnames)  # type: ignore
                 self.abs_read_only_fnames.update(editor_coder.abs_read_only_fnames)  # type: ignore
 
-                exchange.append_editor_response(editor_coder.partial_response_content)
+                # Get the final response that includes all successful changes
+                final_response = None
+                if hasattr(editor_coder, "build_final_response"):
+                    final_response = editor_coder.build_final_response()
+                if final_response is None:
+                    final_response = editor_coder.partial_response_content
+                exchange.append_editor_response(final_response)
         except Exception as e:
             logger.exception(
                 "Editor coder failed",
