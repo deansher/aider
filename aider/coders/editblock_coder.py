@@ -351,7 +351,7 @@ class EditBlockCoder(Coder):
         """Override run to use build_final_response for the final message."""
         super().run(with_message, preproc)
         if self.applied_changes:
-            self.partial_response_content = self.build_final_response()
+            self.partial_response_content = self.get_final_editor_outcome()
 
     def _build_failed_edit_error_message(self, failed, passed):
         """Build a clear, structured markdown error message for each failing block.
