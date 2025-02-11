@@ -533,20 +533,21 @@ class TestUtils(unittest.TestCase):
         coder = Coder.create(
             self.GPT35,
             "diff",
-            io=InputOutput(dry_run=True),
+            io=InputOutput(),
             fnames=files,
-            dry_run=True,
         )
 
         def mock_send(*args, **kwargs):
             coder.partial_response_content = (
                 "\nDo this:\n\n"
                 f"{Path(file1).name}\n"
+                "```python\n"
                 "<<<<<<< SEARCH\n"
                 "two\n"
                 "=======\n"
                 "new\n"
-                ">>>>>>> REPLACE\n\n"
+                ">>>>>>> REPLACE\n"
+                "```\n\n"
             )
             coder.partial_response_function_call = dict()
             return []
@@ -596,9 +597,8 @@ class TestUtils(unittest.TestCase):
         coder = Coder.create(
             self.GPT35,
             "diff",
-            io=InputOutput(dry_run=True),
+            io=InputOutput(),
             fnames=[file1, file2],
-            dry_run=True,
         )
 
         # Mock a response with one success and one failure
