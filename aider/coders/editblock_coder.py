@@ -307,11 +307,16 @@ class EditBlockCoder(Coder):
         if failed:
             raise EditBlockError(self._build_failed_edit_error_message(failed, passed))
 
-    def build_final_response(self):
-        """Build a response summarizing all changes that were successfully applied.
+    def get_final_editor_outcome(self) -> str | None:
+        """Return a consolidated summary of all successful edits.
+
+        This method returns a single string that summarizes all changes that were
+        successfully applied, including any retries and lint fixes. The summary
+        uses SEARCH/REPLACE blocks to show exactly what content was changed.
 
         Returns:
-            str: A message describing all changes made, including retries and lint fixes.
+            str | None: A message describing all changes made, or None if no changes
+                     were successfully applied.
         """
         if not self.applied_changes:
             return None
