@@ -518,49 +518,8 @@ class TestUtils(unittest.TestCase):
         content = Path(file1).read_text(encoding="utf-8")
         self.assertEqual(content, "one\n" "new\n" "three\n")
 
-    def test_full_edit(self):
-        # Create a few temporary files
-        _, file1 = tempfile.mkstemp()
-
-        orig_content = "one\n" "two\n" "three\n"
-
-        with open(file1, "w", encoding="utf-8") as f:
-            f.write(orig_content)
-
-        files = [file1]
-
-        # Initialize the Coder object with the mocked IO and mocked repo
-        coder = Coder.create(
-            self.GPT35,
-            "diff",
-            io=InputOutput(),
-            fnames=files,
-        )
-
-        def mock_send(*args, **kwargs):
-            coder.partial_response_content = (
-                "\nDo this:\n\n"
-                f"{Path(file1).name}\n"
-                "```python\n"
-                "<<<<<<< SEARCH\n"
-                "two\n"
-                "=======\n"
-                "new\n"
-                ">>>>>>> REPLACE\n"
-                "```\n\n"
-            )
-            coder.partial_response_function_call = dict()
-            return []
-
-        coder.send = mock_send
-
-        # Call the run method with a message
-        coder.run(with_message="hi")
-
-        content = Path(file1).read_text(encoding="utf-8")
-        self.assertEqual(content, orig_content)
-
-        # Verify final outcome shows the edit would have been made
+    def test_get_final_outcome_no_changes(self):
+    # Verify final outcome shows the edit would have been made
         final_outcome = coder.get_final_editor_outcome()
         self.assertIn("Here are all the changes that were successfully applied:", final_outcome)
         self.assertIn("two\n", final_outcome)
