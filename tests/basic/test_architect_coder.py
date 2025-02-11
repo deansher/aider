@@ -243,6 +243,7 @@ class TestArchitectCoder(unittest.TestCase):
         # Mock editor coder
         with patch.object(self.coder, "create_coder") as mock_create:
             mock_editor = MagicMock()
+            mock_editor.get_final_editor_outcome.return_value = None
             mock_editor.partial_response_content = editor_response
             mock_editor.total_cost = 0.001
             mock_editor.aider_commit_hashes = ["abc123"]
