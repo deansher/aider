@@ -1,7 +1,7 @@
 
 # Release history
 
-### brade-v1.1.2
+### brade-v1.1.3
 
 - Now providing fairly complete information to the review coder about SEARCH/REPLACE
   blocks that were applied and any failures remaining on our last attempt. Should solve
